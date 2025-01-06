@@ -1,0 +1,13 @@
+writable/cache/*
+writable/debugbar/*
+writable/logs/*
+writable/session/*
+writable/uploads/*
+cron/*.txt
+
+# Exceto o arquivo .keep
+!writable/cache/.keep
+!writable/debugbar/.keep
+!writable/logs/.keep
+!writable/session/.keep
+!writable/uploads/.keep

@@ -1,0 +1,156 @@
+.accountbg {
+    background-position: center right !important;
+    height: 100% !important;
+    width: 100% !important;
+    top: 0 !important;
+    box-shadow: none !important;
+    background-size: auto !important;
+    text-shadow: 3px 3px #0f8688;
+}
+.btn-xxs {
+    padding: 0px 10px;
+    font-size: 12px;
+}
+.alert-danger {
+    color: #721c24 !important;
+    background-color: #f8d7da !important;
+    border-color: #f5c6cb !important;
+}
+.form-control-sm {
+    height: calc(1.5em + 0.5rem + 2px) !important;
+    font-size: .875rem !important;
+}
+.form-control-xxs {
+    height: calc(1.5em + 0.5rem + -7px) !important;
+    font-size: .875rem !important;
+}
+.hidden {
+    display: none;
+}
+.alert-warning2 {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+@media (max-width: 1024px){
+    .topbar .topbar-left {
+        width: 152px;
+    }
+}
+@media (min-width: 768px){
+    .hidden-lg {
+        display: none;
+    }
+}
+.font-11 {
+    font-size: 11px !important;
+}
+@media print {
+    .noprint {
+        display:none !important;
+    }
+    tr, td {
+        -webkit-print-color-adjust: exact;
+    }
+}
+/*small*/
+@media (max-width: 540px){
+    .text-left-sm {
+        text-align: left !important;
+    }
+}
+/* config mobile */
+@media (max-width: 800px){
+    /* exibe coluna */
+    .y-mobile-block {
+        display: block !important;
+    }
+    .y-mobile-cell {
+        display: table-cell !important;
+    }
+    .n-mobile-cell {
+        display: none !important;
+    }
+    .page-content,
+    .container-fluid {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+    .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .card {
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+    .card-body {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    .modal-content-full .modal-body {
+        padding: 0;
+    }
+}
+/* colors eldorado buttons */
+.bteldorado_1 {
+    background-color: #006b44 !important;
+    border: 1px solid #006b44 !important;
+    color: #ffffff !important;
+}
+.bteldorado_2 {
+    background-color: #f4811f !important;
+    border: 1px solid #f4811f !important;
+    color: #ffffff !important;
+}
+.bteldorado_3 {
+    background-color: #31b450 !important;
+    border: 1px solid #31b450 !important;
+    color: #ffffff !important;
+}
+.bteldorado_4 {
+    background-color: #c8c02d !important;
+    border: 1px solid #c8c02d !important;
+    color: #ffffff !important;
+}
+.bteldorado_5 {
+    background-color: #feca07 !important;
+    border: 1px solid #feca07 !important;
+    color: #ffffff !important;
+}
+.bteldorado_6 {
+    background-color: #cb7b3a !important;
+    border: 1px solid #cb7b3a !important;
+    color: #ffffff !important;
+}
+.bteldorado_7 {
+    background-color: #004d95 !important;
+    border: 1px solid #004d95 !important;
+    color: #ffffff !important;
+}
+
+/* colors eldorado text */
+.txteldorado_1 {
+    color: #006b44 !important;
+}
+.txteldorado_2 {
+    color: #f4811f !important;
+}
+.txteldorado_3 {
+    color: #31b450 !important;
+}
+.txteldorado_4 {
+    color: #c8c02d !important;
+}
+.txteldorado_5 {
+    color: #feca07 !important;
+}
+.txteldorado_6 {
+    color: #cb7b3a !important;
+}
+.txteldorado_8 {
+    color: #dbdcdd !important;
+}
+.txteldorado_9 {
+    color: #f3dab0 !important;
+}
