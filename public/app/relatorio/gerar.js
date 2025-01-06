@@ -768,6 +768,39 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DIAS_DE_DIREITO', 'name': 'Total de Dias de Direito'}
             ];
         break;
+        case '30':
+                colunas = [
+                    {'value': '[ID]', 'name': 'ID'},
+                    {'value': '[TIPO]', 'name': 'Tipo'},
+                    {'value': '[STATUS]', 'name': 'Status'},
+                    {'value': '[COD.COLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[COD.FILIAL]', 'name': 'Cód. Filial'},
+                    {'value': '[CHAPA]', 'name': 'Chapa'},
+                    {'value': '[NOME]', 'name': 'Nome'},
+                    {'value': '[COD.FUNÇÃO]', 'name': 'Cód. Função'},
+                    {'value': '[FUNÇÃO]', 'name': 'Função'},
+                    {'value': '[DT ADMISSÃO]', 'name': 'Data Admissão'},
+                    {'value': '[SITUAÇÃO]', 'name': 'Situação'},
+                    {'value': '[COD.CUSTO]', 'name': 'Cód. Custo'},
+                    {'value': '[DESC.CUSTO]', 'name': 'Custo'},
+                    {'value': '[COD.SEÇÃO]', 'name': 'Cód. Seção'},
+                    {'value': '[DESC.SEÇÃO]', 'name': 'Seção'},
+                    {'value': '[DATA]', 'name': 'Data'},
+                    {'value': '[ANTES - TROCA]', 'name': 'Antes Troca'},
+                    {'value': '[APÓS - TROCA]', 'name': 'Após Troca'},
+                    {'value': '[ANTES - FOLGA]', 'name': 'Antes Troca Folga'},
+                    {'value': '[APÓS - FOLGA]', 'name': 'Após Troca Folga'},
+                    {'value': '[DATA SOLICITAÇÃO]', 'name': 'Data Solicitação'},
+                    {'value': '[USUÁRIO - SOLICITANTE]', 'name': 'Solicitante'},
+                    {'value': '[JUSTIFICATIVA SOLICITAÇÃO]', 'name': 'Justificativa Solicitação'},
+                    {'value': '[DATA APROVAÇÃO]', 'name': 'Data Aprovação'},
+                    {'value': '[DATA REPROVAÇÃO]', 'name': 'Data Reprovação'},
+                    {'value': '[JUSTIFICATIVA REPROVAÇÃO]', 'name': 'Justificativa Reprovação'},
+                    {'value': '[USUÁRIO - GESTOR]', 'name': 'Aprovador'},
+                    {'value': '[USUÁRIO - RH]', 'name': 'Aprovador RH'},
+                ]
+                
+            break;
 
     }
 

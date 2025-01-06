@@ -438,13 +438,13 @@ function id($id, $somente_token = false){
     return (!$somente_token) ? $id.'.'.$token : $token;
 }
 // função para validar a integridade de dados do id
-function cid($id, $redirect = true){
+function cid($id, $redirect = true, $disabled = false){
 
     $string = explode('.', $id);
     $id = $string[0] ?? false;
     $token = $string[1] ?? false;
 
-    if(INTEGRIDADE === false) return $id;
+    if(INTEGRIDADE === false || $disabled === true) return $id;
 
     // validação de integridade de dados
     $modulo = explode('/',$_SERVER['REQUEST_URI']);

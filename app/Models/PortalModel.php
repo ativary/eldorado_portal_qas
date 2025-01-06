@@ -370,7 +370,7 @@ class PortalModel extends Model {
                 : false;
     }
 
-    public function CarregaColaboradores($dataInicio, $dados = false, $podeSeVer = true, $motorista = false)
+    public function CarregaColaboradores($dataInicio, $dados = false, $podeSeVer = true, $motorista = false, $passaPonto = false)
     {
 
         $chapaGestor = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
@@ -433,6 +433,24 @@ class PortalModel extends Model {
                 $in_secao .= " AND '".implode(",", $dados['codsecao'])."'  LIKE CONCAT('%', A.CODSECAO, '%') ";
             }
         }
+
+        $utilizaPonto = '';
+        if($passaPonto){
+            $utilizaPonto = '
+            AND (
+                SELECT 
+                    TOP 1 HP.UTILIZA
+                FROM 
+                    AHSTUTILIZAPONTO HP
+                WHERE
+                        HP.DATAINICIO <= GETDATE()
+                    AND HP.CODCOLIGADA = A.CODCOLIGADA
+                    AND HP.CHAPA = A.CHAPA
+                ORDER BY
+                    HP.DATAINICIO DESC
+            ) = 1
+            ';
+        }
         
         $query = " 
             SELECT 
@@ -455,16 +473,118 @@ class PortalModel extends Model {
                         FROM
                             PFUNC
                         WHERE
-                                CODCOLIGADA = A.CODCOLIGADA AND CHAPA = A.CHAPA
-                            AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
+                            CODCOLIGADA = A.CODCOLIGADA AND CHAPA = A.CHAPA
                     )X WHERE X.DATA >= '{$dataInicio}'
                     ORDER BY X. DATA ASC
                 ) IS NOT NULL
                 {$in_secao}
+                {$utilizaPonto}
             ORDER BY 
                 A.NOME 
             ASC
         ";
+        $result = $this->dbrm->query($query);
+        
+        return ($result->getNumRows() > 0)
+                ? $result->getResultArray()
+                : [];
+
+    }
+
+    public function funcoesPodeVer($dados)
+    {
+
+        $chapaGestor = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+
+        //-----------------------------------------
+		// filtro das chapas que o lider pode ver
+		//-----------------------------------------
+        $mHierarquia = Model('HierarquiaModel');
+		$objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+		$isLider = $mHierarquia->isLider();
+
+        $filtro_chapa_lider = "";
+		$filtro_secao_lider = "";
+		if($isLider){
+			$chapas_lider = "";
+			$codsecoes = "";
+			foreach($objFuncLider as $idx => $value){
+				$chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
+			}
+			$filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
+            // exit($filtro_secao_lider);
+		}
+		
+		//-----------------------------------------
+		// filtro das seções que o gestor pode ver
+		//-----------------------------------------
+		$secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+		$filtro_secao_gestor = "";
+        
+		if($secoes){
+			$codsecoes = "";
+			foreach($secoes as $ids => $Secao){
+				$codsecoes .= "'".$Secao['codsecao']."',";									   
+			}
+			$filtro_secao_gestor = " A.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
+		}
+		//-----------------------------------------
+		
+		// monta o where das seções
+		if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
+		if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+		if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+
+        $chapaFunc = " A.CHAPA = '{$chapaGestor}' ";
+        $in_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor." OR {$chapaFunc}) ";
+        if($filtro_secao_lider == "" && $filtro_secao_gestor == "") $in_secao = " AND A.CHAPA = '{$chapaGestor}' ";
+
+        if($dados){
+            if($dados['rh'] ?? false) $in_secao = "";
+            if($dados['codsecao'] ?? false){
+                if(!is_array($dados['codsecao'])){
+                    $dados['codsecao'] = [$dados['codsecao']];
+                }
+
+                $in_secao .= " AND '".implode(",", $dados['codsecao'])."'  LIKE CONCAT('%', A.CODSECAO, '%') ";
+            }
+        }
+        
+        $utilizaPonto = '
+        AND (
+            SELECT 
+                TOP 1 HP.UTILIZA
+            FROM 
+                AHSTUTILIZAPONTO HP
+            WHERE
+                    HP.DATAINICIO <= GETDATE()
+                AND HP.CODCOLIGADA = A.CODCOLIGADA
+                AND HP.CHAPA = A.CHAPA
+            ORDER BY
+                HP.DATAINICIO DESC
+        ) = 1
+        ';
+        
+        $query = " 
+            SELECT 
+                B.CODIGO,
+                B.NOME 
+            FROM 
+                PFUNC A 
+                INNER JOIN PFUNCAO B ON B.CODIGO = A.CODFUNCAO AND B.CODCOLIGADA = A.CODCOLIGADA AND B.INATIVA = 0
+            WHERE 
+                    A.CODCOLIGADA = '{$_SESSION['func_coligada']}' 
+                AND A.CODSITUACAO <> 'D'
+                {$in_secao}
+                {$utilizaPonto}
+            GROUP BY
+                B.CODIGO,
+                B.NOME
+            ORDER BY 
+                B.NOME
+            ASC
+        ";
+       //echo '<pre>'.$query;exit;
         $result = $this->dbrm->query($query);
         
         return ($result->getNumRows() > 0)

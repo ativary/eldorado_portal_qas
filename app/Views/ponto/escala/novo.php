@@ -22,7 +22,7 @@
                         <div class="col-sm-10">
                             <form action="" method="post" name="filtro_form" id="filtro_form">
                                 <select class="select2 custom-select form-control form-control-sm" name="chapa" id="chapa" onchange="selecionaChapa(this.value);">
-                                    <option value="">- selecione o colaborador -</option>
+                                    <option value="">- selecione o colaborador (<?= count($resFuncionarios); ?>) -</option>
                                     <?php $dadosFunc = false; ?>
                                     <?php if($resFuncionarios): ?>
                                         <?php foreach($resFuncionarios as $key => $Funcionario): ?>
@@ -59,7 +59,7 @@
                         <div class="row">
                             <label for="perfil_nome" class="col-sm-2 col-form-label text-right">Data:</label>
                             <div class="col-sm-3">
-                                <input min="<?= DateTime::createFromFormat('d/m/Y', date('d/m/Y'))->add(new DateInterval('P3D'))->format('Y-m-d'); ?>" class="form-control form-control-sm" type="date" value="" name="data" id="data" require onkeyup="selecionaData(this.value);" onchange="selecionaData(this.value);">
+                                <input min="<?= dtEn($resConfiguracao[0]['escala_per_inicio'], true) ?>" max="<?= dtEn($resConfiguracao[0]['escala_per_fim'], true) ?>" class="form-control form-control-sm" type="date" value="" name="data" id="data" require onkeyup="selecionaData(this.value);" onchange="selecionaData(this.value);">
                             </div>
                         </div>
                         <div class="row">
@@ -150,6 +150,15 @@
                             </div>
                         </div>
 
+                        <div class="card border mt-4 hidden box_justificativa_periodo" style="background: #fffbec; border-color: #ebd9a6 !important;">
+                            <div class="card-body">
+                                <div class="col-sm-12">
+                                    <label for="justificativa_periodo" class="col-form-label text-left">Justificativa (Fora do período permitido <b class="text-primary"><?= dtBr($resConfiguracao[0]['escala_per_inicio']) ?></b> à <b class="text-primary"><?= dtBr($resConfiguracao[0]['escala_per_fim']) ?></b>):</label>
+                                    <textarea class="form-control" name="justificativa_periodo" id="justificativa_periodo" maxlength="220" cols="30" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="card-footer text-center">
@@ -169,6 +178,7 @@
 precisa_justificar_11_horas = false;
 precisa_justificar_6_dias = false;
 precisa_justificar_6_meses = false;
+erro_data = false;
 
 const selecionaChapa = (chapa) => {
 
@@ -187,6 +197,7 @@ const selecionaData = (data) => {
     $(".data_disabled").prop("disabled", ((data == "") ? true : false));
     $("#indice").val('');
     if(data == "") $("#box_projecao").fadeOut(100);
+    verificaData();
 }
 const buscaHorarioIndice = (codhorario) => {
     
@@ -229,6 +240,13 @@ const carregaEscala = () => {
     if(dados.data == ""){ exibeAlerta("error", "<b>Data</b> não informada."); return false; }
     if(dados.codhorario == ""){ exibeAlerta("error", "<b>Horário</b> não informado."); return false; }
     if(dados.indice == ""){ exibeAlerta("error", "<b>Índice</b> não selecionado."); return false; }
+    
+    if(
+        (dados.data < '<?= dtEn($resConfiguracao[0]['escala_per_inicio'], true) ?>' || dados.data > '<?= dtEn($resConfiguracao[0]['escala_per_fim'], true) ?>')){
+        $(".box_justificativa_periodo").fadeIn(0);
+    }else{
+        $(".box_justificativa_periodo").fadeOut(0);
+    }
 
     resetaProcesso();
     openLoading();
@@ -286,6 +304,8 @@ const carregaEscala = () => {
 
 }
 const salvaDados = () => {
+
+    if(erro_data == true) return;
 
     var saida2 = parseInt($("[data-saida='9']").attr("data-minutos"));
     var saida = parseInt($("[data-saida='9']").attr("data-minutos")) + 660;
@@ -373,6 +393,17 @@ const salvaDados = () => {
         return false;
     }
     <?php endif; ?>
+
+    var dataTroca = $("#data").val();
+    if(
+        (dataTroca < '<?= dtEn($resConfiguracao[0]['escala_per_inicio'], true) ?>' || dataTroca > '<?= dtEn($resConfiguracao[0]['escala_per_fim'], true) ?>')){
+        $(".box_justificativa_periodo").fadeIn(0);
+        let justificativa_periodo = $("#justificativa_periodo").val();
+        if(justificativa_periodo == ""){ exibeAlerta("error", "Justificativa não informada."); return false; }
+    }else{
+        $(".box_justificativa_periodo").fadeOut(0);
+        $("#justificativa_periodo").val('');
+    }
     
     Swal.fire({
 		icon: 'question',
@@ -391,21 +422,23 @@ const salvaDados = () => {
             openLoading();
 
 			let dados = {
-                "chapa": $("#chapa").val(),
-                "data": $("#data").val(),
-                "codhorario": $("#codhorario").val(),
-                "indice": $("#indice").val(),
-                "dtmudanca_historico": "<?= date('Y-m-d', strtotime($dadosFunc['DTMUDANCA_HORARIO'] ?? null)); ?>",
-                "codhorario_historico": "<?= $dadosFunc['CODHORARIO'] ?? null; ?>",
-                "horaEntrada": horaEntrada,
-                "horaSaida": horaSaida,
-                "dataDia": dataDia,
-                "horaEntrada2": horaEntrada2,
-                "horaSaida2": horaSaida2,
-                "dataDia2": dataDia2,
-                "justificativa_11_horas": justificativa_11_horas,
-                "justificativa_6_dias": justificativa_6_dias,
-                "justificativa_6_meses": justificativa_6_meses,
+                "chapa"                     : $("#chapa").val(),
+                "data"                      : dataTroca,
+                "codhorario"                : $("#codhorario").val(),
+                "indice"                    : $("#indice").val(),
+                "dtmudanca_historico"       : "<?= date('Y-m-d', strtotime($dadosFunc['DTMUDANCA_HORARIO'] ?? null)); ?>",
+                "codhorario_historico"      : "<?= $dadosFunc['CODHORARIO'] ?? null; ?>",
+                "horaEntrada"               : horaEntrada,
+                "horaSaida"                 : horaSaida,
+                "dataDia"                   : dataDia,
+                "horaEntrada2"              : horaEntrada2,
+                "horaSaida2"                : horaSaida2,
+                "dataDia2"                  : dataDia2,
+                "justificativa_11_horas"    : justificativa_11_horas,
+                "justificativa_6_dias"      : justificativa_6_dias,
+                "justificativa_6_meses"     : justificativa_6_meses,
+                "justificativa_periodo"     : $("#justificativa_periodo").val(),
+                "tipo"                      : 1
             }
 
 			$.ajax({
@@ -426,7 +459,7 @@ const salvaDados = () => {
                         <?php endif; ?>
 
                     }else{
-                        exibeAlerta(response.tipo, response.msg, 3, '<?= base_url('ponto/escala/editar'); ?>/'+response.cod+'/'+response.complemento);
+                        exibeAlerta(response.tipo, response.msg, 3, '/ponto/escala');
                     }
                     
 				},
@@ -451,22 +484,49 @@ $(document).ready(function(){
         limitReachedClass: "badge badge-warning"
     });
 });
+
+const verificaData = () => {
+    openLoading();
+    $.ajax({
+        url: "<?= base_url('ponto/escala/action/verifica_data') ?>",
+        type:'POST',
+        data:{
+            'chapa'   : $("#chapa").val(),
+            'data'    : $("#data").val()
+        },
+        success:function(result){
+            openLoading(true);
+            var response = JSON.parse(result);
+
+            if(response.tipo != 'success'){
+                exibeAlerta('error', response.msg);
+                erro_data = true;
+                $("#data").val('');
+            }else{
+                erro_data = false;
+            }
+            
+        },
+    });
+}
 </script>
 <style>
 .bg_dados {
     background-color: #eaeaea;
 }
 .bg_compensado {
-    background-color: #aae0ff;
+    background-color: #497444;
+    color: #ffffff;
 }
 .bg_folga {
-    background-color: #68c7ff;
+    background-color: #f9cd25;
 }
 .bg_feriado {
-    background-color: #4997f9;
+    background-color: #58595b;
+    color: #ffffff;
 }
 .bg_ref {
-    background-color: #d2f1ce;
+    background-color: #dcddde;
 }
 </style>
 <?php

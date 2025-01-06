@@ -35,6 +35,7 @@
                                     <?php if($rh): ?><option value="14" <?php if($relatorio == 14){ echo 'selected';}?>>Ponto Digitado x Excluídos</option><?php endif; ?>
                                     <?php if($rh): ?><option value="15" <?php if($relatorio == 15){ echo 'selected';}?>>Ponto Batidas Reprovadas</option><?php endif; ?>
                                     <option value="16" <?php if($relatorio == 16){ echo 'selected';}?>>Relatório (Macros)</option>
+                                    <option value="30" <?php if($relatorio == 30){ echo 'selected';}?>>Troca de Escala/Dia</option>
                                     <?php if($rh): ?><option value="17" <?php if($relatorio == 17){ echo 'selected';}?>>Variaveis- Auxilio Moradia</option><?php endif; ?>
                                     <?php if($rh): ?><option value="18" <?php if($relatorio == 18){ echo 'selected';}?>>Variaveis- Auxilio Excepcional</option><?php endif; ?>
                                     <?php if($rh): ?><option value="19" <?php if($relatorio == 19){ echo 'selected';}?>>Variaveis- Auxilio Creche</option><?php endif; ?>
@@ -135,7 +136,7 @@
                                         <?php 
                                             if($colunas){ 
                                                 foreach($colunas as $key => $value){
-                                                    echo '<th>' . $colunas[$key] . '</th>';
+                                                    echo '<th>' . str_replace(['[', ']'], '', $colunas[$key]) . '</th>';
                                                 }
                                             }
                                         ?>
@@ -145,7 +146,7 @@
                                     <?php foreach($resDados as $idx => $Dados): ?>
                                         <tr>
                                             <?php foreach($colunas as $colunaNome): ?>
-                                                <td><?= $Dados[$colunaNome]; ?></td>
+                                                <td><?= $Dados[str_replace(['[', ']'], '', $colunaNome)]; ?></td>
                                             <?php endforeach; ?>
                                         </tr>
                                     <?php unset($resDados[$idx], $idx, $Dados); ?>
