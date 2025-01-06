@@ -1,4 +1,4 @@
-<style>table, span {font-family:Tahoma, Geneva, sans-serif !important;border-collapse: collapse;text-align: justify !important; font-size: 12px;}</style><img src="<?= ib64(base_url('public/assets/images/logo_pdf.jpg')); ?>">
+<style>table, span {border-collapse: collapse;text-align: justify !important;}</style><img src="<?= (('public/assets/images/logo_pdf.jpg')); ?>">
 <br>
 <br><br>
 <table width="700">
@@ -8,22 +8,18 @@
 </table>
 
 <br>
-<table width="700">
-    <tr>
-        <td align="left" style="text-align: justify; font-size: 12px;">
-            <div>Pelo presente instrumento particular de Aditivo Contratual, a empresa <?= $resDadosTermo[0]['NOMEFILIAL']; ?>, com sede à <?= $resDadosTermo[0]['RUA'].' - '.$resDadosTermo[0]['COMPLEMENTO']; ?>, Cidade <?= $resDadosTermo[0]['CIDADE']; ?>, Estado <?= $resDadosTermo[0]['ESTADO']; ?>, inscrita no CNPJ <?= $resDadosTermo[0]['CNPJ']; ?> denominada EMPREGADORA e do outro lado o Sr, (a) <strong><?= $resDadosTermo[0]['NOME']; ?></strong>, inscrito (a) no CPF sob o nº <?= $resDadosTermo[0]['CPF']; ?>, portador (a) da Carteira Profissional nº <?= $resDadosTermo[0]['CTPS']; ?>, série <?= $resDadosTermo[0]['CTPS_SERIE']; ?>, doravante denominado EMPREGADO (A), têm como justo e acertado o presente termo aditivo ao contrato de trabalho:</div>
-            <br>
-            <strong>Cláusula Primeira:</strong> Objeto<br>
-            Alteração escala de trabalho.<br>
-            <br>
-            <strong>Cláusula Segunda:</strong> Escala atual<br>
-            A escala de trabalho atual do EMPREGADO é a escala <?= $resDadosTermo[0]['HORARIO_ATUAL']; ?>.<br>
-            <br>
-            <strong>Cláusula Terceira:</strong> Alteração escala de trabalho<br>
-            Fica acordado entre as partes, que a escala de trabalho do empregado acima qualificado, a partir de <?= data_extenso($datamudanca); ?> será alterada para escala de <?= $resDadosTermo[0]['HORARIO_NOVO']; ?>
-        </td>
-    </tr>
-</table>
+<p>
+Pelo presente instrumento particular de Aditivo Contratual, a empresa <?= $resDadosTermo[0]['NOMEFILIAL']; ?>, com sede à <?= $resDadosTermo[0]['RUA'].' - '.$resDadosTermo[0]['COMPLEMENTO']; ?>, Cidade <?= $resDadosTermo[0]['CIDADE']; ?>, Estado <?= $resDadosTermo[0]['ESTADO']; ?>, inscrita no CNPJ <?= $resDadosTermo[0]['CNPJ']; ?> denominada EMPREGADORA e do outro lado o Sr, (a) <strong><?= $resDadosTermo[0]['NOME']; ?></strong>, inscrito (a) no CPF sob o nº <?= $resDadosTermo[0]['CPF']; ?>, portador (a) da Carteira Profissional nº <?= $resDadosTermo[0]['CTPS']; ?>, série <?= $resDadosTermo[0]['CTPS_SERIE']; ?>, doravante denominado EMPREGADO (A), têm como justo e acertado o presente termo aditivo ao contrato de trabalho:
+<br>
+<strong>Cláusula Primeira:</strong> Objeto<br>
+Alteração escala de trabalho.<br>
+<br>
+<strong>Cláusula Segunda:</strong> Escala atual<br>
+A escala de trabalho atual do EMPREGADO é a escala <?= $resDadosTermo[0]['HORARIO_ATUAL']; ?>.<br>
+<br>
+<strong>Cláusula Terceira:</strong> Alteração escala de trabalho<br>
+Fica acordado entre as partes, que a escala de trabalho do empregado acima qualificado, a partir de <?= data_extenso($datamudanca); ?> será alterada para escala de <?= $resDadosTermo[0]['HORARIO_NOVO']; ?>
+</p>
 <br>
 <br>
 <table width="700">

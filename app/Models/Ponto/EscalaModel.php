@@ -12,12 +12,16 @@ class EscalaModel extends Model {
     protected $dbrm;
     public $coligada;
     public $log_id;
+    public $now;
+    public $producao;
     
     public function __construct() {
-        $this->dbportal = db_connect('dbportal');
-        $this->dbrm = db_connect('dbrm');
-        $this->coligada = session()->get('func_coligada');
-        $this->log_id = session()->get('log_id');
+        $this->dbportal   = db_connect('dbportal');
+        $this->dbrm       = db_connect('dbrm');
+        $this->coligada   = session()->get('func_coligada');
+        $this->log_id     = session()->get('log_id');
+        $this->now        = date('Y-m-d H:i:s');
+        $this->producao   = (DBRM_BANCO == 'CorporeRMPRD') ? true : false;
     }
 
 
@@ -28,7 +32,7 @@ class EscalaModel extends Model {
     // -------------------------------------------------------
     // Lista funcionários que pode ver
     // -------------------------------------------------------
-    public function ListarEscalaFuncionarios($dados = false){
+    public function ListarEscalaFuncionarios($perfilRH = false){
     /*
         $mHierarquia = model('HierarquiaModel');
         $Secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
@@ -89,9 +93,8 @@ class EscalaModel extends Model {
         if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
         if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
         $in_secao = " (".$filtro_secao_lider." ".$filtro_secao_gestor.") ";
-        // if(isset($dados)){
-        //     if($dados['rh']) $in_secao = " 1 = 1 ";
-        // }
+
+        if($perfilRH) $in_secao = " 1=1 ";
 
         $query = "
             SELECT
@@ -129,12 +132,25 @@ class EscalaModel extends Model {
                     {$in_secao}
                 AND A.CODSITUACAO IN ('A')
                 AND A.CODCOLIGADA = {$this->coligada}
+                AND (
+                    SELECT 
+                        TOP 1 HP.UTILIZA
+                    FROM 
+                        AHSTUTILIZAPONTO HP
+                    WHERE
+                            HP.DATAINICIO <= GETDATE()
+                        AND HP.CODCOLIGADA = A.CODCOLIGADA
+                        AND HP.CHAPA = A.CHAPA
+                    ORDER BY
+                        HP.DATAINICIO DESC
+                ) = 1
             ORDER BY
                 A.NOME
         ";
 
-        //echo '<pre>'.$query;exit();
+        // echo '<pre>'.$query;exit();
         $result = $this->dbrm->query($query);
+        if(!$result) return false;
         return ($result->getNumRows() > 0) 
                 ? $result->getResultArray() 
                 : false;
@@ -246,11 +262,21 @@ class EscalaModel extends Model {
     // -------------------------------------------------------
     public function CalculaTrocaDeEscala($dados){
 
-        $data = $dados['data'] ?? null;
-        $chapa = $dados['chapa'] ?? null;
-        $codhorario = $dados['codhorario'] ?? null;
-        $indice = $dados['indice'] ?? null;
-        $qtde_dias = 10;
+        $id           = $dados['id'] ?? null;
+        $data         = $dados['data'] ?? null;
+        $chapa        = $dados['chapa'] ?? null;
+        $codhorario   = $dados['codhorario'] ?? null;
+        $indice       = $dados['indice'] ?? null;
+        $qtde_dias    = 10;
+
+        if($id != null){
+            $query = " select projecao escala from zcrmportal_escala WHERE id = '{$id}' and situacao not in (0,8,9) ";
+            $result = $this->dbportal->query($query);
+            if($result->getNumRows() > 0){
+                $response = $result->getResultArray();
+                if(strlen(trim($response[0]['escala'])) > 0) exit($response[0]['escala']);
+            }
+        }
 
         //return responseJson('error', '<b>Colaborador</b> não informado.');
         if($data == null) return responseJson('error', '<b>Data</b> não informada.');
@@ -326,28 +352,132 @@ class EscalaModel extends Model {
         return false;
 
     }
+
+    // -------------------------------------------------------
+    // Calcula Troca de Escala
+    // -------------------------------------------------------
+    public function CalculaTrocaDeDia($dados){
+
+        $id           = $dados['id'] ?? null;
+        $tipo         = $dados['tipo'] ?? null;
+        $data         = $dados['data'] ?? null;
+        $chapa        = $dados['chapa'] ?? null;
+        $codhorario   = $dados['codhorario'] ?? null;
+        $indice       = $dados['indice'] ?? null;
+        $qtde_dias    = 1;
+
+        //return responseJson('error', '<b>Colaborador</b> não informado.');
+        if($data == null) return responseJson('error', '<b>Data</b> não informada.');
+        if($chapa == null) return responseJson('error', '<b>Colaborador</b> não informado.');
+        if($codhorario == null) return responseJson('error', '<b>Horário</b> não informado.');
+        if($indice == null) return responseJson('error', '<b>Índice</b> não informado.');
+
+        if($id != null){
+
+            $query = " select ".(($tipo == 'trabalho') ? 'projecao' : 'projecao_folga')." escala from zcrmportal_escala WHERE id = '{$id}' and situacao not in (0,8,9) ";
+            $result = $this->dbportal->query($query);
+            if($result->getNumRows() > 0){
+                $response = $result->getResultArray();
+                if(strlen(trim($response[0]['escala'])) > 0) exit($response[0]['escala']);
+            }
+
+        }
+
+        $data = dtBr($data);
+
+        $query = "
+            SELECT
+                X.CODHORARIO, 
+                CONVERT(VARCHAR, X.DATA, 103) DATA,
+                X.CODINDICE, 
+                X.CODCOLIGADA, 
+                X.TIPO, 
+                X.ENTRADA1, 
+                X.SAIDA1,
+                X.ENTRADA2,
+                X.SAIDA2,
+                ISNULL(B.CODSECAO, A.CODSECAO) CODSECAO,
+                CASE WHEN D.DIAFERIADO IS NOT NULL THEN 1 ELSE 0 END DIAFERIADO
+
+            FROM (
+
+                SELECT * FROM dbo.CALCULO_HORARIO_PT1('{$data}', '{$chapa}', {$this->coligada})
+                    
+                UNION ALL
+                
+                SELECT * FROM dbo.CALCULO_HORARIO_PT2('{$data}', '{$codhorario}', {$indice}, {$this->coligada}, {$qtde_dias}, '{$chapa}') 
+
+            )X
+                LEFT JOIN PFUNC A ON A.CHAPA = '{$chapa}' AND A.CODCOLIGADA = {$this->coligada}
+                LEFT JOIN PFHSTSEC B ON B.CHAPA = A.CHAPA AND B.CODCOLIGADA = A.CODCOLIGADA AND B.DTMUDANCA = (SELECT MAX(DTMUDANCA) FROM PFHSTSEC WHERE CHAPA = B.CHAPA AND B.CODCOLIGADA = CODCOLIGADA AND DTMUDANCA <= CONVERT(DATETIME, DATA, 103))
+                LEFT JOIN PSECAO C ON C.CODCOLIGADA = A.CODCOLIGADA AND C.CODIGO = ISNULL(B.CODSECAO, A.CODSECAO)
+                LEFT JOIN GFERIADO D ON D.CODCALENDARIO = C.CODCALENDARIO AND D.DIAFERIADO = CONVERT(DATETIME, DATA, 103)
+
+            ORDER BY CONVERT(DATETIME, DATA, 103) ASC
+        ";
+        $result = $this->dbrm->query($query);
+                
+        if($result->getNumRows() > 0){
+            $response = $result->getResultArray();
+            $dadosJson = false;
+            foreach($response as $key => $dadosResponse){
+
+                $dadosJson[$key] = $dadosResponse;
+                $dadosJson[$key]['DIA'] = diaSemana(dtEn($dadosResponse['DATA']), true);
+                $dadosJson[$key]['DATAEN'] = dtEn($dadosResponse['DATA']);
+
+                if((int)$dadosResponse['ENTRADA1'] >= 1440) $dadosResponse['ENTRADA1'] = 0;
+                $dadosJson[$key]['ENTRADA1'] = m2h((int)$dadosResponse['ENTRADA1']);
+
+                if((int)$dadosResponse['ENTRADA2'] >= 1440) $dadosResponse['ENTRADA2'] = 0;
+                $dadosJson[$key]['ENTRADA2'] = m2h((int)$dadosResponse['ENTRADA2']);
+
+                if((int)$dadosResponse['SAIDA1'] >= 1440) $dadosResponse['SAIDA1'] = 0;
+                $dadosJson[$key]['SAIDA1'] = m2h((int)$dadosResponse['SAIDA1']);
+
+                if((int)$dadosResponse['SAIDA2'] >= 1440) $dadosResponse['SAIDA2'] = 0;
+                $dadosJson[$key]['SAIDA2'] = m2h((int)$dadosResponse['SAIDA2']);
+
+                $dadosJson[$key]['ENTRADA1_MINUTO'] = h2m($dadosJson[$key]['ENTRADA1']);
+                $dadosJson[$key]['ENTRADA2_MINUTO'] = h2m($dadosJson[$key]['ENTRADA2']);
+                $dadosJson[$key]['SAIDA1_MINUTO'] = h2m($dadosJson[$key]['SAIDA1']);
+                $dadosJson[$key]['SAIDA2_MINUTO'] = h2m($dadosJson[$key]['SAIDA2']);
+
+            }
+
+            return json_encode($dadosJson);
+        }
+
+        return false;
+
+    }
     
     // -------------------------------------------------------
     // Cadastrar escala
     // -------------------------------------------------------
     public function CadastrarEscala($dados){
 
-        $data = $dados['data'] ?? null;
-        $chapa = $dados['chapa'] ?? null;
-        $codhorario = $dados['codhorario'] ?? null;
-        $indice = $dados['indice'] ?? null;
-        $dtmudanca_historico = $dados['dtmudanca_historico'] ?? null;
-        $codhorario_historico = $dados['codhorario_historico'] ?? null;        
-        $chapa_solicitante = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-        $horaEntrada = $dados['horaEntrada'] ?? null; 
-        $horaSaida = $dados['horaSaida'] ?? null; 
-        $dataDia = $dados['dataDia'] ?? null; 
-        $horaEntrada2 = $dados['horaEntrada2'] ?? null; 
-        $horaSaida2 = $dados['horaSaida2'] ?? null; 
-        $dataDia2 = $dados['dataDia2'] ?? null;
+        $id                     = $dados['id'] ?? null;
+        $data                   = $dados['data'] ?? null;
+        $data_folga             = $dados['data_folga'] ?? null;
+        $chapa                  = $dados['chapa'] ?? null;
+        $codhorario             = $dados['codhorario'] ?? null;
+        $indice                 = $dados['indice'] ?? null;
+        $indice_folga           = $dados['indice_folga'] ?? null;
+        $dtmudanca_historico    = $dados['dtmudanca_historico'] ?? null;
+        $codhorario_historico   = $dados['codhorario_historico'] ?? null;
+        $chapa_solicitante      = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+        $horaEntrada            = $dados['horaEntrada'] ?? null;
+        $horaSaida              = $dados['horaSaida'] ?? null;
+        $dataDia                = $dados['dataDia'] ?? null;
+        $horaEntrada2           = $dados['horaEntrada2'] ?? null;
+        $horaSaida2             = $dados['horaSaida2'] ?? null;
+        $dataDia2               = $dados['dataDia2'] ?? null;
         $justificativa_11_horas = $dados['justificativa_11_horas'] ?? "";
-        $justificativa_6_dias = $dados['justificativa_6_dias'] ?? "";
-        $justificativa_6_meses = $dados['justificativa_6_meses'] ?? "";
+        $justificativa_6_dias   = $dados['justificativa_6_dias'] ?? "";
+        $justificativa_6_meses  = $dados['justificativa_6_meses'] ?? "";
+        $justificativa_periodo  = $dados['justificativa_periodo'] ?? "";
+        $tipo                   = $dados['tipo'] ?? 1;
 
         if($data == null) return responseJson('error', '<b>Data</b> não informada.');
         if($chapa == null) return responseJson('error', '<b>Colaborador</b> não informado.');
@@ -355,15 +485,68 @@ class EscalaModel extends Model {
         if($indice == null) return responseJson('error', '<b>Índice</b> não informado.');
         if($chapa_solicitante == null) return responseJson('error', '<b>Solicitante</b> inválido.');
         if($dtmudanca_historico == null) return responseJson('error', '<b>Histórico de horário</b> inválido.');
+        if($tipo != 1){
+            if($data_folga == null) return responseJson('error', '<b>Data (Dia Folga)</b> não informada.');
+            if($indice_folga == null) return responseJson('error', '<b>Índice (Dia Folga)</b> não informada.');
 
-        $termo_obrigatorio = ($codhorario != $codhorario_historico) ? 1 : "NULL";
+            $diasDiff = (int)dataDiff($data, $data_folga);
+            if($diasDiff < 0) $diasDiff = $diasDiff*-1;
+            if($diasDiff == 0) return responseJson('error', 'Dia útil não pode ser igual ao Dia folga.');
+            if($diasDiff > 90) return responseJson('error', 'Intervalo entre <strong>Dia Útil</strong> e <strong>Dia Folga</strong> não pode ser superior a <strong>90 dias</strong>.');
+        }
+
+        $termo_obrigatorio = ($codhorario != $codhorario_historico || $tipo != 1) ? 1 : "NULL";
+
+        $configuracao         = self::Configuracao();
+        $escala_per_inicio    = (strlen(trim($configuracao[0]['escala_per_inicio'])) <= 0) ? 'NULL' : "'{$configuracao[0]['escala_per_inicio']}'";
+        $escala_per_fim       = (strlen(trim($configuracao[0]['escala_per_fim'])) <= 0) ? 'NULL' : "'{$configuracao[0]['escala_per_fim']}'";
+        $dia_per_inicio       = (strlen(trim($configuracao[0]['dia_per_inicio'])) <= 0) ? 'NULL' : "'{$configuracao[0]['dia_per_inicio']}'";
+        $dia_per_fim          = (strlen(trim($configuracao[0]['dia_per_fim'])) <= 0) ? 'NULL' : "'{$configuracao[0]['dia_per_fim']}'";
+        $bloqueio_aviso       = (int)$configuracao[0]['bloqueio_aviso'];
+
+        // valida troca da troca
+        $historico = $this->dbrm->query(" SELECT * FROM PFHSTHOR WHERE CHAPA = '{$chapa}' AND CODCOLIGADA = '{$this->coligada}' AND DTMUDANCA = '{$data}' ");
+        if(($historico->getNumRows() ?? 0) > 0){
+            return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($data).'</b>.');
+        }
+            
+        
+        if($tipo != 1){
+            $historico2 = $this->dbrm->query(" SELECT * FROM PFHSTHOR WHERE CHAPA = '{$chapa}' AND CODCOLIGADA = '{$this->coligada}' AND DTMUDANCA = '{$data_folga}' ");
+            if(($historico2->getNumRows() ?? 0) > 0){
+                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($data_folga).'</b>.');
+            }
+
+            $dataTrabalho       = \DateTime::createFromFormat('Y-m-d', $data)->add(new \DateInterval('P1D'))->format('Y-m-d');
+            $verificaTrabalho   = " SELECT * FROM dbo.CALCULO_HORARIO_PT1('".dtBr($dataTrabalho)."', '{$chapa}', '{$this->coligada}') ";
+            $resultTrabalho     = $this->dbrm->query($verificaTrabalho);
+            $dadosTrabalho      = $resultTrabalho->getResultArray()[0];
+            if($dadosTrabalho['TIPO'] == 'TRABALHO'){
+                return responseJson('error', 'Dia <b>'.dtBr($data).'</b> é um dia de trabalho, não é possivel trocar um dia de trabalho por outro dia de trabalho.');
+            }
+            
+            $dataFolga        = \DateTime::createFromFormat('Y-m-d', $data_folga)->add(new \DateInterval('P1D'))->format('Y-m-d');
+            $verificaFolga    = " SELECT * FROM dbo.CALCULO_HORARIO_PT1('".dtBr($dataFolga)."', '{$chapa}', '{$this->coligada}') ";
+            $resultFolga      = $this->dbrm->query($verificaFolga);
+            $dadosFolga       = $resultFolga->getResultArray()[0];
+            if($dadosFolga['TIPO'] != 'TRABALHO'){
+                return responseJson('error', 'Dia <b>'.dtBr($data_folga).'</b> não é um dia de trabalho, não é possivel trocar um dia de folga por outro dia de folga.');
+            }
+
+            $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND datamudanca = '{$data}' AND tipo != '1' AND situacao not in (3,9) ";
+            $result = $this->dbportal->query($query);
+            if($result->getNumRows() > 0){
+                return responseJson('error', 'Já existe uma solicitação em aberto para esta data.');
+            }
+
+        }
 
         // valida data da mudança
-        $data_min = \DateTime::createFromFormat('d/m/Y', date('d/m/Y'))->add(new \DateInterval('P3D'))->format('Ymd');
-        $data_min2 = \DateTime::createFromFormat('d/m/Y', date('d/m/Y'))->add(new \DateInterval('P3D'))->format('d/m/Y');
-        $data_prog = \DateTime::createFromFormat('Y-m-d', $data)->format('Ymd');
+        // $data_min = \DateTime::createFromFormat('d/m/Y', date('d/m/Y'))->add(new \DateInterval('P3D'))->format('Ymd');
+        // $data_min2 = \DateTime::createFromFormat('d/m/Y', date('d/m/Y'))->add(new \DateInterval('P3D'))->format('d/m/Y');
+        // $data_prog = \DateTime::createFromFormat('Y-m-d', $data)->format('Ymd');
 
-        if($data_prog < $data_min) return responseJson('error', '<b>Data da nova escala</b> não permitida.<br>Permitido apartir de <b>'.$data_min2.'</b>');
+        // if($data_prog < $data_min) return responseJson('error', '<b>Data da nova escala</b> não permitida.<br>Permitido apartir de <b>'.$data_min2.'</b>');
         
         if($codhorario_historico != $codhorario && $justificativa_6_meses == ""){
             // VERIFICA A DATA DA ULTIMA TROCA DE HORÁRIO
@@ -372,8 +555,8 @@ class EscalaModel extends Model {
         }
 
         // verifica se o Colaborador já possui uma solicitação em aberto
-        $checkRequisicaoPendente = $this->VerificarRequisicaoChapa($chapa);
-        if($checkRequisicaoPendente) return responseJson('error', 'Colaborador já possui uma requisição de troca de escala em aberto.');
+        $checkRequisicaoPendente = $this->VerificarRequisicaoChapa($chapa, $data, $data_folga, $id);
+        if($checkRequisicaoPendente) return responseJson('error', 'Colaborador já possui uma requisição em aberto na data informada.');
 
         // verifica 35 horas de descanso dos ultimos 6 dias
         ##$result35horas = calcula35Horas($dataDia, $horaEntrada, $horaSaida, $dataDia2, $horaEntrada2, $horaSaida2);
@@ -387,11 +570,30 @@ class EscalaModel extends Model {
             if($checkDSR == 1) return responseJson('error', 'TROCA DE ESCALA <b>NÃO PERMITIDA</b> EM DECORRÊNCIA DE FÉRIAS JÁ PROGRAMADAS.<br>POR GENTILEZA PROCURAR O RH.');
             if($checkDSR == 2) return responseJson('error', 'TROCA DE ESCALA <b>NÃO PERMITIDA</b> EM DECORRÊNCIA DE FÉRIAS INCIAR EM DIA DE DESCANSO.');
         }
+
+        if($id){
+            return self::AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_periodo, $termo_obrigatorio, $chapa);
+        }
+
+        $filtroProjecao = [
+            'data' => $data,
+            'chapa' => $chapa,
+            'codhorario' => $codhorario,
+            'indice' => $indice,
+        ];
+
+        $projecao = self::CalculaTrocaDeDia($filtroProjecao);
+        $projecao_folga = null;
+        if($tipo != 1){
+            $filtroProjecao['data'] = $data_folga;
+            $filtroProjecao['indice'] = $indice_folga;
+            $projecao_folga = self::CalculaTrocaDeDia($filtroProjecao);
+        }
         
         $query = " INSERT INTO zcrmportal_escala
-            (chapa, coligada, datamudanca, codhorario, codindice, usucad, dtcad, chapa_solicitante, justificativa_11_horas, justificativa_6_dias, justificativa_6_meses, termo_obrigatorio) 
+            (chapa, coligada, datamudanca, codhorario, codindice, usucad, dtcad, chapa_solicitante, justificativa_11_horas, justificativa_6_dias, justificativa_6_meses, termo_obrigatorio, tipo, datamudanca_folga, codindice_folga, justificativa_periodo, config_escala_per_ini, config_escala_per_fim, config_dia_per_ini, config_dia_per_fim, bloqueio_aviso, projecao, projecao_folga) 
                 VALUES
-            ('{$chapa}', '{$this->coligada}', '{$data}', '{$codhorario}', '{$indice}', '{$this->log_id}', '".date('Y-m-d H:i:s')."', '{$chapa_solicitante}', ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").", ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").", ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").", {$termo_obrigatorio})
+            ('{$chapa}', '{$this->coligada}', '{$data}', '{$codhorario}', '{$indice}', '{$this->log_id}', '".date('Y-m-d H:i:s')."', '{$chapa_solicitante}', ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").", ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").", ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").", {$termo_obrigatorio}, {$tipo}, '{$data_folga}', '{$indice_folga}', ".(($justificativa_periodo == "") ? "NULL" : "'{$justificativa_periodo}'").", {$escala_per_inicio}, {$escala_per_fim}, {$dia_per_inicio}, {$dia_per_fim}, {$bloqueio_aviso}, '{$projecao}', ".(($projecao_folga != null) ? "'{$projecao_folga}'" : 'NULL').")
         ";
         $this->dbportal->query($query);
         
@@ -403,37 +605,153 @@ class EscalaModel extends Model {
             $mHierarquia = model('HierarquiaModel');
             if($mHierarquia->isGestor()){
 
-                $this->dbportal->query(" UPDATE zcrmportal_escala SET situacao = (CASE WHEN termo_obrigatorio = 1 THEN 1 ELSE 2 END), dtapr = '".date('Y-m-d H:i:s')."', usuapr = '{$this->log_id}' WHERE id = '{$id_insert}' AND coligada = '{$this->coligada}' AND situacao = 0 ");
+                $this->dbportal->query(" UPDATE zcrmportal_escala SET situacao = (CASE WHEN termo_obrigatorio = 1 THEN 0 ELSE 2 END), dtapr = '".date('Y-m-d H:i:s')."', usuapr = '{$this->log_id}' WHERE id = '{$id_insert}' AND coligada = '{$this->coligada}' AND situacao = 0 ");
 
                 if($this->dbportal->affectedRows() > 0){
-                    $query = " SELECT id FROM zcrmportal_escala WHERE id = '{$id_insert}' AND coligada = '{$this->coligada}' AND termo_obrigatorio = 1 AND situacao = 1 ";
+                    $query = " SELECT id FROM zcrmportal_escala WHERE id = '{$id_insert}' AND coligada = '{$this->coligada}' AND termo_obrigatorio = 1 AND situacao = 0 ";
                     $result = $this->dbportal->query($query);
                     if($result->getNumRows() > 0){
                         $this->EscalaNotificaSolicitante($id_insert);
                     }
                 }
 
-                notificacao('success', 'Escala Cadastrada e Aprovada com sucesso.');
-                return responseJson('success', 'Escala Cadastrada e Aprovada com sucesso', id($this->dbportal->insertID()), id(($termo_obrigatorio == 1) ? 1 : 2));
+                notificacao('success', 'Cadastrado com Sucesso.');
+                return responseJson('success', 'Cadastrado com Sucesso', id($this->dbportal->insertID()), id(($termo_obrigatorio == 1) ? 1 : 2));
 
             }else{
                 $this->EscalaNotificaGestor($chapa_solicitante, $chapa);
             }
 
-            notificacao('success', 'Escala cadastrada com sucesso.');
-            return responseJson('success', 'Escala cadastrada com sucesso', id($this->dbportal->insertID()), id(0));
+            notificacao('success', 'Cadastrado com Sucesso.');
+            return responseJson('success', 'Cadastrado com Sucesso', id($this->dbportal->insertID()), id(0));
         }
 
         return responseJson('error', 'Falha ao cadastrar escala');
 
     }
+
+    public function AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_periodo, $termo_obrigatorio, $chapa)
+    {
+
+        $filtroProjecao = [
+            'data' => $data,
+            'chapa' => $chapa,
+            'codhorario' => $codhorario,
+            'indice' => $indice,
+        ];
+
+        $projecao = self::CalculaTrocaDeDia($filtroProjecao);
+        $projecao_folga = null;
+        if($data_folga != null){
+            $filtroProjecao['data'] = $data_folga;
+            $filtroProjecao['indice'] = $indice_folga;
+            $projecao_folga = self::CalculaTrocaDeDia($filtroProjecao);
+        }
+
+        
+        $this->dbportal->query("
+            update
+                zcrmportal_escala
+            set
+                termo_obrigatorio         = {$termo_obrigatorio},
+                codhorario                = '{$codhorario}',
+                datamudanca               = '{$data}',
+                codindice                 = '{$indice}',
+                datamudanca_folga         = '{$data_folga}',
+                codindice_folga           = '{$indice_folga}',
+                justificativa_11_horas    = ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").",
+                justificativa_6_dias      = ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").",
+                justificativa_6_meses     = ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").",
+                justificativa_periodo     = ".(($justificativa_periodo == "") ? "NULL" : "'{$justificativa_periodo}'").",
+                usualt                    = '{$this->log_id}',
+                dtalt                     = '{$this->now}',
+                situacao                  = 0,
+                projecao                  = '{$projecao}',
+                projecao_folga            = ".(($projecao_folga != null) ? "'{$projecao_folga}'" : 'NULL')."
+            where
+                    id                    = {$id}
+                and situacao in (0, 8)
+        ");
+        if($this->dbportal->affectedRows() > 0){
+            notificacao('success', 'Escala salva com sucesso.');
+            return responseJson('success', 'Escala salva com sucesso');
+        }
+
+        return responseJson('error', 'Falha ao salvar escala');
+    }
+    
+    // -------------------------------------------------------
+    // Envia troca de escala e dia para aprovação
+    // -------------------------------------------------------
+    public function EnviaParaAprovacao($dados){
+        $checkStatus = $this->dbportal
+                    ->table('zcrmportal_escala')
+                    ->where('id', $dados['id'])
+                    ->whereIn('situacao', [0])
+                    ->get();
+                    
+        if($checkStatus->getNumRows() <= 0){
+            return responseJson('error', 'Erro ao enviar para aprovação.');
+        }
+
+        // verifica se anexou o termo
+        $dadosEscala = $checkStatus->getResultArray();
+        if((int)$dadosEscala[0]['termo_obrigatorio'] == 1){
+            if(strlen(trim($dadosEscala[0]['dtupload'])) <= 0){
+                return responseJson('error', 'Termo assinado ainda não foi anexado.');
+            }
+        }
+
+        $this->dbportal
+            ->table('zcrmportal_escalaportal_escala')
+            ->whereIn('situacao', [0])
+            ->where('id', $dados['id'])
+            ->update([
+                'situacao' => 10,
+                'usualt' => $this->log_id,
+                'dtalt' => date('Y-m-d H:i:s')
+            ]);
+
+        return responseJson('success', 'Requisição enviada para aprovação com sucesso.');
+    }
+    
+    // -------------------------------------------------------
+    // exclui troca de escala
+    // -------------------------------------------------------
+    public function ExcluirEscala($dados)
+    {
+
+        $checkStatus = $this->dbportal
+                    ->table('zcrmportal_escala')
+                    ->where('id', $dados['id'])
+                    ->whereIn('situacao', [0,8])
+                    ->get();
+                    
+        if($checkStatus->getNumRows() <= 0){
+            return responseJson('error', 'Não é possivel excluir esta escala.');
+        }
+
+        $this->dbportal->query("
+            UPDATE zcrmportal_escala SET situacao = 11 WHERE id = {$dados['id']} AND situacao = 8
+        ");
+
+        $this->dbportal->query("
+            DELETE FROM zcrmportal_escala WHERE id = {$dados['id']} AND situacao = 0
+        ");
+
+        return responseJson('success', 'Requisição excluída com sucesso.');
+        
+    }
     
     // -------------------------------------------------------
     // verifica se a chapa possui uma requisição aberta pendente
     // -------------------------------------------------------
-    public function VerificarRequisicaoChapa($chapa){
+    public function VerificarRequisicaoChapa($chapa, $data, $data_folga, $id){
 
-        $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND situacao not in (3, 9, 8) ";
+        $filtroDataFolga = ($data_folga) ? " OR datamudanca_folga = '{$data_folga}' " : "";
+        $filtroId = ($id) ? " AND id != '{$id}' " : "";
+
+        $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND situacao not in (3,9) AND (datamudanca = '{$data}' {$filtroDataFolga})".$filtroId;
         $result = $this->dbportal->query($query);
 
         return ($result->getNumRows() > 0) ? true : false;
@@ -460,6 +778,13 @@ class EscalaModel extends Model {
 
         $bloqueio_aviso = $dados['bloqueio_aviso'];
 
+        if($dados['escala_per_fim'] < $dados['escala_per_inicio']){
+            return responseJson('error', '<b>Escala:</b> Data fim não pode ser menor que a data início');
+        }
+        if($dados['dia_per_fim'] < $dados['dia_per_inicio']){
+            return responseJson('error', '<b>Dia:</b> Data fim não pode ser menor que a data início');
+        }
+
         $existe_registro = $this->Configuracao();
         if($existe_registro){
 
@@ -468,11 +793,15 @@ class EscalaModel extends Model {
                 UPDATE
                     zcrmportal_escala_config
                 SET
-                    bloqueio_aviso = ".(($bloqueio_aviso) ? "1" : "NULL").",
-                    usualt = '{$this->log_id}',
-                    dtalt = '".date('Y-m-d H:i:s')."'
+                    bloqueio_aviso    = ".(($bloqueio_aviso) ? "1" : "NULL").",
+                    escala_per_inicio = '{$dados['escala_per_inicio']}',
+                    escala_per_fim    = '{$dados['escala_per_fim']}',
+                    dia_per_inicio    = '{$dados['dia_per_inicio']}',
+                    dia_per_fim       = '{$dados['dia_per_fim']}',
+                    usualt            = '{$this->log_id}',
+                    dtalt             = '".date('Y-m-d H:i:s')."'
                 WHERE
-                    coligada = '{$this->coligada}'
+                    coligada          = '{$this->coligada}'
             ";
             $this->dbportal->query($query);
             if($this->dbportal->affectedRows() > 0){
@@ -489,11 +818,19 @@ class EscalaModel extends Model {
             (
                 coligada,
                 bloqueio_aviso,
+                escala_per_inicio,
+                escala_per_fim,
+                dia_per_inicio,
+                dia_per_fim,
                 usualt,
                 dtalt
             ) VALUES (
                 '{$this->coligada}',
                 ".(($bloqueio_aviso) ? "1" : "NULL").",
+                '{$dados['escala_per_inicio']}',
+                '{$dados['escala_per_fim']}',
+                '{$dados['dia_per_inicio']}',
+                '{$dados['dia_per_fim']}',
                 '{$this->log_id}',
                 '".date('Y-m-d H:i:s')."'
             )
@@ -519,22 +856,81 @@ class EscalaModel extends Model {
         $table_documento = ($ft_id != "") ? " , a.documento " : "";
 
         $mAcesso = model('AcessoModel');
-        $perfil_rh = $mAcesso->VerificaPerfil('PONTO_TROCADEESCALA_RH');
+        $perfil_rh = $mAcesso->VerificaPerfil('GLOBAL_RH');
 
         $situacao_rh = " AND a.situacao = 2 ";
         $situacao_gestor = " AND a.situacao = 0 ";
         $situacao_solicitante = "";
         $distinct = ($id) ? "" : "DISTINCT";
+        $filtroGlobal = "";
 
-        if($filtro !== null && $filtro != ""){
-            $filtro_in = ($filtro == 9) ? "8,9" : $filtro;
-            $situacao_rh = " AND a.situacao IN ({$filtro_in}) ";
-            $situacao_gestor = " AND a.situacao IN ({$filtro_in}) ";
-            $situacao_solicitante = $situacao_gestor;
+        // if($filtro['filtro'] ?? null !== null && $filtro['filtro'] ?? "" != ""){
+        //     $filtro_in = ($filtro['filtro'] == 9) ? "8,9" : $filtro['filtro'];
+        //     $situacao_rh = " AND a.situacao IN ({$filtro_in}) ";
+        //     $situacao_gestor = " AND a.situacao IN ({$filtro_in}) ";
+        //     $situacao_solicitante = $situacao_gestor;
+        // }
+
+        if(($filtro['filtro_tipo_troca'] ?? '') !== '') $filtroGlobal .= " and a.tipo = '{$filtro['filtro_tipo_troca']}' ";
+        if(($filtro['filtro_colaborador'] ?? '') !== '') $filtroGlobal .= " and a.chapa = '{$filtro['filtro_colaborador']}' ";
+        if(($filtro['data_inicio'] ?? '') !== '') $filtroGlobal .= " and a.datamudanca >= '{$filtro['data_inicio']}' ";
+        if(($filtro['data_fim'] ?? '') !== '') $filtroGlobal .= " and a.datamudanca <= '{$filtro['data_fim']}' ";
+        if(($filtro['data_inicio'] ?? '') !== '' && ($filtro['filtro_tipo_troca'] ?? null) == 2) $filtroGlobal .= " and a.datamudanca_folga >= '{$filtro['data_inicio']}' ";
+        if(($filtro['data_fim'] ?? '') !== '' && ($filtro['filtro_tipo_troca'] ?? null) == 2) $filtroGlobal .= " and a.datamudanca_folga <= '{$filtro['data_fim']}' ";
+        if(($filtro['filtro'] ?? '') !== ''){
+            if($filtro['filtro'] == '9'){
+                $filtroGlobal .= " and a.situacao IN ('8','9') ";
+            }else{
+                $filtroGlobal .= " and a.situacao = '{$filtro['filtro']}' ";
+            }
         }
 
+        //-----------------------------------------
+		// filtro das chapas que o lider pode ver
+		//-----------------------------------------
+        $mHierarquia = Model('HierarquiaModel');
+		$objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+		$isLider = $mHierarquia->isLider();
+
+        $filtro_chapa_lider = "";
+		$filtro_secao_lider = "";
+		if($isLider){
+			$chapas_lider = "";
+			$codsecoes = "";
+			foreach($objFuncLider as $idx => $value){
+				$chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
+			}
+			$filtro_secao_lider = " a.chapa IN (".substr($chapas_lider, 0, -1).") OR ";
+            // exit($filtro_secao_lider);
+		}
+		
+		//-----------------------------------------
+		// filtro das seções que o gestor pode ver
+		//-----------------------------------------
+		$secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+		$filtro_secao_gestor = "";
+        
+		if($secoes){
+			$codsecoes = "";
+			foreach($secoes as $ids => $Secao){
+				$codsecoes .= "'".$Secao['codsecao']."',";									   
+			}
+			$filtro_secao_gestor = " aa.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
+		}
+		//-----------------------------------------
+		
+		// monta o where das seções
+		if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
+		if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+		if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+        
+        $in_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.") ";
+        if($perfil_rh) $in_secao = "";
+
+        $usucad = "";
+
         $sql_rh = "";
-        if($perfil_rh){
+        if($perfil_rh && 1==2){
             $sql_rh = "
                 UNION ALL
 
@@ -544,16 +940,26 @@ class EscalaModel extends Model {
                     a.justificativa_11_horas,
                     a.justificativa_6_dias,
                     a.justificativa_6_meses,
+                    a.justificativa_periodo,
                     a.motivocancelado,
                     a.id,
                     a.chapa,
                     a.datamudanca,
+                    a.datamudanca_folga,
                     a.codhorario,
                     a.codindice,
+                    a.codindice_folga,
                     a.situacao,
                     2 step,
                     a.dtcancelado,
-                    b.nome solicitante
+                    b.nome solicitante,
+                    a.tipo,
+                    a.config_escala_per_ini,
+                    a.config_escala_per_fim,
+                    a.config_dia_per_ini,
+                    a.config_dia_per_fim,
+                    a.bloqueio_aviso,
+                    a.usuupload
                     {$table_documento}
                 FROM 
                     zcrmportal_escala a
@@ -561,7 +967,9 @@ class EscalaModel extends Model {
                 WHERE
                         a.coligada = '{$this->coligada}'
                         {$situacao_rh}
-                    {$ft_id}
+                        {$filtroGlobal}
+                        {$ft_id}
+                        and a.situacao <> 11
             ";
         }
 
@@ -572,24 +980,42 @@ class EscalaModel extends Model {
             a.justificativa_11_horas,
             a.justificativa_6_dias,
             a.justificativa_6_meses, 
+            a.justificativa_periodo, 
             a.motivocancelado,
             a.id,
             a.chapa,
             a.datamudanca,
+            a.datamudanca_folga,
             a.codhorario,
             a.codindice,
+            a.codindice_folga,
             a.situacao,
             0 step,
             a.dtcancelado,
-            b.nome solicitante
+            a.chapa_solicitante,
+            b.nome solicitante,
+            a.tipo,
+            a.config_escala_per_ini,
+            a.config_escala_per_fim,
+            a.config_dia_per_ini,
+            a.config_dia_per_fim,
+            a.bloqueio_aviso,
+            a.usuupload,
+            a.dtcad
              {$table_documento} 
             FROM 
                 zcrmportal_escala a 
                 LEFT JOIN zcrmportal_usuario b ON b.id = a.usucad
+                INNER JOIN ".DBRM_BANCO."..PFUNC aa ON aa.chapa = a.chapa COLLATE Latin1_General_CI_AS AND aa.CODCOLIGADA = a.coligada
             WHERE 
-                a.coligada = '{$this->coligada}' {$ft_id} AND a.usucad = '{$this->log_id}' {$situacao_solicitante} 
+                a.coligada = '{$this->coligada}' {$ft_id} 
+                {$usucad} 
+                {$situacao_solicitante} 
+                {$filtroGlobal}
+                {$in_secao}
+                and a.situacao <> 11
             
-
+            /***************
             UNION ALL
 
             SELECT 
@@ -598,20 +1024,31 @@ class EscalaModel extends Model {
                 a.justificativa_11_horas,
                 a.justificativa_6_dias,
                 a.justificativa_6_meses,
+                a.justificativa_periodo,
                 a.motivocancelado,
                 a.id,
                 a.chapa,
                 a.datamudanca,
+                a.datamudanca_folga,
                 a.codhorario,
                 a.codindice,
+                a.codindice_folga,
                 a.situacao,
                 1 step,
                 a.dtcancelado,
-                a2.nome solicitante
+                a2.nome solicitante,
+                a.tipo,
+                a.config_escala_per_ini,
+                a.config_escala_per_fim,
+                a.config_dia_per_ini,
+                a.config_dia_per_fim,
+                a.bloqueio_aviso,
+                a.usuupload
                 {$table_documento}
             FROM 
                 zcrmportal_escala a
                     LEFT JOIN zcrmportal_usuario a2 ON a2.id = a.usucad
+                    INNER JOIN ".DBRM_BANCO."..PFUNC aa ON aa.chapa = a.chapa COLLATE Latin1_General_CI_AS AND aa.CODCOLIGADA = a.coligada
                 ,
                 GESTOR_DO_LIDER b,
                 zcrmportal_hierarquia_lider_func c
@@ -625,6 +1062,9 @@ class EscalaModel extends Model {
                 AND c.id_lider = b.id_funcionario_lider
                 AND c.chapa = a.chapa
                 AND c.coligada = a.coligada
+                {$filtroGlobal}
+                {$in_secao}
+                and a.situacao <> 11
 
             UNION ALL
 
@@ -634,16 +1074,26 @@ class EscalaModel extends Model {
                 a.justificativa_11_horas,
                 a.justificativa_6_dias,
                 a.justificativa_6_meses,
+                a.justificativa_periodo,
                 a.motivocancelado,
                 a.id,
                 a.chapa,
                 a.datamudanca,
+                a.datamudanca_folga,
                 a.codhorario,
                 a.codindice,
+                a.codindice_folga,
                 a.situacao,
                 1 step,
                 a.dtcancelado,
-                a2.nome solicitante
+                a2.nome solicitante,
+                a.tipo,
+                a.config_escala_per_ini,
+                a.config_escala_per_fim,
+                a.config_dia_per_ini,
+                a.config_dia_per_fim,
+                a.bloqueio_aviso,
+                a.usuupload
                 {$table_documento}
             FROM 
                 zcrmportal_escala a
@@ -661,13 +1111,18 @@ class EscalaModel extends Model {
                 AND c.id_lider = b.id_funcionario_lider
                 AND c.chapa = a.chapa
                 AND c.coligada = a.coligada
+                {$filtroGlobal}
+                and a.situacao <> 11
 
             {$sql_rh}
-
+        **************/
                 
         ";
         
-        // echo '<pre>'.$query;exit();
+        
+
+        // print_r($filtro);
+        // echo '<pre>';echo $query;exit();
         $result = $this->dbportal->query($query);
 
         if($result->getNumRows() > 0){
@@ -681,12 +1136,51 @@ class EscalaModel extends Model {
                 $dadosArray[$key] = (!$dados) ? array() : $dados;
                 $dadosChapa = $mPortal->ListarDadosFuncionario(false, $dados['chapa'], false);
                 $dadosArray[$key]['nome'] = $dadosChapa[0]['NOME'] ?? "";
+                
+                if($filtro['filtro_secao'] ?? null != null){
+                    if($filtro['filtro_secao'] ?? null != $dadosChapa[0]['CODSECAO']){
+                        unset($dadosArray[$key]);
+                        continue;
+                    }
+                }
+                if($filtro['filtro_funcao'] ?? null != null){
+                    if($filtro['filtro_funcao'] != $dadosChapa[0]['CODFUNCAO']){
+                        unset($dadosArray[$key]);
+                        continue;
+                    }
+                }
 
             }
             
             return $dadosArray;
         }
         return false;
+
+    }
+
+    public function VerificaData($dados)
+    {
+
+        $dataInicio   = somarDias($dados['data'], -1);
+        $dataTermino  = somarDias($dados['data'], 1);
+        $idRequisicao = strlen(trim($dados['id'] ?? '') > 0) ? " AND id != '{$dados['id']}' " : '';
+
+        $historico = $this->dbrm->query(" SELECT * FROM PFHSTHOR WHERE CHAPA = '{$dados['chapa']}' AND CODCOLIGADA = '{$this->coligada}' AND DTMUDANCA BETWEEN '{$dataInicio}' AND '{$dataTermino}' ");
+        if(($historico->getNumRows() ?? 0) > 0){
+            return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+        }
+
+        $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9) {$idRequisicao} ");
+        if(($checkPortal->getNumRows() ?? 0) > 0){
+            return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+        }
+
+        $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca_folga BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9) {$idRequisicao} ");
+        if(($checkPortal->getNumRows() ?? 0) > 0){
+            return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+        }
+
+        return responseJson('success', 'Data ok');
 
     }
     
@@ -718,7 +1212,9 @@ class EscalaModel extends Model {
                 D.ESTADO,
                 E.CPF,
                 E.CARTEIRATRAB CTPS,
-                E.SERIECARTTRAB CTPS_SERIE
+                E.SERIECARTTRAB CTPS_SERIE,
+                D.CEP,
+                D.TELEFONE
             FROM
                 PFUNC A
                     INNER JOIN AHORARIO B ON B.CODCOLIGADA = A.CODCOLIGADA AND B.CODIGO = A.CODHORARIO
@@ -744,7 +1240,7 @@ class EscalaModel extends Model {
         $id = cid($dados['id']);
 
         switch(cid($dados['step'])){
-            case 1: $query = " UPDATE zcrmportal_escala SET situacao = (CASE WHEN termo_obrigatorio = 1 THEN 1 ELSE 2 END), dtapr = '".date('Y-m-d H:i:s')."', usuapr = '{$this->log_id}' WHERE id = '{$id}' AND coligada = '{$this->coligada}' AND situacao = 0 "; break;
+            case 1: $query = " UPDATE zcrmportal_escala SET situacao = 2, dtapr = '".date('Y-m-d H:i:s')."', usuapr = '{$this->log_id}' WHERE id = '{$id}' AND coligada = '{$this->coligada}' AND situacao = 0 "; break;
             case 2: $query = " UPDATE zcrmportal_escala SET situacao = 3, dtrh = '".date('Y-m-d H:i:s')."', usurh = '{$this->log_id}' WHERE id = '{$id}' AND coligada = '{$this->coligada}' AND situacao = 2 "; break;
             default: responseJson('error', 'Falha ao APROVAR escala'); break;
         }
@@ -810,7 +1306,6 @@ class EscalaModel extends Model {
 
         $id = cid($dados['id']);
 
-
         switch(cid($dados['step'])){
             case 1: $query = " UPDATE zcrmportal_escala SET situacao = 8, motivocancelado = 'Reprovado pelo Gestor', dtcancelado = '".date('Y-m-d H:i:s')."', usucancelado = '{$this->log_id}' WHERE id = '{$id}' AND coligada = '{$this->coligada}' AND situacao NOT IN (9, 3, 8) ";
             case 2: $query = " UPDATE zcrmportal_escala SET situacao = 8, motivocancelado = 'Reprovado pelo RH', dtcancelado = '".date('Y-m-d H:i:s')."', usucancelado = '{$this->log_id}' WHERE id = '{$id}' AND coligada = '{$this->coligada}' AND situacao NOT IN (9, 3, 8) ";
@@ -833,6 +1328,7 @@ class EscalaModel extends Model {
 
         $id = cid($dados['id']);
         $documento = $dados['documento'];
+        $formatosPermitidos = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
         
         $file_name = $documento['documento']['name'] ?? null;
         $file_type = $documento['documento']['type'] ?? null;
@@ -847,17 +1343,27 @@ class EscalaModel extends Model {
         $tamanho = $file_size / 1000000;
         if($tamanho > 10) return responseJson('error', 'Arquivo muito grande, tamanho máximo permitido <b>10MB</b>');
 
+        if(!in_array($file_type, $formatosPermitidos)){
+            return responseJson('error', 'O formato do arquivo não é permitido, formatos aceitos <b>PDF</b> ou <b>Imagem</b>.');
+        }
+
+        $mHierarquia = model('HierarquiaModel');
+        $situacao = "0";
+        if($mHierarquia->isGestor()){
+            $situacao = "2";
+        }
+
         $query = "
             UPDATE 
                 zcrmportal_escala
             SET
-                documento = '{$file_name}|{$file_type}|{$file_size}|{$file_file}',
-                dtupload = '".date('Y-m-d H:i:s')."',
-                usuupload = '{$this->log_id}',
-                situacao = 2
+                documento   = '{$file_name}|{$file_type}|{$file_size}|{$file_file}',
+                dtupload    = '".date('Y-m-d H:i:s')."',
+                usuupload   = '{$this->log_id}',
+                situacao    = {$situacao}
             WHERE
                     id = {$id}
-                AND situacao = 1
+                AND situacao IN (0)
         ";
         $this->dbportal->query($query);
 
@@ -875,40 +1381,120 @@ class EscalaModel extends Model {
     // -------------------------------------------------------
     public function SincronizaRM_Horario($id_requisicao){
 
-        $query = " SELECT chapa, codhorario, datamudanca, codindice FROM zcrmportal_escala WHERE coligada = {$this->coligada} AND id = {$id_requisicao} ";
+        $query = " SELECT chapa, coligada, codhorario, datamudanca, codindice, tipo, datamudanca_folga, codindice_folga FROM zcrmportal_escala WHERE coligada = {$this->coligada} AND id = {$id_requisicao} ";
         $result = $this->dbportal->query($query);
 
         if($result->getNumRows() <= 0) return false;
 
         $DadosEscala = $result->getResultArray()[0];
 
-        // atualiza PFUNC
-        $PFUNC = " 
-            UPDATE 
-                PFUNC 
-            SET 
-                CODHORARIO = '{$DadosEscala['codhorario']}', 
-                INDINICIOHOR = '{$DadosEscala['codindice']}', 
-                RECMODIFIEDBY = 'PORTAL.{$this->log_id}', 
-                RECMODIFIEDON = '".date('Y-m-d H:i:s')."'
-            WHERE 
-                    CODCOLIGADA = {$this->coligada} 
-                AND CHAPA = '{$DadosEscala['chapa']}' 
-        ";
-        $this->dbrm->query($PFUNC);
+        if($DadosEscala['tipo'] == 1){
 
-        if($this->dbrm->affectedRows() > 0){
-
-            // grava o histórico da alteração PFHSTHOR
-            $PFHSTHOR = "
-                INSERT INTO PFHSTHOR
-                    (CODCOLIGADA, CHAPA, CODHORARIO, INDINICIOHOR, DTMUDANCA, DATAALTERACAO, RECCREATEDBY, RECCREATEDON, COMPORTAMENTOHORARIOANTERIOR, COMPORTAMENTOHORARIOATUAL)
-                        VALUES
-                    ({$this->coligada}, '{$DadosEscala['chapa']}', '{$DadosEscala['codhorario']}', dbo.CalculoIndicePontoMais('{$DadosEscala['codindice']}', '".date('d/m/Y', strtotime($DadosEscala['datamudanca']))."', '{$DadosEscala['codhorario']}', {$this->coligada}), '".date('Y-m-d', strtotime($DadosEscala['datamudanca']))."', '".date('Y-m-d H:i:s')."', 'PORTAL.{$this->log_id}', '".date('Y-m-d H:i:s')."', 1, 1)
+            // atualiza PFUNC
+            $PFUNC = " 
+                UPDATE 
+                    PFUNC 
+                SET 
+                    CODHORARIO = '{$DadosEscala['codhorario']}', 
+                    INDINICIOHOR = '{$DadosEscala['codindice']}', 
+                    RECMODIFIEDBY = 'PORTAL.{$this->log_id}', 
+                    RECMODIFIEDON = '".date('Y-m-d H:i:s')."'
+                WHERE 
+                        CODCOLIGADA = {$this->coligada} 
+                    AND CHAPA = '{$DadosEscala['chapa']}' 
             ";
-            $this->dbrm->query($PFHSTHOR);
+            $this->dbrm->query($PFUNC);
 
-            return true;
+            if($this->dbrm->affectedRows() > 0){
+
+                // grava o histórico da alteração PFHSTHOR
+                $PFHSTHOR = "
+                    INSERT INTO PFHSTHOR
+                        (CODCOLIGADA, CHAPA, CODHORARIO, INDINICIOHOR, DTMUDANCA, DATAALTERACAO, RECCREATEDBY, RECCREATEDON, COMPORTAMENTOHORARIOANTERIOR, COMPORTAMENTOHORARIOATUAL)
+                            VALUES
+                        ({$this->coligada}, '{$DadosEscala['chapa']}', '{$DadosEscala['codhorario']}', dbo.CalculoIndicePontoMais({$DadosEscala['codindice']}, '".date('d/m/Y', strtotime($DadosEscala['datamudanca']))."', '{$DadosEscala['codhorario']}', '{$this->coligada}'), '".date('Y-m-d', strtotime($DadosEscala['datamudanca']))."', '".date('Y-m-d H:i:s')."', 'PORTAL.{$this->log_id}', '".date('Y-m-d H:i:s')."', 1, 1)
+                ";
+                $this->dbrm->query($PFHSTHOR);
+
+                return true;
+
+            }
+
+        }else{
+
+            $pfunc = $this->dbrm->query(" SELECT TOP 1 CODHORARIO, INDINICIOHOR FROM PFHSTHOR WHERE CHAPA = '{$DadosEscala['chapa']}' AND CODCOLIGADA = '{$DadosEscala['coligada']}' ORDER BY DTMUDANCA DESC ");
+            if($pfunc->getNumRows() > 0){
+
+                $query    = " select projecao, projecao_folga from zcrmportal_escala WHERE id = '{$id_requisicao}' ";
+                $result   = $this->dbportal->query($query);
+                $response = $result->getResultArray()[0];
+            
+                $dadosFunc                = $pfunc->getResultArray()[0];
+                $dataMudanca              = $DadosEscala['datamudanca'];
+                $dataMudancaFolga         = $DadosEscala['datamudanca_folga'];
+                $dataHorarioNormal        = somarDias(dtEn($dataMudanca, true), 1);
+                $dataHorarioNormalFolga   = somarDias(dtEn($dataMudancaFolga, true), 1);
+
+                $indiceTrabalho       = $dadosFunc['INDINICIOHOR'];
+                $indiceFolga          = $dadosFunc['INDINICIOHOR'];
+                $dadosProjecao        = json_decode($response['projecao'], true);
+                $dadosProjecaoFolga   = json_decode($response['projecao_folga'], true);
+
+                if($dadosProjecao){
+                    foreach($dadosProjecao as $projecao){
+                        if($projecao['DATAEN'] == $dataHorarioNormal){
+                            $indiceTrabalho = $projecao['CODINDICE'];
+                            break;
+                        }
+                    }
+                }
+                if($dadosProjecaoFolga){
+                    foreach($dadosProjecaoFolga as $projecaoFolga){
+                        if($projecaoFolga['DATAEN'] == $dataHorarioNormalFolga){
+                            $indiceFolga = $projecaoFolga['CODINDICE'];
+                            break;
+                        }
+                    }
+                }
+                
+                // dia util
+                $PFHSTHOR = "
+                    INSERT INTO PFHSTHOR
+                        (CODCOLIGADA, CHAPA, CODHORARIO, INDINICIOHOR, DTMUDANCA, DATAALTERACAO, RECCREATEDBY, RECCREATEDON, COMPORTAMENTOHORARIOANTERIOR, COMPORTAMENTOHORARIOATUAL)
+                            VALUES
+                        ({$this->coligada}, '{$DadosEscala['chapa']}', '{$DadosEscala['codhorario']}', dbo.CalculoIndicePontoMais({$DadosEscala['codindice']}, '".date('d/m/Y', strtotime($DadosEscala['datamudanca']))."', '{$DadosEscala['codhorario']}', '{$this->coligada}'), '".date('Y-m-d', strtotime($DadosEscala['datamudanca']))."', '".date('Y-m-d H:i:s')."', 'PORTAL.{$this->log_id}', '".date('Y-m-d H:i:s')."', 1, 1)
+                ";
+                $this->dbrm->query($PFHSTHOR);
+                if(dtEn($dataMudancaFolga, true) != $dataHorarioNormal){
+                    // horario normal
+                    $PFHSTHOR = "
+                        INSERT INTO PFHSTHOR
+                            (CODCOLIGADA, CHAPA, CODHORARIO, INDINICIOHOR, DTMUDANCA, DATAALTERACAO, RECCREATEDBY, RECCREATEDON, COMPORTAMENTOHORARIOANTERIOR, COMPORTAMENTOHORARIOATUAL)
+                                VALUES
+                            ({$this->coligada}, '{$DadosEscala['chapa']}', '{$dadosFunc['CODHORARIO']}', dbo.CalculoIndicePontoMais({$indiceTrabalho}, '".date('d/m/Y', strtotime($dataHorarioNormal))."', '{$dadosFunc['CODHORARIO']}', '{$this->coligada}'), '".date('Y-m-d', strtotime($dataHorarioNormal))."', '".date('Y-m-d H:i:s')."', 'PORTAL.{$this->log_id}', '".date('Y-m-d H:i:s')."', 1, 1)
+                    ";
+                    $this->dbrm->query($PFHSTHOR);
+                }
+                // dia folga
+                $PFHSTHOR = "
+                    INSERT INTO PFHSTHOR
+                        (CODCOLIGADA, CHAPA, CODHORARIO, INDINICIOHOR, DTMUDANCA, DATAALTERACAO, RECCREATEDBY, RECCREATEDON, COMPORTAMENTOHORARIOANTERIOR, COMPORTAMENTOHORARIOATUAL)
+                            VALUES
+                        ({$this->coligada}, '{$DadosEscala['chapa']}', '{$DadosEscala['codhorario']}', dbo.CalculoIndicePontoMais({$DadosEscala['codindice_folga']}, '".date('d/m/Y', strtotime($DadosEscala['datamudanca_folga']))."', '{$DadosEscala['codhorario']}', '{$this->coligada}'), '".date('Y-m-d', strtotime($DadosEscala['datamudanca_folga']))."', '".date('Y-m-d H:i:s')."', 'PORTAL.{$this->log_id}', '".date('Y-m-d H:i:s')."', 1, 1)
+                ";
+                $this->dbrm->query($PFHSTHOR);
+                // horario normal
+                $PFHSTHOR = "
+                    INSERT INTO PFHSTHOR
+                        (CODCOLIGADA, CHAPA, CODHORARIO, INDINICIOHOR, DTMUDANCA, DATAALTERACAO, RECCREATEDBY, RECCREATEDON, COMPORTAMENTOHORARIOANTERIOR, COMPORTAMENTOHORARIOATUAL)
+                            VALUES
+                        ({$this->coligada}, '{$DadosEscala['chapa']}', '{$dadosFunc['CODHORARIO']}', dbo.CalculoIndicePontoMais({$indiceFolga}, '".date('d/m/Y', strtotime($dataHorarioNormalFolga))."', '{$dadosFunc['CODHORARIO']}', '{$this->coligada}'), '".date('Y-m-d', strtotime($dataHorarioNormalFolga))."', '".date('Y-m-d H:i:s')."', 'PORTAL.{$this->log_id}', '".date('Y-m-d H:i:s')."', 1, 1)
+                ";
+                $this->dbrm->query($PFHSTHOR);
+
+                return true;
+
+            }
 
         }
 
@@ -948,8 +1534,10 @@ class EscalaModel extends Model {
     public function EscalaNotificaSolicitante($id){
 
         $query = "
+        --//----Solicitante
             SELECT 
                 a.chapa_solicitante,
+                a.tipo,
                 b.nome nome_solicitante,
                 b.email email_solicitante,
                 c.NOME nome_funcionario,
@@ -961,7 +1549,27 @@ class EscalaModel extends Model {
             WHERE
                     a.id = {$id}
                 AND a.situacao = 1
+                        
+        UNION ALL 
+        
+        --//----Gestor substituto
+            SELECT 
+                a.chapa_solicitante,
+                a.tipo,
+                b.SUBSTITUTO_NOME nome_solicitante,
+                b.email email_solicitante,
+                c.NOME nome_funcionario,
+                c.CHAPA chapa_funcionario
+            FROM
+                zcrmportal_escala a
+                INNER JOIN GESTOR_SUBSTITUTO_CHAPA b ON b.GESTOR_ID = a.usucad
+                INNER JOIN ".DBRM_BANCO."..PFUNC c ON c.CODCOLIGADA = A.coligada AND c.CHAPA = a.chapa COLLATE Latin1_General_CI_AS
+            WHERE
+                    a.id = {$id}
+                AND a.situacao = 1
+                AND B.FUNCOES LIKE '%\"136\"%'
         ";
+
         $result = $this->dbportal->query($query);
 
         if($result->getNumRows() > 0){
@@ -969,15 +1577,15 @@ class EscalaModel extends Model {
             $dados = $result->getResultArray()[0];
             $mensagem = 'Olá <strong>'.$dados['nome_solicitante'].'</strong>,<br>
 <br>
-Requisição de alteração de escala do colaborador <strong>'.$dados['nome_funcionario'].' - '.$dados['chapa_funcionario'].',</strong> foi aprovada e aguarda o upload de termo aditivo assinado.';
+Requisição de alteração '.(($dados['tipo'] == 1) ? 'de escala' : 'de dia').' do colaborador <strong>'.$dados['nome_funcionario'].' - '.$dados['chapa_funcionario'].',</strong> foi aprovada e aguarda o upload de termo aditivo assinado.';
 
             $htmlEmail = templateEmail($mensagem);
 
-            enviaEmail($dados['email_solicitante'], 'Solicitação de Troca de Escala Aprovada', $htmlEmail);
-            //enviaEmail('tiago.moselli@crmservices.com.br', 'Solicitação de Troca de Escala Aprovada', $htmlEmail);
-            //enviaEmail('tiago.moselli@crmservices.com.br', 'Solicitação de Troca de Escala Aprovada', $htmlEmail);
-            //enviaEmail('samuel.santana@crmservices.com.br', 'Solicitação de Troca de Escala Aprovada', $htmlEmail);
-            //enviaEmail('edmir.santos@eldoradobrasil.com.br', 'Solicitação de Troca de Escala Aprovada', $htmlEmail);
+            if($this->producao){
+                enviaEmail($dados['email_solicitante'], 'Solicitação de Troca de '.(($dados['tipo'] == 1) ? 'Escala' : 'Dia').' Aprovada', $htmlEmail);
+            }else{
+                enviaEmail('jessica.silva@outserv.com.br', 'Solicitação de Troca de '.(($dados['tipo'] == 1) ? 'Escala' : 'Dia').' Aprovada', $htmlEmail);
+            }
 
 
         }
@@ -1003,11 +1611,32 @@ Requisição de alteração de escala do colaborador <strong>'.$dados['nome_func
                 INNER JOIN GESTOR_DO_LIDER D ON D.chapa_funcionario = A.chapa AND D.coligada = A.coligada AND D.hierarquia_gestor = A.id_hierarquia
                 INNER JOIN ".DBRM_BANCO."..PFUNC E ON E.CODCOLIGADA = A.coligada AND E.CHAPA = B.chapa COLLATE Latin1_General_CI_AS
             WHERE
-                    A.chapa = '{$chapa_solicitante}'
+                    A.chapa = '{$chapa_solicitante}' 
                 AND A.coligada = {$this->coligada}
-                AND B.chapa = '{$chapa_funcionario}'
+                AND B.chapa = '{$chapa_funcionario}' 
                 AND A.inativo IS NULL
                 AND '".date('Y-m-d')."' BETWEEN D.perini AND (CASE WHEN D.perfim IS NOT NULL THEN D.perfim ELSE '2090-12-31' END)
+            
+            UNION ALL 
+            
+            SELECT		
+                F.SUBSTITUTO_NOME COLLATE Latin1_General_CI_AS,
+                F.email,
+                E.NOME nome_funcionario
+            FROM
+                zcrmportal_hierarquia_lider A
+                INNER JOIN zcrmportal_hierarquia_lider_func B ON A.id = B.id_lider
+                INNER JOIN zcrmportal_hierarquia C ON C.id = A.id_hierarquia AND C.inativo IS NULL
+                INNER JOIN GESTOR_DO_LIDER D ON D.chapa_funcionario = A.chapa AND D.coligada = A.coligada AND D.hierarquia_gestor = A.id_hierarquia
+                INNER JOIN ".DBRM_BANCO."..PFUNC E ON E.CODCOLIGADA = A.coligada AND E.CHAPA = B.chapa COLLATE Latin1_General_CI_AS
+                INNER JOIN GESTOR_SUBSTITUTO_CHAPA F ON F.GESTOR_CHAPA = D.chapa_gestor AND F.CODCOLIGADA = D.coligada
+            WHERE
+                    A.chapa = '{$chapa_solicitante}'  -- funcionario solicitante (Email do gestor dele que é notificado)
+                AND A.coligada = {$this->coligada}
+                AND B.chapa = '{$chapa_funcionario}'  -- funcionario que terá a escala trocada
+                AND A.inativo IS NULL
+                AND '".date('Y-m-d')."' BETWEEN D.perini AND (CASE WHEN D.perfim IS NOT NULL THEN D.perfim ELSE '2090-12-31' END)
+                AND F.FUNCOES LIKE '%\"181\"%'
         ";
         $result = $this->dbportal->query($query);
 
@@ -1022,10 +1651,9 @@ Requisição de alteração de escala do colaborador <strong>'.$dados['nome_func
 
                 $htmlEmail = templateEmail($mensagem);
 
-                enviaEmail($dados['email_gestor'], 'Solicitação de Troca de Escala', $htmlEmail);
-                //enviaEmail('edmir.santos@eldoradobrasil.com.br', 'Solicitação de Troca de Escala', $htmlEmail);
-                //enviaEmail('samuel.santana@crmservices.com.br', 'Solicitação de Troca de Escala', $htmlEmail);
-                //enviaEmail('tiago.moselli@crmservices.com.br', 'Solicitação de Troca de Escala', $htmlEmail);
+                if($this->producao){
+                    enviaEmail($dados['email_gestor'], 'Solicitação de Troca de Escala', $htmlEmail);
+                }
 
             }
 
@@ -1081,6 +1709,17 @@ Requisição de alteração de escala do colaborador <strong>'.$dados['nome_func
         }
 
         return false;
+
+    }
+
+    public function dadosEscala($idEscala)
+    {
+        
+        $query = " SELECT * FROM zcrmportal_escala WHERE id = '{$idEscala}' ";
+        $result = $this->dbportal->query($query);
+        return ($result->getNumRows() > 0) 
+                ? $result->getResultArray() 
+                : false;
 
     }
 

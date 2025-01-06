@@ -214,6 +214,9 @@ class RelatorioModel extends Model {
             case 28:
                 return self::relatorioDeflatoresPremios($request);
                 break;
+            case 30:
+                return self::relatorioEscalaDia($request);
+                break;
         }
     }
     private function relatorioVariaveisCreche($request)
@@ -5237,6 +5240,247 @@ FROM (
         //echo $query;exit();
         $result = $this->dbportal->query($query);
 
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+    
+    private function relatorioEscalaDia($request)
+    {
+
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND b.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND b.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND b.CHAPA = '".$request['chapa']."'";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        //-----------------------------------------
+		// filtro das chapas que o lider pode ver
+		//-----------------------------------------
+        $mHierarquia = Model('HierarquiaModel');
+		$objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+		$isLider = $mHierarquia->isLider();
+
+		$filtro_chapa_lider = "";
+		$filtro_secao_lider = "";
+		if($isLider){
+			$chapas_lider = "";
+			$codsecoes = "";
+			foreach($objFuncLider as $idx => $value){
+				$chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
+			}
+			$filtro_secao_lider = " b.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
+		}
+        
+		
+		//-----------------------------------------
+		// filtro das seções que o gestor pode ver
+		//-----------------------------------------
+		$secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+		$filtro_secao_gestor = "";
+        
+		if($secoes){
+			$codsecoes = "";
+			foreach($secoes as $ids => $Secao){
+				$codsecoes .= "'".$Secao['codsecao']."',";
+			}
+			$filtro_secao_gestor = " b.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
+		}
+		//-----------------------------------------
+		
+		// monta o where das seções
+		if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
+		if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+		if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+
+        if(!$request['rh']){
+		    $qr_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.") ";
+        }else{
+            $qr_secao = "";
+        }
+
+        $FiltroData = "";
+        if($request['dataIni'] != ''){
+            $FiltroData .= " AND (a.datamudanca >= '{$request['dataIni']} 00:00:00' OR a.datamudanca_folga >= '{$request['dataIni']} 00:00:00') ";
+        }
+        if($request['dataFim'] != ''){
+            $FiltroData .= " AND (a.datamudanca <= '{$request['dataFim']} 23:59:59' OR a.datamudanca_folga <= '{$request['dataFim']} 23:59:59') ";
+        }
+
+        $query = "
+            SELECT ".rtrim($select, ',')." FROM (
+                SELECT
+                    DISTINCT
+                    a.id ID,
+                    CASE WHEN a.tipo = 1 THEN 'Troca de Escala' ELSE 'Troca de Dia' END [TIPO],
+                        CASE WHEN a.situacao = 0 THEN 'Criada'
+                        WHEN a.situacao = 10 THEN 'Pend/Ação Gestor'
+                        WHEN a.situacao = 1 THEN 'Pend/Upload Documento'
+                        WHEN a.situacao = 4 THEN 'Termo Anexado'
+                        WHEN a.situacao = 2 THEN 'Pend/Ação RH'
+                        WHEN a.situacao = 3 THEN 'Concluído'
+                        WHEN a.situacao = 9 THEN 'Reprovado'
+                        WHEN a.situacao = 11 THEN 'Excluído'
+                        end as STATUS,
+                    CONVERT(VARCHAR, a.datamudanca, 103) [DATA],
+                    b.CODCOLIGADA [COD.COLIGADA],
+                    k.NOME [COLIGADA],
+                    b.codfilial [COD.FILIAL],
+                    c.nome [FILIAL],
+                    a.chapa [CHAPA],
+                    b.nome [NOME],
+                    b.codfuncao [COD.FUNÇÃO],
+                    d.nome [FUNÇÃO],
+                    CONVERT(VARCHAR, b.dataadmissao, 103) [DT ADMISSÃO],
+                    substring(b.codsecao, 5, 5) [COD.CUSTO],
+                    j.NOME [DESC.CUSTO],
+                    b.codsecao [COD.SEÇÃO],
+                    e.descricao [DESC.SEÇÃO],
+                    (
+                        SELECT
+                            TOP 1 
+                            HB.DESCRICAO
+                        FROM
+                            ".DBRM_BANCO."..PFHSTSIT HA
+                            INNER JOIN ".DBRM_BANCO."..PCODSITUACAO HB ON HB.CODCLIENTE = HA.NOVASITUACAO
+                        WHERE
+                                HA.CODCOLIGADA = a.coligada
+                            AND HA.CHAPA = a.chapa COLLATE Latin1_General_CI_AS
+                            AND (
+                                HA.DATAMUDANCA <= a.datamudanca
+                            )
+                        ORDER BY
+                            DATAMUDANCA DESC
+                    ) [SITUAÇÃO],
+                    (
+                        SELECT
+                            TOP 1
+                            CONCAT(A2.CODIGO, ' - ', A2.DESCRICAO, ' - ', ZZ.INDICE)
+                        FROM
+                            ".DBRM_BANCO."..PFHSTHOR A1 (NOLOCK)
+                            INNER JOIN ".DBRM_BANCO."..AHORARIO A2 (NOLOCK) ON A2.CODCOLIGADA = A1.CODCOLIGADA AND A2.CODIGO = A1.CODHORARIO
+                            LEFT JOIN ".DBRM_BANCO."..Z_OUTSERV_MELHORIAS4 (NOLOCK) ZZ ON ZZ.CODCOLIGADA = A1.CODCOLIGADA AND ZZ.CODHORARIO = A1.CODHORARIO AND ZZ.DATA = (DATEADD(day, +(A1.INDINICIOHOR-1), a.datamudanca))
+                        WHERE
+                            A1.DTMUDANCA <= a.datamudanca
+                            AND A1.CHAPA = a.chapa COLLATE Latin1_General_CI_AS
+                            AND A1.CODCOLIGADA = a.coligada
+                        ORDER BY
+                            A1.DTMUDANCA DESC
+                    ) [ANTES - TROCA],
+                    CONCAT(a.codhorario, ' - ', f.descricao collate Latin1_General_CI_AS,' - ', a.codindice) [APÓS - TROCA],
+                    CASE WHEN a.tipo = 2 THEN (
+                        SELECT
+                            TOP 1
+                            CONCAT(A2.CODIGO, ' - ', A2.DESCRICAO, ' - ', ZZ.INDICE)
+                        FROM
+                            ".DBRM_BANCO."..PFHSTHOR A1 (NOLOCK)
+                            INNER JOIN ".DBRM_BANCO."..AHORARIO A2 (NOLOCK) ON A2.CODCOLIGADA = A1.CODCOLIGADA AND A2.CODIGO = A1.CODHORARIO
+                            LEFT JOIN ".DBRM_BANCO."..Z_OUTSERV_MELHORIAS4 (NOLOCK) ZZ ON ZZ.CODCOLIGADA = A1.CODCOLIGADA AND ZZ.CODHORARIO = A1.CODHORARIO AND ZZ.DATA = (DATEADD(day, +(A1.INDINICIOHOR-1), a.datamudanca_folga))
+                        WHERE
+                            A1.DTMUDANCA <= a.datamudanca_folga
+                            AND A1.CHAPA = a.chapa COLLATE Latin1_General_CI_AS
+                            AND A1.CODCOLIGADA = a.coligada
+                        ORDER BY
+                            A1.DTMUDANCA DESC
+                    ) ELSE NULL END [ANTES - FOLGA],
+                    CASE WHEN a.tipo = 2 THEN CONCAT(a.codhorario, ' - ', f.descricao collate Latin1_General_CI_AS,' - ', a.codindice_folga) ELSE NULL END [APÓS - FOLGA],
+                    
+                    (
+                    SELECT 
+                        TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
+                    FROM
+                        ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO
+                    WHERE
+                        AA.CPF = g.login COLLATE Latin1_General_CI_AS
+                        AND BB.DATAADMISSAO <= a.datamudanca
+                    ) [USUÁRIO - SOLICITANTE],
+                    
+                    (
+                    SELECT 
+                        TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
+                    FROM
+                        ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO
+                    WHERE
+                        AA.CPF = h.login COLLATE Latin1_General_CI_AS
+                        AND BB.DATAADMISSAO <= a.datamudanca
+                    ) [USUÁRIO - GESTOR],
+                    
+                    (
+                    SELECT 
+                        TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
+                    FROM
+                        ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO
+                    WHERE
+                        AA.CPF = i.login COLLATE Latin1_General_CI_AS
+                        AND BB.DATAADMISSAO <= a.datamudanca
+                    ) [USUÁRIO - RH],
+                    CONCAT(
+                    	CASE WHEN a.justificativa_11_horas IS NOT NULL THEN CONCAT('Interjornada 11h: ',a.justificativa_11_horas, ', ') ELSE '' END,
+                    	CASE WHEN a.justificativa_6_dias IS NOT NULL THEN CONCAT('6 dias consecutivos: ', a.justificativa_11_horas, ', ') ELSE '' END,
+                    	CASE WHEN a.justificativa_6_meses IS NOT NULL THEN CONCAT('Troca inf. 6 meses: ', a.justificativa_6_meses, ', ') ELSE '' END,
+                    	CASE WHEN a.justificativa_periodo IS NOT NULL THEN CONCAT('Fora período: ', a.justificativa_periodo, ', ') ELSE '' END
+                    ) [JUSTIFICATIVA SOLICITAÇÃO],
+                    CASE WHEN a.dtapr IS NULL THEN NULL ELSE CONVERT(VARCHAR, a.dtapr, 103) END [DATA APROVAÇÃO],
+                    CASE WHEN a.dtcancelado IS NULL THEN NULL ELSE CONVERT(VARCHAR, a.dtcancelado, 103) END [DATA REPROVAÇÃO],
+                    a.motivocancelado [JUSTIFICATIVA REPROVAÇÃO],
+                    CONVERT(VARCHAR, a.dtcad, 103) [DATA SOLICITAÇÃO]
+                    
+                FROM
+                    zcrmportal_escala a (NOLOCK)
+                    INNER JOIN ".DBRM_BANCO."..PFUNC b (NOLOCK) ON b.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND b.CODCOLIGADA = a.coligada
+                    INNER JOIN ".DBRM_BANCO."..GFILIAL c (NOLOCK) ON c.CODFILIAL = b.CODFILIAL AND c.CODCOLIGADA = b.CODCOLIGADA
+                    INNER JOIN ".DBRM_BANCO."..PFUNCAO d (NOLOCK) ON d.CODIGO = b.CODFUNCAO AND c.CODCOLIGADA = b.CODCOLIGADA
+                    INNER JOIN ".DBRM_BANCO."..PSECAO e (NOLOCK) ON e.CODIGO = b.CODSECAO AND e.CODCOLIGADA = b.CODCOLIGADA
+                    INNER JOIN ".DBRM_BANCO."..AHORARIO f (NOLOCK) ON f.CODIGO = a.codhorario COLLATE Latin1_General_CI_AS AND f.CODCOLIGADA = e.CODCOLIGADA
+                    LEFT JOIN ".DBRM_BANCO."..GCCUSTO j (NOLOCK) ON j.CODCCUSTO = substring(b.codsecao, 5, 5) AND j.CODCOLIGADA = b.CODCOLIGADA
+                    LEFT JOIN ".DBRM_BANCO."..GCOLIGADA k (NOLOCK) ON k.CODCOLIGADA = b.CODCOLIGADA
+                    INNER JOIN zcrmportal_usuario g (NOLOCK) ON g.id = a.usucad
+                    LEFT JOIN zcrmportal_usuario h (NOLOCK) ON h.id = a.usuapr
+                    LEFT JOIN zcrmportal_usuario i (NOLOCK) ON i.id = a.usurh
+                WHERE
+                        1=1
+                    {$FiltroSecao}
+                    {$FiltroChapa}
+                    {$FiltroFuncao}
+                    {$FiltroData}
+                    {$qr_secao}
+
+            )Y
+        ";
+        $result = $this->dbportal->query($query);
         return ($result)
             ? array(
                 'dados'     => $result->getResultArray(),
