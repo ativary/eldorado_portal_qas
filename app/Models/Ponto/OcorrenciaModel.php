@@ -93,6 +93,29 @@ class OcorrenciaModel extends Model {
 
 						AND h.CODSITUACAO <>'D'
 
+					UNION ALL
+				
+					SELECT
+						I.email,
+						I.SUBSTITUTO_CHAPA CHAPA,
+						I.CODCOLIGADA AS COLIGADA,
+						I.SUBSTITUTO_NOME COLLATE Latin1_General_CI_AS nome 
+					
+						FROM
+								zcrmportal_funcoes a
+								JOIN zcrmportal_perfilfuncao b ON b.id_funcao = a.id
+								JOIN zcrmportal_perfil c ON c.id = b.id_perfil
+								JOIN zcrmportal_usuarioperfil d ON d.id_perfil = c.id
+								JOIN zcrmportal_usuario e ON d.id_usuario = e.id
+								INNER JOIN ".DBRM_BANCO."..PPESSOA f ON e.login = f.cpf COLLATE Latin1_General_CI_AS
+								INNER JOIN ".DBRM_BANCO."..PFUNC h ON f.codigo = h.codpessoa 
+								INNER JOIN GESTOR_SUBSTITUTO_CHAPA I ON I.GESTOR_CHAPA = H.CHAPA COLLATE Latin1_General_CI_AS
+								
+						WHERE
+							a.nome = 'PONTO_OCORRENCIA_WOKRFLOW1'
+							AND h.CODSITUACAO <>'D'
+							AND I.FUNCOES LIKE '%\"150\"%'
+
 
 					";
 					
@@ -111,12 +134,12 @@ class OcorrenciaModel extends Model {
 		try {
         
 			// configuração de periodo do ponto
-			$query = "  SELECT
+			$query = "  
+			SELECT
 				e.email,
 				h.CHAPA,
 				h.CODCOLIGADA AS COLIGADA,
 				h.nome
-				
 				FROM
 						zcrmportal_funcoes a
 						JOIN zcrmportal_perfilfuncao b ON b.id_funcao = a.id
@@ -128,8 +151,30 @@ class OcorrenciaModel extends Model {
 						
 				WHERE
 					a.nome = 'PONTO_OCORRENCIA_WOKRFLOW2'
-
 					AND h.CODSITUACAO <>'D'
+			
+			UNION ALL
+			
+			SELECT
+				I.email,
+				I.SUBSTITUTO_CHAPA CHAPA,
+				I.CODCOLIGADA AS COLIGADA,
+				I.SUBSTITUTO_NOME COLLATE Latin1_General_CI_AS nome 
+			
+				FROM
+						zcrmportal_funcoes a
+						JOIN zcrmportal_perfilfuncao b ON b.id_funcao = a.id
+						JOIN zcrmportal_perfil c ON c.id = b.id_perfil
+						JOIN zcrmportal_usuarioperfil d ON d.id_perfil = c.id
+						JOIN zcrmportal_usuario e ON d.id_usuario = e.id
+						INNER JOIN ".DBRM_BANCO."..PPESSOA f ON e.login = f.cpf COLLATE Latin1_General_CI_AS
+						INNER JOIN ".DBRM_BANCO."..PFUNC h ON f.codigo = h.codpessoa 
+						INNER JOIN GESTOR_SUBSTITUTO_CHAPA I ON I.GESTOR_CHAPA = H.CHAPA COLLATE Latin1_General_CI_AS
+						
+				WHERE
+					a.nome = 'PONTO_OCORRENCIA_WOKRFLOW2'
+					AND h.CODSITUACAO <>'D'
+					AND I.FUNCOES LIKE '%\"149\"%'
 
 
 				";
@@ -264,7 +309,7 @@ class OcorrenciaModel extends Model {
 					B.CODFILIAL,
 					B.NOME
 			";
-
+			//echo '<textarea>'.$query.'</textarea>';exit;
 			$result = $this->dbrm->query($query);
 			return ($result->getNumRows() > 0) 
 					? $result->getResultArray() 

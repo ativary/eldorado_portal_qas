@@ -36,6 +36,7 @@
                                     <?php if($rh): ?><option value="15" <?php if($relatorio == 15){ echo 'selected';}?>>Ponto Batidas Reprovadas</option><?php endif; ?>
                                     <option value="16" <?php if($relatorio == 16){ echo 'selected';}?>>Relatório (Macros)</option>
                                     <option value="30" <?php if($relatorio == 30){ echo 'selected';}?>>Troca de Escala/Dia</option>
+                                    <?php if($rh): ?><option value="29" <?php if($relatorio == 29){ echo 'selected';}?>>Aprovações e Reprovações</option><?php endif; ?> 
                                     <?php if($rh): ?><option value="17" <?php if($relatorio == 17){ echo 'selected';}?>>Variaveis- Auxilio Moradia</option><?php endif; ?>
                                     <?php if($rh): ?><option value="18" <?php if($relatorio == 18){ echo 'selected';}?>>Variaveis- Auxilio Excepcional</option><?php endif; ?>
                                     <?php if($rh): ?><option value="19" <?php if($relatorio == 19){ echo 'selected';}?>>Variaveis- Auxilio Creche</option><?php endif; ?>

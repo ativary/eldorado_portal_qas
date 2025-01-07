@@ -408,29 +408,72 @@ class CartasModel extends Model {
     public function CronEnviaCartaGestorRequisicaoPromocao(){
 
         $query = "
-            SELECT 
-                a.id, 
-                a.coligada, 
-                a.chapa,
-                c.NOME,
-                c.EMAIL,
-                a.usufim_apr,
-                d.NOME nome_funcionario
-                
-            FROM 
-                zcrmportal_requisicao a
-                    INNER JOIN zcrmportal_hierarquia_chapa b ON b.id_hierarquia = a.id_hierarquia_aprovador
-                    INNER JOIN EMAIL_CHAPA c ON c.CHAPA = b.chapa COLLATE Latin1_General_CI_AS AND c.CODCOLIGADA = b.coligada
-                    LEFT JOIN ".DBRM_BANCO."..PFUNC d ON d.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND d.CODCOLIGADA = a.coligada COLLATE Latin1_General_CI_AS
-                
-            WHERE 
-                    a.situacao IN (2) 
-                AND a.carta_enviada IS NULL
-                --AND a.id > 7581
-                --AND a.id IN (7524, 7523)
-                AND a.id >= 8643
-                AND a.codmotivo IN (SELECT id FROM zcrmportal_requisicao_motivo WHERE descricao IN ('Promoção','Mérito','Enquadramento','Alteração Cargo') AND coligada = a.coligada)
-            ORDER BY a.id DESC
+        SELECT 
+            a.id, 
+            a.coligada, 
+            a.chapa,
+            c.EMAIL,
+            c.NOME,
+            a.usufim_apr,
+            d.NOME as nome_funcionario,
+            'Gestor Principal' as tipo_gestor
+        FROM 
+            zcrmportal_requisicao a
+            INNER JOIN zcrmportal_hierarquia_chapa b 
+                ON b.id_hierarquia = a.id_hierarquia_aprovador
+            INNER JOIN EMAIL_CHAPA c 
+                ON c.CHAPA = b.chapa COLLATE Latin1_General_CI_AS 
+                AND c.CODCOLIGADA = b.coligada
+            LEFT JOIN ".DBRM_BANCO."..PFUNC d 
+                ON d.CHAPA = a.chapa COLLATE Latin1_General_CI_AS 
+                AND d.CODCOLIGADA = a.coligada COLLATE Latin1_General_CI_AS
+        WHERE 
+            a.situacao IN (2)
+            AND a.id >= 8643
+            AND a.codmotivo IN (
+                SELECT id 
+                FROM zcrmportal_requisicao_motivo 
+                WHERE descricao IN ('Promoção','Mérito','Enquadramento','Alteração Cargo') 
+                AND coligada = a.coligada
+            )
+        
+        UNION ALL
+        
+        SELECT 
+            a.id, 
+            a.coligada, 
+            a.chapa,
+            gs.email,
+            F.NOME, -- Nome do substituto
+            a.usufim_apr,
+            d.NOME as nome_funcionario,
+            'Gestor Substituto' as tipo_gestor
+        FROM 
+            zcrmportal_requisicao a
+            INNER JOIN zcrmportal_hierarquia_chapa b 
+                ON b.id_hierarquia = a.id_hierarquia_aprovador
+            INNER JOIN GESTOR_SUBSTITUTO_CHAPA gs
+                ON gs.GESTOR_CHAPA = b.chapa
+                AND gs.CODCOLIGADA = b.coligada
+            LEFT JOIN ".DBRM_BANCO."..PFUNC d 
+                ON d.CHAPA = a.chapa COLLATE Latin1_General_CI_AS 
+                AND d.CODCOLIGADA = a.coligada COLLATE Latin1_General_CI_AS
+            LEFT JOIN ".DBRM_BANCO."..PFUNC f
+                ON f.CHAPA = gs.SUBSTITUTO_CHAPA COLLATE Latin1_General_CI_AS 
+                AND f.CODCOLIGADA = GS.CODCOLIGADA COLLATE Latin1_General_CI_AS
+        WHERE 
+            a.situacao IN (2)
+            AND a.id >= 8643
+            AND a.codmotivo IN (
+                SELECT id 
+                FROM zcrmportal_requisicao_motivo 
+                WHERE descricao IN ('Promoção','Mérito','Enquadramento','Alteração Cargo') 
+                AND coligada = a.coligada
+            )
+            AND gs.funcoes LIKE '%\"159\"%'
+        
+        ORDER BY id DESC
+
         ";
 
         //echo '<pre>'.$query;
@@ -446,27 +489,53 @@ class CartasModel extends Model {
     public function CronEnviaCartaGestorRequisicaoMeritocracia(){
 
         $query = "
-            SELECT 
-                a.id, 
-                a.coligada, 
-                a.chapa,
-                c.NOME,
-                c.EMAIL,
-                a.usufim_apr,
-                d.NOME nome_funcionario
-                
-            FROM 
-                zcrmportal_requisicao_meritocracia a
-                    LEFT JOIN GESTOR_CHAPA b ON b.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND b.CODCOLIGADA = a.coligada
-                    LEFT JOIN EMAIL_CHAPA c ON c.CHAPA COLLATE Latin1_General_CI_AS = b.GESTOR_CHAPA AND c.CODCOLIGADA = b.CODCOLIGADA
-                    LEFT JOIN ".DBRM_BANCO."..PFUNC d ON d.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND d.CODCOLIGADA = a.coligada COLLATE Latin1_General_CI_AS
-                
-            WHERE 
-                    a.situacao IN (2) 
-                AND a.carta_enviada IS NULL
-                AND a.secao_motivo IN ('07','02','03')
-                AND a.id > 22
-            ORDER BY a.id DESC
+        SELECT 
+            a.id, 
+            a.coligada, 
+            a.chapa,
+            c.NOME,
+            c.EMAIL,
+            a.usufim_apr,
+            d.NOME nome_funcionario,
+            'gestor'
+            
+        FROM 
+            zcrmportal_requisicao_meritocracia a
+                LEFT JOIN GESTOR_CHAPA b ON b.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND b.CODCOLIGADA = a.coligada
+                LEFT JOIN EMAIL_CHAPA c ON c.CHAPA COLLATE Latin1_General_CI_AS = b.GESTOR_CHAPA AND c.CODCOLIGADA = b.CODCOLIGADA
+                LEFT JOIN ".DBRM_BANCO."..PFUNC d ON d.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND d.CODCOLIGADA = a.coligada COLLATE Latin1_General_CI_AS
+            
+        WHERE 
+                a.situacao IN (2) 
+            AND a.carta_enviada IS NULL
+            AND a.secao_motivo IN ('07','02','03')
+            AND a.id > 22
+
+        UNION ALL 
+
+        SELECT 
+            a.id, 
+            a.coligada, 
+            C.SUBSTITUTO_CHAPA COLLATE Latin1_General_CI_AS,
+            c.SUBSTITUTO_NOME COLLATE Latin1_General_CI_AS,
+            c.EMAIL,
+            a.usufim_apr,
+            d.NOME nome_funcionario,
+            'Substituto'
+            
+        FROM 
+            zcrmportal_requisicao_meritocracia a
+                LEFT JOIN GESTOR_CHAPA b ON b.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND b.CODCOLIGADA = a.coligada
+                INNER JOIN GESTOR_SUBSTITUTO_CHAPA c ON c.GESTOR_CHAPA COLLATE Latin1_General_CI_AS = b.GESTOR_CHAPA AND c.CODCOLIGADA = b.CODCOLIGADA
+                LEFT JOIN ".DBRM_BANCO."..PFUNC d ON d.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND d.CODCOLIGADA = a.coligada COLLATE Latin1_General_CI_AS
+            
+        WHERE 
+            a.situacao IN (2) 
+            AND a.carta_enviada IS NULL
+            AND a.secao_motivo IN ('07','02','03')
+            AND a.id > 22
+            AND c.funcoes LIKE '%\"159\"%'
+        ORDER BY a.id DESC
         ";
 
         //echo '<pre>'.$query;
@@ -482,21 +551,46 @@ class CartasModel extends Model {
     public function CronEnviaCartaGestorRequisicaoAQ(){
 
         $query = "
-            SELECT 
+        SELECT 
+            a.id,
+            a.coligada,
+            b.email,
+            b.nome,
+            'gestor'
+            
+        FROM
+            zcrmportal_requisicao_aq a
+            INNER JOIN zcrmportal_usuario b ON b.id = a.usucad
+            
+        WHERE
+            a.codposicao IS NOT NULL
+            AND a.tipo = 'A'
+            AND a.carta_enviada IS NULL
+            AND a.id > 9365
+            
+        ORDER BY
+            a.id DESC
+
+            UNION ALL 
+
+        SELECT 
                 a.id,
                 a.coligada,
-                b.email,
-                b.nome
+                c.email,
+                c.SUBSTITUTO_NOME,
+                'substituto'
                 
             FROM
                 zcrmportal_requisicao_aq a
                 INNER JOIN zcrmportal_usuario b ON b.id = a.usucad
+                INNER JOIN GESTOR_SUBSTITUTO_CHAPA C ON C.GESTOR_ID = a.usucad
                 
             WHERE
                 a.codposicao IS NOT NULL
                 AND a.tipo = 'A'
                 AND a.carta_enviada IS NULL
                 AND a.id > 9365
+                AND c.funcoes LIKE '%\"159\"%'
                 
             ORDER BY
                 a.id DESC

@@ -1605,6 +1605,12 @@ class CriticaModel extends Model {
         if($result->getNumRows() > 0) return true;
       }
 
+      $query = " SELECT * FROM zcrmportal_hierarquia_gestor_substituto WHERE chapa_substituto = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo = 0";
+      $result = $this->dbportal->query($query);
+      if($result){
+        if($result->getNumRows() > 0) return true;
+      }
+
       $query = "
         SELECT * FROM zcrmportal_hierarquia_lider_func_ponto WHERE chapa = '{$chapaColaborador}' AND coligada = '{$this->coligada}' AND inativo IS NULL AND id_lider IN (
             SELECT id FROM zcrmportal_hierarquia_lider_ponto WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo IS NULL AND nivel = 1

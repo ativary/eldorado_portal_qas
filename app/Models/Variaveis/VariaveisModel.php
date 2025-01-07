@@ -441,7 +441,12 @@ class VariaveisModel extends Model {
 
        
         $query2 = " 
-        SELECT * FROM zcrmportal_usuario WHERE login ='".$aprovador."'";
+        SELECT nome, email FROM zcrmportal_usuario WHERE login = '".$aprovador."'
+        UNION ALL
+        SELECT B.SUBSTITUTO_NOME, B.email FROM zcrmportal_usuario A
+                INNER JOIN GESTOR_SUBSTITUTO_CHAPA B ON B.GESTOR_ID = A.ID
+            WHERE login = '".$aprovador."'
+            AND B.FUNCOES LIKE '%\"219\"%'";
          //exit('<pre>'.print_r($query2,1));
         $result2 = $this->dbportal->query($query2);
        
@@ -455,7 +460,11 @@ class VariaveisModel extends Model {
 
        
         $query2 = " 
-        SELECT * FROM zcrmportal_usuario WHERE id ='".$aprovador."'";
+        SELECT * FROM zcrmportal_usuario WHERE id ='".$aprovador."'
+        UNION ALL
+        SELECT B.SUBSTITUTO_NOME, B.email FROM zcrmportal_usuario A
+                INNER JOIN GESTOR_SUBSTITUTO_CHAPA B ON B.GESTOR_ID = A.ID
+            WHERE login = '".$aprovador."'";
          //exit('<pre>'.print_r($query2,1));
         $result2 = $this->dbportal->query($query2);
        

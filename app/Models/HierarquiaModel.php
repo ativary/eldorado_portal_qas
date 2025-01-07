@@ -19,14 +19,24 @@ class HierarquiaModel extends Model {
     	}else{
         		$coligada = session()->get('func_coligada');
         }
-        if($chapas){
-        	$chapa = $chapas;
+		if($chapas){
+        	$chapa = "'" . $chapas . "'";
         }else {
-        	$chapa = util_chapa(session()->get('func_chapa'))['CHAPA'];
+        	$chapa = "'" . util_chapa(session()->get('func_chapa'))['CHAPA'] . "'";
         }
+
+		$chapasGestorSubstituto = self::getChapasGestorSubstituto($chapa);
+
+
+		if($chapasGestorSubstituto){
+			foreach($chapasGestorSubstituto as $idx  => $value){
+				$chapa .= " , '" . $chapasGestorSubstituto[$idx]['chapa_gestor'] . "' ";
+			}
+		}	
 
 		// verifica se é lider de BP
 		$isLiderBP = $this->getSecaoPodeVerLiderBP();
+		
 		if($isLiderBP) return $isLiderBP;
 
         //$isLider = $this->dbportal->query(" SELECT * FROM zcrmportal_hierarquia_lider_func_ponto WHERE chapa = '{$chapa}' AND coligada = '{$coligada}' AND inativo IS NULL AND '".date('Y-m-d')."' BETWEEN A.perini AND (CASE WHEN A.perfim IS NOT NULL THEN A.perfim ELSE '2090-12-31' END) ");
@@ -47,7 +57,7 @@ class HierarquiaModel extends Model {
 					INNER JOIN zcrmportal_hierarquia B ON B.id = A.id_hierarquia AND B.coligada = A.coligada
 					INNER JOIN zcrmportal_hierarquia_lider_func_ponto C ON A.id = C.id_lider
 				WHERE
-						A.chapa = '{$chapa}'
+						A.chapa IN ({$chapa})
 					AND A.coligada = '{$coligada}'
 					AND A.inativo IS NULL
 					AND B.inativo IS NULL
@@ -66,7 +76,7 @@ class HierarquiaModel extends Model {
 					INNER JOIN zcrmportal_hierarquia B ON B.id = A.id_hierarquia AND B.coligada = A.coligada
 					INNER JOIN zcrmportal_hierarquia_lider_func_ponto C ON A.id = C.id_lider
 				WHERE
-						X.chapa = '{$chapa}'
+						X.chapa IN ({$chapa})
 					AND X.coligada = '{$coligada}'
 					AND A.inativo IS NULL
 					AND B.inativo IS NULL
@@ -77,7 +87,7 @@ class HierarquiaModel extends Model {
 					C.chapa
 			)X GROUP BY chapa
             ";
-		
+			
 			$result = $this->dbportal->query($query);
 			return ($result->getNumRows() > 0) 
 					? $result->getResultArray() 
@@ -102,11 +112,10 @@ class HierarquiaModel extends Model {
 						,
 						zcrmportal_hierarquia B
 					WHERE
-						(A.chapa = '{$chapa}' OR C.chapa = '{$chapa}')
+						(A.chapa IN ({$chapa}) OR C.chapa IN ({$chapa}))
 						AND A.id_hierarquia = B.id
 						AND B.coligada = '{$coligada}'
 						AND B.inativo IS NULL
-						
 					
 					UNION ALL
 					
@@ -127,7 +136,7 @@ class HierarquiaModel extends Model {
 								,
 								zcrmportal_hierarquia B
 							WHERE
-								(A.chapa = '{$chapa}' OR C.chapa = '{$chapa}')
+								(A.chapa IN ({$chapa}) OR C.chapa IN ({$chapa}))
 								AND A.id_hierarquia = B.id
 								AND B.coligada = '{$coligada}'
 								AND B.inativo IS NULL
@@ -158,7 +167,7 @@ class HierarquiaModel extends Model {
 										,
 										zcrmportal_hierarquia B
 									WHERE
-										(A.chapa = '{$chapa}' OR C.chapa = '{$chapa}')
+										(A.chapa IN ({$chapa}) OR C.chapa IN ({$chapa}))
 										AND A.id_hierarquia = B.id
 										AND B.coligada = '{$coligada}'
 										AND B.inativo IS NULL
@@ -196,7 +205,7 @@ class HierarquiaModel extends Model {
 												,
 												zcrmportal_hierarquia B
 											WHERE
-												(A.chapa = '{$chapa}' OR C.chapa = '{$chapa}')
+												(A.chapa IN ({$chapa}) OR C.chapa IN ({$chapa}))
 												AND A.id_hierarquia = B.id
 												AND B.coligada = '{$coligada}'
 												AND B.inativo IS NULL
@@ -241,7 +250,7 @@ class HierarquiaModel extends Model {
 														,
 														zcrmportal_hierarquia B
 													WHERE
-														(A.chapa = '{$chapa}' OR C.chapa = '{$chapa}')
+														(A.chapa IN ({$chapa}) OR C.chapa IN ({$chapa}))
 														AND A.id_hierarquia = B.id
 														AND B.coligada = '{$coligada}'
 														AND B.inativo IS NULL
@@ -293,7 +302,7 @@ class HierarquiaModel extends Model {
 																,
 																zcrmportal_hierarquia B
 															WHERE
-																(A.chapa = '{$chapa}' OR C.chapa = '{$chapa}')
+																(A.chapa IN ({$chapa}) OR C.chapa IN ({$chapa}))
 																AND A.id_hierarquia = B.id
 																AND B.coligada = '{$coligada}'
 																AND B.inativo IS NULL
@@ -312,6 +321,7 @@ class HierarquiaModel extends Model {
 					AND XB.inativo IS NULL
             ";
 
+			//echo '<textarea>'.$query.'</textarea>';exit;
 			$result = $this->dbportal->query($query);
 
 			$arraySecao = [];
@@ -326,6 +336,7 @@ class HierarquiaModel extends Model {
 			
 			// verifica se o acesso é de BP
 			$isBP = $this->getSecaoPodeVerBP();
+
 			if($isBP){
 				foreach($isBP as $key2 => $dadosbp){
 					$arraySecao[] = [
@@ -343,11 +354,11 @@ class HierarquiaModel extends Model {
 	public function isLider($chapa = false, $coligada = false){
 
 		$coligada = (!$coligada) ? (session()->get('func_coligada') ?? null) : $coligada;
-        $chapa = (!$chapa) ? (util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null) : $chapa;
+        $chapa = (!$chapa) ? ("'".util_chapa(session()->get('func_chapa'))['CHAPA']."'" ?? null) : $chapa;
 
 		if($coligada === null || $chapa === null) return false;
 
-		$query = " SELECT * FROM zcrmportal_hierarquia_lider_ponto WHERE chapa = '{$chapa}' AND coligada = '{$coligada}' AND inativo IS NULL AND '".date('Y-m-d')."' BETWEEN perini AND (CASE WHEN perfim IS NOT NULL THEN perfim ELSE '2090-12-31' END) ";
+		$query = "  SELECT * FROM zcrmportal_hierarquia_lider_ponto WHERE chapa IN ({$chapa}) AND coligada = '{$coligada}' AND inativo IS NULL AND '".date('Y-m-d')."' BETWEEN perini AND (CASE WHEN perfim IS NOT NULL THEN perfim ELSE '2090-12-31' END)  ";
 		
 		$result = $this->dbportal->query($query);
 		return ($result->getNumRows() > 0) 
@@ -359,11 +370,11 @@ class HierarquiaModel extends Model {
 	public function isLiderExcecao($chapa = false, $coligada = false){
 
 		$coligada = (!$coligada) ? (session()->get('func_coligada') ?? null) : $coligada;
-        $chapa = (!$chapa) ? (util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null) : $chapa;
+        $chapa = (!$chapa) ? ("'".util_chapa(session()->get('func_chapa'))['CHAPA']."'" ?? null) : $chapa;
 
 		if($coligada === null || $chapa === null) return false;
 
-		$query = " SELECT * FROM zcrmportal_hierarquia_lider_excecao_ponto WHERE chapa = '{$chapa}' AND coligada = '{$coligada}' AND inativo IS NULL AND '".date('Y-m-d')."' BETWEEN perini AND (CASE WHEN perfim IS NOT NULL THEN perfim ELSE '2090-12-31' END) ";
+		$query = " SELECT * FROM zcrmportal_hierarquia_lider_excecao_ponto WHERE chapa in ({$chapa}) AND coligada = '{$coligada}' AND inativo IS NULL AND '".date('Y-m-d')."' BETWEEN perini AND (CASE WHEN perfim IS NOT NULL THEN perfim ELSE '2090-12-31' END) ";
 		// echo '<pre>'.$query;exit();
 		$result = $this->dbportal->query($query);
 		return ($result->getNumRows() > 0)
@@ -620,6 +631,39 @@ class HierarquiaModel extends Model {
 		
 	}
 
+	public function getChapasGestorSubstituto($chapa){
+
+		$caminho = substr($_SERVER['REQUEST_URI'], 1);
+		
+		$queryFuncao = "SELECT TOP 1 id FROM zcrmportal_funcoes WHERE caminho = '".$caminho."'";
+
+		$resultFuncao = $this->dbportal->query($queryFuncao);
+		$resultFuncao = $resultFuncao->getResultArray();
+		$verificaPermissaoModulo = "";
+
+		if($resultFuncao){
+			$verificaPermissaoModulo = " AND b.funcoes like '%\"".$resultFuncao[0]['id']."\"%'";
+		}
+
+		$query = "
+
+			SELECT chapa_gestor FROM zcrmportal_hierarquia_gestor_substituto a
+				LEFT JOIN zcrmportal_hierarquia_gestor_substituto_modulos b 
+					ON a.modulos LIKE '%\"' + CAST(b.id AS VARCHAR) + '\"%'
+			WHERE a.chapa_substituto = {$chapa}
+				AND a.inativo = 0 AND b.inativo = 0 
+				AND '".date('Y-m-d')."' between a.dtini and a.dtfim
+				".$verificaPermissaoModulo."
+	
+		";
+		
+		$result = $this->dbportal->query($query);
+		return ($result->getNumRows() > 0) 
+				? $result->getResultArray() 
+				: false;
+
+	}
+
 	public function getSecaoPodeVerLiderBP(){
 
 		$chapa_lider_bp = util_chapa(session()->get('func_chapa'))['CHAPA'];
@@ -821,7 +865,7 @@ class HierarquiaModel extends Model {
 				AND XC.coligada = '".session()->get('func_coligada')."'
 		";
 
-		//echo '<textarea>'.$query.'</textarea>';
+		//echo '<textarea>'.$query.'</textarea>';exit;
 		$result = $this->dbportal->query($query);
 		return ($result->getNumRows() > 0) 
 				? $result->getResultArray() 

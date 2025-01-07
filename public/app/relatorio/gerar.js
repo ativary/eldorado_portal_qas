@@ -768,6 +768,32 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DIAS_DE_DIREITO', 'name': 'Total de Dias de Direito'}
             ];
         break;
+        case '29':
+            colunas = [
+                {'value': 'ID', 'name': 'ID'},
+                {'value': 'COD_COLIGADA', 'name': 'Cod. Coligada'},
+                {'value': 'COD_FILIAL', 'name': 'Cód. Filial'},
+                {'value': 'CHAPA', 'name': 'Chapa'},
+                {'value': 'NOME', 'name': 'Nome'},
+                {'value': 'SITUACAO', 'name': 'Situação'},
+                {'value': 'COD_FUNCAO', 'name': 'Cód. Função'},
+                {'value': 'FUNCAO', 'name': 'Função'},
+                {'value': 'COD_SECAO', 'name': 'Cod. Secao'},
+                {'value': 'SECAO', 'name': 'Seção'},
+                {'value': 'CODIGO_CENTRO_CUSTO', 'name': 'Cod. Centro de Custo'},
+                {'value': 'CENTRO_CUSTO', 'name': 'Centro de Custo'},
+                {'value': 'PRODUTO', 'name': 'Produto'},
+                {'value': 'PROCESSO', 'name': 'Processo'},
+                {'value': 'STATUS', 'name': 'Status'},
+                {'value': 'DATA_SOLICITACAO', 'name': 'Data solicitação'},
+                {'value': 'USUARIO_SOLICITANTE', 'name': 'Usuário solicitação'},
+                {'value': 'DATA_APROVACAO_REPROVACAO', 'name': 'Data Aprovação/Reprovação'},
+                {'value': 'JUSTIFICATIVA', 'name': 'Justificativa'},
+                {'value': 'USUARIO_GESTOR', 'name': 'Usuário Gestor'},
+                {'value': 'USUARIO_RH', 'name': 'Usuário RH'},
+            ]
+            
+        break;
         case '30':
                 colunas = [
                     {'value': '[ID]', 'name': 'ID'},
