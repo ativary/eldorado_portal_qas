@@ -67,6 +67,13 @@ class VariaveisModel extends Model {
 		//-----------------------------------------
 		// filtro das seções que o gestor pode ver
 		//-----------------------------------------
+        if (is_array($chapa)) {
+            foreach ($chapa as $key => $value) {
+                $resultado[] = $value['CHAPA'];
+            }
+            $chapa = "'" . implode("','", $resultado) . "'";
+        }
+        
 		$secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer($chapa);
         
 		$filtro_secao_gestor = "";
@@ -413,15 +420,34 @@ class VariaveisModel extends Model {
     {
         $query = " 
         SELECT CPF_GESTOR_IMEDIATO, B.NOME, E.CHAPA 
-        FROM CRM_HIERARQUIA3 A 
-        INNER JOIN PortalRHPRD..zcrmportal_usuario B 
-            ON A.CPF_GESTOR_IMEDIATO = B.login COLLATE Latin1_General_CI_AS 
-        INNER JOIN PPESSOA D 
-            ON A.CPF_GESTOR_IMEDIATO = D.CPF COLLATE Latin1_General_CI_AS 
-        INNER JOIN PFUNC E 
-            ON D.CODIGO = E.CODPESSOA  
-        WHERE A.chapa = '".$chapa."' 
-        AND E.CODSITUACAO <> 'D' 
+            FROM CRM_HIERARQUIA3 A 
+            INNER JOIN ".DBPORTAL_BANCO."..zcrmportal_usuario B 
+                ON A.CPF_GESTOR_IMEDIATO = B.login COLLATE Latin1_General_CI_AS 
+            INNER JOIN PPESSOA D 
+                ON A.CPF_GESTOR_IMEDIATO = D.CPF COLLATE Latin1_General_CI_AS 
+            INNER JOIN PFUNC E 
+                ON D.CODIGO = E.CODPESSOA  
+            WHERE A.chapa = '".$chapa."' 
+            AND E.CODSITUACAO <> 'D' 
+
+        UNION ALL 
+
+        SELECT CPF_GESTOR_IMEDIATO, B.NOME, E.CHAPA
+            FROM CRM_HIERARQUIA3 A 
+            INNER JOIN ".DBPORTAL_BANCO."..zcrmportal_usuario B 
+                ON A.CPF_GESTOR_IMEDIATO = B.login COLLATE Latin1_General_CI_AS
+            left JOIN ".DBPORTAL_BANCO."..zcrmportal_hierarquia_gestor_substituto C ON C.chapa_gestor COLLATE Latin1_General_CI_AS = A.chapa 
+            INNER JOIN PPESSOA D 
+                ON A.CPF_GESTOR_IMEDIATO = D.CPF COLLATE Latin1_General_CI_AS 
+            INNER JOIN PFUNC E 
+                ON D.CODIGO = E.CODPESSOA  
+            
+            WHERE A.chapa = C.chapa_gestor COLLATE Latin1_General_CI_AS
+            AND C.chapa_substituto = '".$chapa."'
+            AND C.inativo = 0
+            AND getdate() BETWEEN C.dtini AND C.dtfim 
+            AND E.CODSITUACAO <> 'D' 
+    
     ";
     
         
