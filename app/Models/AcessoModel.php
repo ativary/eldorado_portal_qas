@@ -203,17 +203,37 @@ class AcessoModel extends Model {
         $log_id = session()->get('log_id');
 
         $query = "
-            SELECT
-                a.nome
-            FROM
-                zcrmportal_funcoes a
-                    JOIN zcrmportal_perfilfuncao b ON b.id_funcao = a.id
-                    JOIN zcrmportal_perfil c ON c.id = b.id_perfil
-                    JOIN zcrmportal_usuarioperfil d ON d.id_perfil = c.id
-            WHERE
-                a.nome = '{$perfil}'
-                AND d.id_usuario = {$log_id}
+            SELECT DISTINCT * FROM (
+            
+                SELECT
+                    a.nome
+                FROM
+                    zcrmportal_funcoes a
+                        JOIN zcrmportal_perfilfuncao b ON b.id_funcao = a.id
+                        JOIN zcrmportal_perfil c ON c.id = b.id_perfil
+                        JOIN zcrmportal_usuarioperfil d ON d.id_perfil = c.id
+                WHERE
+                    a.nome = '{$perfil}'
+                    AND d.id_usuario = {$log_id}
+                
+                UNION ALL 
+            
+                SELECT 
+                    D.nome
+                FROM 
+                    zcrmportal_hierarquia_gestor_substituto A
+                    LEFT JOIN zcrmportal_hierarquia_gestor_substituto_modulos B ON a.modulos LIKE '%\"' + CAST(b.id AS VARCHAR) + '\"%'
+                    CROSS APPLY EXTRAIR_DADOS_JSON(B.funcoes)  AS JSON
+                    JOIN zcrmportal_funcoes D ON JSON.Id = D.id AND D.portal_novo = 1
+                    
+                    WHERE D.nome = '{$perfil}'
+                    AND A.id_substituto = {$log_id}
+                    AND getdate() BETWEEN A.dtini AND A.dtfim
+                    AND A.inativo = 0
+            )Z
         ";
+
+       // echo '<textarea>'.$query.'</textarea>';exit;
         $result = $this->dbportal->query($query);
         if(!$result) return false;
         return ($result->getNumRows() > 0) 

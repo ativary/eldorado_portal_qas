@@ -703,7 +703,7 @@ class EscalaModel extends Model {
         }
 
         $this->dbportal
-            ->table('zcrmportal_escalaportal_escala')
+            ->table('zcrmportal_escala')
             ->whereIn('situacao', [0])
             ->where('id', $dados['id'])
             ->update([
@@ -1233,7 +1233,7 @@ class EscalaModel extends Model {
     }
 
     // -------------------------------------------------------
-    // Aprova solicitação de escala
+    // Aprova solicitação de escala 
     // -------------------------------------------------------
     public function AprovarEscala($dados){
 
