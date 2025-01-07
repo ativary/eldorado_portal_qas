@@ -582,7 +582,7 @@ class EscalaModel extends Model {
             'indice' => $indice,
         ];
 
-        $projecao = self::CalculaTrocaDeDia($filtroProjecao);
+        $projecao = ($tipo == 1) ? self::CalculaTrocaDeEscala($filtroProjecao) : self::CalculaTrocaDeDia($filtroProjecao);
         $projecao_folga = null;
         if($tipo != 1){
             $filtroProjecao['data'] = $data_folga;
