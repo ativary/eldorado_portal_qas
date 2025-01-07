@@ -1233,7 +1233,7 @@ class EscalaModel extends Model {
     }
 
     // -------------------------------------------------------
-    // Aprova solicitação de escala
+    // Aprova solicitação de escala 
     // -------------------------------------------------------
     public function AprovarEscala($dados){
 
