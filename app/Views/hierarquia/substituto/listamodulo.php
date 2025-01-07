@@ -23,19 +23,18 @@
                     <div class="col-xl-12 col-12">
                         <table class="table table-sm table-bordered mt-3">
                             <tr>
-                                <th style="width: 60%; background-color: #F3F2F7"> Perfis </th>
-                                <th class="text-center" style="width: 15%; background-color: #F3F2F7"> Quantidade de Funções </th>
-                                <th class="text-center" style="width: 15%; background-color: #F3F2F7"> Aprovador? </th>
-                                <th class="text-center" style="background-color: #F3F2F7"> Ação </th>
-
+                                <th class="align-middle text-center" style="width: 50%; background-color: #F3F2F7"> Perfis </th>
+                                <th class="align-middle text-center" style="width: 25%; background-color: #F3F2F7"> Quantidade de Funções </th>
+                                <th class="align-middle text-center" style="width: 15%; background-color: #F3F2F7"> Aprovador? </th>
+                                <th class="align-middle text-center" style="background-color: #F3F2F7"> Ação </th>
                             </tr>
 
                             <?php foreach($modulosExistentes as $modulo): ?>
                                 <tr>
-                                    <td><?= $modulo['id'] ?> - <?= $modulo['nome'] ?></td>
-                                    <td class="text-center"><?= $modulo['qtd_funcoes'] ?> </td>
-                                    <td class="text-center"><?= ($modulo['aprovador'] == 1) ? 'Sim' : 'Não' ?> </td>
-                                    <td class="text-center"> 
+                                    <td> <?= $modulo['id'] ?> - <?= $modulo['nome'] ?></td>
+                                    <td class="align-middle text-center"><?= $modulo['qtd_funcoes'] ?> </td>
+                                    <td class="align-middle text-center"><?= ($modulo['aprovador'] == 1) ? 'Sim' : 'Não' ?> </td>
+                                    <td class="align-middle text-center"> 
                                     <a href="<?= base_url('/hierarquia/substituto/editarmodulo/'. $modulo['id']); ?>" class="btn btn-success btn-xxs bteldorado_7"><i class="mdi mdi-square-edit-outline"></i></a>
                                         <button onclick="excluirModulo(<?= $modulo['id'] ?> )" class="btn btn-xxs btn-danger "><span><i class="fas fa-trash"></i></span></button>
                                     </td>
@@ -44,7 +43,6 @@
 
                         </table>
                     </div>
-
 
                 </div>
             </div>

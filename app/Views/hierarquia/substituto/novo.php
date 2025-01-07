@@ -80,7 +80,7 @@
                 
                 <div class="card-header mt-0">
                     <div class="row">
-                        <h4 class="col-12 mb-1 mt-1">Perfis atribuidos</h4>
+                        <h4 class="col-12 mb-1 mt-1">Perfis atribuídos</h4>
                     </div>
                 </div>
 
@@ -128,7 +128,7 @@
 
                 </div>
                 <div class="card-footer text-center">
-                        <button class="btn btn-success bteldorado_7" id="btnsave" onclick="return cadastrarGestorSubstituto()"><i class="mdi mdi-content-save-outline"></i>Salvar</button>
+                        <button class="btn btn-success bteldorado_7" id="btnsave" onclick="return cadastrarGestorSubstituto()"><i class="mdi mdi-content-save-outline"></i> Salvar</button>
                 </div>
             </div>
         </div>
