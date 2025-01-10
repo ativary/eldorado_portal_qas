@@ -198,7 +198,7 @@ Class Escala extends BaseController {
         $dados['chapa'] = $chapa;
         if($chapa){
             
-            $dados['resHorario'] = $this->mEscala->ListarEscalaHorario($chapa, $dados['resFuncionarios']);
+            $dados['resHorario']    = $this->mEscala->ListarEscalaHorario($chapa, $dados['resFuncionarios']);
 
         }
         
@@ -222,7 +222,8 @@ Class Escala extends BaseController {
         $dados['chapa'] = $chapa;
         if($chapa){
             
-            $dados['resHorario'] = $this->mEscala->ListarEscalaHorario($chapa, $dados['resFuncionarios']);
+            $dados['resHorario']    = $this->mEscala->ListarEscalaHorario($chapa, $dados['resFuncionarios']);
+            $dados['resProjecao']   = $this->mEscala->projecaoEscalaChapa($chapa);
 
         }
         
@@ -371,6 +372,8 @@ Class Escala extends BaseController {
             // case 9  : $dados['_titulo'] = $dados['_titulo']. ' | <span class="badge badge-danger">Cancelado</span>'; break;
             default : $dados['_titulo'] = $dados['_titulo'];
         }
+
+        $dados['resProjecao']   = $this->mEscala->projecaoEscalaChapa($resEscala[0]['chapa']);
 
         if($resEscala[0]['situacao'] == 9) notificacao('danger', 'Requisição cancelada em <b>'.dtBr($resEscala[0]['dtcancelado']).(strlen(trim($resEscala[0]['motivocancelado'])) > 0 ? "<br>Motivo: ".$resEscala[0]['motivocancelado'] : "" ).'</b>');
         if($resEscala[0]['situacao'] == 8) notificacao('danger', 'Requisição reprovada em <b>'.dtBr($resEscala[0]['dtcancelado']).(strlen(trim($resEscala[0]['motivocancelado'])) > 0 ? "<br>Motivo: ".$resEscala[0]['motivocancelado'] : "" ).'</b>');

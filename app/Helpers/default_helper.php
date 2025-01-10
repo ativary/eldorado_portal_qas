@@ -179,9 +179,15 @@ function loadPlugin($array = array()){
         echo '<link href="'.base_url('public/assets/plugins/bootstrap-duallistbox-master/src/bootstrap-duallistbox.css').'?v'.VERSION_CSS.'" rel="stylesheet" />';
     }
 
-    // duallistbox
+    // clipboard
     if(in_array('clipboard', $array)){
         echo '<script src="'.base_url('public/assets/plugins/clipboard/clipboard.min.js').'?v'.VERSION_JS.'"></script>';
+    }
+    
+    // datepicker
+    if(in_array('datepicker', $array)){
+        echo '<script src="'.base_url('public/assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js').'?v'.VERSION_JS.'"></script>';
+        echo '<link href="'.base_url('public/assets/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css').'?v'.VERSION_CSS.'" rel="stylesheet" />';
     }
 
 }

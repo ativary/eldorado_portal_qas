@@ -1723,5 +1723,74 @@ Requisição de alteração de escala do colaborador <strong>'.$dados['nome_func
 
     }
 
+    public function projecaoEscalaChapa($chapa)
+    {
+
+        $configuracao = self::Configuracao();
+        
+        if($chapa == null) return false;
+
+        $query = "
+            SELECT
+                X.CODHORARIO, 
+                CONVERT(VARCHAR, X.DATA, 103) DATA,
+                X.CODINDICE, 
+                X.CODCOLIGADA, 
+                X.TIPO, 
+                X.ENTRADA1, 
+                X.SAIDA1,
+                X.ENTRADA2,
+                X.SAIDA2,
+                ISNULL(B.CODSECAO, A.CODSECAO) CODSECAO,
+                CASE WHEN D.DIAFERIADO IS NOT NULL THEN 1 ELSE 0 END DIAFERIADO
+
+            FROM (
+
+                SELECT * FROM DBO.PROJETA_ESCALA('".dtBr($configuracao[0]['escala_per_inicio'])."', '".dtBr($configuracao[0]['dia_per_fim'])."', '{$chapa}', {$this->coligada})
+
+            )X
+                LEFT JOIN PFUNC A ON A.CHAPA = '{$chapa}' AND A.CODCOLIGADA = {$this->coligada}
+                LEFT JOIN PFHSTSEC B ON B.CHAPA = A.CHAPA AND B.CODCOLIGADA = A.CODCOLIGADA AND B.DTMUDANCA = (SELECT MAX(DTMUDANCA) FROM PFHSTSEC WHERE CHAPA = B.CHAPA AND B.CODCOLIGADA = CODCOLIGADA AND DTMUDANCA <= CONVERT(DATETIME, DATA, 103))
+                LEFT JOIN PSECAO C ON C.CODCOLIGADA = A.CODCOLIGADA AND C.CODIGO = ISNULL(B.CODSECAO, A.CODSECAO)
+                LEFT JOIN GFERIADO D ON D.CODCALENDARIO = C.CODCALENDARIO AND D.DIAFERIADO = CONVERT(DATETIME, DATA, 103)
+
+            ORDER BY CONVERT(DATETIME, DATA, 103) ASC
+        ";
+        $result = $this->dbrm->query($query);
+                
+        if($result->getNumRows() > 0){
+            $response = $result->getResultArray();
+            $dadosJson = false;
+            foreach($response as $key => $dadosResponse){
+
+                $dadosJson[$key] = $dadosResponse;
+                $dadosJson[$key]['DIA'] = diaSemana(dtEn($dadosResponse['DATA']), true);
+                $dadosJson[$key]['DATAEN'] = dtEn($dadosResponse['DATA']);
+
+                if((int)$dadosResponse['ENTRADA1'] >= 1440) $dadosResponse['ENTRADA1'] = 0;
+                $dadosJson[$key]['ENTRADA1'] = m2h((int)$dadosResponse['ENTRADA1']);
+
+                if((int)$dadosResponse['ENTRADA2'] >= 1440) $dadosResponse['ENTRADA2'] = 0;
+                $dadosJson[$key]['ENTRADA2'] = m2h((int)$dadosResponse['ENTRADA2']);
+
+                if((int)$dadosResponse['SAIDA1'] >= 1440) $dadosResponse['SAIDA1'] = 0;
+                $dadosJson[$key]['SAIDA1'] = m2h((int)$dadosResponse['SAIDA1']);
+
+                if((int)$dadosResponse['SAIDA2'] >= 1440) $dadosResponse['SAIDA2'] = 0;
+                $dadosJson[$key]['SAIDA2'] = m2h((int)$dadosResponse['SAIDA2']);
+
+                $dadosJson[$key]['ENTRADA1_MINUTO'] = h2m($dadosJson[$key]['ENTRADA1']);
+                $dadosJson[$key]['ENTRADA2_MINUTO'] = h2m($dadosJson[$key]['ENTRADA2']);
+                $dadosJson[$key]['SAIDA1_MINUTO'] = h2m($dadosJson[$key]['SAIDA1']);
+                $dadosJson[$key]['SAIDA2_MINUTO'] = h2m($dadosJson[$key]['SAIDA2']);
+
+            }
+
+            return $dadosJson;
+        }
+
+        return false;
+    }
+
 }
 ?>
