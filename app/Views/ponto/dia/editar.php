@@ -84,7 +84,7 @@
                         <div class="row">
                             <label for="perfil_nome" class="col-sm-2 col-form-label text-right">Data (Dia Trabalho):</label>
                             <div class="col-sm-3">
-                                <input min="<?= dtEn($resEscala['config_dia_per_ini'], true) ?>" max="<?= dtEn($resEscala['config_dia_per_fim'], true) ?>" <?= (($resEscala['situacao'] != 0 && $resEscala['situacao'] != 8) ? 'disabled' : ''); ?> class="form-control form-control-sm" type="date" value="<?= date('Y-m-d', strtotime($resEscala['datamudanca'])) ?>" name="data" id="data" required onkeyup="selecionaData(this.value);" onchange="selecionaData(this.value);">
+                                <input min="<?= dtEn($resEscala['config_dia_per_ini'], true) ?>" max="<?= dtEn($resEscala['config_dia_per_fim'], true) ?>" <?= (($resEscala['situacao'] != 0 && $resEscala['situacao'] != 8) ? 'disabled' : ''); ?> class="form-control form-control-sm" type="text" value="<?= date('d/m/Y', strtotime($resEscala['datamudanca'])) ?>" name="data" id="data" required readonly onkeyup="selecionaData(this.value);" onchange="selecionaData(this.value);">
                             </div>
                         </div>
                         <div class="row">
@@ -103,7 +103,7 @@
                         <div class="row mt-4">
                             <label for="data_folga" class="col-sm-2 col-form-label text-right">Data (Dia Folga):</label>
                             <div class="col-sm-3">
-                            <input min="<?= dtEn($resEscala['config_dia_per_ini'], true) ?>" <?= (($resEscala['situacao'] != 0 && $resEscala['situacao'] != 8) ? 'disabled' : ''); ?> class="form-control form-control-sm" type="date" value="<?= date('Y-m-d', strtotime($resEscala['datamudanca_folga'])) ?>" name="data" id="data_folga" required onkeyup="selecionaDataFolga(this.value);" onchange="selecionaDataFolga(this.value);">
+                            <input min="<?= dtEn($resEscala['config_dia_per_ini'], true) ?>" <?= (($resEscala['situacao'] != 0 && $resEscala['situacao'] != 8) ? 'disabled' : ''); ?> class="form-control form-control-sm" type="text" value="<?= date('d/m/Y', strtotime($resEscala['datamudanca_folga'])) ?>" name="data" id="data_folga" required readonly onkeyup="selecionaDataFolga(this.value);" onchange="selecionaDataFolga(this.value);">
                             </div>
                         </div>
                         <div class="row">
@@ -351,13 +351,13 @@ const carregaEscala = () => {
 
     let dados = {
         "chapa"         : "<?= $resEscala['chapa']; ?>",
-        "data"          : $("#data").val(),
+        "data"          : fixData($("#data").val()),
         "codhorario"    : '<?= $resEscala['codhorario']; ?>',
         "indice"        : $("#indice").val()
     }
     let dadosFolga = {
         "chapa"         : "<?= $resEscala['chapa']; ?>",
-        "data"          : $("#data_folga").val(),
+        "data"          : fixData($("#data_folga").val()),
         "codhorario"    : '<?= $resEscala['codhorario']; ?>',
         "indice"        : $("#indice_folga").val()
     }
@@ -396,8 +396,8 @@ const carregaEscala = () => {
 
 }
 const validaData = () => {
-    let diaUtil   = $("#data").val();
-    let diaFolga  = $("#data_folga").val();
+    let diaUtil   = fixData($("#data").val());
+    let diaFolga  = fixData($("#data_folga").val());
 
     if(diaUtil == diaFolga){exibeAlerta('warning', 'Dia trabalho não pode ser igual ao Dia folga.'); return false;}
 
@@ -591,13 +591,13 @@ const salvaDados = () => {
 
     let dados = {
         "chapa"               : '<?= $resEscala['chapa']; ?>',
-        "data"                : $("#data").val(),
+        "data"                : fixData($("#data").val()),
         "codhorario"          : '<?= $resEscala['codhorario']; ?>',
         "indice"              : $("#indice").val()
     }
     let dadosFolga = {
         "chapa"         : '<?= $resEscala['chapa']; ?>',
-        "data"          : $("#data_folga").val(),
+        "data"          : fixData($("#data_folga").val()),
         "codhorario"    : '<?= $resEscala['codhorario']; ?>',
         "indice"        : $("#indice_folga").val()
     }
@@ -802,8 +802,8 @@ const salvaDados = () => {
 
             let dados = {
                 "chapa"                     : '<?= $resEscala['chapa']; ?>',
-                "data"                      : $("#data").val(),
-                "data_folga"                : $("#data_folga").val(),
+                "data"                      : fixData($("#data").val()),
+                "data_folga"                : fixData($("#data_folga").val()),
                 "codhorario"                : '<?= $resEscala['codhorario']; ?>',
                 "indice"                    : $("#indice").val(),
                 "indice_folga"              : $("#indice_folga").val(),
@@ -950,9 +950,21 @@ Swal.fire({
 .bg_ref {
     background-color: #dcddde;
 }
+.highlight {
+    background: #ededed;
+    color: #038f5c !important;
+}
+.datepicker table tr td.day.focused, .datepicker table tr td.day:hover:not(.disabled), .active.day.highlight {
+    background: #038f5c !important;
+    color: #ffffff !important;
+}
+.day.disabled {
+    background: #ffffff !important;
+    color: #cccccc !important;
+}
 </style>
 <?php
-loadPlugin(array('select2','dropify'));
+loadPlugin(array('select2','dropify', 'datepicker', 'maxlength'));
 ?>
 <script>
 $(function () {
@@ -1029,7 +1041,7 @@ const verificaData = () => {
         type:'POST',
         data:{
             'chapa'   : '<?= $resEscala['chapa']; ?>',
-            'data'    : $("#data").val(),
+            'data'    : fixData($("#data").val()),
             'id'      : '<?= $resEscala['id']; ?>'
         },
         success:function(result){
@@ -1054,7 +1066,7 @@ const verificaDataFolga = () => {
         type:'POST',
         data:{
             'chapa'   : '<?= $resEscala['chapa']; ?>',
-            'data'    : $("#data_folga").val(),
+            'data'    : fixData($("#data_folga").val()),
             'id'      : '<?= $resEscala['id']; ?>'
         },
         success:function(result){
@@ -1072,4 +1084,78 @@ const verificaDataFolga = () => {
         },
     });
 }
+const fixData = (data) => {
+    try{
+    
+        data = data.split('/');
+        data = data[2]+'-'+data[1]+'-'+data[0];
+
+        return data;
+
+    }catch(e){
+        return '';
+    }
+}
+
+$(document).ready(function(){
+    <?php
+    $datasTrabalho    = [];
+    $datasFolga       = [];
+
+    if($resProjecao){
+        foreach($resProjecao as $projecao){
+            switch($projecao['TIPO']){
+                case 'TRABALHO'   : $datasTrabalho[] = '"'.$projecao['DATA'].'"'; break;
+                default           : $datasFolga[] = '"'.$projecao['DATA'].'"'; break;
+            };
+        }
+    }
+    ?>
+    const datasPermitidasTrabalho   = [<?= (count($datasTrabalho) > 0) ? implode(',', $datasTrabalho) : ''; ?>];
+    const datasPermitidasFolga      = [<?= (count($datasFolga) > 0) ? implode(',', $datasFolga) : ''; ?>];
+
+    $('textarea').maxlength({
+        alwaysShow          : true,
+        warningClass        : "badge badge-success",
+        limitReachedClass   : "badge badge-warning"
+    });
+
+    $('#data').datepicker({
+        format    : "dd/mm/yyyy",
+        autoclose : true,
+        beforeShowDay: function (date) {
+            
+            var dia = 
+                ("0" + date.getDate()).slice(-2) + "/" +
+                ("0" + (date.getMonth() + 1)).slice(-2) + "/" +
+                date.getFullYear();
+                
+            if (datasPermitidasFolga.includes(dia)) {
+                return { enabled: true, classes: 'highlight' };
+            } else {
+                return false;
+            }
+        }
+
+    });
+    
+    $('#data_folga').datepicker({
+        format    : "dd/mm/yyyy",
+        autoclose : true,
+        beforeShowDay: function (date) {
+            
+            var dia = 
+                ("0" + date.getDate()).slice(-2) + "/" +
+                ("0" + (date.getMonth() + 1)).slice(-2) + "/" +
+                date.getFullYear();
+                
+            if (datasPermitidasTrabalho.includes(dia)) {
+                return { enabled: true, classes: 'highlight' };
+            } else {
+                return false;
+            }
+        }
+
+    });
+});
 </script>
