@@ -517,22 +517,6 @@ class EscalaModel extends Model {
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($data_folga).'</b>.');
             }
 
-            $dataTrabalho       = \DateTime::createFromFormat('Y-m-d', $data)->add(new \DateInterval('P1D'))->format('Y-m-d');
-            $verificaTrabalho   = " SELECT * FROM dbo.CALCULO_HORARIO_PT1('".dtBr($dataTrabalho)."', '{$chapa}', '{$this->coligada}') ";
-            $resultTrabalho     = $this->dbrm->query($verificaTrabalho);
-            $dadosTrabalho      = $resultTrabalho->getResultArray()[0];
-            if($dadosTrabalho['TIPO'] == 'TRABALHO'){
-                return responseJson('error', 'Dia <b>'.dtBr($data).'</b> é um dia de trabalho, não é possivel trocar um dia de trabalho por outro dia de trabalho.');
-            }
-            
-            $dataFolga        = \DateTime::createFromFormat('Y-m-d', $data_folga)->add(new \DateInterval('P1D'))->format('Y-m-d');
-            $verificaFolga    = " SELECT * FROM dbo.CALCULO_HORARIO_PT1('".dtBr($dataFolga)."', '{$chapa}', '{$this->coligada}') ";
-            $resultFolga      = $this->dbrm->query($verificaFolga);
-            $dadosFolga       = $resultFolga->getResultArray()[0];
-            if($dadosFolga['TIPO'] != 'TRABALHO'){
-                return responseJson('error', 'Dia <b>'.dtBr($data_folga).'</b> não é um dia de trabalho, não é possivel trocar um dia de folga por outro dia de folga.');
-            }
-
             $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND datamudanca = '{$data}' AND tipo != '1' AND situacao not in (3,9) ";
             $result = $this->dbportal->query($query);
             if($result->getNumRows() > 0){
