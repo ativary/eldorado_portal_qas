@@ -1736,7 +1736,7 @@ Requisição de alteração de escala do colaborador <strong>'.$dados['nome_func
                 CONVERT(VARCHAR, X.DATA, 103) DATA,
                 X.CODINDICE, 
                 X.CODCOLIGADA, 
-                X.TIPO, 
+                CASE WHEN D.DIAFERIADO IS NOT NULL THEN 'FERIADO' ELSE X.TIPO END TIPO,
                 X.ENTRADA1, 
                 X.SAIDA1,
                 X.ENTRADA2,
