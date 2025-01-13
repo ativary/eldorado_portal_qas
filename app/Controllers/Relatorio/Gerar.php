@@ -236,7 +236,7 @@ Class Gerar extends BaseController {
             $sheet = $spreadsheet->getActiveSheet();
             $i=1;
             foreach ($colunas as $colunaNome) {
-                $sheet->setCellValue(indexToExcelColumn($i) . '1', $colunaNome);
+                $sheet->setCellValue(indexToExcelColumn($i) . '1', str_replace(['[', ']'], '', $colunaNome));
                 $i++;
             }
             
@@ -246,7 +246,7 @@ Class Gerar extends BaseController {
             
                 $valorColuna = 1;
                 foreach ($colunas as $colunaNome) {
-                    $valorCelula = isset($Dados[$colunaNome]) ? $Dados[$colunaNome] : ''; // Deixa em branco se o valor não existir
+                    $valorCelula = isset($Dados[str_replace(['[', ']'], '', $colunaNome)]) ? $Dados[str_replace(['[', ']'], '', $colunaNome)] : ''; // Deixa em branco se o valor não existir
                     $sheet->setCellValue(indexToExcelColumn($valorColuna) . $linha, $valorCelula);
                     $valorColuna++;
                 }
