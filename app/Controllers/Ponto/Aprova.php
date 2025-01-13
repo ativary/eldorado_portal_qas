@@ -49,24 +49,38 @@ class Aprova extends BaseController
         return false;
     }
 
-        $idbatida               = $this->request->getPost('idbatida');
-        $act                    = $this->request->getPost('act');
-        $codsecao               = $this->request->getPost('secao');
-        $tipo_abono             = $this->request->getPost('tipo_abono');
-        $ft_legenda             = $this->request->getPost('ft_legenda');
-        $ft_status              = $this->request->getPost('ft_status');
-        $chapa                  = $this->request->getPost('funcionario');
-        $motivo_reprova         = $this->request->getPost('motivo_reprova');
-        $dados['filtro_tipo']   = $this->request->getPost('filtro_tipo');
-        $dados['filtro_filial'] = $this->request->getPost('filtro_filial');
-        $dados['filtro_legenda'] = $this->request->getPost('filtro_legenda');
+        $idbatida                   = $this->request->getPost('idbatida');
+        $act                        = $this->request->getPost('act');
+        $codsecao                   = $this->request->getPost('secao');
+        $tipo_abono                 = $this->request->getPost('tipo_abono');
+        $ft_legenda                 = $this->request->getPost('ft_legenda');
+        $ft_status                  = $this->request->getPost('ft_status');
+        $chapa                      = $this->request->getPost('funcionario');
+        $motivo_reprova             = $this->request->getPost('motivo_reprova');
+        $dados['filtro_tipo']       = $this->request->getPost('filtro_tipo');
+        $dados['filtro_filial']     = $this->request->getPost('filtro_filial');
+        $dados['filtro_legenda']    = $this->request->getPost('filtro_legenda');
+        $filtroPeriodo              = $this->request->getPost('periodo');
+        $statusPeriodo              = $this->request->getPost('statusPeriodo');
+
+        if(isset($_SESSION['filtro_tipo'])) $dados['filtro_tipo'] = $_SESSION['filtro_tipo'];
+        if(isset($_SESSION['periodo'])) $filtroPeriodo = $_SESSION['periodo'];
+        if(isset($_SESSION['statusPeriodo'])) $statusPeriodo = $_SESSION['statusPeriodo'];
+        if(isset($_SESSION['filtro_filial'])) $dados['filtro_filial'] = $_SESSION['filtro_filial'];
+        if(isset($_SESSION['secao'])) $codsecao = $_SESSION['secao'];
+        if(isset($_SESSION['funcionario'])) $chapa = $_SESSION['funcionario'];
+        if(isset($_SESSION['filtro_legenda'])) $dados['filtro_legenda'] = $_SESSION['filtro_legenda'];
+
+        if(isset($_SESSION['filtro_tipo'])){
+            unset($_SESSION['filtro_tipo'], $_SESSION['periodo'], $_SESSION['statusPeriodo'], $_SESSION['filtro_filial'], $_SESSION['secao'], $_SESSION['funcionario'], $_SESSION['filtro_legenda']);
+        }
 
         if($motivo_reprova == null){
-            $dados['periodo']             = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), 0, -1) : null;
-            $dados['statusPeriodo']       = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), -1) : 0;
+            $dados['periodo']             = ($filtroPeriodo != null) ? substr($filtroPeriodo, 0, -1) : null;
+            $dados['statusPeriodo']       = ($filtroPeriodo != null) ? substr($filtroPeriodo, -1) : 0;
         }else{
-            $dados['periodo']             = $this->request->getPost('periodo');
-            $dados['statusPeriodo']       = ($this->request->getPost('statusPeriodo') != null) ? $this->request->getPost('statusPeriodo') : 0;
+            $dados['periodo']             = $filtroPeriodo;
+            $dados['statusPeriodo']       = ($statusPeriodo != null) ? $statusPeriodo : 0;
         }
 
         $dados['codsecao'] = $codsecao;
@@ -84,10 +98,19 @@ class Aprova extends BaseController
 
         $resFuncionarioSecao = $colaboradores;
         
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+        if($_SERVER['REQUEST_METHOD'] == 'POST' || isset($dados['periodo'])){
         
             // APROVA BATIDA RH COM RM
             if ($act == 'apr') {
+
+                
+                    $_SESSION['filtro_tipo']    = $dados['filtro_tipo'];
+                    $_SESSION['periodo']        = $filtroPeriodo.$statusPeriodo;
+                    $_SESSION['statusPeriodo']  = $statusPeriodo;
+                    $_SESSION['filtro_filial']  = $dados['filtro_filial'];
+                    $_SESSION['secao']          = $codsecao;
+                    $_SESSION['funcionario']    = $chapa;
+                    $_SESSION['filtro_legenda'] = $dados['filtro_legenda'];
 
                     $sucesso = 0;
                     $erro = '';
@@ -134,8 +157,11 @@ class Aprova extends BaseController
                     }
                     
                     notificacao('success', 'Movimento aprovado com sucesso.');
+
+                    redireciona('/ponto/aprova');
+                    exit();
                     
-                    $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
+                    // $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
                 
             }
 
