@@ -91,11 +91,11 @@
 </style>
 <script>
     $(document).ready(function() {
-        $("#selecctall, #checkall").click(function() {
-            if ($("input:checkbox").prop('checked')) {
-                $("input:checkbox").prop('checked', false);
-            } else {
-                $("input:checkbox").prop('checked', true);
+        $("#checkall").on('click', function(e){
+            if($(this).prop('checked')){
+                $("[type=checkbox]").prop('checked', true);
+            }else{
+                $("[type=checkbox]").prop('checked', false);
             }
         });
     });
@@ -127,6 +127,26 @@
                         <form action="" method="POST" name="form_secao" id="form_secao">
                             <div class="form-group row">
 
+                                <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Categoria</label></div>
+                                <div class="col-sm-10">
+                                    <select name="filtro_tipo" id="filtro_tipo" class="form-control form-control-sm">
+                                        <option value="">Todos</option>
+                                        <!-- <optgroup label="Ponto">
+                                            <option <?= ($filtro_tipo == "1") ? 'selected' : ''; ?> value="1">&bull; Inclusão de batida</option>
+                                            <option <?= ($filtro_tipo == "3") ? 'selected' : ''; ?> value="3">&bull; Alteração de natureza</option>
+                                            <option <?= ($filtro_tipo == "4") ? 'selected' : ''; ?> value="4">&bull; Alteração jornada referência</option>
+                                            <option <?= ($filtro_tipo == "5") ? 'selected' : ''; ?> value="5">&bull; Abono de atrasos</option>
+                                            <option <?= ($filtro_tipo == "6") ? 'selected' : ''; ?> value="6">&bull; Abono de faltas</option>
+                                            <option <?= ($filtro_tipo == "7") ? 'selected' : ''; ?> value="7">&bull; Justificativa de exceção</option>
+                                            <option <?= ($filtro_tipo == "8") ? 'selected' : ''; ?> value="8">&bull; Altera atitude</option>
+                                            <option <?= ($filtro_tipo == "9") ? 'selected' : ''; ?> value="9">&bull; Falta não remunerada</option>
+                                        </optgroup> -->
+                                            <option <?= ($filtro_tipo == "ponto") ? 'selected' : ''; ?> value="ponto">&bull; Ponto</option>
+                                            <option <?= ($filtro_tipo == "21") ? 'selected' : ''; ?> value="21">&bull; Troca de escala</option>
+                                            <option <?= ($filtro_tipo == "22") ? 'selected' : ''; ?> value="22">&bull; Troca de dia</option>
+                                    </select>
+                                </div>
+
                                 <div class="col-sm-2 text-right"><label for="opt_periodo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Período</label></div>
 
                                 <div class="col-sm-10">
@@ -140,8 +160,20 @@
                                 </select>
                                 </div>
 
+                                <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Filial</label></div>
+                                <div class="col-sm-10">
+                                    <select name="filtro_filial" id="filtro_filial" class="form-control form-control-sm">
+                                        <option value="">Todos</option>
+                                        <?php if($resFilial): ?>
+                                                <?php foreach($resFilial as $key => $Filial): ?>
+                                                    <option value="<?= $Filial['CODFILIAL']; ?>" <?= (($filtro_filial ?? "") == $Filial['CODFILIAL']) ? " selected " : ""; ?>><?= $Filial['CODFILIAL'].' - '.$Filial['NOMEFILIAL']; ?></option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                    </select>
+                                </div>
+
                                 <div class="col-sm-2 text-right"><label for="secao" class="col-form-label text-right text-left-sm">Seção:</label></div>
-                                <div class="col-sm-10 "><select name="secao" id="secao" class="form-control select2  form-control-sm " onchange="carregaColaboradores();">
+                                <div class="col-sm-10 "><select name="secao" id="secao" class="form-control select2  form-control-sm " onchange="return carregaColaboradores()">
                                     <option value="all">Todas as seções</option>
                                     <?php
                                     if ($listaSecaoUsuarioRM) {
@@ -163,6 +195,15 @@
                                     <?php endif; ?>
                                 </select></div>
 
+                                <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Legenda</label></div>
+                                <div class="col-sm-10">
+                                    <select name="filtro_legenda" id="filtro_legenda" class="form-control form-control-sm">
+                                        <option value="">Todos</option>
+                                        <option <?= ($filtro_legenda == "10") ? 'selected' : ''; ?> value="10">Pend/Ação Gestor</option>
+                                        <option <?= ($filtro_legenda == "2") ? 'selected' : ''; ?> value="2">Pend/Ação RH</option>
+                                    </select>
+                                </div>
+
                                 <div class="col-sm-12 text-center">
                                     <button style="margin-left: 20px;" class="btnpeq btn-sm btn-success bteldorado_1" type="button" onclick="return filtroSecao()"><i class="fa fa-filter"></i> Filtrar</button>
                                     <button style="margin-left: 20px;" class="btnpeq btn-sm btn-danger bteldorado_2" type="button" onclick="return limpaFiltro()"> Limpar</button>
@@ -173,383 +214,376 @@
                         <div class="col-12">
                             <hr>
                             <b>Legenda:</b>
-                            <span style="display: inline-block;" class="mb-1"><span class="batida bteldorado_3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Batida inserida &nbsp;&nbsp;&nbsp;</span>
+                            <span class="badge badge-warning">Pend/Ação Gestor</span>
+                            <span class="badge badge-info">Pend/Ação RH</span>
+                            <!-- <span style="display: inline-block;" class="mb-1"><span class="batida bteldorado_3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Batida inserida &nbsp;&nbsp;&nbsp;</span>
                             <span style="display: inline-block;" class="mb-1"><span class="batida_atraso_view bteldorado_4" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Abono atraso &nbsp;&nbsp;&nbsp;</span>
                             <span style="display: inline-block;" class="mb-1"><span class="batida_falta_view bteldorado_5" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Abono falta &nbsp;&nbsp;&nbsp;</span>
-                            <span style="display: inline-block;" class="mb-1"><span class="batida_atitude bteldorado_6" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Altera atitude &nbsp;&nbsp;&nbsp;</span>
+                            <span style="display: inline-block;" class="mb-1"><span class="batida_atitude bteldorado_6" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Altera atitude &nbsp;&nbsp;&nbsp;</span> -->
                             <!--<span style="display: inline-block;" class="mb-1"><span class="batida_just_excecao" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Justificativa de Exceção &nbsp;&nbsp;&nbsp;</span>-->
                         </div>
                     </div>
+                    
+                    <div class="card-body">
+                    <div class="row mb-3" style="margin-top: -62px;">
+                        <div class="col-12 text-right"><button onclick="return excel()" type="button" class="btnpeq btn-sm btn-success bteldorado_1"><i class="mdi mdi-file-excel"></i> Exportar excel</button></div>
+                    </div>
+                    <?php
+                    if (!$periodo_bloqueado) {
+                        echo '<div class="row mt-3 mb-3">';
+                        echo '<div class="col-6 text-left"><button onclick="return reprovaBatida()" type="button" class="btnpeq btn-sm btn-danger bteldorado_2"><i class="far fa-thumbs-down"></i> Reprova Selecionados</button></div>';
+                        echo '<div class="col-6 text-right"><button onclick="return aprovaBatida()" type="button" class="btnpeq btn-sm btn-success bteldorado_1"><i class="far fa-thumbs-up"></i> Aprova Selecionados</button></div>';
+                        echo '</div>';
+                    }
+                    ?>
+
+                        <form action="" method="post" id="form1">
+                            <table id="datatableAprovacao" class="table table-sm table-bordered table-responsive_mobile" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="checkall"></th>
+                                        <th class="n-mobile-cell"><strong>Status</strong></th>
+                                        <th><strong>Tipo</strong></th>
+                                        <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><th class="n-mobile-cell"><strong>Data</strong></th><?php endif; ?>
+                                        <th class="n-mobile-cell"><strong>Colaborador</strong></th>
+                                        <th class="n-mobile-cell" style="min-width: 290px;"><strong>Descrição Tipo</strong></th>
+                                        <th class="n-mobile-cell"><strong>Justificativa</strong></th>
+                                        <th class="n-mobile-cell"><strong>Anexo</strong></th>
+                                        <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><th class="n-mobile-cell"><strong>Batidas do Dia</strong></th><?php endif; ?>
+                                        <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><th class="n-mobile-cell"><strong>Data de Referência</strong></th><?php endif; ?>
+                                        <th class="n-mobile-cell"><strong>Data solicitação</strong></th>
+                                        <th class="n-mobile-cell"><strong>Solicitante</strong></th>
+                                        <!-- <th class="n-mobile-cell"><strong>Aprovador</strong></th> -->
+                                        <th class="y-mobile-cell d-none"><b>DADOS</b></th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if($objListaBatidaApr): ?>
+                                        <?php foreach($objListaBatidaApr as $registro): ?>
+                                            <tr>
+                                                <td width="20" class="text-center">
+                                                    <?php
+                                                    if(
+                                                        ($perfilRH && $registro['status'] == 2 && ($registro['movimento'] == 21 || $registro['movimento'] == 22)) ||
+                                                        (($perfilRH) || (($registro['status'] == 10) && ($registro['movimento'] == 21 || $registro['movimento'] == 22))) ||
+                                                        ($registro['status'] == 1)
+                                                    ):
+                                                    ?>
+                                                    <input type="checkbox" name="idbatida[]" data-checkbox="<?= $registro['id'].'|'.$registro['movimento']; ?>" data-chapa="<?= $registro['chapa']; ?>" value="<?= $registro['chapa'] . '|' . dtEn($registro['dtponto'], true) . '|' . $registro['id'].'|'.$registro['movimento']; ?>">
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="n-mobile-cell">
+                                                    <?php
+                                                        if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
+                                                            switch($registro['status']){
+                                                                case 10: echo '<span class="badge badge-warning">Pend/Ação Gestor</span>'; break;
+                                                                case 2: echo '<span class="badge badge-info">Pend/Ação RH</span>'; break;
+                                                                default: echo '';
+                                                            }
+                                                        }else{
+                                                            echo '<span class="badge badge-warning">Pend/Ação Gestor</span>';
+                                                        }
+                                                    ?>
+                                                </td>
+                                                <td>
+                                                <?php
+                                                    $tipoRequisicao = "";
+                                                    switch($registro['movimento']){
+                                                        case 1: $tipoRequisicao = 'Inclusão de batida'; break;
+                                                        case 2: $tipoRequisicao = 'Exclusão de batida'; break;
+                                                        case 3: $tipoRequisicao = 'Alteração de natureza'; break;
+                                                        case 4: $tipoRequisicao = 'Alteração jornada referência'; break;
+                                                        case 5: $tipoRequisicao = 'Abono de atrasos'; break;
+                                                        case 6: $tipoRequisicao = 'Abono de faltas'; break;
+                                                        case 7: $tipoRequisicao = 'Justificativa de exceção'; break;
+                                                        case 8: $tipoRequisicao = 'Altera atitude'; break;
+                                                        case 9: $tipoRequisicao = 'Falta não remunerada'; break;
+                                                        case 21: $tipoRequisicao = 'Troca de escala'; break;
+                                                        case 22: $tipoRequisicao = 'Troca de dia'; break;
+                                                    }
+
+                                                    if($tipoRequisicao == 'Altera atitude' && $registro['justificativa_excecao'] != ''){
+                                                        $tipoRequisicao = ucfirst(strtolower($registro['justificativa_excecao']));
+                                                    }
+
+                                                    echo $tipoRequisicao;
+                                                ?>
+                                                </td>
+                                                <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><td class="n-mobile-cell"><?= dtBr($registro['dtponto']); ?></td><?php endif; ?>
+                                                <td class="n-mobile-cell"><?= $registro['chapa'].' - '.$registro['nome']; ?></td>
+                                                <td class="n-mobile-cell">
+                                                    <?php
+                                                    // calcula qtde de horas
+                                                    $data_fim = "";
+                                                    $total_horas = "";
+                                                    if (strlen(trim($registro['abn_codabono'] ?? '')) > 0) {
+                                                        if ($registro['abn_horafim'] > $registro['abn_horaini']) {
+
+                                                            $data_fim    = dtEn($registro['dtponto'], true) . 'T00:00:00';
+                                                            $total_horas = ($registro['abn_horafim'] - $registro['abn_horaini']);
+                                                        } else {
+
+                                                            $dataTermino = new \DateTime(dtEn($registro['dtponto'], true));
+                                                            $dataTermino->add(new \DateInterval('P1D'));
+                                                            $data_fim    = $dataTermino->format('Y-m-d');
+                                                            $total_horas = (($registro['abn_horafim'] + 1440) - $registro['abn_horaini']);
+                                                        }
+                                                    }
+                                                    
+                                                    // inclusão de batida
+                                                    echo '<div class="row" style="min-width: 290px;">';
+                                                    if ($registro['movimento'] == 21) {
+                                                        echo '<div class="col-4 text-center"> <strong>Indice</strong><br> ' . $registro['codindice'] . '</div>';
+                                                        echo '<div class="col-8 text-center"> <strong>Horário</strong><br> ' . $registro['horario']. '</div>';
+                                                    }
+                                                    if ($registro['movimento'] == 22) {
+                                                        echo '<div class="col-6 text-center"> <strong>Data Útil</strong><br> ' . dtBr($registro['dtponto']) . '</div>';
+                                                        echo '<div class="col-6 text-center"> <strong>Índice Útil</strong><br> ' . ($registro['codindice']) . '</div>';
+                                                        echo '<div class="col-6 text-center"> <strong>Data Folga</strong><br> ' . dtBr($registro['dtfolga']) . '</div>';
+                                                        echo '<div class="col-6 text-center"> <strong>Índice Folga</strong><br> ' . ($registro['codindice_folga']) . '</div>';
+                                                        echo '<div class="col-12 text-center"> <strong>Horário</strong><br> ' . $registro['horario']. '</div>';
+                                                    }
+                                                    if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                                                        echo '<div class="col-12 text-center"><strong>Batida</strong><br> ' . sprintf("%05s", m2h($registro['batida'])) . '</div>';
+                                                    }
+                                                    // abono
+                                                    if ($registro['movimento'] == 5 || $registro['movimento'] == 6 || $registro['movimento'] == 9) {
+                                                        echo '<div class="col-6 text-center">  <strong>Data Inicio</strong><br> ' . date('d/m/Y', strtotime($registro['dtponto'])) . ' ' . sprintf("%05s", m2h($registro['abn_horaini'])) . '</div>';
+                                                        echo '<div class="col-6 text-center"> <strong>Data Fim</strong><br> ' . date('d/m/Y', strtotime($data_fim)) . ' ' . sprintf("%05s", m2h($registro['abn_horafim'])) . '</div>';
+                                                        echo '<div class="col-6 text-center pt-2"> <strong>Total de Horas</strong><br> ' . m2h($total_horas, 4) . '</div>';
+                                                        echo '<div class="col-6 text-center pt-2"> <strong>Tipo de Abono</strong><br> ' . $registro['abn_codabono'] . ' - ' . (($registro['movimento'] == 9) ? 'FALTA NÃO REMUNERADA' : extrai_valor($resAbonos, $registro['abn_codabono'], 'CODIGO', 'DESCRICAO')) . '</div>';
+                                                    }
+                                                    // altera atitude
+                                                    if ($registro['movimento'] == 8 || $registro['movimento'] == 7) {
+                                                        echo '<div class="col-6 text-center"> <strong>Data</strong><br> ' . date('d/m/Y', strtotime($registro['atitude_dt'])) . '</div>';
+                                                        echo '<div class="col-6 text-center"> <strong>Horas</strong><br> ' . sprintf("%05s", m2h($registro['atitude_fim'])) . '</div>';
+                                                        if ($registro['movimento'] == 8) {
+                                                            echo '<div class="col-12 text-center pt-2"> <strong>Tipo Atitude</strong><br> ' . ($registro['atitude_tipo'] == 1 ? 'Compensar (Fica BH)' : 'Descontar no pagto.') . '</div>';
+                                                        } else {
+                                                            echo '<div class="col-12 text-center pt-2"> <strong>Tipo Atitude</strong><br> Atraso Não Remunerado</div>';
+                                                        }
+                                                    }
+                                                    echo '</div>';
+                                                    ?>
+                                                </td>
+                                                <td class="n-mobile-cell">
+                                                <?php
+                                                    if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
+                                                        echo $registro['justificativa_escala'];
+                                                    }
+                                                    // inclusão de batida
+                                                    if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                                                        if (strlen(trim($registro['motivo'] ?? '')) > 0) echo $registro['motivo'];
+                                                    }
+                                                    // abono
+                                                    if ($registro['movimento'] == 5 || $registro['movimento'] == 6 || $registro['movimento'] == 9) {
+                                                        if (strlen(trim($registro['justificativa_abono_tipo'] ?? '')) > 0) echo $registro['justificativa_abono_tipo'];
+                                                    }
+                                                    // altera atitude
+                                                    if ($registro['movimento'] == 8 || $registro['movimento'] == 7) {
+                                                        if ($registro['movimento'] == 8) {
+                                                            if (strlen(trim($registro['justificativa_abono_tipo'] ?? '')) > 0) echo $registro['atitude_justificativa'];
+                                                        } else {
+                                                            echo 'Atraso Não Remunerado';
+                                                        }
+                                                    }
+                                                    ?>
+                                                </td>
+                                                <td class="n-mobile-cell">
+                                                <?php
+                                                    // inclusão de batida
+                                                    echo '<div class="row">';
+                                                    if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                                                        if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                                                            echo '<div class="col-12 text-center">';
+                                                            echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
+                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                            echo '</div>';
+                                                        }
+                                                    }
+                                                    // abono
+                                                    if ($registro['movimento'] == 5 || $registro['movimento'] == 6 || $registro['movimento'] == 9) {
+                                                        if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                                                            echo '<div class="col-12 text-center">';
+                                                            echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
+                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                            echo '</div>';
+                                                        }
+                                                    }
+                                                    // altera atitude
+                                                    if ($registro['movimento'] == 8 || $registro['movimento'] == 7) {
+                                                        if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                                                            echo '<div class="col-12 text-center">';
+                                                            echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
+                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                            echo '</div>';
+                                                        }
+                                                    }
+                                                    // escala
+                                                    if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
+                                                        if (($registro['possui_anexo'] ?? 0) == 1) {
+                                                            echo '<div class="col-12 text-center">';
+                                                            echo '<button type="button" onclick="carregaVisualizadorEscala(' . $registro['id'] . ',\'' . $registro['solicitante'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
+                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo_escala/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                            echo '</div>';
+                                                        }
+                                                    }
+                                                    echo '</div>';
+                                                    ?>
+                                                </td>
+                                                <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><td class="n-mobile-cell"><?= $registro['batidas_dia']; ?></td><?php endif; ?>
+                                                <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><td class="n-mobile-cell"><?= (strlen(trim($registro['data_referencia'])) > 0 ? dtBr($registro['data_referencia']) : ''); ?></td><?php endif; ?>
+                                                <td class="n-mobile-cell"><?= dtBr($registro['data_solicitacao']); ?></td>
+                                                <td class="n-mobile-cell"><?= $registro['chapa_solicitante'].' - '.$registro['solicitante']; ?></td>
+                                                <!-- <td class="n-mobile-cell"><?= $registro['chapa_gestor'].' - '.$registro['nome_gestor']; ?></td> -->
+                                                <td class="y-mobile-cell d-none">
+                                                    <?php
+                                                    // inclusão de batida
+                                                    echo '<div class="row">';
+                                                    if ($registro['movimento'] == 21) {
+                                                        echo '<div class="col-4 text-center"><strong>Indice</strong><br>' . $registro['codindice'] . '</div>';
+                                                        echo '<div class="col-8 text-center"><strong>Horário</strong><br>' . $registro['horario']. '</div>';
+                                                    }
+                                                    if ($registro['movimento'] == 22) {
+                                                        echo '<div class="col-6 text-center"><strong>Data Útil</strong><br>' . dtBr($registro['dtponto']) . '</div>';
+                                                        echo '<div class="col-6 text-center"><strong>Índice Útil</strong><br>' . ($registro['codindice']) . '</div>';
+                                                        echo '<div class="col-6 text-center"><strong>Data Folga</strong><br>' . dtBr($registro['dtfolga']) . '</div>';
+                                                        echo '<div class="col-6 text-center"><strong>Índice Folga</strong><br>' . ($registro['codindice_folga']) . '</div>';
+                                                        echo '<div class="col-12 text-center"><strong>Horário</strong><br>' . $registro['horario']. '</div>';
+                                                    }
+                                                    if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                                                        echo '<div class="col-6 text-center"><strong>Data</strong><br>' . date('d/m/Y', strtotime($registro['dtponto'])) . '</div>';
+                                                        echo '<div class="col-6 text-center"><strong>Batida</strong><br>' . sprintf("%05s", m2h($registro['batida'])) . '</div>';
+                                                        echo '<div class="col-12 text-center"><strong>Justificativa</strong><br>' . $registro['motivo'] . '</div>';
+                                                        echo '<div class="col-12 text-center"><strong>Solicitante</strong><br>' . $registro['solicitante'] . '</div>';
+                                                        if (strlen(trim($registro['justificativa_abono_tipo'] ?? '')) > 0) echo '<div class="col-12 text-center pt-2"><strong>Justificativa</strong><br>' . $registro['justificativa_abono_tipo'] . '</div>';
+
+                                                        if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                                                            echo '<div class="col-12 text-center pt-2"><strong>Anexo</strong><br>';
+                                                            echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
+                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                            echo '</div>';
+                                                        }
+                                                    }
+                                                    // abono
+                                                    if ($registro['movimento'] == 5 || $registro['movimento'] == 6 || $registro['movimento'] == 9) {
+                                                        echo '<div class="col-6 text-center"><strong>Data Inicio</strong><br>' . date('d/m/Y', strtotime($registro['dtponto'])) . ' ' . sprintf("%05s", m2h($registro['abn_horaini'])) . '</div>';
+                                                        echo '<div class="col-6 text-center"><strong>Data Fim</strong><br>' . date('d/m/Y', strtotime($data_fim)) . ' ' . sprintf("%05s", m2h($registro['abn_horafim'])) . '</div>';
+                                                        echo '<div class="col-6 text-center pt-2"><strong>Total de Horas</strong><br>' . m2h($total_horas, 4) . '</div>';
+                                                        echo '<div class="col-6 text-center pt-2"><strong>Tipo de Abono</strong><br>' . $registro['abn_codabono'] . ' - ' . (($registro['movimento'] == 9) ? 'FALTA NÃO REMUNERADA' : extrai_valor($resAbonos, $registro['abn_codabono'], 'CODIGO', 'DESCRICAO')) . '</div>';
+                                                        echo '<div class="col-12 text-center"><strong>Solicitante</strong><br>' . $registro['solicitante'] . '</div>';
+                                                        if (strlen(trim($registro['justificativa_abono_tipo'] ?? '')) > 0) echo '<div class="col-12 text-center pt-2"><strong>Justificativa</strong> ' . $registro['justificativa_abono_tipo'] . '</div>';
+                                                        if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                                                            echo '<div class="col-12 text-center pt-2"><strong>Anexo</strong><br>';
+                                                            echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
+                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                            echo '</div>';
+                                                        }
+                                                    }
+                                                    // altera atitude
+                                                    if ($registro['movimento'] == 8 || $registro['movimento'] == 7) {
+                                                        echo '<div class="col-6 text-center"><strong>Data</strong><br>' . date('d/m/Y', strtotime($registro['atitude_dt'])) . '</div>';
+                                                        echo '<div class="col-6 text-center"><strong>Horas</strong><br>' . sprintf("%05s", m2h($registro['atitude_fim'])) . '</div>';
+                                                        if ($registro['movimento'] == 8) {
+                                                            echo '<div class="col-12 text-center pt-2"><strong>Tipo Atitude</strong><br>' . ($registro['atitude_tipo'] == 1 ? 'Compensar (Fica BH)' : 'Descontar no pagto.') . '</div>';
+                                                        } else {
+                                                            echo '<div class="col-12 text-center pt-2"><strong>Tipo Atitude</strong><br>Atraso Não Remunerado</div>';
+                                                        }
+                                                        echo '<div class="col-12 text-center"><strong>Solicitante</strong><br>' . $registro['solicitante'] . '</div>';
+                                                        if ($registro['movimento'] == 8) {
+                                                            if (strlen(trim($registro['justificativa_abono_tipo'] ?? '')) > 0) echo '<div class="col-12 text-center pt-2"><strong>Justificativa</strong> ' . $registro['atitude_justificativa'] . '</div>';
+                                                        } else {
+                                                            echo '<div class="col-12 text-center pt-2"><strong>Justificativa</strong> Atraso Não Remunerado</div>';
+                                                        }
+                                                        if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                                                            echo '<div class="col-12 text-center pt-2"><strong>Anexo</strong><br>';
+                                                            echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search"  data-anexo="Sim"aria-hidden="true"></i> </button>';
+                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                            echo '</div>';
+                                                        }
+                                                    }
+                                                    echo '</div>';
+                                                    ?>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    if(
+                                                        ($perfilRH && $registro['status'] == 2 && ($registro['movimento'] == 21 || $registro['movimento'] == 22)) ||
+                                                        (($perfilRH) || (($registro['status'] == 10) && ($registro['movimento'] == 21 || $registro['movimento'] == 22))) ||
+                                                        ($registro['status'] == 1)
+                                                    ):
+                                                    ?>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
+                                                        <div class="dropdown-menu" style="margin-left: -131px;">
+
+                                                            <?php if($registro['movimento'] == 21 || $registro['movimento'] == 22): ?>
+                                                                <a target="_blank" href="<?= base_url('ponto/escala/'.(($registro['movimento'] == 21) ? 'editar' : 'editardia').'/'.id($registro['id'])).'/'.id($registro['situacao']); ?>" class="dropdown-item"><i class="mdi mdi-eye-outline"></i> Ver requisição</a>
+                                                                <button type="button" onclick="justificativas('<?= id($registro['id']); ?>')" class="dropdown-item"><i class="mdi mdi-comment-eye-outline"></i> Ver justificativa</button>
+                                                                
+                                                            <?php else: ?>
+                                                                <a href="/ponto/espelho/editar/<?= $registro['chapa']; ?>/<?= dtEn($registro['dtponto'], true); ?>" target="_blank" class="dropdown-item"><i class="mdi mdi mdi-account-clock"></i> Ver Espelho</a>
+                                                            <?php endif; ?>
+
+                                                            <button type="button" onclick="aprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-success"><i class="far fa-thumbs-up"></i> Aprovar</button>
+                                                            <button type="button" onclick="reprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-danger"><i class="far fa-thumbs-down"></i> Reprovar</button>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                            <input type="hidden" name="act" data-act>
+                            <input type="hidden" name="motivo_reprova" id="motivo_reprova">
+                            <input type="hidden" name="periodo" value="<?= $periodo; ?>">
+                            <input type="hidden" name="statusPeriodo" value="<?= $statusPeriodo; ?>">
+                            <input type="hidden" name="filtro_tipo" value="<?= $filtro_tipo; ?>">
+                            <input type="hidden" name="codsecao" value="<?= $codsecao; ?>">
+                            <input type="hidden" name="funcionario" value="<?= $chapa; ?>">
+                        </form>
+                    </div>
                 </div>
 
-                <!-- TABELA COM RESULTADOS -->
-                <?php
-                $chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-                if ($nomeFunc) {
-
-                    //-----------------------------------------------
-                    // regra para bloqueio do ponto
-                    //-----------------------------------------------
-                    $periodo_bloqueado = false;
-                    // if ($statusPeriodo == 1) {
-                    //     if ($isGestor) {
-                    //         $periodo_bloqueado = (dtEn($EspelhoConfiguracao[0]['limite_gestor'], true) < date('Y-m-d')) ? true : false;
-                    //         if ($gestorPossuiExcecao && $periodo_bloqueado) {
-                    //             $periodo_bloqueado = (dtEn($gestorPossuiExcecao, true) < date('Y-m-d')) ? true : false;
-                    //         }
-                    //     } else {
-                    //         $periodo_bloqueado = (dtEn($EspelhoConfiguracao[0]['limite_funcionario'], true) < date('Y-m-d')) ? true : false;
-                    //     }
-                    // }
-                    if ($statusPeriodo == 0) $periodo_bloqueado = true;
-                    //-----------------------------------------------
-
-                    echo '
-                    <div class="row mr-2">
-                        <div class="col-12 text-right">
-                            <form action="' . base_url('ponto/aprova/excel') . '" method="post" name="form_excel" target="_blank">
-                                <button class="btn btn-success btn-xxs bteldorado_1" type="submit"><i class="fas fa-file-excel"></i> Exportar Excel</button>
-                                <input type="hidden" name="secao" value="' . $_POST['secao'] . '">
-                                <input type="hidden" name="tipo_abono" value="' . $_POST['tipo_abono'] . '">
-                                <input type="hidden" name="ft_legenda" value="' . $_POST['ft_legenda'] . '">
-                                <input type="hidden" name="ft_status" value="' . $_POST['ft_status'] . '">
-                                <input type="hidden" name="funcionario" value="' . $_POST['funcionario'] . '">
-                                <input type="hidden" name="motivo_reprova" value="' . $_POST['motivo_reprova'] . '">
-                                <input type="hidden" name="periodo" value="' . $_POST['periodo'] . '">
-                                <input type="hidden" name="statusPeriodo" value="' . $_POST['statusPeriodo'] . '">
-                            </form>
-                        </div>
-                    </div>';
-
-                    echo '<form action="" method="post" name="apr_batida" id="form1">';
-
-                    echo '<div class="card m-0">';
-                    if (!$periodo_bloqueado) {
-                        echo '<div class="row mt-3">';
-                        echo '<div class="col-6 text-center"><button onclick="return reprovaBatida()" type="button" class="btnpeq btn-sm btn-danger bteldorado_2"><i class="far fa-thumbs-down"></i><br> Reprova Selecionados</button></div>';
-                        echo '<div class="col-6 text-center"><button onclick="return aprovaBatida()" type="button" class="btnpeq btn-sm btn-success bteldorado_1"><i class="far fa-thumbs-up"></i><br> Aprova Selecionados</button></div>';
-                        echo '</div>';
-                    }
-                    echo '<div class="card-body" style="display: flex; align-items: center;">';
-
-
-
-                    echo '<table class="table table-bordered">';
-                    echo '<thead>';
-                    // echo '<label for="sel_todos">';
-                    // echo '<th><input id="sel_todos" data-check="checado" type="checkbox"> SELECIONAR TODOS</th>';
-                    echo '<div class="row d-flex">
-                        <span id="selecctall"><input type="checkbox" id="checkall"><span style="margin-left: 5px;">Selecionar Todos</span> </span>
-                    </div>';
-                    echo '</label>';
-                    echo '</thead>';
-                    echo '</table>';
-                    echo '</div>';
-                    echo '</div>';
-
-                    foreach ($nomeFunc as $chapaFunc) {
-
-
-                        // exit(substr(trim($chapaFunc), 0, 9));
-                        if(substr(trim($chapaFunc), 0, 9) == $chapaUser) continue;
-
-                        echo '<div class="card m-0">';
-                        echo '<div class="card-body">';
-                        echo '<h4 class="page-title">' . $chapaFunc . '</h4>';
-
-                        echo '<table class="table table-sm table-bordered table-responsive_mobile">';
-                        echo '<thead>';
-                        if (!$periodo_bloqueado) {
-                            echo '<th><input data-check class="data_check_func" type="checkbox" data-chapa="' . substr($chapaFunc, 0, 9) . '"></th>';
-                        } else {
-                            echo '<th></th>';
-                        }
-                        // mobile
-                        echo '<th><b></b></th>';
-                        echo '<th class="y-mobile-cell d-none"><b>DADOS</b></th>';
-
-
-
-                        echo '<th class="n-mobile-cell" width="140"><b>MOVIMENTO</b></th>';
-                        echo '<th class="n-mobile-cell" align="center" width="90"><b>DATA</b></th>';
-                        echo '<th class="n-mobile-cell" align="center" width="130"><b>BATIDA</b></th>';
-                        echo '<th class="n-mobile-cell" align="center" width="120"><b>ABONO DATA INICIO</b></th>';
-                        echo '<th class="n-mobile-cell" align="center" width="120"><b>ABONO DATA FIM</b></th>';
-                        echo '<th class="n-mobile-cell" align="center" width="80"><b>TOTAL HORAS</b></th>';
-                        echo '<th class="n-mobile-cell" width="230"><b>TIPO</b></th>';
-                        echo '<th class="n-mobile-cell" width="230"><b>JUSTIFICATIVA</b></th>';
-                        echo '<th class="n-mobile-cell" class="text-center"><b>ANEXO</b></th>';
-                        echo '<th class="n-mobile-cell" class="text-center"><b>SOLICITANTE</b></th>';
-                        echo '</thead>';
-
-                        if ($objListaBatidaApr) {
-                            $aa = 0;
-                            foreach ($objListaBatidaApr as $idx => $value) {
-                                if ($objListaBatidaApr[$idx]['nomechapa'] == $chapaFunc) {
-
-
-                                    // calcula qtde de horas
-                                    $data_fim = "";
-                                    $total_horas = "";
-                                    if (strlen(trim($objListaBatidaApr[$idx]['abn_codabono'] ?? '')) > 0) {
-                                        if ($objListaBatidaApr[$idx]['abn_horafim'] > $objListaBatidaApr[$idx]['abn_horaini']) {
-
-                                            $data_fim    = dtEn($objListaBatidaApr[$idx]['dtponto'], true) . 'T00:00:00';
-                                            $total_horas = ($objListaBatidaApr[$idx]['abn_horafim'] - $objListaBatidaApr[$idx]['abn_horaini']);
-                                        } else {
-
-                                            $dataTermino = new \DateTime(dtEn($objListaBatidaApr[$idx]['dtponto'], true));
-                                            $dataTermino->add(new \DateInterval('P1D'));
-                                            $data_fim    = $dataTermino->format('Y-m-d');
-                                            $total_horas = (($objListaBatidaApr[$idx]['abn_horafim'] + 1440) - $objListaBatidaApr[$idx]['abn_horaini']);
-                                        }
-                                    }
-                                    echo '<tr class="tbadmlistalin">';
-
-                                    if (!$periodo_bloqueado) {
-                                        echo '<td width="20" align="center">
-                                        <input type="checkbox" name="idbatida[]"  data-chapa="' . substr($chapaFunc, 0, 9) . '" value="' . $objListaBatidaApr[$idx]['chapa'] . '|' . dtEn($objListaBatidaApr[$idx]['dtponto'], true) . '|' . $objListaBatidaApr[$idx]['id'] . '">
-                                        </td>';
-                                    } else {
-                                        echo '<td width="20" align="center"></td>';
-                                    }
-                                    echo '<td class="y-mobile-cell d-none" style="font-size:11px;" width="40">';
-                                    switch ($objListaBatidaApr[$idx]['movimento']) {
-                                        case 1:
-                                            echo '<span class="batida bteldorado_3 text-center" style="display:block !important; width: 100% !important;">Inclusão de batida</span>';
-                                            break;
-                                        case 2:
-                                            echo '<span class="batida_del_view text-center" style="display:block !important; width: 100% !important;">Exclusão de batida</span>';
-                                            break;
-                                        case 3:
-                                            echo '<span class="batida_nat_view text-center" style="display:block !important; width: 100% !important;">Alteração de natureza</span>';
-                                            break;
-                                        case 4:
-                                            echo '<span class="batida_data_view text-center" style="display:block !important; width: 100% !important;">Alteração jornada referência</span>';
-                                            break;
-                                        case 5:
-                                            echo '<span class="batida_atraso_view bteldorado_4 text-center" style="display:block !important; width: 100% !important;">Abono de atrasos</span>';
-                                            break;
-                                        case 6:
-                                            echo '<span class="batida_falta_view bteldorado_5 text-center" style="display:block !important; width: 100% !important;">Abono de faltas</span>';
-                                            break;
-                                        case 7:
-                                            echo '<span class="batida_just_excecao text-center" style="display:block !important; width: 100% !important;">Justificativa de Exceção</span>';
-                                            break;
-                                        case 8:
-                                            echo '<span class="batida_atitude bteldorado_6 text-center" style="display:block !important; width: 100% !important;">Altera Atitude</span>';
-                                            break;
-                                        case 9:
-                                            echo '<span class="batida_falta_view text-center" style="display:block !important; width: 100% !important;">Falta não remunerada</span>';
-                                            break;
-                                    }
-                                    echo '</td>';
-
-                                    echo '<td class="y-mobile-cell d-none">';
-
-                                    // inclusão de batida
-                                    echo '<div class="row">';
-                                    if ($objListaBatidaApr[$idx]['movimento'] != 5 && $objListaBatidaApr[$idx]['movimento'] != 6 && $objListaBatidaApr[$idx]['movimento'] != 8 && $objListaBatidaApr[$idx]['movimento'] != 7 && $objListaBatidaApr[$idx]['movimento'] != 9) {
-                                        echo '<div class="col-6 text-center"><strong>Data</strong><br>' . date('d/m/Y', strtotime($objListaBatidaApr[$idx]['dtponto'])) . '</div>';
-                                        echo '<div class="col-6 text-center"><strong>Batida</strong><br>' . sprintf("%05s", m2h($objListaBatidaApr[$idx]['batida'])) . '</div>';
-                                        echo '<div class="col-12 text-center"><strong>Justificativa</strong><br>' . $objListaBatidaApr[$idx]['motivo'] . '</div>';
-                                        echo '<div class="col-12 text-center"><strong>Solicitante</strong><br>' . $objListaBatidaApr[$idx]['solicitante'] . '</div>';
-                                        if (strlen(trim($objListaBatidaApr[$idx]['justificativa_abono_tipo'] ?? '')) > 0) echo '<div class="col-12 text-center pt-2"><strong>Justificativa</strong><br>' . $objListaBatidaApr[$idx]['justificativa_abono_tipo'] . '</div>';
-
-                                        if (strlen($objListaBatidaApr[$idx]['possui_anexo'] ?? '') > 0) {
-                                            echo '<div class="col-12 text-center pt-2"><strong>Anexo</strong><br>';
-                                            echo '<button type="button" onclick="carregaVisualizador(' . $objListaBatidaApr[$idx]['id'] . ',\'' . substr($chapaFunc, 9) . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" aria-hidden="true"></i> </button>';
-                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $objListaBatidaApr[$idx]['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
-                                            echo '</div>';
-                                        }
-                                    }
-                                    // abono
-                                    if ($objListaBatidaApr[$idx]['movimento'] == 5 || $objListaBatidaApr[$idx]['movimento'] == 6 || $objListaBatidaApr[$idx]['movimento'] == 9) {
-                                        echo '<div class="col-6 text-center"><strong>Data Inicio</strong><br>' . date('d/m/Y', strtotime($objListaBatidaApr[$idx]['dtponto'])) . ' ' . sprintf("%05s", m2h($objListaBatidaApr[$idx]['abn_horaini'])) . '</div>';
-                                        echo '<div class="col-6 text-center"><strong>Data Fim</strong><br>' . date('d/m/Y', strtotime($data_fim)) . ' ' . sprintf("%05s", m2h($objListaBatidaApr[$idx]['abn_horafim'])) . '</div>';
-                                        echo '<div class="col-6 text-center pt-2"><strong>Total de Horas</strong><br>' . m2h($total_horas, 4) . '</div>';
-                                        echo '<div class="col-6 text-center pt-2"><strong>Tipo de Abono</strong><br>' . $objListaBatidaApr[$idx]['abn_codabono'] . ' - ' . (($objListaBatidaApr[$idx]['movimento'] == 9) ? 'FALTA NÃO REMUNERADA' : extrai_valor($resAbonos, $objListaBatidaApr[$idx]['abn_codabono'], 'CODIGO', 'DESCRICAO')) . '</div>';
-                                        echo '<div class="col-12 text-center"><strong>Solicitante</strong><br>' . $objListaBatidaApr[$idx]['solicitante'] . '</div>';
-                                        if (strlen(trim($objListaBatidaApr[$idx]['justificativa_abono_tipo'] ?? '')) > 0) echo '<div class="col-12 text-center pt-2"><strong>Justificativa</strong> ' . $objListaBatidaApr[$idx]['justificativa_abono_tipo'] . '</div>';
-                                        if (strlen($objListaBatidaApr[$idx]['possui_anexo'] ?? '') > 0) {
-                                            echo '<div class="col-12 text-center pt-2"><strong>Anexo</strong><br>';
-                                            echo '<button type="button" onclick="carregaVisualizador(' . $objListaBatidaApr[$idx]['id'] . ',\'' . substr($chapaFunc, 9) . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" aria-hidden="true"></i> </button>';
-                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $objListaBatidaApr[$idx]['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
-                                            echo '</div>';
-                                        }
-                                    }
-                                    // altera atitude
-                                    if ($objListaBatidaApr[$idx]['movimento'] == 8 || $objListaBatidaApr[$idx]['movimento'] == 7) {
-                                        echo '<div class="col-6 text-center"><strong>Data</strong><br>' . date('d/m/Y', strtotime($objListaBatidaApr[$idx]['atitude_dt'])) . '</div>';
-                                        echo '<div class="col-6 text-center"><strong>Horas</strong><br>' . sprintf("%05s", m2h($objListaBatidaApr[$idx]['atitude_fim'])) . '</div>';
-                                        if ($objListaBatidaApr[$idx]['movimento'] == 8) {
-                                            echo '<div class="col-12 text-center pt-2"><strong>Tipo Atitude</strong><br>' . ($objListaBatidaApr[$idx]['atitude_tipo'] == 1 ? 'Compensar (Fica BH)' : 'Descontar no pagto.') . '</div>';
-                                        } else {
-                                            echo '<div class="col-12 text-center pt-2"><strong>Tipo Atitude</strong><br>Atraso Não Remunerado</div>';
-                                        }
-                                        echo '<div class="col-12 text-center"><strong>Solicitante</strong><br>' . $objListaBatidaApr[$idx]['solicitante'] . '</div>';
-                                        if ($objListaBatidaApr[$idx]['movimento'] == 8) {
-                                            if (strlen(trim($objListaBatidaApr[$idx]['justificativa_abono_tipo'] ?? '')) > 0) echo '<div class="col-12 text-center pt-2"><strong>Justificativa</strong> ' . $objListaBatidaApr[$idx]['atitude_justificativa'] . '</div>';
-                                        } else {
-                                            echo '<div class="col-12 text-center pt-2"><strong>Justificativa</strong> Atraso Não Remunerado</div>';
-                                        }
-                                        if (strlen($objListaBatidaApr[$idx]['possui_anexo'] ?? '') > 0) {
-                                            echo '<div class="col-12 text-center pt-2"><strong>Anexo</strong><br>';
-                                            echo '<button type="button" onclick="carregaVisualizador(' . $objListaBatidaApr[$idx]['id'] . ',\'' . substr($chapaFunc, 9) . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" aria-hidden="true"></i> </button>';
-                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $objListaBatidaApr[$idx]['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
-                                            echo '</div>';
-                                        }
-                                    }
-                                    echo '</div>';
-
-                                    echo '</td>';
-
-
-
-
-                                    echo '<td class="n-mobile-cell" width="25" align="center">';
-                                    switch ($objListaBatidaApr[$idx]['movimento']) {
-                                        case 1:
-                                            echo '<span class="batida bteldorado_3" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                        case 2:
-                                            echo '<span class="batida_del_view" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                        case 3:
-                                            echo '<span class="batida_nat_view" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                        case 4:
-                                            echo '<span class="batida_data_view" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                        case 5:
-                                            echo '<span class="batida_atraso_view bteldorado_4" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                        case 6:
-                                            echo '<span class="batida_falta_view bteldorado_5" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                        case 7:
-                                            echo '<span class="batida_just_excecao" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                        case 8:
-                                            echo '<span class="batida_atitude bteldorado_6" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                        case 9:
-                                            echo '<span class="batida_falta_view" style="display: inline !important;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                                            break;
-                                    }
-
-
-
-                                    if ($aa == 0) {
-                                        echo '<input type="hidden" name="func_chapa" value="' . $objListaBatidaApr[$idx]['chapa'] . '"><input type="hidden" name="func_cpf" value="' . $objListaBatidaApr[$idx]['cpf'] . '"><input type="hidden" name="func_password" id="func_password_' . $objListaBatidaApr[$idx]['chapa'] . '" value="">';
-                                    }
-
-                                    echo '</td>';
-                                    echo '<td class="n-mobile-cell" style="font-size: 11px;">';
-
-                                    switch ($objListaBatidaApr[$idx]['movimento']) {
-                                        case 1:
-                                            echo 'Inclusão de batida';
-                                            break;
-                                        case 2:
-                                            echo 'Exclusão de batida';
-                                            break;
-                                        case 3:
-                                            echo 'Alteração de natureza';
-                                            break;
-                                        case 4:
-                                            echo 'Alteração jornada referência';
-                                            break;
-                                        case 5:
-                                            echo 'Abono de atrasos';
-                                            break;
-                                        case 6:
-                                            echo 'Abono de faltas';
-                                            break;
-                                        case 7:
-                                            echo 'Justificativa de Exceção';
-                                            break;
-                                        case 8:
-                                            echo 'Altera Atitude';
-                                            break;
-                                        case 9:
-                                            echo 'Falta não remunerada';
-                                            break;
-                                    }
-
-                                    echo '</td>';
-                                    echo '<td class="n-mobile-cell" align="center">' . date('d/m/Y', strtotime($objListaBatidaApr[$idx]['dtponto'])) . '</td>';
-
-                                    if ($objListaBatidaApr[$idx]['movimento'] != 8 && $objListaBatidaApr[$idx]['movimento'] != 7) {
-                                        echo '<td class="n-mobile-cell" align="center">' . (($objListaBatidaApr[$idx]['abn_codabono'] == '') ? sprintf("%05s", m2h($objListaBatidaApr[$idx]['batida'])) : '') . '</td>';
-                                        echo '<td class="n-mobile-cell" align="center">' . (($objListaBatidaApr[$idx]['abn_codabono'] <> '') ? date('d/m/Y', strtotime($objListaBatidaApr[$idx]['dtponto'])) . ' ' . sprintf("%05s", m2h($objListaBatidaApr[$idx]['abn_horaini'])) : '') . '</td>';
-                                        echo '<td class="n-mobile-cell" align="center">' . (($objListaBatidaApr[$idx]['abn_codabono'] <> '') ? date('d/m/Y', strtotime($data_fim)) . ' ' . sprintf("%05s", m2h($objListaBatidaApr[$idx]['abn_horafim'])) : '') . '</td>';
-                                        echo '<td class="n-mobile-cell" align="center">' . (($objListaBatidaApr[$idx]['abn_totalhoras'] <> '') ?  m2h($total_horas, 4)  : '') . '</td>';
-                                        echo '<td class="n-mobile-cell">';
-                                        if (strlen(trim($objListaBatidaApr[$idx]['abn_codabono'] ?? '')) > 0) {
-                                            echo $objListaBatidaApr[$idx]['abn_codabono'] . ' - ' . (($objListaBatidaApr[$idx]['movimento'] == 9) ? 'FALTA NÃO REMUNERADA' : extrai_valor($resAbonos, $objListaBatidaApr[$idx]['abn_codabono'], 'CODIGO', 'DESCRICAO'));
-                                        }
-                                        echo '</td>';
-                                        echo '<td class="n-mobile-cell">' . (strlen(trim($objListaBatidaApr[$idx]['justificativa_abono_tipo'])) > 0 ? $objListaBatidaApr[$idx]['justificativa_abono_tipo'] : $objListaBatidaApr[$idx]['motivo']) . '</td>';
-                                    } else {
-
-                                        echo '<td class="n-mobile-cell" align="left"></td>';
-                                        echo '<td class="n-mobile-cell" align="left"></td>';
-                                        echo '<td class="n-mobile-cell" align="left"></td>';
-
-                                        echo '<td class="n-mobile-cell" align="center">' . sprintf("%05s", m2h($objListaBatidaApr[$idx]['atitude_fim'])) . '</td>';
-                                        if ($objListaBatidaApr[$idx]['movimento'] == 8) {
-                                            echo '<td class="n-mobile-cell" align="left">' . ($objListaBatidaApr[$idx]['atitude_tipo'] == 1 ? 'Compensar (Fica BH)' : 'Descontar no pagto.') . '</td>';
-                                            echo '<td class="n-mobile-cell" align="left">' . $objListaBatidaApr[$idx]['atitude_justificativa'] . '</td>';
-                                        } else {
-                                            echo '<td class="n-mobile-cell" align="left">Atraso Não Remunerado</td>';
-                                            echo '<td class="n-mobile-cell" align="left">Atraso Não Remunerado</td>';
-                                        }
-                                    }
-                                    echo '<td class="text-center n-mobile-cell">';
-
-                                    if (strlen($objListaBatidaApr[$idx]['possui_anexo'] ?? '') > 0) {
-                                        echo '<button type="button" onclick="carregaVisualizador(' . $objListaBatidaApr[$idx]['id'] . ',\'' . substr($chapaFunc, 9) . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" aria-hidden="true"></i> </button>';
-                                        echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $objListaBatidaApr[$idx]['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
-                                    }
-                                    echo '</td>';
-                                    echo '<td class="n-mobile-cell" align="left" style="font-size:11px;">' . $objListaBatidaApr[$idx]['solicitante'] . '</td>';
-                                    echo '</tr>';
-                                    $aa++;
-                                }
-                            }
-                        }
-
-                        echo '</table>';
-                        echo '</div>';
-                        echo '</div>';
-
-                        echo '</fieldset>';
-                        echo '<input type="hidden" name="act" data-act>';
-                    }
-                    echo '</br>';
-
-                    echo '<div class="row">';
-                    echo '<input type="hidden" name="motivo_reprova" id="motivo_reprova">';
-                    echo '<input type="hidden" name="periodo" value="' . $periodo . '">';
-                    echo '<input type="hidden" name="statusPeriodo" value="' . $statusPeriodo . '">';
-                    echo '</div></form>';
-                    echo '</br>';
-                    echo '</br>';
-                } else {
-                    echo '<div class="card-body border-bottom">
-                                                    <div class="alert alert-warning2 border-0" role="alert">
-                                                        <i class="fas fa-info-circle"></i> Nenhum registro encontrado.
-                                                    </div>
-                                                </div>';
-                }
-                ?>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    const aprovarIndividual = (idRegistro) => {
+        Swal.fire({
+            icon              : 'question',
+            title             : 'Confirmar aprovação deste registro?',
+            showDenyButton    : true,
+            showCancelButton  : true,
+            confirmButtonText : `Sim aprovar`,
+            denyButtonText    : `Cancelar`,
+            showCancelButton  : false,
+            showCloseButton   : false,
+            allowOutsideClick : false,
+            width             : 600,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $("[data-checkbox]").prop('checked', false);
+                openLoading();
+                $("[data-checkbox='"+idRegistro+"']").prop('checked', true);
+                $('[data-act]').val('apr');
+                $("#form1").attr('target', '_top');
+                document.getElementById('form1').action="";
+                document.getElementById('form1').submit();
+            }
+        });
+    }
+    const reprovarIndividual = (idRegistro) => {
+        $("[data-checkbox]").prop('checked', false);
+        $("[data-checkbox='"+idRegistro+"']").prop('checked', true);
+        reprovaBatida();
+    }
     const carregaVisualizador = (id, nome) => {
 
         $("#titulo_modal").html('Anexo enviado por | ' + nome);
@@ -559,6 +593,24 @@
         var hFrame = $(".modal-body").height();
 
         $("#iframe_preview").html('<iframe id="iframe" src="/ponto/preview/index/' + id + '" frameborder="0" width="100%" height="' + (hFrame - 50) + 'px" allowfullscreen></iframe>');
+
+        var myTimeout = setTimeout(function() {
+            openLoading(true);
+            var wFrame = $("#iframe").width();
+            $('#iframe').contents().find("html").find('img').attr('style', 'max-width:' + wFrame + 'px;');
+            clearTimeout(myTimeout);
+        }, 4000);
+
+    }
+    const carregaVisualizadorEscala = (id, nome) => {
+
+        $("#titulo_modal").html('Anexo enviado por | ' + nome);
+        $("#conteudo_modal").html('<div class="text-center"><div class="spinner-border thumb-md text-primary" role="status"></div></div>');
+        $(".modal_visualizador").modal('show');
+        openLoading();
+        var hFrame = $(".modal-body").height();
+
+        $("#iframe_preview").html('<iframe id="iframe" src="/ponto/preview/escala/' + id + '" frameborder="0" width="100%" height="' + (hFrame - 50) + 'px" allowfullscreen></iframe>');
 
         var myTimeout = setTimeout(function() {
             openLoading(true);
@@ -593,6 +645,24 @@
 </div><!-- /.modal -->
 <!-- modal visualizador -->
 
+<!-- modal justificativa -->
+<div class="modal modal_justificativa" tabindex="-1" role="dialog" data-animation="blur" aria-labelledby="modal_justificativa" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-full">
+            <div class="modal-header text-dark pt-3 pb-2" style="background: #ffffff;">
+                <h5 class="modal-title mt-0">Justificativas da requisição</h5>
+                <button type="button" class="close text-dark" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
+            </div>
+            <div class="modal-body" style="background: #ffffff;" id="justificativas">
+
+                
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- modal upload -->
+
 <style>
     .modal_visualizador {
         padding: 10px !important;
@@ -612,7 +682,6 @@
         border-radius: 0;
     }
 </style>
-
 <script>
     function filtroSecao() {
         var periodo = document.getElementById("periodo").value;
@@ -625,6 +694,9 @@
             alert('Selecione uma seção');
             return false;
         }
+        openLoading();
+        $("#form_secao").attr('target', '_top');
+        document.getElementById('form_secao').action="";
         document.getElementById('form_secao').submit();
     }
 
@@ -646,20 +718,32 @@
     })
 
     function aprovaBatida() {
-        var r = confirm('Deseja realmente APROVAR as batidas selecionadas.');
+        if( $("[data-checkbox]:checked").length <= 0){
+            exibeAlerta('warning', 'Nenhum registro selecionado.')
+            return;
+        }
+        var r = confirm('Deseja realmente APROVAR os registros selecionados.');
         if (r == true) {
             openLoading();
             $('[data-act]').val('apr');
+            $("#form1").attr('target', '_top');
+            document.getElementById('form1').action="";
             document.getElementById('form1').submit();
         }
         return false;
     }
 
     function aprovaBatidaTot() {
-        var r = confirm('Deseja realmente aprovar as batidas selecionadas.');
+        if( $("[data-checkbox]:checked").length <= 0){
+            exibeAlerta('warning', 'Nenhum registro selecionado.')
+            return;
+        }
+        var r = confirm('Deseja realmente aprovar os registros selecionados.');
         if (r == true) {
             openLoading();
             $('[data-act]').val('apr');
+            $("#form1").attr('target', '_top');
+            document.getElementById('form1').action="";
             document.getElementById('form1').submit();
         }
         return false;
@@ -689,7 +773,7 @@
 
     function reprovaBatida() {
 
-        if ($("[data-chapa]:checked").length <= 0) {
+        if ($("[data-checkbox]:checked").length <= 0) {
             exibeAlerta('warning', 'Nenhuma registro selecionada.');
             return false;
         }
@@ -733,6 +817,8 @@
                     openLoading();
                     $('[data-act]').val('rep');
                     $('#motivo_reprova').val(result.value);
+                    $("#form1").attr('target', '_top');
+                    document.getElementById('form1').action="";
                     document.getElementById('form1').submit();
 
                 } catch (e) {
@@ -821,5 +907,169 @@
         });
 
     }
+    const excel = () => {
+
+        var periodo = document.getElementById("periodo").value;
+        if (periodo == "") {
+            exibeAlerta('error', 'Período não informado.');
+            return false;
+        }
+        var secao = document.getElementById('secao').value;
+        if (secao == '') {
+            alert('Selecione uma seção');
+            return false;
+        }
+
+        $("#form1").attr('target', '_blank');
+        document.getElementById('form1').action="<?= base_url('ponto/aprova/excel'); ?>";
+        document.getElementById('form1').submit();
+    }
+    const justificativas = (idEscala) => {
+
+        openLoading();
+        $("#justificativas").html('');
+
+        $.ajax({
+            url: "<?= base_url('ponto/escala/action/justificativa') ?>",
+            type:'POST',
+            data: {
+                "id": idEscala
+            },
+            success:function(result){
+                $(".modal_justificativa").modal('show');
+                openLoading(true);
+                if(result == ""){
+                    $("#justificativas").html('<div class="alert alert-warning2 border-0" role="alert">Nenhuma justificativa encontrada.</div>');
+                }else{
+                    $("#justificativas").html(result);
+                }
+
+            },
+        });
+
+    }
+    function removerHTML(variavelComHTML) {
+        const elemento = document.createElement('div');
+        elemento.innerHTML = variavelComHTML;
+        return elemento.textContent || elemento.innerText || '';
+    }
+</script>
+<style> 
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0 !important;
+    border: none !important;
+    background: none !important;
+}
+.dtfh-floatingparent {
+    height: 205px !important;
+}
+.dtfh-floatingparent .sorting {
+    padding-top: 75px !important;
+}
+body {
+    overflow-x: auto !important;
+}
+.select2-results {
+    width: max-content !important;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    
+}
+.dropify-wrapper {
+    height: 53px !important;
+    width: 132px;
+    line-height: 0;
+}
+.dropify-wrapper .dropify-message span.file-icon {
+    font-size: 28px;
+}
+.dropify-wrapper .dropify-message p {
+    margin: 5px 0 0;
+    margin: 0;
+    padding: 0;
+    font-size: 10px;
+    line-height: 1;
+}
+.dropify-wrapper .dropify-errors-container ul li {
+    font-size: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+</style>
+<?php loadPlugin(array('datatable')); ?>
+<link rel="stylesheet" type="text/css" href="<?= base_url('public/assets/plugins/datatables/fixedHeader/jquery.dataTables.css'); ?>"/>
+<link rel="stylesheet" type="text/css" href="<?= base_url('public/assets/plugins/datatables/fixedHeader/fixedHeader.dataTables.css'); ?>"/>
+<script type="text/javascript" src="<?= base_url('public/assets/plugins/datatables/fixedHeader/jquery.dataTables.js'); ?>"></script>
+<script type="text/javascript" src="<?= base_url('public/assets/plugins/datatables/fixedHeader/dataTables.fixedHeader.js'); ?>"></script>
+<script>
+    $(document).ready(function () {
+    // Inicialização do DataTable
+    var tabelaAprovacao = $('#datatableAprovacao').DataTable({
+        "aLengthMenu": [[25, 50, 100, 200, -1], [25, 50, 100, 200, "Todos"]],
+        "iDisplayLength": 25,
+        "aaSorting": [[0, "desc"]],
+        "fixedHeader": true, // Ativa o fixedHeader
+        "language": {
+            "decimal": ",",
+            "thousands": ".",
+            "sProcessing": "Processando...",
+            "sLengthMenu": "Exibir _MENU_ registros",
+            "sZeroRecords": "Nenhum registro encontrado",
+            "sEmptyTable": "Nenhum dado disponível nesta tabela",
+            "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+            "sInfoFiltered": "(filtrado de _MAX_ registros no total)",
+            "sSearch": "Procurar:",
+            "oPaginate": {
+                "sFirst": "Primeiro",
+                "sPrevious": "Anterior",
+                "sNext": "Próximo",
+                "sLast": "Último"
+            },
+            "oAria": {
+                "sSortAscending": ": Ordenar colunas de forma ascendente",
+                "sSortDescending": ": Ordenar colunas de forma descendente"
+            }
+        },
+        initComplete: function () {
+            var api = this.api(); // Instância do DataTable
+            var p_linha = api.columns()[0].length;
+
+            // Configura filtros personalizados
+            api.columns().every(function () {
+                var column = this;
+
+                if (column[0][0] == 0 || column[0][0] >= (p_linha - 2) || column[0][0] == 7 || column[0][0] == 5) return false;
+
+                var select = $('<select class="form-control form-control-sm filtro_table"><option value="">Todos</option></select>')
+                    .appendTo($(column.header()))
+                    .on('change', function () {
+                        var val = $(this).val();
+                        column.search(val ? '^' + val + '$' : '', true, false).draw();
+                    });
+
+                column.data().unique().sort().each(function (d, j) {
+                    var noHTML = removerHTML(d);
+                    select.append('<option value="' + noHTML + '">' + noHTML + '</option>');
+                });
+            });
+
+            $(".filtro_table").select2({
+                width: '100%',
+                language: {
+                    noResults: function () {
+                        return 'Nenhum resultado encontrado';
+                    }
+                }
+            });
+            setInterval(function(){
+                tabelaAprovacao.fixedHeader.adjust();
+            }, 1000);
+        },
+    });
+    
+});
 </script>
 <?php loadPlugin(array('select2')); ?>

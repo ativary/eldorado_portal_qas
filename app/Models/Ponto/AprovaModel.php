@@ -12,6 +12,7 @@ class AprovaModel extends Model
 
     protected $dbportal;
     protected $dbrm;
+    protected $mEscala;
     private $log_id;
     private $now;
     private $coligada;
@@ -22,10 +23,86 @@ class AprovaModel extends Model
         $this->log_id   = session()->get('log_id');
         $this->coligada = session()->get('func_coligada');
         $this->now      = date('Y-m-d H:i:s');
+		$this->mEscala = model('Ponto/EscalaModel');
 
         if(DBRM_TIPO == 'oracle') $this->dbrm->query("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
 		if(DBRM_TIPO == 'oracle') $this->dbrm->query("ALTER SESSION SET NLS_NUMERIC_CHARACTERS='.,'");
     }
+
+	// #############################################################################
+	// APROVA DE ESCALA
+	// #############################################################################
+	public function aprovaEscala($idEscala, $rh = false)
+	{
+
+		
+
+		$escala = $this->dbportal->query(" SELECT chapa, situacao FROM zcrmportal_escala WHERE id = '{$idEscala}' AND situacao IN (10,2) ");
+		$result = ($escala) ? $escala->getResultArray() : null;
+		
+		if($result){
+
+			$situacao = $result[0]['situacao'];
+			
+			$chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+			if($chapaUser == $result[0]['chapa']) return false;
+
+			if(!$rh){
+				if(!self::isGestorOrLiderAprovador($result[0]['chapa'])){
+					return false;
+				}
+			}
+
+			switch($situacao){
+				case 10: $query = " UPDATE zcrmportal_escala SET situacao = 2, dtapr = '".date('Y-m-d H:i:s')."', usuapr = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao = 10 "; break;
+				case 2: $query = " UPDATE zcrmportal_escala SET situacao = 3, dtrh = '".date('Y-m-d H:i:s')."', usurh = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao = 2 "; break;
+				default: return false; break;
+			}
+
+			$this->dbportal->query($query);
+        	if($this->dbportal->affectedRows() > 0){
+
+				$query = " SELECT id FROM zcrmportal_escala WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' and termo_obrigatorio = 1 AND situacao = 1 ";
+                $result = $this->dbportal->query($query);
+                if($result->getNumRows() > 0){
+                    $this->mEscala->EscalaNotificaSolicitante($idEscala);
+                }
+
+				if($situacao == 2){
+					$result = $this->mEscala->SincronizaRM_Horario($idEscala);
+
+					if($result === false){
+
+						// em caso de erro na sincronização com totvs
+						// faz o rollback da tabela do portal
+						$query = "
+							UPDATE 
+								zcrmportal_escala
+							SET
+								usurh = NULL,
+								dtrh = NULL,
+								situacao = 2
+							WHERE
+									id = {$idEscala}
+								AND situacao = 3
+						";
+						$this->dbportal->query($query);
+
+						return false;
+
+					}
+					
+				}
+
+				return true;
+
+			}
+
+		}
+
+		return false;
+
+	}
 
     // #############################################################################
 	// APROVA BATIDA RH
@@ -272,6 +349,41 @@ class AprovaModel extends Model
 	}
 
     // #############################################################################
+	// REPROVA TROCA DE ESCALA
+	// #############################################################################
+	public function reprovaEscala($idEscala, $motivo_reprova = "", $rh = false)
+	{
+
+		$escala = $this->dbportal->query(" SELECT chapa FROM zcrmportal_escala WHERE id = '{$idEscala}' AND situacao != '3' ");
+		$result = ($escala) ? $escala->getResultArray() : null;
+
+		if($result){
+
+			$chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+			if($chapaUser == $result[0]['chapa']) return false;
+
+			if(!$rh){
+				if(!self::isGestorOrLiderAprovador($result[0]['chapa'])){
+					notificacao('danger', 'Alguns movimento não podem ser aprovados.');
+					return false;
+				}
+			}
+
+			$situacao = $result[0]['situacao'];
+
+			$query = " UPDATE zcrmportal_escala SET documento = NULL, dtupload = NULL, usuupload = NULL, situacao = 8, motivocancelado = '(".((!$rh) ? 'Gestor' : 'RH').") {$motivo_reprova}', dtcancelado = '".date('Y-m-d H:i:s')."', usucancelado = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao NOT IN (9, 3, 8) ";
+			$this->dbportal->query($query);
+			if($this->dbportal->affectedRows() > 0){
+				return responseJson('success', 'Escala REPROVADA com sucesso');
+			}
+
+        }
+
+		return false;
+
+	}
+
+    // #############################################################################
 	// REPROVA BATIDA RH
 	// #############################################################################
 	public function reprovaBatidaRH($idbatida, $tipo, $motivo_reprova = "", $rh = false)
@@ -365,8 +477,10 @@ class AprovaModel extends Model
 
 
 		// exit($periodo);
-		$periodo = explode('|', $periodo);
-		$periodo = " AND A.dtponto BETWEEN '{$periodo[0]}' AND '{$periodo[1]}' ";
+		$periodo    = explode('|', $periodo);
+		$perInicio  = $periodo[0];
+		$perFim     = $periodo[1];
+		$periodo    = " AND A.dtponto BETWEEN '{$periodo[0]}' AND '{$periodo[1]}' ";
 
         $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 		if ($codfilial) {
@@ -436,7 +550,7 @@ class AprovaModel extends Model
 							WHERE
 								CODCOLIGADA = PFUNC.CODCOLIGADA AND CHAPA = PFUNC.CHAPA
 						)X WHERE X.DATA >= '{$perInicio}'
-						ORDER BY X. DATA ASC
+						ORDER BY X.DATA ASC
 					) IS NOT NULL
 					AND PFUNC.CODTIPO <> 'A' 
 					AND PFUNC.CODPESSOA = PPESSOA.CODIGO 
@@ -621,7 +735,8 @@ class AprovaModel extends Model
 				A.NOME,
 				B.CPF,
 				C.GESTOR_CHAPA,
-				C.GESTOR_NOME
+				C.GESTOR_NOME,
+				(CASE WHEN (A.DATADEMISSAO IS NULL OR A.DATADEMISSAO >= '{$perFim}') THEN 'Ativo' ELSE 'Demitido' END) CODSITUACAO
 			FROM 
 				PFUNC A
 				INNER JOIN PPESSOA B ON B.CODIGO = A.CODPESSOA
@@ -647,60 +762,248 @@ class AprovaModel extends Model
 				".(str_replace('B.CODSECAO','A.CODSECAO',$in_secao))."
 				{$filtro_chapa}
 			";
-		$result = $this->dbrm->query($query);
-		$dados_func = $result->getResultArray();
+		// $result = $this->dbrm->query($query);
+		// $dados_func = $result->getResultArray();
+
+		$filtro_tipo = (strlen(trim($dados['filtro_tipo'])) != 0) ? " AND a.movimento = '{$dados['filtro_tipo']}' " : '';
+		$filtro_filial = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND B.CODFILIAL = '{$dados['filtro_filial']}' " : '';
+		$filtro_legenda = "";
+		$filtro_legenda2 = "";
+		if((strlen(trim($dados['filtro_legenda'])) != 0)){
+			if($dados['filtro_legenda'] == 10){
+				$filtro_legenda2 = " AND a.situacao = '10' ";
+			}
+			if($dados['filtro_legenda'] == 2){
+				$filtro_legenda = " AND 1 = 2 ";
+				$filtro_legenda2 = " AND a.situacao = '2' ";
+			}
+		}
+		
+		
+		(strlen(trim($dados['filtro_legenda'])) != 0) ? " AND a.situacao = '{$dados['filtro_legenda']}' " : '';
+		
+		$filtro_1 = "";
+		$filtro_2 = "";
+		if(strlen(trim($dados['filtro_tipo'])) > 0){
+			if($dados['filtro_tipo'] == 21 || $dados['filtro_tipo'] == 22){
+				$filtro_1 = " AND 1 = 2 ";
+				$filtro_2 = " AND 1 = 1 ";
+				$filtro_tipo = ($dados['filtro_tipo'] == 21) ? ' and a.movimento = 1 ' : ' and a.movimento = 2 ';
+			}else{
+				$filtro_1 = " AND 1 = 1 ";
+				$filtro_2 = " AND 1 = 2 ";
+			}
+		}
 
 		// nova sql Tiago
 		$query = "
-			SELECT
-				A.id,
-				A.dtponto,
-				A.movimento,
-				A.chapa,
-				COALESCE(A.ent1, A.ent2, A.ent3, A.ent4, A.ent5, A.sai1, A.sai2, A.sai3, A.sai4, A.sai5) batida,
-				COALESCE(A.justent1, A.justent2, A.justent3, A.justent4, A.justent5, A.justsai1, A.justsai2, A.justsai3, A.justsai4, A.justsai5) motivo,
-				COALESCE(A.natent1, A.natent2, A.natent3, A.natent4, A.natent5, A.natsai1, A.natsai2, A.natsai3, A.natsai4, A.natsai5) natureza,
-				A.abn_dtfim,
-				A.abn_horaini,
-				A.abn_horafim,
-				A.abn_codabono,
-				(A.abn_horafim - A.abn_horaini) abn_totalhoras,
-				A.possui_anexo,
-				A.coligada,
-				A.status,
-				A.justificativa_abono_tipo,
-				A.atitude_dt,
-				A.atitude_ini,
-				A.atitude_fim,
-				A.atitude_tipo,
-				A.atitude_justificativa,
-				C.nome solicitante
-			FROM
-				zcrmportal_ponto_horas A
-				INNER JOIN ".DBRM_BANCO."..PFUNC B ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
-				LEFT JOIN zcrmportal_usuario C ON C.id = A.usucad
-			WHERE
-				" . $FT_STATUS . "
-				AND A.coligada = '{$_SESSION['func_coligada']}'
-				AND A.motivo_reprova IS NULL
-				AND A.usu_delete IS NULL
-				{$in_secao}
-				" . $FT_ABONO . "
-				" . $FT_MOVIMENTO . "
-				" . $codfilial . "
-				{$periodo}
-				{$filtro_chapa}
+			SELECT DISTINCT X.* FROM (
+				SELECT
+					A.id,
+					A.dtponto,
+					null dtfolga,
+					null codindice_folga,
+					A.movimento,
+					A.chapa,
+					COALESCE(A.ent1, A.ent2, A.ent3, A.ent4, A.ent5, A.sai1, A.sai2, A.sai3, A.sai4, A.sai5) batida,
+					COALESCE(A.justent1, A.justent2, A.justent3, A.justent4, A.justent5, A.justsai1, A.justsai2, A.justsai3, A.justsai4, A.justsai5) motivo,
+					COALESCE(A.natent1, A.natent2, A.natent3, A.natent4, A.natent5, A.natsai1, A.natsai2, A.natsai3, A.natsai4, A.natsai5) natureza,
+					COALESCE(A.dtrefent1, A.dtrefent2, A.dtrefent3, A.dtrefent4, A.dtrefent5, A.dtrefsai1, A.dtrefsai2, A.dtrefsai3, A.dtrefsai4, A.dtrefsai5) data_referencia,
+					A.abn_dtfim,
+					A.abn_horaini,
+					A.abn_horafim,
+					A.abn_codabono,
+					(A.abn_horafim - A.abn_horaini) abn_totalhoras,
+					A.possui_anexo,
+					A.coligada,
+					A.status,
+					A.justificativa_abono_tipo,
+					A.atitude_dt,
+					A.atitude_ini,
+					A.atitude_fim,
+					A.atitude_tipo,
+					A.atitude_justificativa,
+					C.nome solicitante,
+					(
+						SELECT
+							MAX(BB.CHAPA)
+						FROM
+							".DBRM_BANCO."..PPESSOA AA
+							INNER JOIN ".DBRM_BANCO."..PFUNC BB ON BB.CODPESSOA = AA.CODIGO
+						WHERE
+								AA.CPF = C.login COLLATE Latin1_General_CI_AS
+							AND BB.CODCOLIGADA = A.coligada
+							AND (
+								SELECT TOP 1 REGISTRO FROM (
+									SELECT
+										CONCAT(CODCOLIGADA,'-',CHAPA) REGISTRO,
+										CASE
+											WHEN DATADEMISSAO IS NOT NULL AND CODSITUACAO = 'D' THEN DATADEMISSAO
+											ELSE GETDATE()
+										END DATA
+									FROM
+										".DBRM_BANCO."..PFUNC
+									WHERE
+										CODCOLIGADA = BB.CODCOLIGADA AND CHAPA = BB.CHAPA
+										AND DATAADMISSAO <= a.dtponto
+								)X WHERE X.DATA >= a.dtponto
+								ORDER BY X. DATA ASC
+							) IS NOT NULL
+					) chapa_solicitante,
+					NULL codhorario,
+					NULL horario,
+					NULL codindice,
+					NULL justificativa_escala,
+					E.CPF,
+					(
+					SELECT
+						TOP 1 
+						HB.DESCRICAO
+					FROM
+						".DBRM_BANCO."..PFHSTSIT HA
+						INNER JOIN ".DBRM_BANCO."..PCODSITUACAO HB ON HB.CODCLIENTE = HA.NOVASITUACAO
+					WHERE
+							HA.CODCOLIGADA = A.COLIGADA
+						AND HA.CHAPA = A.CHAPA COLLATE Latin1_General_CI_AS
+						AND (
+							HA.DATAMUDANCA <= A.dtponto
+						)
+					ORDER BY
+						DATAMUDANCA DESC
+					) CODSITUACAO,
+					B.NOME,
+					a.dtcadastro data_solicitacao,
+					(
+						SELECT max(CAST(BB.descricao AS VARCHAR)) FROM zcrmportal_ponto_justificativa_func AA  (NOLOCK) 
+						INNER JOIN zcrmportal_ponto_motivos BB (NOLOCK) ON AA.justificativa = BB.id AND AA.coligada = BB.codcoligada WHERE AA.coligada = A.coligada AND AA.dtponto = A.dtponto AND AA.chapa = A.chapa
+					) justificativa_excecao
+				FROM
+					zcrmportal_ponto_horas A
+					INNER JOIN ".DBRM_BANCO."..PFUNC B ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
+					LEFT JOIN zcrmportal_usuario C ON C.id = A.usucad
+					INNER JOIN ".DBRM_BANCO."..PPESSOA E ON E.CODIGO = B.CODPESSOA
+				WHERE
+					" . $FT_STATUS . "
+					AND A.coligada = '{$_SESSION['func_coligada']}'
+					AND A.motivo_reprova IS NULL
+					AND A.usu_delete IS NULL
+					{$in_secao}
+					" . $FT_ABONO . "
+					" . $FT_MOVIMENTO . "
+					" . $codfilial . "
+					{$periodo}
+					{$filtro_chapa}
+					".((($dados['filtro_tipo'] ?? 'ponto') == 'ponto') ? '' : $filtro_tipo)."
+					{$filtro_filial}
+					{$filtro_1}
+					{$filtro_legenda}
+					
+				UNION ALL
 				
-			ORDER BY 
-				A.chapa,
-				A.dtponto
+				SELECT
+					a.id,
+					a.datamudanca dtponto,
+					a.datamudanca_folga dtfolga,
+					a.codindice_folga codindice_folga,
+					CASE WHEN a.tipo = 1 THEN 21 ELSE 22 END movimento,
+					a.chapa,
+					NULL batida,
+					NULL motivo,
+					NULL natureza,
+					NULL data_referencia,
+					NULL abn_dtfim,
+					NULL abn_horaini,
+					NULL abn_horafim,
+					NULL abn_codabono,
+					NULL abn_totalhoras,
+					CASE WHEN a.usuupload IS NULL THEN 0 ELSE 1 END possui_anexo,
+					a.coligada,
+					a.situacao status,
+					NULL justificativa_abono_tipo,
+					NULL atitude_dt,
+					NULL atitude_ini,
+					NULL atitude_fim,
+					NULL atitude_tipo,
+					NULL atitude_justificativa,
+					c.nome solicitante,
+					(
+						SELECT
+							MAX(BB.CHAPA)
+						FROM
+							".DBRM_BANCO."..PPESSOA AA
+							INNER JOIN ".DBRM_BANCO."..PFUNC BB ON BB.CODPESSOA = AA.CODIGO
+						WHERE
+								AA.CPF = C.login COLLATE Latin1_General_CI_AS
+							AND BB.CODCOLIGADA = A.coligada
+							AND (
+								SELECT TOP 1 REGISTRO FROM (
+									SELECT
+										CONCAT(CODCOLIGADA,'-',CHAPA) REGISTRO,
+										CASE
+											WHEN DATADEMISSAO IS NOT NULL AND CODSITUACAO = 'D' THEN DATADEMISSAO
+											ELSE GETDATE()
+										END DATA
+									FROM
+										".DBRM_BANCO."..PFUNC
+									WHERE
+										CODCOLIGADA = BB.CODCOLIGADA AND CHAPA = BB.CHAPA
+										AND DATAADMISSAO <= a.datamudanca
+								)X WHERE X.DATA >= a.datamudanca
+								ORDER BY X.DATA ASC
+							) IS NOT NULL
+					) chapa_solicitante,
+					a.codhorario,
+					d.DESCRICAO horario,
+					a.codindice,
+					CASE
+						WHEN justificativa_11_horas IS NOT NULL THEN justificativa_11_horas
+						WHEN justificativa_6_dias IS NOT NULL THEN justificativa_6_dias
+						WHEN justificativa_6_meses IS NOT NULL THEN justificativa_6_meses
+						WHEN justificativa_periodo IS NOT NULL THEN justificativa_periodo
+						ELSE NULL
+					END justificativa_escala,
+					E.CPF,
+					(
+					SELECT
+						TOP 1 
+						HB.DESCRICAO
+					FROM
+						".DBRM_BANCO."..PFHSTSIT HA
+						INNER JOIN ".DBRM_BANCO."..PCODSITUACAO HB ON HB.CODCLIENTE = HA.NOVASITUACAO
+					WHERE
+							HA.CODCOLIGADA = A.COLIGADA
+						AND HA.CHAPA = A.CHAPA COLLATE Latin1_General_CI_AS
+						AND (
+							HA.DATAMUDANCA <= A.datamudanca
+						)
+					ORDER BY
+						DATAMUDANCA DESC
+					) CODSITUACAO,
+					B.NOME,
+					a.dtcad data_solicitacao,
+					NULL justificativa_excecao
+				FROM
+					zcrmportal_escala a
+					INNER JOIN ".DBRM_BANCO."..PFUNC B ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
+					LEFT JOIN zcrmportal_usuario C ON C.id = A.usucad
+					LEFT JOIN ".DBRM_BANCO."..AHORARIO D ON D.CODIGO = a.codhorario COLLATE Latin1_General_CI_AS AND D.CODCOLIGADA = a.coligada
+					INNER JOIN ".DBRM_BANCO."..PPESSOA E ON E.CODIGO = B.CODPESSOA
+				WHERE
+					a.coligada = '{$_SESSION['func_coligada']}'
+					and a.situacao in (10,2)
+					{$in_secao}
+					" . $codfilial . "
+					".(str_replace('A.dtponto','a.datamudanca',$periodo))."
+					".(str_replace(['a.movimento','ponto'],['a.tipo','0'],$filtro_tipo))."
+					{$filtro_chapa}
+					{$filtro_filial}
+					{$filtro_2}
+					{$filtro_legenda2}
+			)X
+			ORDER BY
+				X.chapa,
+				X.dtponto
 		";
-		// echo '<textarea>'.$query.'</textarea>';exit();
-		// if(session()->get('log_id') == 1){
-		// 	echo '<textarea>'.$query.'</textarea>'; 
-			// exit();
-		// }
-		// exit('<pre>'.$query);
 		$result = $this->dbportal->query($query);
         if($result->getNumRows() > 0){
 			$response = array();
@@ -708,56 +1011,19 @@ class AprovaModel extends Model
 			foreach($result as $key => $Dados){
 				$response[$key] = $Dados;
 
-				$nome_funcionario = '-demitido-';
-				$cpf_functionario = '';
-				$nome_gestor = '';
-				$chapa_gestor = '';
-				if($dados_func){
-					foreach($dados_func as $key2 => $dadosFunc){
-						if($dadosFunc['CHAPA'] == $Dados['chapa']){
-							$nome_funcionario = $dadosFunc['NOME'];
-							$cpf_functionario = $dadosFunc['CPF'];
-							$nome_gestor = $dadosFunc['GESTOR_NOME'];
-							$chapa_gestor = $dadosFunc['GESTOR_CHAPA'];
-							break;
-						}
-					}
-				}
-				$response[$key]['nome'] = $nome_funcionario;
-				$response[$key]['cpf'] = $cpf_functionario;
-				$response[$key]['nome_gestor'] = $nome_gestor;
-				$response[$key]['chapa_gestor'] = $chapa_gestor;
-				$response[$key]['nomechapa'] = $Dados['chapa'].' - '.$nome_funcionario.' <small><b>=> [GESTOR: '.$chapa_gestor.' - '.$nome_gestor.']</b></small>';
+				$response[$key]['batidas_dia'] = self::listaBatidasDoDia($Dados['coligada'], $Dados['chapa'], dtEn($Dados['dtponto'], true));
 
-				// pega as batidas do sia no RM
-				$query = "
-					SELECT
-						BATIDA,
-						NATUREZA
-					FROM
-						ABATFUN
-					WHERE
-						CHAPA = '{$Dados['chapa']}'
-						AND CODCOLIGADA = '{$Dados['coligada']}'
-						AND DATA = '".dtEn($Dados['dtponto'], true)."'
-					ORDER BY
-						CASE WHEN DATAREFERENCIA IS NOT NULL THEN DATAREFERENCIA ELSE DATA END ASC
-				";
-				$batidas_do_dia = "";
-				$result_batidas = $this->dbrm->query($query);
-				if($result_batidas){
-					if($result_batidas->getNumRows() > 0){
-						$btidas_rm = $result_batidas->getResultArray();
-						foreach($btidas_rm as $key3 => $Batidas){
-
-							$batidas_do_dia .= (($Batidas['NATUREZA'] == 0) ? 'e:' : 's:').m2h($Batidas['BATIDA'],4).' | ';
-							unset($btidas_rm[$key3], $key3, $Batidas);
-						}
-						$batidas_do_dia = rtrim($batidas_do_dia, ' | ');
-					}
-				}
-
-				$response[$key]['batidas_rm'] = $batidas_do_dia;
+				$nome_funcionario   = '-demitido-';
+				$cpf_functionario   = '';
+				$nome_gestor        = '';
+				$chapa_gestor       = '';
+				$codsituacao        = '';
+				$response[$key]['nome']           = $Dados['NOME'];
+				$response[$key]['cpf']            = $Dados['CPF'];
+				$response[$key]['nome_gestor']    = $Dados['GESTOR_NOME'];
+				$response[$key]['chapa_gestor']   = $Dados['GESTOR_CHAPA'];
+				$response[$key]['codsituacao']    = $Dados['CODSITUACAO'];
+				$response[$key]['nomechapa']      = $Dados['chapa'].' - '.$Dados['NOME'].' <span style="font-size: 12px; margin-right: 5px;">[Situação: '.$Dados['CODSITUACAO'].']</span> <small><b>=> [GESTOR: '.$Dados['GESTOR_CHAPA'].' - '.$Dados['GESTOR_NOME'].']</b></small>';
 				
 
 				unset($result[$key], $key, $Dados);
@@ -765,196 +1031,7 @@ class AprovaModel extends Model
 			unset($dados_func);
 			return $response;
 		}
-		return false;
 
-		// nova sql Tiago
-		$query = " 
-			SELECT 
-				A.id,
-				A.dtponto,
-				A.movimento,
-				A.chapa,
-				CASE
-					WHEN ent1 IS NOT NULL THEN ent1
-					WHEN sai1 IS NOT NULL THEN sai1
-					WHEN ent2 IS NOT NULL THEN ent2
-					WHEN sai2 IS NOT NULL THEN sai2
-					WHEN ent3 IS NOT NULL THEN ent3
-					WHEN sai3 IS NOT NULL THEN sai3
-					WHEN ent4 IS NOT NULL THEN ent4
-					WHEN sai4 IS NOT NULL THEN sai4
-					WHEN ent5 IS NOT NULL THEN ent5
-					WHEN sai5 IS NOT NULL THEN sai5
-				END AS batida,
-				CASE
-					WHEN justent1 IS NOT NULL THEN justent1
-					WHEN justsai1 IS NOT NULL THEN justsai1
-					WHEN justent2 IS NOT NULL THEN justent2
-					WHEN justsai2 IS NOT NULL THEN justsai2
-					WHEN justent3 IS NOT NULL THEN justent3
-					WHEN justsai3 IS NOT NULL THEN justsai3
-					WHEN justent4 IS NOT NULL THEN justent4
-					WHEN justsai4 IS NOT NULL THEN justsai4
-					WHEN justent5 IS NOT NULL THEN justent5
-					WHEN justsai5 IS NOT NULL THEN justsai5
-				END AS motivo,
-				NULL as abn_dtfim,
-				NULL as abn_horaini,
-				NULL as abn_horafim,
-				NULL as abn_codabono,
-				NULL as abn_totalhoras,
-				NULL AS atitude_dt,
-				NULL AS atitude_ini,
-				NULL AS atitude_fim,
-				NULL AS atitude_justificativa,
-				NULL AS atitude_tipo
-				,F.NOME nomefunc
-				,P.CPF cpf
-				,F.CHAPA + ' - ' + F.NOME nomechapa
-				,F.CODSITUACAO situacao
-				,FU.NOME funcao
-				,F.CODFUNCAO codfuncao
-				,SE.DESCRICAO secao
-				,F.CODSECAO codsecao
-				,AA.DESCRICAO abn_descricao
-				,(
-					SELECT  
-						[1] +
-						CASE WHEN [2] IS NOT NULL THEN ' | '+[2] ELSE '' END +
-						CASE WHEN [3] IS NOT NULL THEN ' | '+[3] ELSE '' END +
-						CASE WHEN [4] IS NOT NULL THEN ' | '+[4] ELSE '' END +
-						CASE WHEN [5] IS NOT NULL THEN ' | '+[5] ELSE '' END +
-						CASE WHEN [6] IS NOT NULL THEN ' | '+[6] ELSE '' END +
-						CASE WHEN [7] IS NOT NULL THEN ' | '+[7] ELSE '' END BATIDAS
-					FROM
-					(
-						SELECT 
-							ROW_NUMBER() OVER(PARTITION BY (CASE WHEN DATAREFERENCIA IS NULL THEN DATA ELSE DATAREFERENCIA END), CHAPA ORDER BY (CASE WHEN DATAREFERENCIA IS NULL THEN DATA ELSE DATAREFERENCIA END)) LINHA,
-							CHAPA,
-							CASE WHEN NATUREZA = 1 THEN 'e:' ELSE 's:' END + CAST(BATIDA / 60 AS VARCHAR(8)) + ':' + FORMAT(BATIDA % 60, 'D2') BATIDA
-						FROM 
-							" . DBRM_BANCO . "..ABATFUN 
-						WHERE 
-							CHAPA = A.chapa 
-							AND DATA = A.dtponto
-							AND CODCOLIGADA = '" . $_SESSION['func_coligada'] . "'
-					) bat
-					PIVOT(
-						MAX(BATIDA)
-						FOR [LINHA] IN ([1], [2], [3], [4], [5], [6], [7])
-					)
-					 AS pv
-				) batidas,
-				U.id AS ANEXO_ID
-			FROM 
-				zcrmportal_ponto_horas A
-				LEFT JOIN zcrmportal_ponto_abono_atestado U ON A.dtponto = U.dtponto AND A.chapa = U.chapa AND A.coligada = U.coligada
-					LEFT JOIN " . DBRM_BANCO . "..PFUNC F ON F.CHAPA = A.chapa AND F.CODCOLIGADA = A.coligada
-					LEFT JOIN " . DBRM_BANCO . "..PFUNCAO FU ON FU.CODIGO = F.CODFUNCAO AND FU.CODCOLIGADA = F.CODCOLIGADA
-					LEFT JOIN " . DBRM_BANCO . "..PSECAO SE ON SE.CODIGO = F.CODSECAO AND SE.CODCOLIGADA = F.CODCOLIGADA
-					LEFT JOIN " . DBRM_BANCO . "..PPESSOA P ON P.CODIGO = F.CODPESSOA
-					LEFT JOIN " . DBRM_BANCO . "..AABONO AA ON AA.CODIGO = A.abn_codabono AND AA.CODCOLIGADA = A.coligada
-			WHERE
-				A.status <> 'S'  AND 
-				A.movimento NOT IN (" . $movimentoB . ")
-				" . $FILTRO_CHAPAS . "
-				" . $codfilial . "
-				
-				AND A.motivo_reprova IS NULL
-				
-			UNION ALL
-
-			SELECT
-				A.id,
-				A.dtponto,
-				A.movimento,
-				A.chapa,
-				NULL as batida,
-				NULL as motivo,
-				A.abn_dtfim,
-				A.abn_horaini,
-				A.abn_horafim,
-				CASE
-					WHEN A.justificativa_excecao IS NOT NULL THEN A.abn_codabono + ' - ' + A.justificativa_excecao
-					ELSE
-					A.abn_codabono
-				END abn_codabono,
-				CASE
-				WHEN A.abn_codabono IS NOT NULL 
-					THEN CONVERT(DATETIME, CONVERT(DATETIME, CAST(abn_dtfim AS VARCHAR (12)) + ' ' + CAST(abn_horafim / 60 AS VARCHAR(8)) + ':' + FORMAT(abn_horafim % 60, 'D2'), 113)
-							 -  
-						CONVERT(DATETIME, CAST(abn_dtini AS VARCHAR (12)) + ' ' + CAST(abn_horaini / 60 AS VARCHAR(8)) + ':' + FORMAT(abn_horaini % 60, 'D2'), 113)) 
-				ELSE 
-					NULL
-				END as abn_totalhoras,
-				A.atitude_dt,
-				A.atitude_ini,
-				A.atitude_fim,
-				A.atitude_justificativa,
-				A.atitude_tipo
-				,F.NOME nomefunc
-				,P.CPF cpf
-				,F.CHAPA + ' - ' + F.NOME nomechapa
-				,F.CODSITUACAO situacao
-				,FU.NOME funcao
-				,F.CODFUNCAO codfuncao
-				,SE.DESCRICAO secao
-				,F.CODSECAO codsecao
-				,AA.DESCRICAO abn_descricao
-				,(
-					SELECT  
-						[1] +
-						CASE WHEN [2] IS NOT NULL THEN ' | '+[2] ELSE '' END +
-						CASE WHEN [3] IS NOT NULL THEN ' | '+[3] ELSE '' END +
-						CASE WHEN [4] IS NOT NULL THEN ' | '+[4] ELSE '' END +
-						CASE WHEN [5] IS NOT NULL THEN ' | '+[5] ELSE '' END +
-						CASE WHEN [6] IS NOT NULL THEN ' | '+[6] ELSE '' END +
-						CASE WHEN [7] IS NOT NULL THEN ' | '+[7] ELSE '' END BATIDAS
-					FROM
-					(
-						SELECT 
-							ROW_NUMBER() OVER(PARTITION BY (CASE WHEN DATAREFERENCIA IS NULL THEN DATA ELSE DATAREFERENCIA END), CHAPA ORDER BY (CASE WHEN DATAREFERENCIA IS NULL THEN DATA ELSE DATAREFERENCIA END)) LINHA,
-							CHAPA,
-							CASE WHEN NATUREZA = 1 THEN 'e:' ELSE 's:' END + CAST(BATIDA / 60 AS VARCHAR(8)) + ':' + FORMAT(BATIDA % 60, 'D2') BATIDA
-						FROM 
-							" . DBRM_BANCO . "..ABATFUN 
-						WHERE 
-							CHAPA = A.chapa 
-							AND DATA = A.dtponto
-							AND CODCOLIGADA = '" . $_SESSION['func_coligada'] . "'
-					) bat
-					PIVOT(
-						MAX(BATIDA)
-						FOR [LINHA] IN ([1], [2], [3], [4], [5], [6], [7])
-					)
-					 AS pv
-				) batidas,
-				U.id AS ANEXO_ID
-			FROM 
-				zcrmportal_ponto_horas A
-				LEFT JOIN zcrmportal_ponto_abono_atestado U ON A.dtponto = U.dtponto AND A.chapa = U.chapa AND A.coligada = U.coligada
-					LEFT JOIN " . DBRM_BANCO . "..PFUNC F ON F.CHAPA = A.chapa AND F.CODCOLIGADA = A.coligada
-					LEFT JOIN " . DBRM_BANCO . "..PFUNCAO FU ON FU.CODIGO = F.CODFUNCAO AND FU.CODCOLIGADA = F.CODCOLIGADA
-					LEFT JOIN " . DBRM_BANCO . "..PSECAO SE ON SE.CODIGO = F.CODSECAO AND SE.CODCOLIGADA = F.CODCOLIGADA
-					LEFT JOIN " . DBRM_BANCO . "..PPESSOA P ON P.CODIGO = F.CODPESSOA
-					LEFT JOIN " . DBRM_BANCO . "..AABONO AA ON AA.CODIGO = A.abn_codabono AND AA.CODCOLIGADA = A.coligada
-			WHERE
-				A.status = 1 AND 
-				A.movimento IN (" . $movimentoB . ")
-				" . $FILTRO_CHAPAS . "
-				" . $codfilial . "
-				AND A.motivo_reprova IS NULL
-			ORDER BY
-				A.chapa, A.dtponto, A.movimento
-		";
-		// echo '<textarea>'.$query.'</textarea>';
-		$qry = $this->dbportal->query($query);
-		$res = ($qry) ? $qry->getResultArray() : false;
-
-		return $res;
-
-		$res = $this->dbportal->query($query);
-		
 		return false;
 	}
 
@@ -1353,6 +1430,13 @@ class AprovaModel extends Model
         if($result->getNumRows() > 0) return true;
       }
 
+	  $query = " SELECT * FROM zcrmportal_hierarquia_gestor_substituto WHERE chapa_substituto = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo = 0";
+      $result = $this->dbportal->query($query);
+      if($result){
+        if($result->getNumRows() > 0) return true;
+      }
+
+
       $query = "
         SELECT * FROM zcrmportal_hierarquia_lider_func_ponto WHERE chapa = '{$chapaColaborador}' AND coligada = '{$this->coligada}' AND inativo IS NULL AND id_lider IN (
             SELECT id FROM zcrmportal_hierarquia_lider_ponto WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo IS NULL AND nivel = 1
@@ -1366,5 +1450,24 @@ class AprovaModel extends Model
       return false;
 
     }
+
+	public function listaBatidasDoDia($coligada, $chapa, $data)
+	{
+		$result       = $this->dbrm->query("SELECT BATIDA, NATUREZA FROM ABATFUN WHERE CHAPA = '{$chapa}' AND COALESCE(DATAREFERENCIA, DATA) = '{$data}' AND CODCOLIGADA = '{$coligada}' ORDER BY DATA ASC, BATIDA ASC ");
+		$batidasDia   = '';
+
+		if($result){
+			$batidas = $result->getResult();
+			foreach($batidas as $batida){
+				switch($batida->NATUREZA){
+					case 0: $batidasDia .= 'Ent: '.m2h($batida->BATIDA).' | '; break;
+					case 1: $batidasDia .= 'Sai: '.m2h($batida->BATIDA).' | '; break;
+				}
+			}
+		}
+
+		return rtrim($batidasDia, ' | ');
+
+	}
 
 }

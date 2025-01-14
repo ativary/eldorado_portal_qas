@@ -21,8 +21,11 @@ class ManagerModel extends Model {
         $log_id = session()->get('log_id');
 
         $where = (!$global) ? " WHERE a.id_usuario = {$log_id} " : " WHERE d.menupai = '0' ";
+        $whereSub = (!$global) ? " WHERE a.id_substituto = {$log_id} AND '".date('Y-m-d')."' BETWEEN A.dtini AND A.dtfim AND A.inativo = 0" : " WHERE d.menupai = '0' ";
 
         $query = "
+        SELECT DISTINCT * FROM (
+
             SELECT 
                 DISTINCT
                 d.id,
@@ -38,8 +41,28 @@ class ManagerModel extends Model {
                 
             {$where}
                 
-            ORDER BY
-                d.menutit
+            UNION ALL 
+        
+            SELECT 
+                D.id,
+                D.menutit,
+                D.nome,
+                D.caminho,
+                D.icone
+            FROM 
+                zcrmportal_hierarquia_gestor_substituto A
+                LEFT JOIN zcrmportal_hierarquia_gestor_substituto_modulos B ON a.modulos LIKE '%\"' + CAST(b.id AS VARCHAR) + '\"%'
+                CROSS APPLY EXTRAIR_DADOS_JSON(B.funcoes)  AS JSON
+                LEFT JOIN zcrmportal_perfilfuncao H ON H.id_funcao = JSON.id
+				INNER JOIN zcrmportal_usuarioperfil I ON I.id_perfil = H.id_perfil AND I.id_usuario = A.id_gestor
+                JOIN zcrmportal_funcoes D ON JSON.Id = D.id AND D.modo = 'M' AND D.menu = 'X' AND D.menupai IS NOT NULL AND D.portal_novo = 1
+                
+            {$whereSub}
+        
+        )Z
+        
+         ORDER BY
+            menutit
         ";
         $result = $this->dbportal->query($query);
         return ($result->getNumRows() > 0) 
@@ -56,27 +79,51 @@ class ManagerModel extends Model {
         $log_id = session()->get('log_id');
 
         $where = (!$global) ? " WHERE a.id_usuario = {$log_id} " : "";
+        $whereSub = (!$global) ? " WHERE A.id_substituto = {$log_id} AND '".date('Y-m-d')."' BETWEEN A.dtini AND A.dtfim AND A.inativo = 0" : "";
 
         $query = "
-            SELECT 
-                DISTINCT
-                d.id,
-                d.menupai idpai,
-                d.menutit,
-                d.nome,
-                d.caminho,
-                d.icone
-            FROM 	
-                zcrmportal_usuarioperfil a
-                INNER JOIN zcrmportal_perfil b ON b.id = a.id_perfil
-                INNER JOIN zcrmportal_perfilfuncao c ON c.id_perfil = b.id
-                INNER JOIN zcrmportal_funcoes d ON d.id = c.id_funcao AND d.modo != 'M' AND d.menu = 'X' AND d.menupai IS NOT NULL AND d.portal_novo = 1
+            SELECT DISTINCT * FROM (
+
+                SELECT 
+                    DISTINCT
+                    d.id,
+                    d.menupai idpai,
+                    d.menutit,
+                    d.nome,
+                    d.caminho,
+                    d.icone
+                FROM 	
+                    zcrmportal_usuarioperfil a
+                    INNER JOIN zcrmportal_perfil b ON b.id = a.id_perfil
+                    INNER JOIN zcrmportal_perfilfuncao c ON c.id_perfil = b.id
+                    INNER JOIN zcrmportal_funcoes d ON d.id = c.id_funcao AND d.modo != 'M' AND d.menu = 'X' AND d.menupai IS NOT NULL AND d.portal_novo = 1
+                    
+                    {$where} 
+                    
+                UNION ALL 
                 
-            {$where}
+                SELECT 
+                    B.id,
+                    B.menupai idpai,
+                    B.menutit,
+                    B.nome,
+                    B.caminho,
+                    B.icone
+                FROM 
+                    zcrmportal_hierarquia_gestor_substituto A
+                    LEFT JOIN zcrmportal_hierarquia_gestor_substituto_modulos C ON a.modulos LIKE '%\"' + CAST(C.id AS VARCHAR) + '\"%'
+                	CROSS APPLY EXTRAIR_DADOS_JSON(C.funcoes)  AS JSON
+                    LEFT JOIN zcrmportal_perfilfuncao H ON H.id_funcao = JSON.id
+					INNER JOIN zcrmportal_usuarioperfil I ON I.id_perfil = H.id_perfil AND I.id_usuario = A.id_gestor
+                    JOIN zcrmportal_funcoes B ON JSON.Id = B.id AND B.modo != 'M' AND B.menu = 'X' AND B.menupai IS NOT NULL AND B.portal_novo = 1
+                    
+                    {$whereSub}
                 
+            )Z
+
             ORDER BY
-                d.menupai,
-                d.menutit
+                idpai,
+                menutit
         ";
         $result = $this->dbportal->query($query);
         return ($result->getNumRows() > 0) 
@@ -274,7 +321,13 @@ class ManagerModel extends Model {
     // -------------------------------------------------------
     // Listar Funções do Perfil
     // -------------------------------------------------------
-    public function ListarPerfilFuncao($id_perfil){
+    public function ListarPerfilFuncao($id_perfil, $portal_novo = 1){
+
+        if($portal_novo == 1){
+            $portal = 'AND b.portal_novo = 1';
+        }else{
+            $portal = '';
+        }
 
         $query = "
             SELECT
@@ -287,7 +340,8 @@ class ManagerModel extends Model {
             WHERE
                 a.id_funcao = b.id
                 AND a.id_perfil = '{$id_perfil}'
-                AND b.portal_novo = 1
+                {$portal}
+                
         ";
         $result = $this->dbportal->query($query);
         return ($result->getNumRows() > 0) 

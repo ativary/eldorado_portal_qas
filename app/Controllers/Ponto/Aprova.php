@@ -11,15 +11,17 @@ class Aprova extends BaseController
   private $mAprova;
   private $mCritica;
   private $mPortal;
+  public $mOcorrencia;
 
   public function __construct()
   {
     parent::__construct('Ponto'); // sempre manter
 
-    $this->_moduloName = '<i class="fas fa-clock"></i> Ponto';
-    $this->mAprova = model('Ponto/AprovaModel');
-    $this->mCritica = model('Ponto/CriticaModel');
-    $this->mPortal = model('PortalModel');
+    $this->_moduloName    = '<i class="fas fa-clock"></i> Ponto';
+    $this->mAprova        = model('Ponto/AprovaModel');
+    $this->mCritica       = model('Ponto/CriticaModel');
+    $this->mPortal        = model('PortalModel');
+    $this->mOcorrencia    = model('Ponto/OcorrenciaModel');
   }
 
   public function index()
@@ -39,6 +41,7 @@ class Aprova extends BaseController
 
     $dados['EspelhoConfiguracao'] = $mEspelho->ListarEspelhoConfiguracao();
     $dados['gestorPossuiExcecao'] = $mEspelho->gestorPossuiExcecao();
+    $dados['resFilial'] = $this->mOcorrencia->ListarOcorrenciaFilial();
 
     if(!$dados['EspelhoConfiguracao']){
         notificacao('warning2', 'Configuração de ponto não localizada.');
@@ -46,25 +49,43 @@ class Aprova extends BaseController
         return false;
     }
 
-        $idbatida   = $this->request->getPost('idbatida');
-        $act        = $this->request->getPost('act');
-        $codsecao   = $this->request->getPost('secao');
-        $tipo_abono = $this->request->getPost('tipo_abono');
-        $ft_legenda = $this->request->getPost('ft_legenda');
-        $ft_status  = $this->request->getPost('ft_status');
-        $chapa      = $this->request->getPost('funcionario');
-        $motivo_reprova = $this->request->getPost('motivo_reprova');
+        $idbatida                   = $this->request->getPost('idbatida');
+        $act                        = $this->request->getPost('act');
+        $codsecao                   = $this->request->getPost('secao');
+        $tipo_abono                 = $this->request->getPost('tipo_abono');
+        $ft_legenda                 = $this->request->getPost('ft_legenda');
+        $ft_status                  = $this->request->getPost('ft_status');
+        $chapa                      = $this->request->getPost('funcionario');
+        $motivo_reprova             = $this->request->getPost('motivo_reprova');
+        $dados['filtro_tipo']       = $this->request->getPost('filtro_tipo');
+        $dados['filtro_filial']     = $this->request->getPost('filtro_filial');
+        $dados['filtro_legenda']    = $this->request->getPost('filtro_legenda');
+        $filtroPeriodo              = $this->request->getPost('periodo');
+        $statusPeriodo              = $this->request->getPost('statusPeriodo');
+
+        if(isset($_SESSION['filtro_tipo'])) $dados['filtro_tipo'] = $_SESSION['filtro_tipo'];
+        if(isset($_SESSION['periodo'])) $filtroPeriodo = $_SESSION['periodo'];
+        if(isset($_SESSION['statusPeriodo'])) $statusPeriodo = $_SESSION['statusPeriodo'];
+        if(isset($_SESSION['filtro_filial'])) $dados['filtro_filial'] = $_SESSION['filtro_filial'];
+        if(isset($_SESSION['secao'])) $codsecao = $_SESSION['secao'];
+        if(isset($_SESSION['funcionario'])) $chapa = $_SESSION['funcionario'];
+        if(isset($_SESSION['filtro_legenda'])) $dados['filtro_legenda'] = $_SESSION['filtro_legenda'];
+
+        if(isset($_SESSION['filtro_tipo'])){
+            unset($_SESSION['filtro_tipo'], $_SESSION['periodo'], $_SESSION['statusPeriodo'], $_SESSION['filtro_filial'], $_SESSION['secao'], $_SESSION['funcionario'], $_SESSION['filtro_legenda']);
+        }
 
         if($motivo_reprova == null){
-            $dados['periodo']             = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), 0, -1) : null;
-            $dados['statusPeriodo']       = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), -1) : 0;
+            $dados['periodo']             = ($filtroPeriodo != null) ? substr($filtroPeriodo, 0, -1) : null;
+            $dados['statusPeriodo']       = ($filtroPeriodo != null) ? substr($filtroPeriodo, -1) : 0;
         }else{
-            $dados['periodo']             = $this->request->getPost('periodo');
-            $dados['statusPeriodo']       = ($this->request->getPost('statusPeriodo') != null) ? $this->request->getPost('statusPeriodo') : 0;
+            $dados['periodo']             = $filtroPeriodo;
+            $dados['statusPeriodo']       = ($statusPeriodo != null) ? $statusPeriodo : 0;
         }
 
         $dados['codsecao'] = $codsecao;
         $objListaBatidaApr = false;
+
 
         $colaboradores = [];
 
@@ -77,11 +98,19 @@ class Aprova extends BaseController
 
         $resFuncionarioSecao = $colaboradores;
         
-        // $resFuncionarioSecao = $this->mAprova->ListarFuncionariosSecao('all', $dados);
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+        if($_SERVER['REQUEST_METHOD'] == 'POST' || isset($dados['periodo'])){
         
             // APROVA BATIDA RH COM RM
             if ($act == 'apr') {
+
+                
+                    $_SESSION['filtro_tipo']    = $dados['filtro_tipo'];
+                    $_SESSION['periodo']        = $filtroPeriodo.$statusPeriodo;
+                    $_SESSION['statusPeriodo']  = $statusPeriodo;
+                    $_SESSION['filtro_filial']  = $dados['filtro_filial'];
+                    $_SESSION['secao']          = $codsecao;
+                    $_SESSION['funcionario']    = $chapa;
+                    $_SESSION['filtro_legenda'] = $dados['filtro_legenda'];
 
                     $sucesso = 0;
                     $erro = '';
@@ -92,15 +121,21 @@ class Aprova extends BaseController
                         $dados_post = explode('|', $id_batida);
 
                         $index = $dados_post[0].'_'.$dados_post[1];
+                        $tipo = $dados_post[3] ?? 0;
                         
-                        if(!isset($array_recalculo[$index])){
+                        if(!isset($array_recalculo[$index]) && ($tipo != 21 && $tipo != 22)){
                             $array_recalculo[$index] = array(
                                 'chapa' => $dados_post[0],
                                 'data' => $dados_post[1]
                             );
                         }
 
-                        $RESULT = $this->mAprova->aprovaBatidaRH($dados_post[2], $dados['perfilRH']);
+                        if($tipo != 21 && $tipo != 22){
+                            $RESULT = $this->mAprova->aprovaBatidaRH($dados_post[2], $dados['perfilRH']);
+                        }else{
+                            $RESULT = $this->mAprova->aprovaEscala($dados_post[2], $dados['perfilRH']);
+                        }
+                        
 
                         if($RESULT === true){
                             $sucesso++;
@@ -110,23 +145,23 @@ class Aprova extends BaseController
                     }
 
                     if($sucesso > 0 && strlen($erro) > 0){
-                        notificacao('warning', 'Batida(s) aprovada(s) com sucesso! Porém, ocorreram falha parcial na aprovação.'.$erro);
+                        notificacao('warning', 'Registro(s) aprovada(s) com sucesso! Porém, ocorreram falha parcial na aprovação.'.$erro);
                     }
 
                     if($sucesso == 0 && strlen($erro) > 0){
-                        notificacao('danger', 'Erro ao aprovar a(s) batida(s) | Erro: '. $erro);
+                        notificacao('danger', 'Erro ao aprovar a(s) registro(s) | Erro: '. $erro);
                     }
 
                     if(strlen($erro) == 0 && $sucesso > 0){
-                        notificacao('success', 'Batida(s) aprovada(s) com sucesso!');
+                        notificacao('success', 'Registro(s) aprovada(s) com sucesso!');
                     }
+                    
+                    notificacao('success', 'Movimento aprovado com sucesso.');
 
-                    // processa o recalculo
-                    //$this->mAprova->RecalculoPonto($array_recalculo);
-                    redireciona(base_url('ponto/aprova'));
+                    redireciona('/ponto/aprova');
                     exit();
-
-                    //return responseJson('success', 'Batida(s) aprovada(s) com sucesso!');
+                    
+                    // $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
                 
             }
 
@@ -142,7 +177,16 @@ class Aprova extends BaseController
             if ($act == 'rep') {
                 $resp = 0;
                 foreach ($idbatida as $id_batida) {
-                    $result = $this->mAprova->reprovaBatidaRH($id_batida, 'RH', $motivo_reprova, $dados['perfilRH']);
+
+                    $dadosRep = explode('|', $id_batida);
+                    $tipo = $dadosRep[3] ?? 0;
+
+                    if($tipo != 21 && $tipo != 22){
+                        $result = $this->mAprova->reprovaBatidaRH($id_batida, 'RH', $motivo_reprova, $dados['perfilRH']);
+                    }else{
+                        $result = $this->mAprova->reprovaEscala($dadosRep[2], $motivo_reprova, $dados['perfilRH']);
+                    }
+
                     if(!$result) $resp = 1;
                 }
 
@@ -152,20 +196,19 @@ class Aprova extends BaseController
                     notificacao('success', 'Movimento reprovado com sucesso.');
                 }
                 
-                //return responseJson('success', 'Batida reprovada com sucesso.');
             }
-            $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
-            if($codsecao != null) $resFuncionarioSecao = $this->mAprova->listaFuncionarioSecao($codsecao, $dados);
+
+             $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
+            
         }
-
-       //$objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status);
-
+        
         $nomeFunc = array();
         if ($objListaBatidaApr) {
             foreach ($objListaBatidaApr as $idxx => $value) {
                 $nomeFunc[] = $objListaBatidaApr[$idxx]['nomechapa'];
             }
         }
+        
 
         $nomeFunc = array_unique($nomeFunc);
 
@@ -184,7 +227,7 @@ class Aprova extends BaseController
         $dados['resMotivoReprova']   = $mEspelho->ListarJustificativa(5);
         $dados['isGestorOrLider']   = $mEspelho->isGestorOrLider($dados);
         $dados['isGestor']          = $mEspelho->isGestor($dados);
-
+        
     return parent::ViewPortal('ponto/aprova/index', $dados);
   }
 
@@ -276,37 +319,56 @@ class Aprova extends BaseController
 
   }
 
+  public function download_anexo_escala($id_anexo){
+    if(!$id_anexo) exit('Parametros invalidos!');
+
+    $mEscala = model('Ponto/EscalaModel');
+    $DadosAnexos = $mEscala->dadosEscala($id_anexo);
+    
+    if(count($DadosAnexos) > 0){
+
+        if(strlen(trim($DadosAnexos[0]['documento'])) > 0){
+            $DADOS_ARQUIVO = explode ("|", $DadosAnexos[0]['documento']);
+        }
+
+        $ARQUIVO = base64_decode($DADOS_ARQUIVO[3]);
+        $TIPO = $DADOS_ARQUIVO[1];
+        $NOME = $DADOS_ARQUIVO[0];
+
+        header('Content-Type: '.$TIPO);
+        header('Content-Disposition: attachment; filename='. $NOME);
+        header('Pragma: no-cache');
+
+        echo $ARQUIVO;
+        exit();
+
+    }
+
+  }
+
   public function excel()
     {
         parent::VerificaPerfil('PONTO_APROVA');
         $dados['perfilRH'] = parent::VerificaPerfil('GLOBAL_RH', false);
+        
+        $codsecao                   = $this->request->getPost('secao');
+        $tipo_abono                 = $this->request->getPost('tipo_abono');
+        $ft_legenda                 = $this->request->getPost('ft_legenda');
+        $ft_status                  = $this->request->getPost('ft_status');
+        $chapa                      = $this->request->getPost('funcionario');
+        $dados['filtro_tipo']       = $this->request->getPost('filtro_tipo');
+        $dados['filtro_filial']     = $this->request->getPost('filtro_filial');
+        $dados['filtro_legenda']    = $this->request->getPost('filtro_legenda');
+        $motivo_reprova             = $this->request->getPost('motivo_reprova');
 
-        // $codsecao               = $this->request->getPost('codsecao');
-        // $chapa                  = $this->request->getPost('funcionario');
-        // $periodo                  = $this->request->getPost('periodo');
+       
+        $dados['periodo']             = ($this->request->getPost('periodo') != null) ? ($this->request->getPost('periodo')) : null;
+        $dados['statusPeriodo']       = ($this->request->getPost('periodo') != null) ? ($this->request->getPost('periodo')) : 0;
+
+        
         // $objListaBatidaApr      = $this->mAprova->listaBatidaApr(3, $codsecao, false, false, false, false, false, false, $chapa, $periodo, $dados);
 
-        $codsecao   = $this->request->getPost('secao');
-        $tipo_abono = $this->request->getPost('tipo_abono');
-        $ft_legenda = $this->request->getPost('ft_legenda');
-        $ft_status  = $this->request->getPost('ft_status');
-        $chapa      = $this->request->getPost('funcionario');
-        $motivo_reprova = $this->request->getPost('motivo_reprova');
-
-        if($motivo_reprova == null){
-            $dados['periodo']             = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), 0, -1) : null;
-            $dados['statusPeriodo']       = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), -1) : 0;
-        }else{
-            $dados['periodo']             = $this->request->getPost('periodo');
-            $dados['statusPeriodo']       = ($this->request->getPost('statusPeriodo') != null) ? $this->request->getPost('statusPeriodo') : 0;
-        }
-
-        $objListaBatidaApr      = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
-// echo '<pre>';
-// print_r($objListaBatidaApr);
-//         exit();
-        // $objListaBatidaApr      = $this->mAprova->listaBatidaApr(3, $codsecao, false, false, false, false);
-        $resFuncionarioSecao    = $this->mAprova->ListarFuncionariosSecao($codsecao);
+        $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
 
         $spreadsheet = new Spreadsheet();
 
@@ -326,12 +388,12 @@ class Aprova extends BaseController
             ),
         );
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:N1')->applyFromArray($styleArray);
-        $spreadsheet->getActiveSheet()->getStyle('A1:N1')->applyFromArray($styleBorda);
+        $spreadsheet->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleArray);
+        $spreadsheet->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleBorda);
 
         $spreadsheet
         ->getActiveSheet()
-        ->getStyle('A1:N1')
+        ->getStyle('A1:K1')
         ->getFill()
         ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
         ->getStartColor()
@@ -339,24 +401,22 @@ class Aprova extends BaseController
 
         // nome da aba da planilha
         $spreadsheet->getActiveSheet()->setTitle('Aprovação de Ponto');
-        $spreadsheet->getActiveSheet()->setAutoFilter('A1:N1'); // auto filtro no titulo
+        $spreadsheet->getActiveSheet()->setAutoFilter('A1:K1'); // auto filtro no titulo
 
         // titulo das colunas
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'CHAPA');
-        $sheet->setCellValue('B1', 'COLABORADOR');
-        $sheet->setCellValue('C1', 'CHAPA GESTOR');
-        $sheet->setCellValue('D1', 'NOME GESTOR');
-        $sheet->setCellValue('E1', 'MOVIMENTO');
-        $sheet->setCellValue('F1', 'DATA');
-        $sheet->setCellValue('G1', 'BATIDA');
-        $sheet->setCellValue('H1', 'ABONO DATA INICIO');
-        $sheet->setCellValue('I1', 'ABONO DATA FIM');
-        $sheet->setCellValue('J1', 'TOTAL HORAS');
-        $sheet->setCellValue('K1', 'TIPO ABONO');
-        $sheet->setCellValue('L1', 'JUSTIFICATIVA');
-        $sheet->setCellValue('M1', 'ANEXO');
-        $sheet->setCellValue('N1', 'SOLICITANTE');
+        $sheet->setCellValue('A1', 'STATUS');
+        $sheet->setCellValue('B1', 'TIPO');
+        $sheet->setCellValue('C1', 'DATA');
+        $sheet->setCellValue('D1', 'COLABORADOR');
+        $sheet->setCellValue('E1', 'DESCRIÇÃO TIPO');
+        $sheet->setCellValue('F1', 'JUSTIFICATIVA');
+        $sheet->setCellValue('G1', 'ANEXO');
+        $sheet->setCellValue('H1', 'BATIDAS DO DIA');
+        $sheet->setCellValue('I1', 'DATA REFERÊNCIA');
+        $sheet->setCellValue('J1', 'DATA SOLICITAÇÃO');
+        $sheet->setCellValue('K1', 'SOLICITANTE');
+        // $sheet->setCellValue('L1', 'APROVADOR');
 
         $rows = 2;
 
@@ -365,92 +425,153 @@ class Aprova extends BaseController
         $resAbonos = $mEspelho->ListarAbono();
 
         if($objListaBatidaApr){
-            foreach($objListaBatidaApr as $key => $Batidas){
+            foreach($objListaBatidaApr as $key => $registro){
 
-                $sheet->setCellValue('A' . $rows, $Batidas['chapa']);
-                $sheet->setCellValue('B' . $rows, $Batidas['nome']);
-                $sheet->setCellValue('C' . $rows, $Batidas['chapa_gestor']);
-                $sheet->setCellValue('D' . $rows, $Batidas['nome_gestor']);
-
-                
-
-                $movimento = "";
-                switch ($Batidas['movimento']) {
-                    case 1:
-                        $movimento ='Inclusão de batida';
-                        break;
-                    case 2:
-                        $movimento ='Exclusão de batida';
-                        break;
-                    case 3:
-                        $movimento= 'Alteração de natureza';
-                        break;
-                    case 4:
-                        $movimento ='Alteração jornada referência';
-                        break;
-                    case 5:
-                        $movimento = 'Abono de atrasos';
-                        break;
-                    case 6:
-                        $movimento= 'Abono de faltas';
-                        break;
-                    case 7:
-                        $movimento = 'Justificativa de Exceção';
-                        break;
-                    case 8:
-                        $movimento = 'Altera Atitude';
-                        break;
-                    case 9:
-                        $movimento = 'Falta não remunerada';
-                        break;
+                if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
+                    switch($registro['status']){
+                        case 10: $status = 'Pend/Ação Gestor'; break;
+                        case 2: $status = 'Pend/Ação RH'; break;
+                        default: $status = '';
+                    }
+                }else{
+                    $status = 'Pend/Ação Gestor';
                 }
+                $sheet->setCellValue('A' . $rows, $status);
 
+                $tipo = "";
+                switch($registro['movimento']){
+                    case 1: $tipo = 'Inclusão de batida'; break;
+                    case 2: $tipo = 'Exclusão de batida'; break;
+                    case 3: $tipo = 'Alteração de natureza'; break;
+                    case 4: $tipo = 'Alteração jornada referência'; break;
+                    case 5: $tipo = 'Abono de atrasos'; break;
+                    case 6: $tipo = 'Abono de faltas'; break;
+                    case 7: $tipo = 'Justificativa de exceção'; break;
+                    case 8: $tipo = 'Altera atitude'; break;
+                    case 9: $tipo = 'Falta não remunerada'; break;
+                    case 21:$tipo =  'Troca de escala'; break;
+                    case 22: $tipo =  'Troca de dia'; break;
+                }
+                $sheet->setCellValue('B' . $rows, $tipo);
 
-                $tipo_abono = $Batidas['abn_codabono'] . ' - ' . (($Batidas['movimento'] == 9) ? 'FALTA NÃO REMUNERADA' : extrai_valor($resAbonos, $Batidas['abn_codabono'], 'CODIGO', 'DESCRICAO'));
+                $sheet->setCellValue('C' . $rows, dtBr($registro['dtponto']));
+                $sheet->setCellValue('D' . $rows, $registro['chapa'].' - '.$registro['nome']);
 
+                
 
+                /**** descrição do tipo */
+                // calcula qtde de horas
+                $data_fim = "";
                 $total_horas = "";
-                if (strlen(trim($Batidas['abn_codabono'] ?? '')) > 0) {
-                    if ($Batidas['abn_horafim'] > $Batidas['abn_horaini']) {
-                
-                        $data_fim    = dtEn($Batidas['dtponto'], true) . 'T00:00:00';
-                        $total_horas = ($Batidas['abn_horafim'] - $Batidas['abn_horaini']);
-                        $total_horas = m2h($total_horas, 4);
+                if (strlen(trim($registro['abn_codabono'] ?? '')) > 0) {
+                    if ($registro['abn_horafim'] > $registro['abn_horaini']) {
+
+                        $data_fim    = dtEn($registro['dtponto'], true) . 'T00:00:00';
+                        $total_horas = ($registro['abn_horafim'] - $registro['abn_horaini']);
                     } else {
-                
-                        $dataTermino = new \DateTime(dtEn($Batidas['dtponto'], true));
+
+                        $dataTermino = new \DateTime(dtEn($registro['dtponto'], true));
                         $dataTermino->add(new \DateInterval('P1D'));
                         $data_fim    = $dataTermino->format('Y-m-d');
-                        $total_horas = (($Batidas['abn_horafim'] + 1440) - $Batidas['abn_horaini']);
-                        $total_horas = m2h($total_horas, 4);
+                        $total_horas = (($registro['abn_horafim'] + 1440) - $registro['abn_horaini']);
+                    }
+                }
+                
+                // inclusão de batida
+                $descricao_tipo = "";
+                if ($registro['movimento'] == 21) {
+                    $descricao_tipo .= 'Indice: [' . $registro['codindice'] . '] ';
+                    $descricao_tipo .= 'Horário: [' . $registro['horario']. '] ';
+                }
+                if ($registro['movimento'] == 22) {
+                    $descricao_tipo .= 'Data Útil: [' . dtBr($registro['dtponto']) . '] ';
+                    $descricao_tipo .= 'Índice Útil: [' . ($registro['codindice']) . '] ';
+                    $descricao_tipo .= 'Data Folga: [' . dtBr($registro['dtfolga']) . '] ';
+                    $descricao_tipo .= 'Índice Folga: [' . ($registro['codindice_folga']) . '] ';
+                    $descricao_tipo .= 'Horário: [' . $registro['horario']. '] ';
+                }
+                if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                    $descricao_tipo .= 'Batida: [' . sprintf("%05s", m2h($registro['batida'])) . '] ';
+                }
+                // abono
+                if ($registro['movimento'] == 5 || $registro['movimento'] == 6 || $registro['movimento'] == 9) {
+                    $descricao_tipo .= 'Data Inicio: [' . date('d/m/Y', strtotime($registro['dtponto'])) . ' ' . sprintf("%05s", m2h($registro['abn_horaini'])) . '] ';
+                    $descricao_tipo .= 'Data Fim: [' . date('d/m/Y', strtotime($data_fim)) . ' ' . sprintf("%05s", m2h($registro['abn_horafim'])) . '] ';
+                    $descricao_tipo .= 'Total de Horas: [' . m2h($total_horas, 4) . '] ';
+                    $descricao_tipo .= 'Tipo de Abono: [' . $registro['abn_codabono'] . ' - ' . (($registro['movimento'] == 9) ? 'FALTA NÃO REMUNERADA' : extrai_valor($resAbonos, $registro['abn_codabono'], 'CODIGO', 'DESCRICAO')) . '] ';
+                }
+                // altera atitude
+                if ($registro['movimento'] == 8 || $registro['movimento'] == 7) {
+                    $descricao_tipo .= 'Data: ' . date('d/m/Y', strtotime($registro['atitude_dt'])) . '] ';
+                    $descricao_tipo .= 'Horas: ' . sprintf("%05s", m2h($registro['atitude_fim'])) . '] ';
+                    if ($registro['movimento'] == 8) {
+                        $descricao_tipo .= 'Tipo Atitude: [' . ($registro['atitude_tipo'] == 1 ? 'Compensar (Fica BH)' : 'Descontar no pagto.') . '] ';
+                    } else {
+                        $descricao_tipo .= 'Tipo Atitude: [Atraso Não Remunerado]';
                     }
                 }
 
+                $sheet->setCellValue('E' . $rows, $descricao_tipo);
+
+
                 $justificativa = "";
-                if ($Batidas['movimento'] != 8 && $Batidas['movimento'] != 7) {
-                    $justificativa = (strlen(trim($Batidas['justificativa_abono_tipo'])) > 0 ? $Batidas['justificativa_abono_tipo'] : $Batidas['motivo']);
-                } else {
-                    if ($Batidas['movimento'] == 8) {
-                        $justificativa = $Batidas['atitude_justificativa'];
+                if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
+                    $justificativa = $registro['justificativa_escala'];
+                }
+                // inclusão de batida
+                if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                    if (strlen(trim($registro['motivo'] ?? '')) > 0) $justificativa = $registro['motivo'];
+                }
+                // abono
+                if ($registro['movimento'] == 5 || $registro['movimento'] == 6 || $registro['movimento'] == 9) {
+                    if (strlen(trim($registro['justificativa_abono_tipo'] ?? '')) > 0) $justificativa = $registro['justificativa_abono_tipo'];
+                }
+                // altera atitude
+                if ($registro['movimento'] == 8 || $registro['movimento'] == 7) {
+                    if ($registro['movimento'] == 8) {
+                        if (strlen(trim($registro['justificativa_abono_tipo'] ?? '')) > 0) $justificativa = $registro['atitude_justificativa'];
                     } else {
                         $justificativa = 'Atraso Não Remunerado';
                     }
                 }
+                $sheet->setCellValue('F' . $rows, $justificativa);
 
 
-                $sheet->setCellValue('E' . $rows, $movimento);
-                $sheet->setCellValue('F' . $rows, dtBr($Batidas['dtponto']));
-                $sheet->setCellValue('G' . $rows, (($Batidas['movimento'] == 5 || $Batidas['movimento'] == 6 || $Batidas['movimento'] == 9)) ? '' : m2h($Batidas['batida']));
-                $sheet->setCellValue('H' . $rows, (($Batidas['movimento'] == 5 || $Batidas['movimento'] == 6 || $Batidas['movimento'] == 9)) ? date('d/m/Y', strtotime($Batidas['dtponto'])).' '.sprintf("%05s", m2h($Batidas['abn_horaini'])) : '');
-                $sheet->setCellValue('I' . $rows, (($Batidas['movimento'] == 5 || $Batidas['movimento'] == 6 || $Batidas['movimento'] == 9)) ? date('d/m/Y', strtotime($Batidas['dtponto'])).' '.sprintf("%05s", m2h($Batidas['abn_horafim'])) : '');
-                $sheet->setCellValue('J' . $rows, $total_horas);
-                $sheet->setCellValue('K' . $rows, (($Batidas['movimento'] == 5 || $Batidas['movimento'] == 6 || $Batidas['movimento'] == 9)) ? $tipo_abono : '');
-                $sheet->setCellValue('L' . $rows, $justificativa);
-                $sheet->setCellValue('M' . $rows, (strlen($Batidas['possui_anexo'] ?? '') > 0) ? 'Sim' : 'Não');
-                $sheet->setCellValue('N' . $rows, $Batidas['solicitante']);
-                
+                $possuiAnexo = "Não";
+                if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                    if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                        $possuiAnexo = 'Sim';
+                    }
+                }
+                // abono
+                if ($registro['movimento'] == 5 || $registro['movimento'] == 6 || $registro['movimento'] == 9) {
+                    if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                        $possuiAnexo = 'Sim';
+                    }
+                }
+                // altera atitude
+                if ($registro['movimento'] == 8 || $registro['movimento'] == 7) {
+                    if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                        $possuiAnexo = 'Sim';
+                    }
+                }
+                // escala
+                if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
+                    if (($registro['possui_anexo'] ?? 0) == 1) {
+                        $possuiAnexo = 'Sim';
+                    }
+                }
+                $sheet->setCellValue('G' . $rows, $possuiAnexo);
+
+
+                $sheet->setCellValue('H' . $rows, $registro['batidas_dia']);
+                $sheet->setCellValue('I' . $rows, (strlen(trim($registro['data_referencia'])) > 0 ? dtBr($registro['data_referencia']) : ''));
+                $sheet->setCellValue('J' . $rows, dtBr($registro['data_solicitacao']));
+                $sheet->setCellValue('K' . $rows, $registro['chapa_solicitante'].' - '.$registro['solicitante']);
+                // $sheet->setCellValue('L' . $rows, $registro['chapa_gestor'].' - '.$registro['nome_gestor']);
+
                 // $spreadsheet->getActiveSheet()->getStyle('C'.$rows)->applyFromArray(($SaldoBancoHoras['SALDO'] < 0) ? $styleRed : $styleGreen);
-                $spreadsheet->getActiveSheet()->getStyle('A'.$rows.':N'.$rows)->applyFromArray($styleBorda);
+                $spreadsheet->getActiveSheet()->getStyle('A'.$rows.':K'.$rows)->applyFromArray($styleBorda);
                 $rows++;
             }
         }
