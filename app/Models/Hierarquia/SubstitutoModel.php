@@ -90,7 +90,7 @@ class SubstitutoModel extends Model {
             LEFT JOIN 
                 ".DBRM_BANCO."..PFUNC B ON A.chapa_substituto COLLATE Latin1_General_CI_AS = B.CHAPA
             LEFT JOIN 
-			    CorporeRMQA2..PFUNC C ON A.chapa_gestor COLLATE Latin1_General_CI_AS = C.CHAPA
+            ".DBRM_BANCO."..PFUNC C ON A.chapa_gestor COLLATE Latin1_General_CI_AS = C.CHAPA
         WHERE A.id = ".$idSub."
             AND A.inativo = 0
             AND A.coligada = '{$this->coligada}'
@@ -176,24 +176,6 @@ class SubstitutoModel extends Model {
 
             ";
 
-       /* $query ="
-            SELECT 
-        	A.id,
-        	C.CHAPA,
-        	A.NOME,
-        	B.CPF	
-         FROM 
-        	zcrmportal_usuario A
-        	LEFT JOIN CorporeRMQA2..PPESSOA B ON B.CPF COLLATE Latin1_General_CI_AS	 = A.login
-        	LEFT JOIN CorporeRMQA2..PFUNC C ON C.CODPESSOA = B.CODIGO
-		WHERE 
-            a.ativo <> 'e'
-            AND C.CODCOLIGADA = '{$this->coligada}'
-            AND C.CODSITUACAO <> 'D'
-        ORDER BY
-            b.NOME
-
-        ";*/
         $result = $this->dbportal->query($query);
         return  ($result) 
                 ? $result->getResultArray() 
