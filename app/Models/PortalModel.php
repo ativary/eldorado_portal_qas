@@ -474,6 +474,7 @@ class PortalModel extends Model {
                             PFUNC
                         WHERE
                             CODCOLIGADA = A.CODCOLIGADA AND CHAPA = A.CHAPA
+                            AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
                     )X WHERE X.DATA >= '{$dataInicio}'
                     ORDER BY X. DATA ASC
                 ) IS NOT NULL
