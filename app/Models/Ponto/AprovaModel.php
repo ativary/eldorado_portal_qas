@@ -549,6 +549,7 @@ class AprovaModel extends Model
 								PFUNC
 							WHERE
 								CODCOLIGADA = PFUNC.CODCOLIGADA AND CHAPA = PFUNC.CHAPA
+								AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
 						)X WHERE X.DATA >= '{$perInicio}'
 						ORDER BY X.DATA ASC
 					) IS NOT NULL
@@ -756,6 +757,7 @@ class AprovaModel extends Model
                             PFUNC
                         WHERE
                             CODCOLIGADA = A.CODCOLIGADA AND CHAPA = A.CHAPA
+							AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
                     )X WHERE X.DATA >= '{$perInicio}'
                     ORDER BY X. DATA ASC
                 ) IS NOT NULL
@@ -845,6 +847,7 @@ class AprovaModel extends Model
 										".DBRM_BANCO."..PFUNC
 									WHERE
 										CODCOLIGADA = BB.CODCOLIGADA AND CHAPA = BB.CHAPA
+										AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
 										AND DATAADMISSAO <= a.dtponto
 								)X WHERE X.DATA >= a.dtponto
 								ORDER BY X. DATA ASC
@@ -947,6 +950,7 @@ class AprovaModel extends Model
 										".DBRM_BANCO."..PFUNC
 									WHERE
 										CODCOLIGADA = BB.CODCOLIGADA AND CHAPA = BB.CHAPA
+										AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
 										AND DATAADMISSAO <= a.datamudanca
 								)X WHERE X.DATA >= a.datamudanca
 								ORDER BY X.DATA ASC

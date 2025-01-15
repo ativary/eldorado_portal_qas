@@ -6127,7 +6127,7 @@ FROM (
                         TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
                     FROM
                         ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
-                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO AND ISNULL(BB.TIPODEMISSAO, '0') NOT IN ('5', '6')
                     WHERE
                         AA.CPF = g.login COLLATE Latin1_General_CI_AS
                         AND BB.DATAADMISSAO <= a.datamudanca
@@ -6138,7 +6138,7 @@ FROM (
                         TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
                     FROM
                         ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
-                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO AND ISNULL(BB.TIPODEMISSAO, '0') NOT IN ('5', '6')
                     WHERE
                         AA.CPF = h.login COLLATE Latin1_General_CI_AS
                         AND BB.DATAADMISSAO <= a.datamudanca
@@ -6149,7 +6149,7 @@ FROM (
                         TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
                     FROM
                         ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
-                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO AND ISNULL(BB.TIPODEMISSAO, '0') NOT IN ('5', '6')
                     WHERE
                         AA.CPF = i.login COLLATE Latin1_General_CI_AS
                         AND BB.DATAADMISSAO <= a.datamudanca

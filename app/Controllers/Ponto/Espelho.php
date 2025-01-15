@@ -19,7 +19,7 @@ class Espelho extends BaseController {
     }
 
     //ESPELHO PONTO EDITAR
-    public function Editar(){
+    public function Editar($chapaFiltro = false, $dataFiltro = false){
         parent::VerificaPerfil('PONTO_ESPELHO');
 
         $dados['rh']                = parent::VerificaPerfil('GLOBAL_RH', false);
@@ -45,6 +45,25 @@ class Espelho extends BaseController {
             $dados['chapa'] = $this->request->getPost('funcionario');
         }else{
             $dados['chapa'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+        }
+
+        if($dados['isGestorOrLider'] || $dados['rh'] || session()->get('log_id') == 1){
+            if($chapaFiltro && $dataFiltro){
+               
+                $dados['chapa'] = $chapaFiltro;
+                if($dados['resPeriodo']){
+                    foreach($dados['resPeriodo'] as $periodoFiltro){
+                        if($dataFiltro >= dtEn($periodoFiltro['INICIOMENSAL'], true) && $dataFiltro <= dtEn($periodoFiltro['FIMMENSAL'], true)){
+
+                            $dados['periodo'] = substr(dtBr($periodoFiltro['INICIOMENSAL']) . dtBr($periodoFiltro['FIMMENSAL']). $periodoFiltro['STATUSPERIODO'], 0, -1);
+                            $dados['statusPeriodo'] = substr(dtBr($periodoFiltro['INICIOMENSAL']) . dtBr($periodoFiltro['FIMMENSAL']). $periodoFiltro['STATUSPERIODO'], -1);
+                            
+                            break;
+                        }
+                    }
+                }
+
+            }
         }
 
         $DadosBancoHoras            = false;
