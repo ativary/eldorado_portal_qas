@@ -568,8 +568,6 @@ class CartasModel extends Model {
             AND a.carta_enviada IS NULL
             AND a.id > 9365
             
-        ORDER BY
-            a.id DESC
 
             UNION ALL 
 
