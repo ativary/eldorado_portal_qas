@@ -272,7 +272,13 @@ Class Escala extends BaseController {
         }
 
         $dados['DadosFuncionario'] = $DadosFuncionario[0];
-        $dados['resHorario'] = $this->mEscala->ListarEscalaHorario($resEscala[0]['chapa'], $DadosFuncionario);
+
+        if($resEscala[0]['situacao'] != 3 && $resEscala[0]['situacao'] != 9){
+            $dados['resHorario'] = $this->mEscala->ListarEscalaHorario($resEscala[0]['chapa'], $DadosFuncionario);
+        }else{
+            $dados['resHorario'] = $this->mEscala->ListarHorarioRM($resEscala[0]['codhorario']);
+        }
+
         $dados['resIndice']           = $this->mEscala->ListarEscalaHorarioIndice($resEscala[0]['codhorario']);
         $dados['resConfiguracao']     = [
             'escala_per_inicio' => $resEscala[0]['config_escala_per_ini'],
