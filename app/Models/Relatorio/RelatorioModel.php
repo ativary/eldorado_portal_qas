@@ -5331,7 +5331,7 @@ FROM (
                 --, '0' INFORMACOES_ADICIONAIS
                 , dtcadastro DATA_SOLICITACAO
                 , COALESCE((
-                		SELECT CHAPA FROM ".DBRM_BANCO."..PFUNC 
+                		SELECT TOP 1 CHAPA FROM ".DBRM_BANCO."..PFUNC 
                 			WHERE NOME = g.nome COLLATE Latin1_General_CI_AS 
                  			AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')
@@ -5459,7 +5459,7 @@ FROM (
                 --, dbo.Base64Decode(observacao) INFORMACOES_ADICIONAIS
                 , A.dtcad DATA_SOLICITACAO
                 , COALESCE((
-                		SELECT CHAPA FROM ".DBRM_BANCO."..PFUNC 
+                		SELECT TOP 1 CHAPA FROM ".DBRM_BANCO."..PFUNC 
                 			WHERE NOME = g.nome COLLATE Latin1_General_CI_AS 
                  			AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')
@@ -5563,7 +5563,7 @@ FROM (
                 --, '0' INFORMACOES_ADICIONAIS
                 , A.dtcad DATA_SOLICITACAO
                 , COALESCE((
-                		SELECT CHAPA FROM ".DBRM_BANCO."..PFUNC 
+                		SELECT TOP 1 CHAPA FROM ".DBRM_BANCO."..PFUNC 
                 			WHERE NOME = g.nome COLLATE Latin1_General_CI_AS 
                  			AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')
@@ -5685,7 +5685,7 @@ FROM (
                 , A.dtcadastro DATA_SOLICITACAO
                 , 
                 COALESCE((
-                		SELECT CHAPA FROM ".DBRM_BANCO."..PFUNC 
+                		SELECT TOP 1 CHAPA FROM ".DBRM_BANCO."..PFUNC 
                 			WHERE NOME = g.nome COLLATE Latin1_General_CI_AS 
                  			AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')
@@ -5807,7 +5807,7 @@ FROM (
                 , A.dtcad DATA_SOLICITACAO
                 ,
                  COALESCE((
-                		SELECT CHAPA FROM ".DBRM_BANCO."..PFUNC 
+                		SELECT TOP 1 CHAPA FROM ".DBRM_BANCO."..PFUNC 
                 			WHERE NOME = g.nome COLLATE Latin1_General_CI_AS 
                  			AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')
@@ -5878,7 +5878,7 @@ FROM (
                     END AS STATUS
                 , A.dt_requisicao DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT CHAPA FROM ".DBRM_BANCO."..PFUNC 
+                    SELECT TOP 1 CHAPA FROM ".DBRM_BANCO."..PFUNC 
                         WHERE NOME = g.nome COLLATE Latin1_General_CI_AS 
                         AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                         AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')
