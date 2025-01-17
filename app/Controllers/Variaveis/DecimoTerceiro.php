@@ -37,7 +37,7 @@ Class Decimoterceiro extends BaseController {
       
         $dados['listaReqs']     = $this->mParam->getReq(9, $dados['data_inicio'],$dados['data_fim'],$dados['funcionario'],false, $dados['situacao'] );
        
-        $dados['listaSecao'] = $this->mParam->listaSecaoGestor( $dados['rh']);
+        $dados['listaSecao']    = $this->mParam->listaSecaoGestor( $dados['rh']);
        
         
         return parent::ViewPortal('variaveis/decimoterceiro/index', $dados);
