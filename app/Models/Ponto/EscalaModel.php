@@ -182,6 +182,21 @@ class EscalaModel extends Model {
     }
 
     // -------------------------------------------------------
+    // Lista dados do horario do RM
+    // -------------------------------------------------------
+    public function ListarHorarioRM($codHorario)
+    {
+
+        $query = " SELECT * FROM AHORARIO WHERE CODCOLIGADA = '{$this->coligada}' AND CODIGO = '{$codHorario}' ";
+        $result = $this->dbrm->query($query);
+        if(!$result) return false;
+        return ($result->getNumRows() > 0) 
+                ? $result->getResultArray() 
+                : false;
+
+    }
+
+    // -------------------------------------------------------
     // Lista indice do horário
     // -------------------------------------------------------
     public function ListarEscalaHorarioIndice($codhorario){
