@@ -5323,8 +5323,8 @@ FROM (
                     WHEN A.movimento = 9 THEN 'Alteração Atitude'
                 END AS PROCESSO
                 , CASE 
-                    WHEN A.STATUS = 'S' THEN 'SINCRONIZADO'
-                       WHEN A.STATUS = '2' THEN 'APROVADO GESTOR'
+                    WHEN A.STATUS = 'S' THEN 'CONCLUÍDO'
+                       WHEN A.STATUS = '2' THEN 'PENDENTE RH'
                        WHEN A.STATUS = '3' THEN 'REPROVADO'
                   ELSE NULL
                 END AS STATUS
@@ -5453,7 +5453,7 @@ FROM (
                 , 'Programação Férias' PROCESSO
                 , CASE WHEN A.SITUACAO = 3 THEN 'PENDENTE GESTOR'
                     WHEN A.SITUACAO = 1 THEN 'PENDENTE RH'
-                    WHEN A.SITUACAO = 2 THEN 'CONCLUIDO'
+                    WHEN A.SITUACAO = 2 THEN 'CONCLUÍDO'
                     WHEN A.SITUACAO = 9 THEN 'CANCELADO'
                 ELSE NULL
                     END AS STATUS
@@ -5554,7 +5554,7 @@ FROM (
                              END AS PROCESSO
                 , CASE WHEN A.situacao = 10 THEN 'PENDENTE GESTOR'
                     WHEN A.situacao = 2 THEN 'PENDENTE RH'
-                    WHEN A.situacao = 3 THEN 'CONCLUIDO'
+                    WHEN A.situacao = 3 THEN 'CONCLUÍDO'
                     WHEN A.situacao = 8 THEN 'REPROVADO'
                     WHEN A.situacao = 9 THEN 'REPROVADO'
                     WHEN A.situacao = 11 THEN 'EXCLUÍDO'              
@@ -5676,12 +5676,12 @@ FROM (
                 END AS PROCESSO
                 , CASE WHEN STATUS = 'K' THEN 'REPROVADO'
                     WHEN STATUS = 'P' THEN 'PENDENTE RH'
-                    WHEN STATUS = 'U' THEN 'APROVADO RH'
+                    WHEN STATUS = 'U' THEN 'PENDENTE UPLOAD'
                     WHEN STATUS = 'G' THEN 'PENDENTE GESTOR'
                     WHEN STATUS = 'I' THEN 'PENDENTE SINCRONIZAÇÃO'
                     WHEN STATUS = 'S' THEN 'PENDENTE SST'
-                    WHEN STATUS = 'A' THEN 'SINCRONIZADO'
-                    WHEN STATUS = 'X' THEN 'CANCELADO'
+                    WHEN STATUS = 'A' THEN 'CONCLUÍDO'
+                    WHEN STATUS = 'X' THEN 'EXCLUÍDO'
                 ELSE NULL
                     END AS STATUS
                 --, 'Motivo desligamento - ' + dbo.Base64Decode(A.justificativa_desligamento) INFORMACOES_ADICIONAIS
@@ -5801,7 +5801,7 @@ FROM (
                 , CASE 
                     WHEN A.status = 2 THEN 'PENDENTE GESTOR'
                     WHEN A.status = 3 THEN 'PENDENTE RH'
-                    WHEN A.status = 4 THEN 'SINCRONIZADO'
+                    WHEN A.status = 4 THEN 'CONCLUÍDO'
                     WHEN A.status = 5 THEN 'REPROVADO'
                     WHEN A.status = 6 THEN 'REPROVADO'
                     WHEN A.status = 7 THEN 'PENDENTE SINCRONIZAÇÃO'
@@ -5869,16 +5869,15 @@ FROM (
                 , Z.CODCCUSTO CODIGO_CENTRO_CUSTO
                 , Z.NOME CENTRO_CUSTO
                 , 'Prêmios' PRODUTO
-                , CASE WHEN A.tipo = 'M' THEN 'MENSAL'
-                        WHEN A.tipo = 'C' THEN 'COMPLEMENTAR'
-                    END AS PROCESSO
+                , K.nome PROCESSO
                 , CASE 
-                    WHEN isnull(v.status, A.status) = 'S' THEN 'SINCRONIZADO'
-                    WHEN isnull(v.status, A.status) = 'H' THEN 'APROVADO'
+                    WHEN isnull(v.status, A.status) = 'S' THEN 'CONCLUÍDO'
+                    WHEN isnull(v.status, A.status) = 'H' THEN 'PENDENTE SINCRONIZAÇÃO'
                     WHEN isnull(v.status, A.status) = 'A' THEN 'PENDENTE RH CALCULAR'
                     WHEN isnull(v.status, A.status) = 'C' THEN 'PENDENTE RH'
                     WHEN isnull(v.status, A.status) = 'E' THEN 'PENDENTE GESTOR'
-                    WHEN isnull(v.status, A.status) = 'R' THEN 'REPROVADA'
+                    WHEN isnull(v.status, A.status) = 'R' THEN 'REPROVADO'
+                    WHEN isnull(v.status, A.status) = 'I' THEN 'EXCLUÍDO'
                     ELSE NULL
                     END AS STATUS
                 , A.dt_requisicao DATA_SOLICITACAO
@@ -5926,6 +5925,8 @@ FROM (
                 LEFT JOIN ".DBRM_BANCO."..PFUNCAO F ON F.CODIGO = B.CODFUNCAO AND F.CODCOLIGADA = A.id_COLIGADA
                 LEFT JOIN ".DBRM_BANCO."..PCODSITUACAO I ON I.CODINTERNO = B.CODSITUACAO
                 LEFT JOIN (select id_requisicao, min(status) as status from zcrmportal_premios_requisicao_aprovacao where status <> 'I' group by id_requisicao) v ON v.id_requisicao = A.id
+                LEFT JOIN zcrmportal_premios_acessos J ON J.ID = A.id_acesso
+                LEFT JOIN zcrmportal_premios K ON K.ID = J.id_premio AND K.codcoligada =  A.id_coligada
                 INNER JOIN ".DBRM_BANCO."..PCCUSTO Z ON Z.CODCCUSTO = 
                     CASE 
                         WHEN CHARINDEX('.', E.CODIGO) > 0 AND 
@@ -5940,7 +5941,7 @@ FROM (
                     AND Z.CODCOLIGADA = E.CODCOLIGADA
                 LEFT JOIN zcrmportal_usuario G ON G.id = A.id_requisitor
 
-                where A.id_COLIGADA = '{$this->coligada}'
+                where A.id_coligada = '{$this->coligada}'
                 AND A.status NOT IN ('I', 'P')
                 AND (dt_rh_aprovacao IS NOT NULL OR dt_aprovacao IS NOT NULL)
             
