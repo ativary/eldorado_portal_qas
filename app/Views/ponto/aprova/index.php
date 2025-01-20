@@ -1,3 +1,8 @@
+<script>
+$(document).ready(function(){
+    $(".button-menu-mobile").click();
+});
+</script>
 <style>
     .batida {
         background: #ace4ff;
