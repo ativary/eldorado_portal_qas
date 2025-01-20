@@ -1,3 +1,10 @@
+<?php if($filtro_tipo == 'ponto'): ?>
+<script>
+$(document).ready(function(){
+    $(".button-menu-mobile").click();
+});
+</script>
+<?php endif; ?>
 <style>
     .batida {
         background: #ace4ff;
