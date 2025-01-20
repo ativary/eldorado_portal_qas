@@ -6057,15 +6057,17 @@ FROM (
                     DISTINCT
                     a.id ID,
                     CASE WHEN a.tipo = 1 THEN 'Troca de Escala' ELSE 'Troca de Dia' END [TIPO],
-                        CASE WHEN a.situacao = 0 THEN 'Criada'
-                        WHEN a.situacao = 10 THEN 'Pend/Ação Gestor'
-                        WHEN a.situacao = 1 THEN 'Pend/Upload Documento'
-                        WHEN a.situacao = 4 THEN 'Termo Anexado'
-                        WHEN a.situacao = 2 THEN 'Pend/Ação RH'
-                        WHEN a.situacao = 3 THEN 'Concluído'
-                        WHEN a.situacao = 9 THEN 'Reprovado'
-                        WHEN a.situacao = 11 THEN 'Excluído'
-                        end as STATUS,
+                        CASE 
+                            WHEN a.situacao = 0 THEN 'Criada'
+                            WHEN a.situacao = 10 THEN 'Pend/Ação Gestor'
+                            WHEN a.situacao = 1 THEN 'Pend/Upload Documento'
+                            WHEN a.situacao = 4 THEN 'Termo Anexado'
+                            WHEN a.situacao = 2 THEN 'Pend/Ação RH'
+                            WHEN a.situacao = 3 THEN 'Concluído'
+                            WHEN a.situacao = 8 OR a.situacao = 9 THEN 'Reprovado'
+                            WHEN a.situacao = 11 THEN 'Excluído'
+                            ELSE 'Sem status'
+                        END as STATUS,
                     CONVERT(VARCHAR, a.datamudanca, 103) [DATA],
                     b.CODCOLIGADA [COD.COLIGADA],
                     k.NOME [COLIGADA],
