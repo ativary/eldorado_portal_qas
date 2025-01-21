@@ -213,7 +213,7 @@ const selecionaData = (data) => {
     const tresDiasDepois = new Date();
     tresDiasDepois.setDate(dataAtual.getDate() + 3);
     
-    if (inputData < tresDiasDepois && inputData > dataAtual) {
+    if (inputData < tresDiasDepois) {
         
         Swal.fire({
 		icon: 'question',
