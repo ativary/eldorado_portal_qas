@@ -959,14 +959,13 @@ class AprovaModel extends Model
 					a.codhorario,
 					d.DESCRICAO horario,
 					a.codindice,
-					CASE
-						WHEN justificativa_11_horas IS NOT NULL THEN justificativa_11_horas
-						WHEN justificativa_6_dias IS NOT NULL THEN justificativa_6_dias
-						WHEN justificativa_6_meses IS NOT NULL THEN justificativa_6_meses
-						WHEN justificativa_3_dias IS NOT NULL THEN justificativa_3_dias
-						WHEN justificativa_periodo IS NOT NULL THEN justificativa_periodo
-						ELSE NULL
-					END justificativa_escala,
+					CONCAT(
+                    	CASE WHEN justificativa_11_horas IS NOT NULL THEN CONCAT('Interjornada 11h: ',a.justificativa_11_horas, ', ') ELSE '' END,
+                    	CASE WHEN justificativa_6_dias IS NOT NULL THEN CONCAT('6 dias consecutivos: ', a.justificativa_11_horas, ', ') ELSE '' END,
+                    	CASE WHEN justificativa_6_meses IS NOT NULL THEN CONCAT('Troca inf. 6 meses: ', a.justificativa_6_meses, ', ') ELSE '' END,
+                        CASE WHEN justificativa_3_dias IS NOT NULL THEN CONCAT('Troca inf. 72 horas: ', a.justificativa_3_dias, ', ') ELSE '' END,
+                    	CASE WHEN justificativa_periodo IS NOT NULL THEN CONCAT('Fora período: ', a.justificativa_periodo, ', ') ELSE '' END
+                    ) justificativa_escala,
 					E.CPF,
 					(
 					SELECT
