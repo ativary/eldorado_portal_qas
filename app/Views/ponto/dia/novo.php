@@ -317,7 +317,7 @@ $("#data_folga").on('change', function(e){
     console.log(dataAtual);
     console.log(tresDiasDepois);
     
-    if (inputData < tresDiasDepois &&  (inputData > dataAtual || inputData == dataAtual)) {
+    if (inputData < tresDiasDepois) {
         
         Swal.fire({
 		icon: 'question',
