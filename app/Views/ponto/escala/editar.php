@@ -53,6 +53,12 @@
                                 '.nl2br($resEscala['justificativa_6_dias']).'
                             </div>';
                     }
+                    if($resEscala['justificativa_3_dias']){
+                        echo '<div class="alert alert-warning2 border-0 m-0 mt-2" role="alert">
+                                <b>Justificativa (Alteração dentro de 72 horas):</b><br>
+                                '.nl2br($resEscala['justificativa_3_dias']).'
+                            </div>';
+                    }
                     if($resEscala['justificativa_6_meses']){
                         echo '<div class="alert alert-warning2 border-0 m-0 mt-2" role="alert">
                                 <b>Justificativa (Troca de escala inferior a 6 meses do horário atual do colaborador):</b><br>
@@ -219,6 +225,15 @@
                             </div>
                         </div>
 
+                        <div class="card border mt-4 hidden box_justificativa_3_dias" style="background: #fffbec; border-color: #ebd9a6 !important;">
+                            <div class="card-body">
+                                <div class="col-sm-12">
+                                    <label for="justificativa_3_dias" class="col-form-label text-left">Justificativa (Alteração dentro de 72 horas):</label>
+                                    <textarea class="form-control" name="justificativa_3_dias" id="justificativa_3_dias" maxlength="220" cols="30" rows="2"><?= $resEscala['justificativa_3_dias']; ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="card border mt-4 hidden box_justificativa_6_dias" style="background: #fffbec; border-color: #ebd9a6 !important;">
                             <div class="card-body">
                                 <div class="col-sm-12">
@@ -266,10 +281,45 @@
 <script>
 erro_data = false;
 const selecionaData = (data) => {
-    $(".data_disabled").prop("disabled", ((data == "") ? true : false));
-    $("#indice").val('');
-    if(data == "") $("#box_projecao").fadeOut(100);
-    verificaData();
+    const inputData = new Date(data);
+    const dataAtual = new Date();
+    const tresDiasDepois = new Date();
+    tresDiasDepois.setDate(dataAtual.getDate() + 3);
+    
+    if (inputData < tresDiasDepois) {
+        
+        Swal.fire({
+		icon: 'question',
+		title: 'Fora do prazo mínimo de 72 horas. Deseja continuar?',
+		showDenyButton: true,
+		showCancelButton: true,
+		confirmButtonText: `Sim Confirmar`,
+		denyButtonText: `Cancelar`,
+		showCancelButton: false,
+		showCloseButton: false,
+		allowOutsideClick: false,
+		width: 600,
+        }).then((result) => {
+            if (result.isConfirmed) {
+            $(".data_disabled").prop("disabled", (data == "") ? true : false);
+            $("#indice").val('');
+            if (data == "") $("#box_projecao").fadeOut(100);
+            verificaData();
+            }else{
+                $("#data").val("");
+                $(".data_disabled").prop("disabled", true);
+                $("#indice").val('');
+
+            }
+        });
+    }else{
+        $(".data_disabled").prop("disabled", ((data == "") ? true : false));
+        $("#indice").val('');
+        if(data == "") $("#box_projecao").fadeOut(100);
+        verificaData();
+    } 
+
+
 }
 const buscaHorarioIndice = (codhorario) => {
     
@@ -379,6 +429,7 @@ var carregaEscala = () => {
 precisa_justificar_11_horas = false;
 precisa_justificar_6_dias = false;
 precisa_justificar_6_meses = false;
+precisa_justificar_3_dias = false;
 const salvaDados = () => {
 
     if(erro_data == true) return;
@@ -391,9 +442,17 @@ const salvaDados = () => {
     var justificativa_11_horas = $("#justificativa_11_horas").val();
     var justificativa_6_dias = $("#justificativa_6_dias").val();
     var justificativa_6_meses = $("#justificativa_6_meses").val();
+    var justificativa_3_dias = $("#justificativa_3_dias").val();
     if(saida2 <= 0) saida2 = 1440;
-
+    
     if(saida > 1440) saida = saida - 1440;
+    var dataTroca = $("#data").val();
+    
+    //Verificação troca dentro de tres dias
+    var inputData = new Date(dataTroca);
+    var dataAtual = new Date();
+    var tresDiasDepois = new Date();
+    tresDiasDepois.setDate(dataAtual.getDate() + 3);
 
     var horas_saida = 1440 - saida2;
     var horas_entrada = entrada;
@@ -409,6 +468,15 @@ const salvaDados = () => {
             exibeAlerta('warning', 'Descanso de interjornada mínima de 11h não respeitada entre a saída do horário anterior X entrada do novo horário.');
             return false;
         }
+    }
+
+    if(!precisa_justificar_3_dias && inputData < tresDiasDepois){
+        <?php if(($resConfiguracao[0]['bloqueio_aviso'] ?? null) != 1): ?>
+            $(".box_justificativa_3_dias").fadeIn(100);
+            precisa_justificar_3_dias = true;
+            <?php endif; ?>
+            exibeAlerta('warning', 'Troca de escala dentro de 3 dias.');
+        return false;
     }
 
     var qtde_dias_trab = 0;
@@ -467,13 +535,18 @@ const salvaDados = () => {
         return false;
     }
 
+    if(justificativa_3_dias == "" && precisa_justificar_3_dias){
+        exibeAlerta('warning', 'Justificativa (Alteração dentro de 72 horas).');
+        return false;
+    }
+
     if(justificativa_6_meses == "" && precisa_justificar_6_meses){
         exibeAlerta('warning', 'Justificativa (Troca de escala inferior a 6 meses do horário atual do colaborador) não informada.');
         return false;
     }
     <?php endif; ?>
 
-    var dataTroca = $("#data").val();
+    
     if(
         (dataTroca < '<?= dtEn($resConfiguracao['escala_per_inicio'], true) ?>' || dataTroca > '<?= dtEn($resConfiguracao['escala_per_fim'], true) ?>')){
         $(".box_justificativa_periodo").fadeIn(0);
@@ -515,6 +588,7 @@ const salvaDados = () => {
                 "dataDia2"                  : dataDia2,
                 "justificativa_11_horas"    : justificativa_11_horas,
                 "justificativa_6_dias"      : justificativa_6_dias,
+                "justificativa_3_dias"      : justificativa_3_dias,
                 "justificativa_6_meses"     : justificativa_6_meses,
                 "justificativa_periodo"     : $("#justificativa_periodo").val(),
                 "tipo"                      : 1,
