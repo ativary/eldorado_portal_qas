@@ -231,7 +231,7 @@ const selecionaData = (data) => {
             $(".data_disabled").prop("disabled", (data == "") ? true : false);
             $("#indice").val('');
             if (data == "") $("#box_projecao").fadeOut(100);
-            
+            verificaData();
             }else{
                 $("#data").val("");
                 $(".data_disabled").prop("disabled", true);
@@ -394,7 +394,7 @@ const salvaDados = () => {
     }
 
 
-    if(!precisa_justificar_3_dias && inputData < tresDiasDepois && inputData > dataAtual){
+    if(!precisa_justificar_3_dias && inputData < tresDiasDepois){
         <?php if(($resConfiguracao[0]['bloqueio_aviso'] ?? null) != 1): ?>
             $(".box_justificativa_3_dias").fadeIn(100);
             precisa_justificar_3_dias = true;
