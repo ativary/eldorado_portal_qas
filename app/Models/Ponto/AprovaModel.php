@@ -963,6 +963,7 @@ class AprovaModel extends Model
 						WHEN justificativa_11_horas IS NOT NULL THEN justificativa_11_horas
 						WHEN justificativa_6_dias IS NOT NULL THEN justificativa_6_dias
 						WHEN justificativa_6_meses IS NOT NULL THEN justificativa_6_meses
+						WHEN justificativa_3_dias IS NOT NULL THEN justificativa_3_dias
 						WHEN justificativa_periodo IS NOT NULL THEN justificativa_periodo
 						ELSE NULL
 					END justificativa_escala,
