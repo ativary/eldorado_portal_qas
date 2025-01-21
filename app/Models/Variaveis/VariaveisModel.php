@@ -1880,7 +1880,8 @@ class VariaveisModel extends Model {
             WHERE chapa = '".$request['funcionario']."'
             AND YEAR(prog_ini) = YEAR(GETDATE())
             AND YEAR(prog_fim) = YEAR(GETDATE())
-            AND salario13 = 1";
+            AND salario13 = 1
+            AND situacao <> 9";
         
 
         $result = $this->dbportal->query($query);
