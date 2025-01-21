@@ -491,6 +491,7 @@ class EscalaModel extends Model {
         $justificativa_11_horas = $dados['justificativa_11_horas'] ?? "";
         $justificativa_6_dias   = $dados['justificativa_6_dias'] ?? "";
         $justificativa_6_meses  = $dados['justificativa_6_meses'] ?? "";
+        $justificativa_3_dias   = $dados['justificativa_3_dias'] ?? "";
         $justificativa_periodo  = $dados['justificativa_periodo'] ?? "";
         $tipo                   = $dados['tipo'] ?? 1;
 
@@ -571,7 +572,7 @@ class EscalaModel extends Model {
         }
 
         if($id){
-            return self::AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_periodo, $termo_obrigatorio, $chapa);
+            return self::AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_3_dias, $justificativa_periodo, $termo_obrigatorio, $chapa);
         }
 
         $filtroProjecao = [
@@ -590,9 +591,9 @@ class EscalaModel extends Model {
         }
         
         $query = " INSERT INTO zcrmportal_escala
-            (chapa, coligada, datamudanca, codhorario, codindice, usucad, dtcad, chapa_solicitante, justificativa_11_horas, justificativa_6_dias, justificativa_6_meses, termo_obrigatorio, tipo, datamudanca_folga, codindice_folga, justificativa_periodo, config_escala_per_ini, config_escala_per_fim, config_dia_per_ini, config_dia_per_fim, bloqueio_aviso, projecao, projecao_folga) 
+            (chapa, coligada, datamudanca, codhorario, codindice, usucad, dtcad, chapa_solicitante, justificativa_11_horas, justificativa_6_dias, justificativa_6_meses, justificativa_3_dias, termo_obrigatorio, tipo, datamudanca_folga, codindice_folga, justificativa_periodo, config_escala_per_ini, config_escala_per_fim, config_dia_per_ini, config_dia_per_fim, bloqueio_aviso, projecao, projecao_folga) 
                 VALUES
-            ('{$chapa}', '{$this->coligada}', '{$data}', '{$codhorario}', '{$indice}', '{$this->log_id}', '".date('Y-m-d H:i:s')."', '{$chapa_solicitante}', ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").", ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").", ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").", {$termo_obrigatorio}, {$tipo}, '{$data_folga}', '{$indice_folga}', ".(($justificativa_periodo == "") ? "NULL" : "'{$justificativa_periodo}'").", {$escala_per_inicio}, {$escala_per_fim}, {$dia_per_inicio}, {$dia_per_fim}, {$bloqueio_aviso}, '{$projecao}', ".(($projecao_folga != null) ? "'{$projecao_folga}'" : 'NULL').")
+            ('{$chapa}', '{$this->coligada}', '{$data}', '{$codhorario}', '{$indice}', '{$this->log_id}', '".date('Y-m-d H:i:s')."', '{$chapa_solicitante}', ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").", ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").", ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").", ".(($justificativa_3_dias == "") ? "NULL" : "'{$justificativa_3_dias}'").", {$termo_obrigatorio}, {$tipo}, '{$data_folga}', '{$indice_folga}', ".(($justificativa_periodo == "") ? "NULL" : "'{$justificativa_periodo}'").", {$escala_per_inicio}, {$escala_per_fim}, {$dia_per_inicio}, {$dia_per_fim}, {$bloqueio_aviso}, '{$projecao}', ".(($projecao_folga != null) ? "'{$projecao_folga}'" : 'NULL').")
         ";
         $this->dbportal->query($query);
         
@@ -629,7 +630,7 @@ class EscalaModel extends Model {
 
     }
 
-    public function AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_periodo, $termo_obrigatorio, $chapa)
+    public function AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_3_dias, $justificativa_periodo, $termo_obrigatorio, $chapa)
     {
 
         $filtroProjecao = [
@@ -661,6 +662,7 @@ class EscalaModel extends Model {
                 justificativa_11_horas    = ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").",
                 justificativa_6_dias      = ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").",
                 justificativa_6_meses     = ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").",
+                justificativa_3_dias      = ".(($justificativa_3_dias == "") ? "NULL" : "'{$justificativa_3_dias}'").",
                 justificativa_periodo     = ".(($justificativa_periodo == "") ? "NULL" : "'{$justificativa_periodo}'").",
                 usualt                    = '{$this->log_id}',
                 dtalt                     = '{$this->now}',
