@@ -100,7 +100,7 @@
                         <div class="card border mt-4 hidden box_justificativa_3_dias" style="background: #fffbec; border-color: #ebd9a6 !important;">
                             <div class="card-body">
                                 <div class="col-sm-12">
-                                    <label for="justificativa_3_dias" class="col-form-label text-left">Justificativa (Alteração dentro de 72 horas):</label>
+                                    <label for="justificativa_3_dias" class="col-form-label text-left">Justificativa (Fora do Prazo mínimo de 72h):</label>
                                     <textarea class="form-control" name="justificativa_3_dias" id="justificativa_3_dias" maxlength="220" cols="30" rows="2"></textarea>
                                 </div>
                             </div>
