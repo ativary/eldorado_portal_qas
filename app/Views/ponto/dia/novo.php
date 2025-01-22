@@ -646,7 +646,7 @@ const salvaDados = () => {
             $(".box_justificativa_3_dias").fadeIn(100);
             precisa_justificar_3_dias = true;
             <?php endif; ?>
-            exibeAlerta('warning', 'Troca de escala dentro de 3 dias.');
+            exibeAlerta('warning', 'Fora do Prazo mínimo de 72h');
         return false;
     }
 
@@ -732,7 +732,7 @@ const salvaDados = () => {
             $(".box_justificativa_3_dias").fadeIn(100);
             precisa_justificar_3_dias = true;
             <?php endif; ?>
-            exibeAlerta('warning', 'Troca de escala dentro de 3 dias.');
+            exibeAlerta('warning', 'Fora do Prazo mínimo de 72h');
         return false;
     }
 
