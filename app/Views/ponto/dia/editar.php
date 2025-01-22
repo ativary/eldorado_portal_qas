@@ -326,7 +326,7 @@ const selecionaData = (data) => {
     const inputData = new Date(dataFormatada);
     const dataAtual = new Date();
     const tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 3);
+    tresDiasDepois.setDate(dataAtual.getDate() + 2);
     
     if (inputData < tresDiasDepois && (inputData > dataAtual || inputData == dataAtual) ) {
         
@@ -384,7 +384,7 @@ const selecionaDataFolga = (data) => {
     const inputData = new Date(dataFormatada);
     const dataAtual = new Date();
     const tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 3);
+    tresDiasDepois.setDate(dataAtual.getDate() + 2);
 
     console.log(inputData);
     console.log(dataAtual);
@@ -756,7 +756,7 @@ const salvaDados = () => {
     var inputData_util = new Date(dataFormatada_util);
     var dataAtual_util = new Date();
     var tresDiasDepois_util = new Date();
-    tresDiasDepois_util.setDate(dataAtual_util.getDate() + 3);
+    tresDiasDepois_util.setDate(dataAtual_util.getDate() + 2);
 
     if(tipo === undefined && tipo2 === undefined && !precisa_justificar_11_horas){
         // if(saida > entrada){exibeAlerta('error', 'Descanso de interjornada mínima de 11h não respeitada entre a saída do horário anterior X entrada do novo horário.');return false;}
@@ -843,7 +843,7 @@ const salvaDados = () => {
     var inputData = new Date(dataFormatada_folga);
     var dataAtual = new Date();
     var tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 3);
+    tresDiasDepois.setDate(dataAtual.getDate() + 2);
 
     if(tipo === undefined && tipo2 === undefined && !precisa_justificar_11_horas){
         // if(saida > entrada){exibeAlerta('error', 'Descanso de interjornada mínima de 11h não respeitada entre a saída do horário anterior X entrada do novo horário.');return false;}
