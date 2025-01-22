@@ -284,7 +284,7 @@ const selecionaData = (data) => {
     const inputData = new Date(data);
     const dataAtual = new Date();
     const tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 3);
+    tresDiasDepois.setDate(dataAtual.getDate() + 2);
     
     if (inputData < tresDiasDepois) {
         
@@ -452,7 +452,7 @@ const salvaDados = () => {
     var inputData = new Date(dataTroca);
     var dataAtual = new Date();
     var tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 3);
+    tresDiasDepois.setDate(dataAtual.getDate() + 2);
 
     var horas_saida = 1440 - saida2;
     var horas_entrada = entrada;
