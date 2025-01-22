@@ -595,7 +595,7 @@ Class Escala extends BaseController {
                     echo '<hr>';
                 }
                 if($escala[0]['justificativa_3_dias'] != ''){
-                    echo '<b>Justificativa (Alteração dentro de 72 horas):</b><br>';
+                    echo '<b>Justificativa (Fora do Prazo mínimo de 72h):</b><br>';
                     echo '<div style="padding: 8px; background: #f0f0f0; border-radius:6px;">'.nl2br($escala[0]['justificativa_3_dias']).'</div>';
                     echo '<hr>';
                 }

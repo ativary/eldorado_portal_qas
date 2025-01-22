@@ -61,7 +61,7 @@
                     }
                     if($resEscala['justificativa_3_dias']){
                         echo '<div class="alert alert-warning2 border-0 m-0 mt-2" role="alert">
-                                <b>Justificativa (Alteração dentro de 72 horas):</b><br>
+                                <b>Justificativa (Fora do Prazo mínimo de 72h):</b><br>
                                 '.nl2br($resEscala['justificativa_3_dias']).'
                             </div>';
                     }
@@ -140,7 +140,7 @@
                         <div class="card border mt-4 hidden box_justificativa_3_dias" style="background: #fffbec; border-color: #ebd9a6 !important;">
                             <div class="card-body">
                                 <div class="col-sm-12">
-                                    <label for="justificativa_3_dias" class="col-form-label text-left">Justificativa (Alteração dentro de 72 horas):</label>
+                                    <label for="justificativa_3_dias" class="col-form-label text-left">Justificativa (Fora do Prazo mínimo de 72h):</label>
                                     <textarea class="form-control" name="justificativa_3_dias" id="justificativa_3_dias" maxlength="220" cols="30" rows="2"><?= $resEscala['justificativa_3_dias']; ?></textarea>
                                 </div>
                             </div>
@@ -921,7 +921,7 @@ const salvaDados = () => {
     }
 
     if(justificativa_3_dias == "" && precisa_justificar_3_dias){
-        exibeAlerta('warning', 'Justificativa (Alteração dentro de 72 horas.)');
+        exibeAlerta('warning', 'Justificativa (Fora do Prazo mínimo de 72h.)');
         return false;
     }
 

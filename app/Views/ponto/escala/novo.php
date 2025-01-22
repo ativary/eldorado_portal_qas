@@ -136,7 +136,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-sm-12">
-                                        <label for="justificativa_3_dias" class="col-form-label text-left">Justificativa (Alteração dentro de 72 horas):</label>
+                                        <label for="justificativa_3_dias" class="col-form-label text-left">Justificativa (Fora do Prazo mínimo de 72h):</label>
                                         <textarea class="form-control" name="justificativa_3_dias" id="justificativa_3_dias" maxlength="220" cols="30" rows="2"></textarea>
                                     </div>
                                 </div>
@@ -174,7 +174,7 @@
                     </div>
 
                     <div class="card-footer text-center">
-                        <button class="btn btn-success" id="btnsave" onclick="return salvaDados()"><i class="fas fa-check"></i> Cadastrar Escala</button>
+                        <button class="btn btn-success" id="btnsave" onclick="return salvaDados()"><i class="fas fa-check"></i> Salvar</button>
                     </div>
 
                 </div>
@@ -462,7 +462,7 @@ const salvaDados = () => {
     }
 
     if(justificativa_3_dias == "" && precisa_justificar_3_dias){
-        exibeAlerta('warning', 'Justificativa (Alteração dentro de 72 horas) não informada.');
+        exibeAlerta('warning', 'Justificativa (Fora do Prazo mínimo de 72h) não informada.');
         return false;
     }
 
