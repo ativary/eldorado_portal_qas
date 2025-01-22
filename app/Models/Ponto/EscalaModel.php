@@ -1512,6 +1512,8 @@ class EscalaModel extends Model {
     // antes da data de mudança
     // -------------------------------------------------------
     public function CancelarEscala10Dias(){
+        // não executar mais esse JOB
+        exit();
 
         $query = "
             UPDATE
