@@ -941,8 +941,8 @@ table th {
                                                     <?php if(!$periodo_bloqueado || $rh || 1==1): ?>
                                                         <div class="btn-group dropleft mb-2 mb-md-0">
                                                             <?php if($DiasEspelho['SUSPENSAO'] <= 0): ?>
-                                                                <?php
-                                                                if (!(($DiasEspelho['AFASTAMENTO'] > 0) || ($DiasEspelho['FERIAS'] > 0) || (strlen(trim($resFuncionario[0]['DATADEMISSAO'])) > 0 && $DiasEspelho['DATA'] >= $resFuncionario[0]['DATADEMISSAO']))) : ?>
+                                                                <?php 
+                                                                if (!(($DiasEspelho['AFASTAMENTO'] > 0) || ($DiasEspelho['FERIAS'] > 0) || (strlen(trim($resFuncionario[0]['DATADEMISSAO'])) > 0 && $DiasEspelho['DATA'] >= $resFuncionario[0]['DATADEMISSAO']) || ($DiasEspelho['DATA'] < $resFuncionario[0]['DATAADMISSAO']))) : ?>
                                                                     <button type="button" class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="mdi mdi-dots-vertical"></i></button>
                                                                     <div class="dropdown-menu">
                                                                         <!--<button <?= ($numero_batida == 8) ? ' disabled ' : ''; ?> onclick="abrirInclusaoBatida('<?= dtEn($DiasEspelho['DATA'], true); ?>', <?= $numero_batida; ?>, <?= $proxima_batida; ?>);" type="button" class="dropdown-item <?= ($numero_batida == 8) ? ' text-secondary ' : ''; ?>" title="Incluir batida"><i class="fas fa-plus-circle"></i> Incluir batida</button>-->
