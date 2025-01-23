@@ -533,7 +533,7 @@ class EscalaModel extends Model {
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($data_folga).'</b>.');
             }
 
-            $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND datamudanca = '{$data}' AND tipo != '1' AND situacao not in (3,9) ";
+            $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND datamudanca = '{$data}' AND tipo != '1' AND situacao not in (3,9,11) ";
             $result = $this->dbportal->query($query);
             if($result->getNumRows() > 0){
                 return responseJson('error', 'Já existe uma solicitação em aberto para esta data.');
@@ -733,7 +733,7 @@ class EscalaModel extends Model {
         }
 
         $this->dbportal->query("
-            UPDATE zcrmportal_escala SET situacao = 11 WHERE id = {$dados['id']} AND situacao = 8
+            UPDATE zcrmportal_escala SET situacao = 11, usualt = '{$this->log_id}', dtalt = '{$this->now}' WHERE id = {$dados['id']} AND situacao = 8
         ");
 
         $this->dbportal->query("
