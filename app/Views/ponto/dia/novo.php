@@ -239,101 +239,21 @@ const selecionaChapa = (chapa) => {
 }
 const selecionaData = (data) => {
 
-    var [dia, mes, ano] = data.split('/');
-    const dataFormatada = `${ano}-${mes}-${dia}`;
-
-    const inputData = new Date(dataFormatada);
-    const dataAtual = new Date();
-    const tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 2);
-    
-    if (inputData < tresDiasDepois && (inputData > dataAtual || inputData == dataAtual) ) {
-        
-        Swal.fire({
-		icon: 'question',
-		title: 'A data escolhida é em menos de 72 horas. Deseja continuar?',
-		showDenyButton: true,
-		showCancelButton: true,
-		confirmButtonText: `Sim Confirmar`,
-		denyButtonText: `Cancelar`,
-		showCancelButton: false,
-		showCloseButton: false,
-		allowOutsideClick: false,
-		width: 600,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $(".data_disabled").prop("disabled", ((data == "") ? true : false));
-                $("#indice").val('');
-                if(data == ""){
-                    $("#box_projecao").fadeOut(100);
-                }else{
-                    buscaHorarioIndice('<?= $dadosFunc['CODHORARIO']; ?>');
-                }
-                
-                verificaData();
-            
-            }else{
-                $("#data").val("");
-                $(".data_disabled").prop("disabled", true);
-                $("#indice").val('');
-
-            }
-        });
+    $(".data_disabled").prop("disabled", ((data == "") ? true : false));
+    $("#indice").val('');
+    if(data == ""){
+        $("#box_projecao").fadeOut(100);
     }else{
-        $(".data_disabled").prop("disabled", ((data == "") ? true : false));
-        $("#indice").val('');
-        if(data == ""){
-            $("#box_projecao").fadeOut(100);
-        }else{
-            buscaHorarioIndice('<?= $dadosFunc['CODHORARIO']; ?>');
-        }
-        
-        verificaData();
-    } 
+        buscaHorarioIndice('<?= $dadosFunc['CODHORARIO']; ?>');
+    }
+    verificaData();
+
 
     
 }
 $("#data_folga").on('change', function(e){
 
-    var [dia, mes, ano] = $("#data_folga").val().split('/');
-    const dataFormatada = `${ano}-${mes}-${dia}`;
-
-    const inputData = new Date(dataFormatada);
-    const dataAtual = new Date();
-    const tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 2);
-
-    console.log(inputData);
-    console.log(dataAtual);
-    console.log(tresDiasDepois);
-    
-    if (inputData < tresDiasDepois) {
-        
-        Swal.fire({
-		icon: 'question',
-		title: 'Fora do prazo mínimo de 72 horas. Deseja continuar?',
-		showDenyButton: true,
-		showCancelButton: true,
-		confirmButtonText: `Sim Confirmar`,
-		denyButtonText: `Cancelar`,
-		showCancelButton: false,
-		showCloseButton: false,
-		allowOutsideClick: false,
-		width: 600,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                verificaDataFolga();
-            
-            }else{
-                $("#data_folga").val("");
-                $(".data_disabled").prop("disabled", true);
-                $("#indice_folga").val('');
-
-            }
-        });
-    }else{
-        verificaDataFolga();
-    } 
+    verificaDataFolga();
 
 });
 $('#data, #data_folga, #indice, #indice_folga').on('change', function(){
