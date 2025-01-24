@@ -1166,6 +1166,10 @@ class EscalaModel extends Model {
     public function VerificaData($dados)
     {
 
+        if(str_contains($dados['data'], 'undefined') || strlen(trim($dados['data'])) != 10){
+            return responseJson('error', 'Data não informada.');
+        }
+
         $dataInicio   = somarDias($dados['data'], -1);
         $dataTermino  = somarDias($dados['data'], 1);
         $idRequisicao = strlen(trim($dados['id'] ?? '') > 0) ? " AND id != '{$dados['id']}' " : '';
