@@ -402,6 +402,26 @@ Class Escala extends BaseController {
 
     }
 
+    public function verificaDataEnvioAprovacao(){
+
+        $idEscala = $this->request->getPost('id');
+
+        $dados['resConfiguracao'] = $this->mEscala->Configuracao();
+        $dados['escala'] = $this->mEscala->dadosEscala($idEscala);
+
+        if( $dados['escala'][0]['tipo'] == 1){
+            if($dados['resConfiguracao'][0]['escala_per_inicio'] < $dados['escala'][0]['datamudanca'] && $dados['resConfiguracao'][0]['escala_per_fim'] > $dados['escala'][0]['datamudanca']){
+                return 'aprova';
+            }
+        }else{
+            if($dados['resConfiguracao'][0]['dia_per_inicio'] < $dados['escala'][0]['datamudanca'] && $dados['resConfiguracao'][0]['dia_per_fim'] > $dados['escala'][0]['datamudanca']){
+                return 'aprova';
+            }
+        }
+
+        return 'recusa';
+    }
+
     // ------------------------------------------------------------------
     // gera o termo aditivo do contrato
     // ------------------------------------------------------------------
