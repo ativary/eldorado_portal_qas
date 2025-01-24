@@ -733,12 +733,12 @@ class EscalaModel extends Model {
         }
 
         $this->dbportal->query("
-            UPDATE zcrmportal_escala SET situacao = 11, usualt = '{$this->log_id}', dtalt = '{$this->now}' WHERE id = {$dados['id']} AND situacao = 8
+            UPDATE zcrmportal_escala SET situacao = 11, usualt = '{$this->log_id}', dtalt = '{$this->now}' WHERE id = {$dados['id']} AND situacao IN (0,8)
         ");
 
-        $this->dbportal->query("
-            DELETE FROM zcrmportal_escala WHERE id = {$dados['id']} AND situacao = 0
-        ");
+        // $this->dbportal->query("
+        //     DELETE FROM zcrmportal_escala WHERE id = {$dados['id']} AND situacao = 0
+        // ");
 
         return responseJson('success', 'Requisição excluída com sucesso.');
         
