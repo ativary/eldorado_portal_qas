@@ -752,7 +752,7 @@ class EscalaModel extends Model {
         $filtroDataFolga = ($data_folga) ? " OR datamudanca_folga = '{$data_folga}' " : "";
         $filtroId = ($id) ? " AND id != '{$id}' " : "";
 
-        $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND situacao not in (3,9) AND (datamudanca = '{$data}' {$filtroDataFolga})".$filtroId;
+        $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND situacao not in (3,9,11) AND (datamudanca = '{$data}' {$filtroDataFolga})".$filtroId;
         $result = $this->dbportal->query($query);
 
         return ($result->getNumRows() > 0) ? true : false;
