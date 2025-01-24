@@ -410,11 +410,11 @@ Class Escala extends BaseController {
         $dados['escala'] = $this->mEscala->dadosEscala($idEscala);
 
         if( $dados['escala'][0]['tipo'] == 1){
-            if($dados['resConfiguracao'][0]['escala_per_inicio'] < $dados['escala'][0]['datamudanca'] && $dados['resConfiguracao'][0]['escala_per_fim'] > $dados['escala'][0]['datamudanca']){
+            if($dados['resConfiguracao'][0]['escala_per_inicio'] <= $dados['escala'][0]['datamudanca'] && $dados['resConfiguracao'][0]['escala_per_fim'] >= $dados['escala'][0]['datamudanca']){
                 return 'aprova';
             }
         }else{
-            if($dados['resConfiguracao'][0]['dia_per_inicio'] < $dados['escala'][0]['datamudanca'] && $dados['resConfiguracao'][0]['dia_per_fim'] > $dados['escala'][0]['datamudanca']){
+            if($dados['resConfiguracao'][0]['dia_per_inicio'] <= $dados['escala'][0]['datamudanca'] && $dados['resConfiguracao'][0]['dia_per_fim'] >= $dados['escala'][0]['datamudanca']){
                 return 'aprova';
             }
         }

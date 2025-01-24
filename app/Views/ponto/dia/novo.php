@@ -97,15 +97,6 @@
                             </div>
                         </div>
 
-                        <div class="card border mt-4 hidden box_justificativa_3_dias" style="background: #fffbec; border-color: #ebd9a6 !important;">
-                            <div class="card-body">
-                                <div class="col-sm-12">
-                                    <label for="justificativa_3_dias" class="col-form-label text-left">Justificativa (Fora do Prazo mínimo de 72h):</label>
-                                    <textarea class="form-control" name="justificativa_3_dias" id="justificativa_3_dias" maxlength="220" cols="30" rows="2"></textarea>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="card border mt-4 hidden box_justificativa_6_dias" style="background: #fffbec; border-color: #ebd9a6 !important;">
                             <div class="card-body">
                                 <div class="col-sm-12">
@@ -229,7 +220,6 @@
 precisa_justificar_11_horas = false;
 precisa_justificar_6_dias = false;
 precisa_justificar_6_meses = false;
-precisa_justificar_3_dias = false;
 projecao = false;
 projecao_folga = false;
 projetado = false;
@@ -249,101 +239,21 @@ const selecionaChapa = (chapa) => {
 }
 const selecionaData = (data) => {
 
-    var [dia, mes, ano] = data.split('/');
-    const dataFormatada = `${ano}-${mes}-${dia}`;
-
-    const inputData = new Date(dataFormatada);
-    const dataAtual = new Date();
-    const tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 2);
-    
-    if (inputData < tresDiasDepois && (inputData > dataAtual || inputData == dataAtual) ) {
-        
-        Swal.fire({
-		icon: 'question',
-		title: 'A data escolhida é em menos de 72 horas. Deseja continuar?',
-		showDenyButton: true,
-		showCancelButton: true,
-		confirmButtonText: `Sim Confirmar`,
-		denyButtonText: `Cancelar`,
-		showCancelButton: false,
-		showCloseButton: false,
-		allowOutsideClick: false,
-		width: 600,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $(".data_disabled").prop("disabled", ((data == "") ? true : false));
-                $("#indice").val('');
-                if(data == ""){
-                    $("#box_projecao").fadeOut(100);
-                }else{
-                    buscaHorarioIndice('<?= $dadosFunc['CODHORARIO']; ?>');
-                }
-                
-                verificaData();
-            
-            }else{
-                $("#data").val("");
-                $(".data_disabled").prop("disabled", true);
-                $("#indice").val('');
-
-            }
-        });
+    $(".data_disabled").prop("disabled", ((data == "") ? true : false));
+    $("#indice").val('');
+    if(data == ""){
+        $("#box_projecao").fadeOut(100);
     }else{
-        $(".data_disabled").prop("disabled", ((data == "") ? true : false));
-        $("#indice").val('');
-        if(data == ""){
-            $("#box_projecao").fadeOut(100);
-        }else{
-            buscaHorarioIndice('<?= $dadosFunc['CODHORARIO']; ?>');
-        }
-        
-        verificaData();
-    } 
+        buscaHorarioIndice('<?= $dadosFunc['CODHORARIO']; ?>');
+    }
+    verificaData();
+
 
     
 }
 $("#data_folga").on('change', function(e){
 
-    var [dia, mes, ano] = $("#data_folga").val().split('/');
-    const dataFormatada = `${ano}-${mes}-${dia}`;
-
-    const inputData = new Date(dataFormatada);
-    const dataAtual = new Date();
-    const tresDiasDepois = new Date();
-    tresDiasDepois.setDate(dataAtual.getDate() + 2);
-
-    console.log(inputData);
-    console.log(dataAtual);
-    console.log(tresDiasDepois);
-    
-    if (inputData < tresDiasDepois) {
-        
-        Swal.fire({
-		icon: 'question',
-		title: 'Fora do prazo mínimo de 72 horas. Deseja continuar?',
-		showDenyButton: true,
-		showCancelButton: true,
-		confirmButtonText: `Sim Confirmar`,
-		denyButtonText: `Cancelar`,
-		showCancelButton: false,
-		showCloseButton: false,
-		allowOutsideClick: false,
-		width: 600,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                verificaDataFolga();
-            
-            }else{
-                $("#data_folga").val("");
-                $(".data_disabled").prop("disabled", true);
-                $("#indice_folga").val('');
-
-            }
-        });
-    }else{
-        verificaDataFolga();
-    } 
+    verificaDataFolga();
 
 });
 $('#data, #data_folga, #indice, #indice_folga').on('change', function(){
@@ -611,7 +521,6 @@ const salvaDados = () => {
     var justificativa_11_horas = $("#justificativa_11_horas").val();
     var justificativa_6_dias = $("#justificativa_6_dias").val();
     var justificativa_6_meses = $("#justificativa_6_meses").val();
-    var justificativa_3_dias = $("#justificativa_3_dias").val();
     if(saida2 <= 0) saida2 = 1440;
 
     if(saida > 1440) saida = saida - 1440;
@@ -639,15 +548,6 @@ const salvaDados = () => {
             exibeAlerta('warning', '<b>Dia Trabalho:</b> Descanso de interjornada mínima de 11h não respeitada entre a saída do horário anterior X entrada do novo horário.');
             return false;
         }
-    }
-
-    if(!justificativa_3_dias && inputData_util < tresDiasDepois_util){
-        <?php if(($resConfiguracao[0]['bloqueio_aviso'] ?? null) != 1): ?>
-            $(".box_justificativa_3_dias").fadeIn(100);
-            precisa_justificar_3_dias = true;
-            <?php endif; ?>
-            exibeAlerta('warning', 'Fora do Prazo mínimo de 72h');
-        return false;
     }
 
     var qtde_dias_trab = 0;
@@ -727,15 +627,6 @@ const salvaDados = () => {
         }
     }
 
-    if(!precisa_justificar_3_dias && inputData < tresDiasDepois && inputData > dataAtual){
-        <?php if(($resConfiguracao[0]['bloqueio_aviso'] ?? null) != 1): ?>
-            $(".box_justificativa_3_dias").fadeIn(100);
-            precisa_justificar_3_dias = true;
-            <?php endif; ?>
-            exibeAlerta('warning', 'Fora do Prazo mínimo de 72h');
-        return false;
-    }
-
     var qtde_dias_trab = 0;
     // verifica 35 horas de descanço nos ultimos 6 dias
     for(var ini = 9; ini >= 0; ini--){
@@ -794,11 +685,6 @@ const salvaDados = () => {
         return false;
     }
 
-    if(justificativa_3_dias == "" && precisa_justificar_3_dias){
-        exibeAlerta('warning', 'Justificativa (Troca de escala inferior a 6 meses do horário atual do colaborador) não informada.');
-        return false;
-    }
-
     
     <?php endif; ?>
     
@@ -836,7 +722,6 @@ const salvaDados = () => {
                 "justificativa_11_horas"    : justificativa_11_horas,
                 "justificativa_6_dias"      : justificativa_6_dias,
                 "justificativa_6_meses"     : justificativa_6_meses,
-                "justificativa_3_dias"      : justificativa_3_dias,
                 "justificativa_periodo"     : $("#justificativa_periodo").val(),
                 "tipo"                      : 2
             }
@@ -870,12 +755,11 @@ const salvaDados = () => {
 
 }
 const resetaProcesso = () => {
-    $(".box_justificativa_11_horas, .box_justificativa_6_horas, .box_justificativa_6_meses, .box_justificativa_3_dias").fadeOut(0);
-    $("#justificativa_11_horas, #justificativa_6_horas, #justificativa_6_meses, #justificativa_3_dias").val('');
+    $(".box_justificativa_11_horas, .box_justificativa_6_horas, .box_justificativa_6_meses").fadeOut(0);
+    $("#justificativa_11_horas, #justificativa_6_horas, #justificativa_6_meses").val('');
     precisa_justificar_11_horas = false;
     precisa_justificar_6_dias = false;
     precisa_justificar_6_meses = false;
-    precisa_justificar_3_dias = false;
 }
 $(document).ready(function(){
     <?php
