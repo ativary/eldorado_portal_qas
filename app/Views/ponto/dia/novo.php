@@ -238,6 +238,7 @@ const selecionaChapa = (chapa) => {
     
 }
 const selecionaData = (data) => {
+
     $(".data_disabled").prop("disabled", ((data == "") ? true : false));
     $("#indice").val('');
     if(data == ""){
@@ -246,9 +247,14 @@ const selecionaData = (data) => {
         buscaHorarioIndice('<?= $dadosFunc['CODHORARIO']; ?>');
     }
     verificaData();
+
+
+    
 }
 $("#data_folga").on('change', function(e){
+
     verificaDataFolga();
+
 });
 $('#data, #data_folga, #indice, #indice_folga').on('change', function(){
     projetado = false;
@@ -523,6 +529,15 @@ const salvaDados = () => {
     var horas_entrada = entrada;
     var diff_total = horas_saida + horas_entrada;
 
+    var [dia, mes, ano] = $("#data").val().split('/');
+    var dataFormatada_util = `${ano}-${mes}-${dia}`;
+
+    //Verificação troca dentro de tres dias
+    var inputData_util = new Date(dataFormatada_util);
+    var dataAtual_util = new Date();
+    var tresDiasDepois_util = new Date();
+    tresDiasDepois_util.setDate(dataAtual_util.getDate() + 2);
+
     if(tipo === undefined && tipo2 === undefined && !precisa_justificar_11_horas){
         // if(saida > entrada){exibeAlerta('error', 'Descanso de interjornada mínima de 11h não respeitada entre a saída do horário anterior X entrada do novo horário.');return false;}
         if(diff_total < 660){
@@ -590,6 +605,15 @@ const salvaDados = () => {
     var horas_saida = 1440 - saida2;
     var horas_entrada = entrada;
     var diff_total = horas_saida + horas_entrada;
+
+    var [dia, mes, ano] = $("#data_folga").val().split('/');
+    var dataFormatada_folga = `${ano}-${mes}-${dia}`;
+
+    //Verificação troca dentro de tres dias
+    var inputData = new Date(dataFormatada_folga);
+    var dataAtual = new Date();
+    var tresDiasDepois = new Date();
+    tresDiasDepois.setDate(dataAtual.getDate() + 2);
 
     if(tipo === undefined && tipo2 === undefined && !precisa_justificar_11_horas){
         // if(saida > entrada){exibeAlerta('error', 'Descanso de interjornada mínima de 11h não respeitada entre a saída do horário anterior X entrada do novo horário.');return false;}
@@ -660,6 +684,8 @@ const salvaDados = () => {
         exibeAlerta('warning', 'Justificativa (Troca de escala inferior a 6 meses do horário atual do colaborador) não informada.');
         return false;
     }
+
+    
     <?php endif; ?>
     
     Swal.fire({

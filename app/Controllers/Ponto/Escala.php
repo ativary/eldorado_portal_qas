@@ -402,6 +402,26 @@ Class Escala extends BaseController {
 
     }
 
+    public function verificaDataEnvioAprovacao(){
+
+        $idEscala = $this->request->getPost('id');
+
+        $dados['resConfiguracao'] = $this->mEscala->Configuracao();
+        $dados['escala'] = $this->mEscala->dadosEscala($idEscala);
+
+        if( $dados['escala'][0]['tipo'] == 1){
+            if($dados['resConfiguracao'][0]['escala_per_inicio'] <= $dados['escala'][0]['datamudanca'] && $dados['resConfiguracao'][0]['escala_per_fim'] >= $dados['escala'][0]['datamudanca']){
+                return 'aprova';
+            }
+        }else{
+            if($dados['resConfiguracao'][0]['dia_per_inicio'] <= $dados['escala'][0]['datamudanca'] && $dados['resConfiguracao'][0]['dia_per_fim'] >= $dados['escala'][0]['datamudanca']){
+                return 'aprova';
+            }
+        }
+
+        return 'recusa';
+    }
+
     // ------------------------------------------------------------------
     // gera o termo aditivo do contrato
     // ------------------------------------------------------------------
@@ -592,6 +612,11 @@ Class Escala extends BaseController {
                 if($escala[0]['justificativa_6_meses'] != ''){
                     echo '<b>Justificativa (Troca de escala inferior a 6 meses do horário atual do colaborador):</b><br>';
                     echo '<div style="padding: 8px; background: #f0f0f0; border-radius:6px;">'.nl2br($escala[0]['justificativa_6_meses']).'</div>';
+                    echo '<hr>';
+                }
+                if($escala[0]['justificativa_3_dias'] != ''){
+                    echo '<b>Justificativa (Fora do Prazo mínimo de 72h):</b><br>';
+                    echo '<div style="padding: 8px; background: #f0f0f0; border-radius:6px;">'.nl2br($escala[0]['justificativa_3_dias']).'</div>';
                     echo '<hr>';
                 }
                 if($escala[0]['justificativa_periodo'] != ''){

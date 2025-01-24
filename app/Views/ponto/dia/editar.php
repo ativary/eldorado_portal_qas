@@ -59,6 +59,7 @@
                                 '.nl2br($resEscala['justificativa_6_meses']).'
                             </div>';
                     }
+
                     if($resEscala['justificativa_periodo']){
                         echo '<div class="alert alert-warning2 border-0 m-0 mt-2" role="alert">
                                 <b>Justificativa (Fora do período permitido):</b><br>
@@ -130,6 +131,8 @@
                                 </div>
                             </div>
                         </div>
+
+   
 
                         <div class="card border mt-4 hidden box_justificativa_6_dias" style="background: #fffbec; border-color: #ebd9a6 !important;">
                             <div class="card-body">
@@ -307,16 +310,22 @@
 const selecionaData = (data) => {
     $(".data_disabled").prop("disabled", ((data == "") ? true : false));
     $("#indice").val('');
-    $("#box_projecao, #box_projecao_folga").fadeOut(100);
+    if(data == ""){
+        $("#box_projecao").fadeOut(100);
+    }else{
+        buscaHorarioIndice('<?= $dadosFunc['CODHORARIO']; ?>');
+    }
     verificaData();
+
 }
 const selecionaDataFolga = (data) => {
-    $(".data_disabled").prop("disabled", ((data == "") ? true : false));
-    $("#indice_folga").val('');
-    $("#box_projecao, #box_projecao_folga").fadeOut(100);
+ 
     verificaDataFolga();
+   
 }
 const buscaHorarioIndice = (codhorario) => {
+
+    console.log(codhorario);
     
     let dados = {
         "codhorario": codhorario,
@@ -645,6 +654,13 @@ const salvaDados = () => {
     var horas_entrada = entrada;
     var diff_total = horas_saida + horas_entrada;
 
+    var [dia, mes, ano] = $("#data").val().split('/');
+    var dataFormatada_util = `${ano}-${mes}-${dia}`;
+    var inputData_util = new Date(dataFormatada_util);
+    var dataAtual_util = new Date();
+    var tresDiasDepois_util = new Date();
+    tresDiasDepois_util.setDate(dataAtual_util.getDate() + 2);
+
     if(tipo === undefined && tipo2 === undefined && !precisa_justificar_11_horas){
         // if(saida > entrada){exibeAlerta('error', 'Descanso de interjornada mínima de 11h não respeitada entre a saída do horário anterior X entrada do novo horário.');return false;}
         if(diff_total < 660){
@@ -713,6 +729,15 @@ const salvaDados = () => {
     var horas_entrada = entrada;
     var diff_total = horas_saida + horas_entrada;
 
+    var [dia, mes, ano] = $("#data_folga").val().split('/');
+    var dataFormatada_folga = `${ano}-${mes}-${dia}`;
+
+    //Verificação troca dentro de tres dias
+    var inputData = new Date(dataFormatada_folga);
+    var dataAtual = new Date();
+    var tresDiasDepois = new Date();
+    tresDiasDepois.setDate(dataAtual.getDate() + 2);
+
     if(tipo === undefined && tipo2 === undefined && !precisa_justificar_11_horas){
         // if(saida > entrada){exibeAlerta('error', 'Descanso de interjornada mínima de 11h não respeitada entre a saída do horário anterior X entrada do novo horário.');return false;}
         if(diff_total < 660){
@@ -724,6 +749,7 @@ const salvaDados = () => {
             return false;
         }
     }
+
 
     var qtde_dias_trab = 0;
     // verifica 35 horas de descanço nos ultimos 6 dias

@@ -1,5 +1,7 @@
 <?php
 date_default_timezone_set('America/Sao_Paulo');
+// não executar mais esse JOB
+exit();
 
 set_time_limit(60*5);
 ini_set('display_errors', true);

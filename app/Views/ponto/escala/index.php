@@ -420,42 +420,63 @@ const excel = () => {
     document.getElementById("form_filtro").submit();
 }
 const enviaParaAprovacao = (idEscala) => {
-    Swal.fire({
-        icon              : 'question',
-        title             : 'Confirmar envio para aprovação?',
-        text              : 'Após envio não será possivel alterar a troca de dia.',
-        showDenyButton    : true,
-        showCancelButton  : true,
-        confirmButtonText : `Sim Confirmar`,
-        denyButtonText    : `Cancelar`,
-        showCancelButton  : false,
-        showCloseButton   : false,
-        allowOutsideClick : false,
-        width             : 600,
-    }).then((result) => {
-        if (result.isConfirmed) {
-            openLoading();
 
-            $.ajax({
-                url: "<?= base_url('ponto/escala/action/envia_aprovacao') ?>",
+    console.log(idEscala);
+
+    $.ajax({
+                url: "<?= base_url('ponto/escala/verificaDataEnvioAprovacao') ?>",
                 type:'POST',
                 data: {
                     'id': idEscala
                 },
                 success:function(result){
-                    
-                    var response = JSON.parse(result);
+                    console.log(result);
 
-                    if(response.tipo != 'success'){
-                        exibeAlerta(response.tipo, response.msg);
+                    if(result == 'aprova'){
+                        Swal.fire({
+                            icon              : 'question',
+                            title             : 'Confirmar envio para aprovação?',
+                            text              : 'Após envio não será possivel alterar a troca de dia.',
+                            showDenyButton    : true,
+                            showCancelButton  : true,
+                            confirmButtonText : `Sim Confirmar`,
+                            denyButtonText    : `Cancelar`,
+                            showCancelButton  : false,
+                            showCloseButton   : false,
+                            allowOutsideClick : false,
+                            width             : 600,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                openLoading();
+
+                                $.ajax({
+                                    url: "<?= base_url('ponto/escala/action/envia_aprovacao') ?>",
+                                    type:'POST',
+                                    data: {
+                                        'id': idEscala
+                                    },
+                                    success:function(result){
+                                        
+                                        var response = JSON.parse(result);
+
+                                        if(response.tipo != 'success'){
+                                            exibeAlerta(response.tipo, response.msg);
+                                        }else{
+                                            exibeAlerta(response.tipo, response.msg, 3, window.location.href);
+                                        }
+                                        
+                                    },
+                                });
+                            }
+                        });
                     }else{
-                        exibeAlerta(response.tipo, response.msg, 3, window.location.href);
+                        exibeAlerta('error', 'Data da mudança fora da configuração');
                     }
                     
                 },
             });
-        }
-    });
+
+    
 }
 const excluir = (idEscala) => {
     event.preventDefault();

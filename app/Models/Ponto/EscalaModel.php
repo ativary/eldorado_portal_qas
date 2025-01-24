@@ -491,6 +491,7 @@ class EscalaModel extends Model {
         $justificativa_11_horas = $dados['justificativa_11_horas'] ?? "";
         $justificativa_6_dias   = $dados['justificativa_6_dias'] ?? "";
         $justificativa_6_meses  = $dados['justificativa_6_meses'] ?? "";
+        $justificativa_3_dias   = $dados['justificativa_3_dias'] ?? "";
         $justificativa_periodo  = $dados['justificativa_periodo'] ?? "";
         $tipo                   = $dados['tipo'] ?? 1;
 
@@ -532,7 +533,7 @@ class EscalaModel extends Model {
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($data_folga).'</b>.');
             }
 
-            $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND datamudanca = '{$data}' AND tipo != '1' AND situacao not in (3,9) ";
+            $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND datamudanca = '{$data}' AND tipo != '1' AND situacao not in (3,9,11) ";
             $result = $this->dbportal->query($query);
             if($result->getNumRows() > 0){
                 return responseJson('error', 'Já existe uma solicitação em aberto para esta data.');
@@ -571,7 +572,7 @@ class EscalaModel extends Model {
         }
 
         if($id){
-            return self::AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_periodo, $termo_obrigatorio, $chapa);
+            return self::AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_3_dias, $justificativa_periodo, $termo_obrigatorio, $chapa);
         }
 
         $filtroProjecao = [
@@ -590,9 +591,9 @@ class EscalaModel extends Model {
         }
         
         $query = " INSERT INTO zcrmportal_escala
-            (chapa, coligada, datamudanca, codhorario, codindice, usucad, dtcad, chapa_solicitante, justificativa_11_horas, justificativa_6_dias, justificativa_6_meses, termo_obrigatorio, tipo, datamudanca_folga, codindice_folga, justificativa_periodo, config_escala_per_ini, config_escala_per_fim, config_dia_per_ini, config_dia_per_fim, bloqueio_aviso, projecao, projecao_folga) 
+            (chapa, coligada, datamudanca, codhorario, codindice, usucad, dtcad, chapa_solicitante, justificativa_11_horas, justificativa_6_dias, justificativa_6_meses, justificativa_3_dias, termo_obrigatorio, tipo, datamudanca_folga, codindice_folga, justificativa_periodo, config_escala_per_ini, config_escala_per_fim, config_dia_per_ini, config_dia_per_fim, bloqueio_aviso, projecao, projecao_folga) 
                 VALUES
-            ('{$chapa}', '{$this->coligada}', '{$data}', '{$codhorario}', '{$indice}', '{$this->log_id}', '".date('Y-m-d H:i:s')."', '{$chapa_solicitante}', ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").", ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").", ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").", {$termo_obrigatorio}, {$tipo}, '{$data_folga}', '{$indice_folga}', ".(($justificativa_periodo == "") ? "NULL" : "'{$justificativa_periodo}'").", {$escala_per_inicio}, {$escala_per_fim}, {$dia_per_inicio}, {$dia_per_fim}, {$bloqueio_aviso}, '{$projecao}', ".(($projecao_folga != null) ? "'{$projecao_folga}'" : 'NULL').")
+            ('{$chapa}', '{$this->coligada}', '{$data}', '{$codhorario}', '{$indice}', '{$this->log_id}', '".date('Y-m-d H:i:s')."', '{$chapa_solicitante}', ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").", ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").", ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").", ".(($justificativa_3_dias == "") ? "NULL" : "'{$justificativa_3_dias}'").", {$termo_obrigatorio}, {$tipo}, '{$data_folga}', '{$indice_folga}', ".(($justificativa_periodo == "") ? "NULL" : "'{$justificativa_periodo}'").", {$escala_per_inicio}, {$escala_per_fim}, {$dia_per_inicio}, {$dia_per_fim}, {$bloqueio_aviso}, '{$projecao}', ".(($projecao_folga != null) ? "'{$projecao_folga}'" : 'NULL').")
         ";
         $this->dbportal->query($query);
         
@@ -629,7 +630,7 @@ class EscalaModel extends Model {
 
     }
 
-    public function AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_periodo, $termo_obrigatorio, $chapa)
+    public function AlterarEscala($id, $codhorario, $data, $indice, $data_folga, $indice_folga, $justificativa_11_horas, $justificativa_6_dias, $justificativa_6_meses, $justificativa_3_dias, $justificativa_periodo, $termo_obrigatorio, $chapa)
     {
 
         $filtroProjecao = [
@@ -661,6 +662,7 @@ class EscalaModel extends Model {
                 justificativa_11_horas    = ".(($justificativa_11_horas == "") ? "NULL" : "'{$justificativa_11_horas}'").",
                 justificativa_6_dias      = ".(($justificativa_6_dias == "") ? "NULL" : "'{$justificativa_6_dias}'").",
                 justificativa_6_meses     = ".(($justificativa_6_meses == "") ? "NULL" : "'{$justificativa_6_meses}'").",
+                justificativa_3_dias      = ".(($justificativa_3_dias == "") ? "NULL" : "'{$justificativa_3_dias}'").",
                 justificativa_periodo     = ".(($justificativa_periodo == "") ? "NULL" : "'{$justificativa_periodo}'").",
                 usualt                    = '{$this->log_id}',
                 dtalt                     = '{$this->now}',
@@ -731,12 +733,12 @@ class EscalaModel extends Model {
         }
 
         $this->dbportal->query("
-            UPDATE zcrmportal_escala SET situacao = 11 WHERE id = {$dados['id']} AND situacao = 8
+            UPDATE zcrmportal_escala SET situacao = 11, usualt = '{$this->log_id}', dtalt = '{$this->now}' WHERE id = {$dados['id']} AND situacao IN (0,8)
         ");
 
-        $this->dbportal->query("
-            DELETE FROM zcrmportal_escala WHERE id = {$dados['id']} AND situacao = 0
-        ");
+        // $this->dbportal->query("
+        //     DELETE FROM zcrmportal_escala WHERE id = {$dados['id']} AND situacao = 0
+        // ");
 
         return responseJson('success', 'Requisição excluída com sucesso.');
         
@@ -750,7 +752,7 @@ class EscalaModel extends Model {
         $filtroDataFolga = ($data_folga) ? " OR datamudanca_folga = '{$data_folga}' " : "";
         $filtroId = ($id) ? " AND id != '{$id}' " : "";
 
-        $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND situacao not in (3,9) AND (datamudanca = '{$data}' {$filtroDataFolga})".$filtroId;
+        $query = " SELECT * FROM zcrmportal_escala WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND situacao not in (3,9,11) AND (datamudanca = '{$data}' {$filtroDataFolga})".$filtroId;
         $result = $this->dbportal->query($query);
 
         return ($result->getNumRows() > 0) ? true : false;
@@ -939,6 +941,7 @@ class EscalaModel extends Model {
                     a.justificativa_11_horas,
                     a.justificativa_6_dias,
                     a.justificativa_6_meses,
+                    a.justificativa_3_dias,
                     a.justificativa_periodo,
                     a.motivocancelado,
                     a.id,
@@ -979,6 +982,7 @@ class EscalaModel extends Model {
             a.justificativa_11_horas,
             a.justificativa_6_dias,
             a.justificativa_6_meses, 
+            a.justificativa_3_dias, 
             a.justificativa_periodo, 
             a.motivocancelado,
             a.id,
@@ -1023,6 +1027,7 @@ class EscalaModel extends Model {
                 a.justificativa_11_horas,
                 a.justificativa_6_dias,
                 a.justificativa_6_meses,
+                a.justificativa_3_dias,
                 a.justificativa_periodo,
                 a.motivocancelado,
                 a.id,
@@ -1073,6 +1078,7 @@ class EscalaModel extends Model {
                 a.justificativa_11_horas,
                 a.justificativa_6_dias,
                 a.justificativa_6_meses,
+                a.justificativa_3_dias,
                 a.justificativa_periodo,
                 a.motivocancelado,
                 a.id,
@@ -1169,12 +1175,12 @@ class EscalaModel extends Model {
             return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
         }
 
-        $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9) {$idRequisicao} ");
+        $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9, 11) {$idRequisicao} ");
         if(($checkPortal->getNumRows() ?? 0) > 0){
             return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
         }
 
-        $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca_folga BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9) {$idRequisicao} ");
+        $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca_folga BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9, 11) {$idRequisicao} ");
         if(($checkPortal->getNumRows() ?? 0) > 0){
             return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
         }
@@ -1506,6 +1512,8 @@ class EscalaModel extends Model {
     // antes da data de mudança
     // -------------------------------------------------------
     public function CancelarEscala10Dias(){
+        // não executar mais esse JOB
+        exit();
 
         $query = "
             UPDATE
