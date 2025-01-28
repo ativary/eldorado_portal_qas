@@ -543,7 +543,7 @@ class AprovaModel extends Model
 								CONCAT(CODCOLIGADA,'-',CHAPA) REGISTRO,
 								CASE
 									WHEN DATADEMISSAO IS NOT NULL AND CODSITUACAO = 'D' THEN DATADEMISSAO
-									ELSE GETDATE()
+									ELSE '2900-12-31'
 								END DATA
 							FROM
 								PFUNC
@@ -751,7 +751,7 @@ class AprovaModel extends Model
                             CONCAT(CODCOLIGADA,'-',CHAPA) REGISTRO,
                             CASE
                                 WHEN DATADEMISSAO IS NOT NULL AND CODSITUACAO = 'D' THEN DATADEMISSAO
-                                ELSE GETDATE()
+                                ELSE '2900-12-31'
                             END DATA
                         FROM
                             PFUNC
@@ -841,7 +841,7 @@ class AprovaModel extends Model
 										CONCAT(CODCOLIGADA,'-',CHAPA) REGISTRO,
 										CASE
 											WHEN DATADEMISSAO IS NOT NULL AND CODSITUACAO = 'D' THEN DATADEMISSAO
-											ELSE GETDATE()
+											ELSE '2900-12-31'
 										END DATA
 									FROM
 										".DBRM_BANCO."..PFUNC
@@ -944,7 +944,7 @@ class AprovaModel extends Model
 										CONCAT(CODCOLIGADA,'-',CHAPA) REGISTRO,
 										CASE
 											WHEN DATADEMISSAO IS NOT NULL AND CODSITUACAO = 'D' THEN DATADEMISSAO
-											ELSE GETDATE()
+											ELSE '2900-12-31'
 										END DATA
 									FROM
 										".DBRM_BANCO."..PFUNC
