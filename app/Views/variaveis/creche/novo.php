@@ -54,7 +54,7 @@
                                                 </option>
                                             <?php endforeach; ?>
                                         <?php else: ?>
-                                            <option value="<?= $chapaFunc ?>"><?= $log_nome ?></option>
+                                            <option value="<?= $chapaFunc ?>"><?= $chapaFunc ?> - <?= $log_nome ?></option>
                                         <?php endif; ?>
                                     </select>
                                 </div>
