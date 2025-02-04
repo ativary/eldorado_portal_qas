@@ -767,6 +767,9 @@ class LiderModel extends Model {
     public function inativaLider()
     {
 
+        self::inativarGestor();
+        self::inativaGestorSubstituto();
+
         $query = $this->dbportal->query(" 
             UPDATE 
                 zcrmportal_hierarquia_lider_func_ponto 
@@ -875,6 +878,94 @@ class LiderModel extends Model {
                     AND b.CODSITUACAO = 'D'
                 )
         ");
+
+    }
+
+    private function inativarGestor()
+    {
+        try {
+
+            $gestorDemitido = $this->dbportal->query("
+                SELECT
+                    a.*
+                FROM
+                    zcrmportal_hierarquia_chapa a
+                    INNER JOIN ".DBRM_BANCO."..PFUNC b ON b.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND b.CODCOLIGADA = a.coligada
+                WHERE
+                        a.inativo IS NULL
+                    AND b.CODSITUACAO = 'D'
+            ");
+
+            if($gestorDemitido){
+                $dadosGestores = $gestorDemitido->getResult();
+                foreach($dadosGestores as $gestor){
+
+                    // inativa gestor da hierarquia
+                    $this->dbportal->query(" UPDATE zcrmportal_hierarquia_chapa SET inativo = 1, dtalt = '{$this->now}', usualt = '0' WHERE id_hierarquia = '{$gestor->id_hierarquia}' AND inativo IS NULL ");
+
+                    // pega os lideres do gestor
+                    $liderDoGestor = $this->dbportal->query(" SELECT * FROM zcrmportal_hierarquia_lider_ponto WHERE id_hierarquia = '{$gestor->id_hierarquia}' AND inativo IS NULL ");
+                    if($liderDoGestor){
+                        $dadosLideres = $liderDoGestor->getResult();
+                        foreach($dadosLideres as $lider){
+
+                            // inativa funcionarios do lider
+                            $this->dbportal->query(" UPDATE zcrmportal_hierarquia_lider_func_ponto SET inativo = 1, usu_inativou = '0', dt_inativou = '{$this->now}' WHERE id_lider = '{$lider->id}' AND inativo IS NULL ");
+
+                            // inativa líder exceção
+                            $this->dbportal->query(" UPDATE zcrmportal_hierarquia_lider_excecao_ponto SET inativo = 1, usu_inativou = '0', dt_inativou = '{$this->now}' WHERE id_hierarquia = '{$gestor->id_hierarquia}' AND id_lider = '{$lider->id}' AND inativo IS NULL ");
+
+                            // inativa o lider
+                            $this->dbportal->query(" UPDATE zcrmportal_hierarquia_lider_ponto SET inativo = 1, usu_inativou = '0', dt_inativou = '{$this->now}' WHERE id = '{$lider->id}' AND inativo IS NULL ");
+
+                        }
+                    }
+
+
+                }
+
+            }
+
+            return true;
+            
+        } catch (\Exception | \Error $e) {
+            return false;
+        }
+
+    }
+
+    private function inativaGestorSubstituto()
+    {
+
+        try {
+
+            $gestorSubDemitido = $this->dbportal->query("
+                SELECT
+                    a.*
+                FROM
+                    zcrmportal_hierarquia_chapa_sub a
+                    INNER JOIN ".DBRM_BANCO."..PFUNC b ON b.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND b.CODCOLIGADA = a.coligada
+                WHERE
+                        a.inativo IS NULL
+                    AND b.CODSITUACAO = 'D'
+            ");
+
+            if($gestorSubDemitido){
+                $dadosGestores = $gestorSubDemitido->getResult();
+                foreach($dadosGestores as $gestor){
+
+                    // inativa gestor substituto da hierarquia
+                    $this->dbportal->query(" UPDATE zcrmportal_hierarquia_chapa_sub SET inativo = 1, dtalt = '{$this->now}', usualt = '0' WHERE id_hierarquia = '{$gestor->id_hierarquia}' AND inativo IS NULL ");
+
+                }
+
+            }
+
+            return true;
+
+        } catch (\Exception | \Error $e) {
+            return false;
+        }
 
     }
     
