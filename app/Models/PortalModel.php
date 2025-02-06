@@ -80,7 +80,18 @@ class PortalModel extends Model {
                 B.DTVENCHABILIT,
                 A.CODHORARIO,
                 H.DESCRICAO NOMEHORARIO,
-                I.NOME CARGO
+                I.NOME CARGO,
+                (
+                    SELECT 
+                			MIN(DTMUDANCA) 
+                		FROM 
+                			PFHSTHOR 
+                		WHERE 
+                				CHAPA = A.CHAPA
+                			AND CODCOLIGADA = A.CODCOLIGADA 
+                			AND CODHORARIO = A.CODHORARIO
+                			AND DTMUDANCA > CASE WHEN (SELECT MAX(DTMUDANCA) FROM PFHSTHOR WHERE CHAPA = A.CHAPA AND CODCOLIGADA = A.CODCOLIGADA AND CODHORARIO <> A.CODHORARIO) IS NOT NULL THEN (SELECT MAX(DTMUDANCA) FROM PFHSTHOR WHERE CHAPA = A.CHAPA AND CODCOLIGADA = A.CODCOLIGADA AND CODHORARIO <> A.CODHORARIO) ELSE '1900-01-01' END
+                ) DTMUDANCA_HORARIO
 
             FROM 
                 PFUNC A
