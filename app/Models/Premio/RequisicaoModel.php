@@ -35,18 +35,35 @@ class RequisicaoModel extends Model {
     // -------------------------------------------------------
     public function ListarRequisicao($id = false){
 
+        $mHierarquia = Model('HierarquiaModel');
+
         $ft_id = ($id) ? " AND e.id = '{$id}' " : "";
         $user_id = "";
 
         // Filtra por chapa ou admin apenas se $id false
         if($ft_id=="") {
-            $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+            $chapa = "'". util_chapa(session()->get('func_chapa'))['CHAPA'] . "'" ?? null;
             $coligada = $_SESSION['func_coligada'];
+
+            if($chapa){
+
+            
+                $chapasGestorSubstituto = $mHierarquia->getChapasGestorSubstituto($chapa);
+
+                if($chapasGestorSubstituto){
+                    foreach($chapasGestorSubstituto as $idx  => $value){
+                        $chapa .= " , '" . $chapasGestorSubstituto[$idx]['chapa_gestor'] . "' ";
+                    }
+                }
+            }
+
             /*$user_id = ($_SESSION['log_id']) != 1 ? " AND e.chapa_requisitor = '".$chapa."' AND e.id_coligada = ".$coligada : "";*/
             //$user_id = ($_SESSION['log_id']) != 1 ? " AND e.chapa_requisitor = '".$chapa."'" : "";
-            $user_id = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? "" : " AND e.chapa_requisitor = '".$chapa."' AND e.id_coligada = ".$coligada;
+            $user_id = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? "" : " AND e.chapa_requisitor in (".$chapa.") AND e.id_coligada = ".$coligada;
             $user_id = $user_id." AND e.id_coligada = ".$coligada;
         }
+
+        
 
         $query = " 
             WITH ZEROS AS (
@@ -1563,13 +1580,26 @@ class RequisicaoModel extends Model {
     // -------------------------------------------------------
     public function ListarAprovaRequisicao(){
 
+        $mHierarquia = Model('HierarquiaModel');
+
         $coligada = $_SESSION['func_coligada'];
         $user_id = " AND e.id_coligada = ".$coligada;
 
         // Filtra requisições de chapas abaixo do gestor requisitor
         if(!($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S')) {
             
-            $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+            $chapa = "'". util_chapa(session()->get('func_chapa'))['CHAPA'] ."'" ?? null;
+
+            if($chapa){
+            
+                $chapasGestorSubstituto = $mHierarquia->getChapasGestorSubstituto($chapa);
+
+                if($chapasGestorSubstituto){
+                    foreach($chapasGestorSubstituto as $idx  => $value){
+                        $chapa .= " , '" . $chapasGestorSubstituto[$idx]['chapa_gestor'] . "' ";
+                    }
+                }
+            }
 
             /* desativado em função da nova regra de aprovação
             $q = "
@@ -1583,7 +1613,7 @@ class RequisicaoModel extends Model {
             $chapas = is_null($row->chapas) ? "-1" : $row->chapas;
             */
 
-            $user_id = $user_id." AND (e.chapa_gerente = '".$chapa."' OR r.chapa_coordenador = '".$chapa."') ";
+            $user_id = $user_id." AND (e.chapa_gerente in (".$chapa.") OR r.chapa_coordenador in (".$chapa.")) ";
         }
         $query = " 
             SELECT 
@@ -1628,6 +1658,8 @@ class RequisicaoModel extends Model {
 	            p.id = a.id_premio
             WHERE e.status not in ('P','I') AND e.id > 0 AND 
 	            r.chapa_coordenador IS NOT NULL ".$user_id;
+
+
         $result = $this->dbportal->query($query);
         return ($result->getNumRows() > 0) 
                 ? $result->getResultArray() 

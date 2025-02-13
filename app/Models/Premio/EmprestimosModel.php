@@ -33,15 +33,29 @@ class EmprestimosModel extends Model {
     // -------------------------------------------------------
     public function ListarEmprestimos($id = false){
 
+        $mHierarquia = Model('HierarquiaModel');
+
         $ft_id = ($id) ? " AND e.id = '{$id}' " : "";
         $user_id = "";
 
         // Filtra por chapa ou admin apenas se $id false
         if($ft_id=="") {
-            $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
             $coligada = $_SESSION['func_coligada'];
+
+            $chapa = "'". util_chapa(session()->get('func_chapa'))['CHAPA'] ."'" ?? null;
+
+            if($chapa){
+            
+                $chapasGestorSubstituto = $mHierarquia->getChapasGestorSubstituto($chapa);
+
+                if($chapasGestorSubstituto){
+                    foreach($chapasGestorSubstituto as $idx  => $value){
+                        $chapa .= " , '" . $chapasGestorSubstituto[$idx]['chapa_gestor'] . "' ";
+                    }
+                }
+            }
             //$user_id = ($_SESSION['log_id']) != 1 ? " AND e.de_chapa = '".$chapa."' AND e.id_coligada = ".$coligada : "";
-            $user_id = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? "" : " AND e.de_chapa = '".$chapa."'";
+            $user_id = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? "" : " AND e.de_chapa in (".$chapa.") ";
             $user_id = $user_id." AND e.id_coligada = ".$coligada;
         }
 
@@ -552,10 +566,25 @@ class EmprestimosModel extends Model {
     // ------------------------------------------------------------------------
     public function ListarEmprestimosAprovar(){
 
-        $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+        $mHierarquia = Model('HierarquiaModel');
+        
         $coligada = $_SESSION['func_coligada'];
+
+        $chapa = "'". util_chapa(session()->get('func_chapa'))['CHAPA'] ."'" ?? null;
+
+        if($chapa){
+        
+            $chapasGestorSubstituto = $mHierarquia->getChapasGestorSubstituto($chapa);
+
+            if($chapasGestorSubstituto){
+                foreach($chapasGestorSubstituto as $idx  => $value){
+                    $chapa .= " , '" . $chapasGestorSubstituto[$idx]['chapa_gestor'] . "' ";
+                }
+            }
+        }
+        
         //$user_id = ($_SESSION['log_id']) != 1 ? " AND e.para_chapa = '".$chapa."' AND e.id_coligada = ".$coligada : "";
-        $user_id = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? "" : " AND e.para_chapa = '".$chapa."'";
+        $user_id = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? "" : " AND e.para_chapa in (".$chapa.") ";
         $user_id = $user_id." AND e.id_coligada = ".$coligada;
 
         $query = " 
