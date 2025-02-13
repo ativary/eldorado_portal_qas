@@ -995,10 +995,10 @@ class RelatorioModel extends Model {
            CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
-        INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
-        INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
-        INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
-        INNER JOIN ".DBRM_BANCO."..PPESSOA D ON zcrmportal_usuario.login = D.CPF COLLATE Latin1_General_CI_AS
+        LEFT JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
+        LEFT JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
+        LEFT JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
+        LEFT JOIN ".DBRM_BANCO."..PPESSOA D ON zcrmportal_usuario.login = D.CPF COLLATE Latin1_General_CI_AS
     
         WHERE
         A.Tipo ='8' 
