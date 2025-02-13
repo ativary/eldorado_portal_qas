@@ -5161,7 +5161,7 @@ FROM (
         }
 
         $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-        $filtroGestor = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? "" : " AND ( CHAPA_REQUISITOR = '".$chapa."' OR CHAPA_GESTOR = '".$chapa."' OR CHAPA_APROVADOR = '".$chapa."') ";
+        $filtroGestor = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? "" : " AND ( CHAPA_GERENTE = '".$chapa."' OR CHAPA_COORDENADOR = '".$chapa."' ) ";
 
         $FiltroSecao = "";
         if(is_array($request['secao'])){

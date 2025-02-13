@@ -2014,7 +2014,6 @@ class RequisicaoModel extends Model {
                         $d_ini = DateTime::createFromFormat('Y-m-d', $d_ini);
                         $d_fim = DateTime::createFromFormat('Y-m-d', $d_fim);
                         $d_admissao = date_diff($d_ini, $d_fim)->d;
-						$d_admissao = ($d_adm > $dtfim_ponto) ? 30 : $d_admissao;
                         $datas_admissao = $datas_admissao.(($datas_admissao != '') ? ', ' : '');
                         $datas_admissao = $datas_admissao.date_format($d_ini, 'd/m/Y').' a '.date_format($d_fim, 'd/m/Y');
                     }

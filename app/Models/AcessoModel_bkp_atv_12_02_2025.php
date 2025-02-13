@@ -39,11 +39,8 @@ class AcessoModel extends Model {
             $DadosFuncionario = $mPortal->ListarDadosFuncionario($user);
             $func_coligada = false;
             $func_chapa = false;
-            $func_codsituacao = false;
-
             if($DadosFuncionario && is_array($DadosFuncionario)){
                 $func_coligada = $DadosFuncionario[0]['CODCOLIGADA'];
-                $func_codsituacao = $DadosFuncionario[0]['CODSITUACAO'];
                 if(count($DadosFuncionario) <= 1){
                     
                     $func_chapa = $DadosFuncionario[0]['CHAPA'];
@@ -82,13 +79,6 @@ class AcessoModel extends Model {
                 session()->set('func_coligada', null);
             }
 			
-            if ($func_codsituacao === 'A' || (is_string($user) && ctype_alpha($user)) || $user == '08622962180' || $func_codsituacao === 'V' || $func_codsituacao === 'F') {
-                return responseJson('success', '<b>Login</b> realizado com sucesso.');
-            }else{
-                
-                session()->destroy();
-            }
-            
 			// verifica se é RH Master
             $rh_master = $this->VerificaPerfil('GLOBAL_RH');
             if($rh_master){
@@ -97,6 +87,8 @@ class AcessoModel extends Model {
             } else {
                 session()->set('rh_master', 'N');
             }
+
+            return responseJson('success', '<b>Login</b> realizado com sucesso.');
         }else{
             return responseJson('error', '<b>Usuário ou Senha</b> inválido.');
         }
