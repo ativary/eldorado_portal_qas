@@ -67,10 +67,25 @@ class Requisicao extends BaseController
   public function editar($id)
   {
     parent::VerificaPerfil('PREMIO_REQUISICAO');
+    $mHierarquia = Model('HierarquiaModel');
 
     $this->_breadcrumb->add('Editar Requisição');
     $dados['isAdmin'] = ($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S') ? true : false;
-    $dados['func_chapa'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+
+    $dados['func_chapa'] = "'" . util_chapa(session()->get('func_chapa'))['CHAPA'] . "'" ?? null;
+
+    if($dados['func_chapa']){
+      $chapasGestorSubstituto = $mHierarquia->getChapasGestorSubstituto($dados['func_chapa']);
+
+      if ($chapasGestorSubstituto) {
+          foreach ($chapasGestorSubstituto as $value) {
+            $dados['func_chapa'] .= ", '" . $value['chapa_gestor'] . "'";
+          }
+      }
+    }
+
+    $listaChapas = array_map('trim', explode(',', str_replace("'", "", $dados['func_chapa'])));
+
     $dados['func_nome'] = $_SESSION['log_nome'];
     $dados['id_requisicao'] = $id;
     $dados['id'] = $id;
@@ -83,7 +98,7 @@ class Requisicao extends BaseController
     $dados['_titulo'] = !($status == 'P' or $status == 'R') ? "Requisição enviada para Aprovação (Edição bloqueada)" : "Editar Requisição";
 
     if($dados['resRequisicao'] <> []) {
-      if($dados['resRequisicao'][0]['chapa_requisitor'] != $dados['func_chapa'] && !$dados['isAdmin']){
+      if(!in_array($dados['resRequisicao'][0]['chapa_requisitor'], $listaChapas) && !$dados['isAdmin']){
         notificacao('danger', 'Sem permissão para acessar esta página');
         redireciona('premio/requisicao');
       } 
