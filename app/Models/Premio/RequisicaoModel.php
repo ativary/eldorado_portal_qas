@@ -1372,23 +1372,19 @@ class RequisicaoModel extends Model {
                     $chapa_gerente = $this->GerenteChapa($chapasGestorSubstituto[$idx]['chapa_gestor']);
 
                     if ($chapa_gerente) {
-                        $chapasGerentesArray[] = "'" . $chapa_gerente . "'";
-                        
+                        $chapasGerentesArray[] = " SELECT '" . $chapa_gerente . "' AS GER_CHAPA  ";
                     }
                 }
             }
         }
 
-        $chapasGerentes = implode(',', $chapasGerentesArray);
-
-        
+        $chapasGerentes = implode(' UNION ALL ', $chapasGerentesArray);
 
         $chapas = "
             WITH GESTORES AS (
                 SELECT chapa_gerente AS GER_CHAPA 
                 FROM zcrmportal_premios_requisicao WHERE id = ".$id_requisicao." and id_coligada = ".$id_coligada." 
-                UNION ALL
-                SELECT ".$chapasGerentes." AS GER_CHAPA 
+                ".  (count($chapasGerentesArray) > 0 ? 'UNION ALL ' : '' ) . $chapasGerentes ."
             ),
             
             CHAPAS AS (
@@ -1477,6 +1473,8 @@ class RequisicaoModel extends Model {
 				ON  c.codcoligada = r.id_coligada
                 AND c.gestor_chapa = g.gestor_chapa 
             WHERE g.chapa_colab IS NOT NULL AND r.id = ".$id_requisicao;
+        echo '<textarea>'.$chapas.'</textarea>';
+        exit();
 
         // AND ( g.dt_demissao_colab IS NULL OR g.dt_demissao_colab >= a.dtini_ponto )
         // CODIGO REMOVIDO DO SELECT ACIMA EM 04/12, substutuido por  AND g.codsituacao_colab <> 'D'
