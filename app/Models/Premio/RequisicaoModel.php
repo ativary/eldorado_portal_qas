@@ -1473,8 +1473,6 @@ class RequisicaoModel extends Model {
 				ON  c.codcoligada = r.id_coligada
                 AND c.gestor_chapa = g.gestor_chapa 
             WHERE g.chapa_colab IS NOT NULL AND r.id = ".$id_requisicao;
-        echo '<textarea>'.$chapas.'</textarea>';
-        exit();
 
         // AND ( g.dt_demissao_colab IS NULL OR g.dt_demissao_colab >= a.dtini_ponto )
         // CODIGO REMOVIDO DO SELECT ACIMA EM 04/12, substutuido por  AND g.codsituacao_colab <> 'D'
