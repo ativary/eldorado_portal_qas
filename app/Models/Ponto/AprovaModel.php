@@ -477,10 +477,11 @@ class AprovaModel extends Model
 
 
 		// exit($periodo);
-		$periodo    = explode('|', $periodo);
-		$perInicio  = $periodo[0];
-		$perFim     = $periodo[1];
-		$periodo    = " AND A.dtponto BETWEEN '{$periodo[0]}' AND '{$periodo[1]}' ";
+		$periodo          = explode('|', $periodo);
+		$perInicio        = $periodo[0];
+		$perFim           = $periodo[1];
+		$periodo          = " AND A.dtponto BETWEEN '{$periodo[0]}' AND '{$periodo[1]}' ";
+		$periodoEscala    = " AND (a.datamudanca BETWEEN '{$perInicio}' AND '{$perFim}' OR a.datamudanca_folga BETWEEN '{$perInicio}' AND '{$perFim}' ) ";
 
         $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 		if ($codfilial) {
@@ -997,7 +998,7 @@ class AprovaModel extends Model
 					and a.situacao in (10,2)
 					{$in_secao}
 					" . $codfilial . "
-					".(str_replace('A.dtponto','a.datamudanca',$periodo))."
+					{$periodoEscala}
 					".(str_replace(['a.movimento','ponto'],['a.tipo','0'],$filtro_tipo))."
 					{$filtro_chapa}
 					{$filtro_filial}
