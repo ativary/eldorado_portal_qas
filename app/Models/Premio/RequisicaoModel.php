@@ -1344,6 +1344,9 @@ class RequisicaoModel extends Model {
     // Processar / Recalcular Requisicao
     // -------------------------------------------------------
     public function ProcessarRequisicao($dados){
+
+        $mHierarquia = Model('HierarquiaModel');
+
         $id_requisicao = $dados['id_requisicao'];
         $tipo_req = $dados['tipo_req'];
         $msgCompl = '';
@@ -1357,10 +1360,35 @@ class RequisicaoModel extends Model {
         $id_usuario = $_SESSION['log_id'];
         $sucesso = true;
 
+        $chapa = "'". util_chapa(session()->get('func_chapa'))['CHAPA'] ."'" ?? null;
+        $chapasGerentes = [];
+
+        if($chapa){
+        
+            $chapasGestorSubstituto = $mHierarquia->getChapasGestorSubstituto($chapa);
+
+            if($chapasGestorSubstituto){
+                foreach($chapasGestorSubstituto as $idx  => $value){
+                    $chapa_gerente = $this->GerenteChapa($chapasGestorSubstituto[$idx]['chapa_gestor']);
+
+                    if ($chapa_gerente) {
+                        $chapasGerentesArray[] = "'" . $chapa_gerente . "'";
+                        
+                    }
+                }
+            }
+        }
+
+        $chapasGerentes = implode(',', $chapasGerentesArray);
+
+        
+
         $chapas = "
             WITH GESTORES AS (
                 SELECT chapa_gerente AS GER_CHAPA 
                 FROM zcrmportal_premios_requisicao WHERE id = ".$id_requisicao." and id_coligada = ".$id_coligada." 
+                UNION ALL
+                SELECT ".$chapasGerentes." AS GER_CHAPA 
             ),
             
             CHAPAS AS (
