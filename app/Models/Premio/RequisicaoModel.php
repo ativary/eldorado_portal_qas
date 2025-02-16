@@ -1378,13 +1378,15 @@ class RequisicaoModel extends Model {
             }
         }
 
-        $chapasGerentes = implode(' UNION ALL ', $chapasGerentesArray);
+        $chapasGerentes = isset($chapasGerentesArray) && is_array($chapasGerentesArray) && count($chapasGerentesArray) > 0
+            ? implode(' UNION ALL ', $chapasGerentesArray)
+            : '';
 
         $chapas = "
             WITH GESTORES AS (
                 SELECT chapa_gerente AS GER_CHAPA 
                 FROM zcrmportal_premios_requisicao WHERE id = ".$id_requisicao." and id_coligada = ".$id_coligada." 
-                ".  (count($chapasGerentesArray) > 0 ? 'UNION ALL ' : '' ) . $chapasGerentes ."
+                ". (!empty($chapasGerentes) ? " UNION ALL ".$chapasGerentes : "") ."
             ),
             
             CHAPAS AS (
