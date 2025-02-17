@@ -579,24 +579,28 @@ class EscalaModel extends Model {
             $dataTerminoFolga = somarDias($dados['data_folga'], 1);
             $idRequisicao     = strlen(trim($dados['id'] ?? '') > 0) ? " AND id != '{$dados['id']}' " : '';
             
-            $ferias = $this->dbrm->query(" SELECT DATAINICIO FROM PFUFERIASPER WHERE CHAPA = '{$chapa}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND DATAINICIO BETWEEN '{$dataInicioUtil}' AND '{$dataTerminoUtil}' ");
+            $ferias = $this->dbrm->query(" SELECT DATAINICIO FROM PFUFERIASPER WHERE CHAPA = '{$chapa}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND 
+                (
+                    '{$dataInicioUtil}' BETWEEN DATAINICIO AND DATAFIM 
+                        OR
+                    '{$dados['data']}' BETWEEN DATAINICIO AND DATAFIM  
+                        OR
+                    '{$dataTerminoUtil}' BETWEEN DATAINICIO AND DATAFIM 
+                )
+            ");
             if(($ferias->getNumRows() ?? 0) > 0){
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador em período de férias ('.dtBr($dados['data']).')</b>.');
-            }
-
-            $ferias = $this->dbrm->query(" SELECT DATAFIM FROM PFUFERIASPER WHERE CHAPA = '{$chapa}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND DATAFIM BETWEEN '{$dataInicioUtil}' AND '{$dataTerminoUtil}' ");
-            if(($ferias->getNumRows() ?? 0) > 0){
-                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador em período de férias (<b>'.dtBr($dados['data']).'</b>)</b>.');
             }
             
-            $ferias = $this->dbrm->query(" SELECT DATAINICIO FROM PFUFERIASPER WHERE CHAPA = '{$chapa}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND DATAINICIO BETWEEN '{$dataInicioFolga}' AND '{$dataTerminoFolga}' ");
+            $ferias = $this->dbrm->query(" SELECT DATAINICIO FROM PFUFERIASPER WHERE CHAPA = '{$chapa}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND 
+                (
+                    '{$dataInicioFolga}' BETWEEN DATAINICIO AND DATAFIM 
+                        OR
+                    '{$dataTerminoFolga}' BETWEEN DATAINICIO AND DATAFIM 
+                )
+            ");
             if(($ferias->getNumRows() ?? 0) > 0){
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador em período de férias ('.dtBr($dados['data']).')</b>.');
-            }
-
-            $ferias = $this->dbrm->query(" SELECT DATAFIM FROM PFUFERIASPER WHERE CHAPA = '{$chapa}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND DATAFIM BETWEEN '{$dataInicioFolga}' AND '{$dataTerminoFolga}' ");
-            if(($ferias->getNumRows() ?? 0) > 0){
-                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador em período de férias (<b>'.dtBr($dados['data']).'</b>)</b>.');
             }
 
         }
@@ -1220,14 +1224,17 @@ class EscalaModel extends Model {
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
             }
             
-            $ferias = $this->dbrm->query(" SELECT DATAINICIO FROM PFUFERIASPER WHERE CHAPA = '{$dados['chapa']}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND DATAINICIO BETWEEN '{$dataInicio}' AND '{$dataTermino}' ");
+            $ferias = $this->dbrm->query(" SELECT DATAINICIO FROM PFUFERIASPER WHERE CHAPA = '{$dados['chapa']}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND 
+                (
+                    '{$dataInicio}' BETWEEN DATAINICIO AND DATAFIM 
+                        OR
+                    '{$dados['data']}' BETWEEN DATAINICIO AND DATAFIM  
+                        OR
+                    '{$dataTermino}' BETWEEN DATAINICIO AND DATAFIM 
+                )
+            ");
             if(($ferias->getNumRows() ?? 0) > 0){
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador em período de férias ('.dtBr($dados['data']).')</b>.');
-            }
-
-            $ferias = $this->dbrm->query(" SELECT DATAFIM FROM PFUFERIASPER WHERE CHAPA = '{$dados['chapa']}' AND CODCOLIGADA = {$this->coligada} AND SITUACAOFERIAS NOT IN ('F') AND DATAFIM BETWEEN '{$dataInicio}' AND '{$dataTermino}' ");
-            if(($ferias->getNumRows() ?? 0) > 0){
-                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador em período de férias (<b>'.dtBr($dados['data']).'</b>)</b>.');
             }
 
         }
