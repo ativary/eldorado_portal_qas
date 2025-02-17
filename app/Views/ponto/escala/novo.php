@@ -570,7 +570,8 @@ const verificaData = () => {
         type:'POST',
         data:{
             'chapa'   : $("#chapa").val(),
-            'data'    : $("#data").val()
+            'data'    : $("#data").val(),
+            'tipo'    : 'escala'
         },
         success:function(result){
             openLoading(true);

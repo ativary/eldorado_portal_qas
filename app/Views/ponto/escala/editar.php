@@ -805,7 +805,8 @@ const verificaData = () => {
         data:{
             'chapa'   : '<?= $resEscala['chapa'] ?>',
             'data'    : $("#data").val(),
-            'id'      : '<?= $resEscala['id']; ?>'
+            'id'      : '<?= $resEscala['id']; ?>',
+            'tipo'    : 'escala'
         },
         success:function(result){
             openLoading(true);

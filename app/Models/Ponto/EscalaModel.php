@@ -1170,13 +1170,26 @@ class EscalaModel extends Model {
             return responseJson('error', 'Data não informada.');
         }
 
+        $isEscala = (($dados['tipo'] ?? 'dia') == 'escala' ? true : false);
+
         $dataInicio   = somarDias($dados['data'], -1);
         $dataTermino  = somarDias($dados['data'], 1);
         $idRequisicao = strlen(trim($dados['id'] ?? '') > 0) ? " AND id != '{$dados['id']}' " : '';
 
-        $historico = $this->dbrm->query(" SELECT * FROM PFHSTHOR WHERE CHAPA = '{$dados['chapa']}' AND CODCOLIGADA = '{$this->coligada}' AND DTMUDANCA BETWEEN '{$dataInicio}' AND '{$dataTermino}' ");
-        if(($historico->getNumRows() ?? 0) > 0){
-            return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+        if($isEscala){
+
+            $historico = $this->dbrm->query(" SELECT * FROM PFHSTHOR WHERE CHAPA = '{$dados['chapa']}' AND CODCOLIGADA = '{$this->coligada}' AND DTMUDANCA = '{$dados['data']}' ");
+            if(($historico->getNumRows() ?? 0) > 0){
+                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+            }
+
+        }else{
+
+            $historico = $this->dbrm->query(" SELECT * FROM PFHSTHOR WHERE CHAPA = '{$dados['chapa']}' AND CODCOLIGADA = '{$this->coligada}' AND DTMUDANCA BETWEEN '{$dataInicio}' AND '{$dataTermino}' ");
+            if(($historico->getNumRows() ?? 0) > 0){
+                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+            }
+
         }
 
         $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9, 11) {$idRequisicao} ");
