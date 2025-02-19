@@ -1587,8 +1587,10 @@ class CriticaModel extends Model {
 
     }
 
-    public function isGestorOrLiderAprovador($chapaColaborador = false)
+    public function isGestorOrLiderAprovador($chapaColaborador = false, $funcao = false)
     {
+      //Funcao de aprovador do ponto
+      $funcao = ($funcao == false) ? 181 : $funcao;
 
       $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
       if($chapa == null) return false;
@@ -1604,8 +1606,13 @@ class CriticaModel extends Model {
       if($result){
         if($result->getNumRows() > 0) return true;
       }
-
-      $query = " SELECT * FROM zcrmportal_hierarquia_gestor_substituto WHERE chapa_substituto = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo = 0";
+      $query = " SELECT * FROM zcrmportal_hierarquia_gestor_substituto A
+                  LEFT JOIN zcrmportal_hierarquia_gestor_substituto_modulos B ON a.modulos LIKE '%\"' + CAST(B.id AS VARCHAR) + '\"%'
+                  WHERE A.chapa_substituto = '{$chapa}' 
+                    AND A.coligada = '{$this->coligada}' 
+                    AND A.inativo = 0
+                    AND B.funcoes like '%\"{$funcao}\"%'
+      ";
       $result = $this->dbportal->query($query);
       if($result){
         if($result->getNumRows() > 0) return true;
