@@ -128,7 +128,9 @@ class AprovaModel extends Model
 			atitude_fim,
 			atitude_dt,
 			atitude_tipo,
-			justificativa_excecao
+			justificativa_excecao,
+			ISNULL((SELECT BASE FROM ".DBRM_BANCO."..AAFHTFUN WHERE CHAPA = zcrmportal_ponto_horas.chapa COLLATE Latin1_General_CI_AS AND CODCOLIGADA = zcrmportal_ponto_horas.coligada AND DATA = zcrmportal_ponto_horas.dtponto),0) htrab,
+			(CASE WHEN abn_dtfim > abn_dtini THEN abn_horafim+1440 - abn_horaini ELSE abn_horafim - abn_horaini END) horas_abono
 		FROM 
 			zcrmportal_ponto_horas 
 		WHERE 
@@ -239,6 +241,12 @@ class AprovaModel extends Model
 				
 				if($res[0]['movimento'] == '5' ) $SOLUCAOCONFLITO = 1;
 				
+				if(strlen(trim($res[0]['horas_abono'])) > 0){
+					if((int)$res[0]['horas_abono'] >= (int)$res[0]['htrab']){
+						$SOLUCAOCONFLITO = 6;
+					}
+				}
+				
 				if($res[0]['abn_horaini'] > $res[0]['abn_horafim']){
 					
 					$queryRM = " INSERT INTO AABONFUN
@@ -246,7 +254,6 @@ class AprovaModel extends Model
 							VALUES
 						('".$_SESSION['func_coligada']."', '".$res[0]['chapa']."', '".$res[0]["dtponto"]."', '".$res[0]["abn_codabono"]."', '".$res[0]["abn_horaini"]."', '1440', '".$SOLUCAOCONFLITO."', 0, '".$_SESSION['func_coligada']."', ".$desconsidera.", '".$res[0]['chapa']."', 'PORT.".$_SESSION['log_id']."', '".date('Y-m-d H:i:s')."')
 					";
-					//echo $queryRM;
 					$resRM = $this->dbrm->query($queryRM);				
 					
 					$queryRM = " INSERT INTO AABONFUN
@@ -259,9 +266,9 @@ class AprovaModel extends Model
 				}else{
 					
 					$queryRM = " INSERT INTO AABONFUN
-						(CODCOLIGADA, CHAPA, DATA, CODABONO, HORAINICIO, HORAFIM, ABONOFUTURO, COLIGADARESP, DESCONSIDERA,RESPONSAVEL, RECCREATEDBY, RECCREATEDON)
+						(CODCOLIGADA, CHAPA, DATA, CODABONO, HORAINICIO, HORAFIM, SOLUCAOCONFLITO, ABONOFUTURO, COLIGADARESP, DESCONSIDERA,RESPONSAVEL, RECCREATEDBY, RECCREATEDON)
 							VALUES
-						('".$_SESSION['func_coligada']."', '".$res[0]['chapa']."', '".$res[0]["abn_dtini"]."', '".$res[0]["abn_codabono"]."', '".$res[0]["abn_horaini"]."', '".$res[0]["abn_horafim"]."', 0, '".$_SESSION['func_coligada']."',".$desconsidera.", '".$res[0]['chapa']."', 'PORT.".$_SESSION['log_id']."', '".date('Y-m-d H:i:s')."')
+						('".$_SESSION['func_coligada']."', '".$res[0]['chapa']."', '".$res[0]["abn_dtini"]."', '".$res[0]["abn_codabono"]."', '".$res[0]["abn_horaini"]."', '".$res[0]["abn_horafim"]."', '".$SOLUCAOCONFLITO."', 0, '".$_SESSION['func_coligada']."',".$desconsidera.", '".$res[0]['chapa']."', 'PORT.".$_SESSION['log_id']."', '".date('Y-m-d H:i:s')."')
 					";
 					$resRM = $this->dbrm->query($queryRM);
 					
