@@ -367,6 +367,22 @@ class HierarquiaModel extends Model {
 
 	}
 
+	public function isLiderAprovador($chapa = false, $coligada = false){
+
+		$coligada = (!$coligada) ? (session()->get('func_coligada') ?? null) : $coligada;
+        $chapa = (!$chapa) ? ("'".util_chapa(session()->get('func_chapa'))['CHAPA']."'" ?? null) : $chapa;
+
+		if($coligada === null || $chapa === null) return false;
+
+		$query = "  SELECT * FROM zcrmportal_hierarquia_lider_ponto WHERE chapa IN ({$chapa}) AND coligada = '{$coligada}' AND inativo IS NULL AND '".date('Y-m-d')."' BETWEEN perini AND (CASE WHEN perfim IS NOT NULL THEN perfim ELSE '2090-12-31' END) AND nivel = 1  ";
+		
+		$result = $this->dbportal->query($query);
+		return ($result->getNumRows() > 0) 
+                ? true
+                : false;
+
+	}
+
 	public function isLiderExcecao($chapa = false, $coligada = false){
 
 		$coligada = (!$coligada) ? (session()->get('func_coligada') ?? null) : $coligada;

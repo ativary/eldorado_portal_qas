@@ -33,7 +33,8 @@ class Aprova extends BaseController
     
     $dados['perfilRH']              = parent::VerificaPerfil('GLOBAL_RH', false);
     $dados['isGestorHierarquia']    = $this->mHierarquia->isGestor();
-    $dados['acessoPermitido']       = ($dados['isGestorHierarquia'] || $dados['perfilRH']) ? true : false;
+    $dados['isLiderAprovador']      = $this->mHierarquia->isLiderAprovador();
+    $dados['acessoPermitido']       = ($dados['isGestorHierarquia'] || $dados['perfilRH'] || $dados['isLiderAprovador']) ? true : false;
 
     if(!$dados['acessoPermitido']) notificacao('warning2', 'Você não possui permissão para aprovação de ponto.');
 
