@@ -134,7 +134,7 @@ $(document).ready(function(){
 
                                 <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Categoria</label></div>
                                 <div class="col-sm-10">
-                                    <select name="filtro_tipo" id="filtro_tipo" class="form-control form-control-sm">
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_tipo" id="filtro_tipo" class="form-control form-control-sm">
                                         <option value="">Todos</option>
                                         <!-- <optgroup label="Ponto">
                                             <option <?= ($filtro_tipo == "1") ? 'selected' : ''; ?> value="1">&bull; Inclusão de batida</option>
@@ -155,7 +155,7 @@ $(document).ready(function(){
                                 <div class="col-sm-2 text-right"><label for="opt_periodo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Período</label></div>
 
                                 <div class="col-sm-10">
-                                <select class="select2  form-control form-control-sm " name="periodo" id="periodo" onchange="return carregaColaboradores()">
+                                <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> class="select2  form-control form-control-sm " name="periodo" id="periodo" onchange="return carregaColaboradores()">
                                     <option value="">- selecione um período -</option>
                                     <?php if ($resPeriodo) : ?>
                                         <?php foreach ($resPeriodo as $key => $DadosPeriodo) : ?>
@@ -167,7 +167,7 @@ $(document).ready(function(){
 
                                 <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Filial</label></div>
                                 <div class="col-sm-10">
-                                    <select name="filtro_filial" id="filtro_filial" class="form-control form-control-sm">
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_filial" id="filtro_filial" class="form-control form-control-sm">
                                         <option value="">Todos</option>
                                         <?php if($resFilial): ?>
                                                 <?php foreach($resFilial as $key => $Filial): ?>
@@ -178,7 +178,7 @@ $(document).ready(function(){
                                 </div>
 
                                 <div class="col-sm-2 text-right"><label for="secao" class="col-form-label text-right text-left-sm">Seção:</label></div>
-                                <div class="col-sm-10 "><select name="secao" id="secao" class="form-control select2  form-control-sm " onchange="return carregaColaboradores()">
+                                <div class="col-sm-10 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="secao" id="secao" class="form-control select2  form-control-sm " onchange="return carregaColaboradores()">
                                     <option value="all">Todas as seções</option>
                                     <?php
                                     if ($listaSecaoUsuarioRM) {
@@ -189,7 +189,7 @@ $(document).ready(function(){
                                     ?>
                                 </select></div>
                                 <div class="col-sm-2 text-right"><label for="funcionario" class=" col-form-label text-right text-left-sm">Colaborador:</label></div>
-                                <div class="col-sm-10 "><select name="funcionario" id="funcionario" class="form-control select2 form-control-sm ">
+                                <div class="col-sm-10 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="funcionario" id="funcionario" class="form-control select2 form-control-sm ">
                                     <option value="all">Todos</option>
                                     <?php if ($resFuncionarioSecao) : ?>
                                         <?php foreach ($resFuncionarioSecao as $key => $FuncionarioSecao) : ?>
@@ -202,7 +202,7 @@ $(document).ready(function(){
 
                                 <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Legenda</label></div>
                                 <div class="col-sm-10">
-                                    <select name="filtro_legenda" id="filtro_legenda" class="form-control form-control-sm">
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_legenda" id="filtro_legenda" class="form-control form-control-sm">
                                         <option value="">Todos</option>
                                         <option <?= ($filtro_legenda == "10") ? 'selected' : ''; ?> value="10">Pend/Ação Gestor</option>
                                         <option <?= ($filtro_legenda == "2") ? 'selected' : ''; ?> value="2">Pend/Ação RH</option>
@@ -210,8 +210,8 @@ $(document).ready(function(){
                                 </div>
 
                                 <div class="col-sm-12 text-center">
-                                    <button style="margin-left: 20px;" class="btnpeq btn-sm btn-success bteldorado_1" type="button" onclick="return filtroSecao()"><i class="fa fa-filter"></i> Filtrar</button>
-                                    <button style="margin-left: 20px;" class="btnpeq btn-sm btn-danger bteldorado_2" type="button" onclick="return limpaFiltro()"> Limpar</button>
+                                    <button <?= (!$acessoPermitido) ? 'disabled' : ''; ?> style="margin-left: 20px;" class="btnpeq btn-sm btn-success bteldorado_1" type="button" onclick="return filtroSecao()"><i class="fa fa-filter"></i> Filtrar</button>
+                                    <button <?= (!$acessoPermitido) ? 'disabled' : ''; ?> style="margin-left: 20px;" class="btnpeq btn-sm btn-danger bteldorado_2" type="button" onclick="return limpaFiltro()"> Limpar</button>
                                 </div>
                             </div>
                         </form>
@@ -234,7 +234,7 @@ $(document).ready(function(){
                         <div class="col-12 text-right"><button onclick="return excel()" type="button" class="btnpeq btn-sm btn-success bteldorado_1"><i class="mdi mdi-file-excel"></i> Exportar excel</button></div>
                     </div>
                     <?php
-                    if (!$periodo_bloqueado) {
+                    if (!$periodo_bloqueado && $acessoPermitido) {
                         echo '<div class="row mt-3 mb-3">';
                         echo '<div class="col-6 text-left"><button onclick="return reprovaBatida()" type="button" class="btnpeq btn-sm btn-danger bteldorado_2"><i class="far fa-thumbs-down"></i> Reprova Selecionados</button></div>';
                         echo '<div class="col-6 text-right"><button onclick="return aprovaBatida()" type="button" class="btnpeq btn-sm btn-success bteldorado_1"><i class="far fa-thumbs-up"></i> Aprova Selecionados</button></div>';
@@ -561,6 +561,7 @@ $(document).ready(function(){
 
 <script>
     const aprovarIndividual = (idRegistro) => {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         Swal.fire({
             icon              : 'question',
             title             : 'Confirmar aprovação deste registro?',
@@ -585,12 +586,13 @@ $(document).ready(function(){
         });
     }
     const reprovarIndividual = (idRegistro) => {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         $("[data-checkbox]").prop('checked', false);
         $("[data-checkbox='"+idRegistro+"']").prop('checked', true);
         reprovaBatida();
     }
     const carregaVisualizador = (id, nome) => {
-
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         $("#titulo_modal").html('Anexo enviado por | ' + nome);
         $("#conteudo_modal").html('<div class="text-center"><div class="spinner-border thumb-md text-primary" role="status"></div></div>');
         $(".modal_visualizador").modal('show');
@@ -608,7 +610,7 @@ $(document).ready(function(){
 
     }
     const carregaVisualizadorEscala = (id, nome) => {
-
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         $("#titulo_modal").html('Anexo enviado por | ' + nome);
         $("#conteudo_modal").html('<div class="text-center"><div class="spinner-border thumb-md text-primary" role="status"></div></div>');
         $(".modal_visualizador").modal('show');
@@ -689,6 +691,7 @@ $(document).ready(function(){
 </style>
 <script>
     function filtroSecao() {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         var periodo = document.getElementById("periodo").value;
         if (periodo == "") {
             exibeAlerta('error', 'Período não informado.');
@@ -706,6 +709,7 @@ $(document).ready(function(){
     }
 
     function limpaFiltro() {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         $('#secao').val('all');
         $('#tipo_abono').val('');
     }
@@ -723,6 +727,7 @@ $(document).ready(function(){
     })
 
     function aprovaBatida() {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         if( $("[data-checkbox]:checked").length <= 0){
             exibeAlerta('warning', 'Nenhum registro selecionado.')
             return;
@@ -739,6 +744,7 @@ $(document).ready(function(){
     }
 
     function aprovaBatidaTot() {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         if( $("[data-checkbox]:checked").length <= 0){
             exibeAlerta('warning', 'Nenhum registro selecionado.')
             return;
@@ -755,6 +761,7 @@ $(document).ready(function(){
     }
 
     function cancelaApr() {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         $(".popup_bg").fadeOut(100);
         $(".popup_content").fadeOut(100);
         $("#nome_func").html('');
@@ -762,6 +769,7 @@ $(document).ready(function(){
     }
 
     function autenticaFunc() {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         var CHAPA = $("#func_chapa").val();
         var SENHA = $("#func_senha").val();
         if (CHAPA == '') {
@@ -777,7 +785,7 @@ $(document).ready(function(){
     }
 
     function reprovaBatida() {
-
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         if ($("[data-checkbox]:checked").length <= 0) {
             exibeAlerta('warning', 'Nenhuma registro selecionada.');
             return false;
@@ -834,7 +842,7 @@ $(document).ready(function(){
 
     }
     const carregaFuncionariosSecao = (codSecao) => {
-
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         openLoading();
 
         $("#funcionario").html('<option value="">-- selecione um funcionário --</option>').trigger('change');
@@ -870,7 +878,7 @@ $(document).ready(function(){
 
     }
     const carregaColaboradores = () => {
-
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         openLoading();
 
         var selPeriodo = $("#periodo").val();
@@ -913,7 +921,7 @@ $(document).ready(function(){
 
     }
     const excel = () => {
-
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         var periodo = document.getElementById("periodo").value;
         if (periodo == "") {
             exibeAlerta('error', 'Período não informado.');
@@ -930,7 +938,7 @@ $(document).ready(function(){
         document.getElementById('form1').submit();
     }
     const justificativas = (idEscala) => {
-
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         openLoading();
         $("#justificativas").html('');
 
@@ -1010,6 +1018,7 @@ body {
 <script type="text/javascript" src="<?= base_url('public/assets/plugins/datatables/fixedHeader/dataTables.fixedHeader.js'); ?>"></script>
 <script>
     $(document).ready(function () {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
     // Inicialização do DataTable
     var tabelaAprovacao = $('#datatableAprovacao').DataTable({
         "aLengthMenu": [[25, 50, 100, 200, -1], [25, 50, 100, 200, "Todos"]],
