@@ -1217,6 +1217,36 @@ class EscalaModel extends Model {
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
             }
 
+            $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND coligada = '{$this->coligada}' AND datamudanca = '{$dados['data']}' AND situacao NOT IN (3, 9, 11) {$idRequisicao} ");
+            if(($checkPortal->getNumRows() ?? 0) > 0){
+                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+            }
+
+            $checkPortal = $this->dbportal->query("
+                SELECT 
+                    *
+                FROM 
+                    zcrmportal_escala
+                WHERE
+                        tipo = 2 AND chapa = '{$dados['chapa']}' AND coligada = '{$this->coligada}' AND situacao NOT IN (3, 9, 11)
+                    AND (
+                        datamudanca = '{$dados['data']}'
+                            OR
+                        datamudanca -1 = '{$dados['data']}'
+                            OR
+                        datamudanca +1 ='{$dados['data']}'
+                            OR
+                        datamudanca_folga ='{$dados['data']}'
+                            OR
+                        datamudanca_folga -1 ='{$dados['data']}'
+                            OR
+                        datamudanca_folga +1 ='{$dados['data']}'
+                    )
+            ");
+            if(($checkPortal->getNumRows() ?? 0) > 0){
+                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+            }
+
         }else{
 
             $historico = $this->dbrm->query(" SELECT * FROM PFHSTHOR WHERE CHAPA = '{$dados['chapa']}' AND CODCOLIGADA = '{$this->coligada}' AND DTMUDANCA BETWEEN '{$dataInicio}' AND '{$dataTermino}' ");
@@ -1237,16 +1267,16 @@ class EscalaModel extends Model {
                 return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador em período de férias ('.dtBr($dados['data']).')</b>.');
             }
 
-        }
+            $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9, 11) {$idRequisicao} ");
+            if(($checkPortal->getNumRows() ?? 0) > 0){
+                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+            }
 
-        $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9, 11) {$idRequisicao} ");
-        if(($checkPortal->getNumRows() ?? 0) > 0){
-            return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
-        }
+            $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca_folga BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9, 11) {$idRequisicao} ");
+            if(($checkPortal->getNumRows() ?? 0) > 0){
+                return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
+            }
 
-        $checkPortal = $this->dbportal->query(" SELECT * FROM zcrmportal_escala WHERE chapa = '{$dados['chapa']}' AND datamudanca_folga BETWEEN '{$dataInicio}' AND '{$dataTermino}' AND situacao NOT IN (3, 9, 11) {$idRequisicao} ");
-        if(($checkPortal->getNumRows() ?? 0) > 0){
-            return responseJson('error', 'Não é possivel cadastrar está requisição.<br>Colaborador já possui uma troca no dia <b>'.dtBr($dados['data']).'</b>.');
         }
 
         return responseJson('success', 'Data ok');
