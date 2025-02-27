@@ -12,6 +12,7 @@ class Aprova extends BaseController
   private $mCritica;
   private $mPortal;
   public $mOcorrencia;
+  public $mHierarquia;
 
   public function __construct()
   {
@@ -22,6 +23,7 @@ class Aprova extends BaseController
     $this->mCritica       = model('Ponto/CriticaModel');
     $this->mPortal        = model('PortalModel');
     $this->mOcorrencia    = model('Ponto/OcorrenciaModel');
+    $this->mHierarquia    = model('HierarquiaModel');
   }
 
   public function index()
@@ -29,7 +31,11 @@ class Aprova extends BaseController
 
     parent::VerificaPerfil('PONTO_APROVA');
     
-    $dados['perfilRH'] = parent::VerificaPerfil('GLOBAL_RH', false);
+    $dados['perfilRH']              = parent::VerificaPerfil('GLOBAL_RH', false);
+    $dados['isGestorHierarquia']    = $this->mHierarquia->isGestor();
+    $dados['acessoPermitido']       = ($dados['isGestorHierarquia'] || $dados['perfilRH']) ? true : false;
+
+    if(!$dados['acessoPermitido']) notificacao('warning2', 'Você não possui permissão para aprovação de ponto.');
 
     $dados['_titulo'] = "Aprovar ponto";
     $this->_breadcrumb->add($dados['_titulo'], 'ponto/aprova');
@@ -99,6 +105,12 @@ class Aprova extends BaseController
         $resFuncionarioSecao = $colaboradores;
         
         if($_SERVER['REQUEST_METHOD'] == 'POST' || isset($dados['periodo'])){
+
+            if(!$dados['acessoPermitido']){
+                notificacao('warning2', 'Você não possui permissão para aprovações de ponto.');
+                redireciona('/ponto/aprova');
+                exit();
+            }
         
             // APROVA BATIDA RH COM RM
             if ($act == 'apr') {
