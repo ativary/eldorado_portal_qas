@@ -41,7 +41,7 @@ class Espelho extends BaseController {
         $dados['isGestor']          = $this->mEspelho->isGestor($dados);
         
         // if(session()->get('log_id') == 1 || session()->get('log_id') == 20009  || session()->get('log_id') == 20414  || session()->get('log_id') == 20003){
-        if(session()->get('log_id') == 1 || $dados['isGestorOrLider']){
+        if((session()->get('log_id') == 1 || $dados['isGestorOrLider']) && $this->request->getPost('funcionario')){
             $dados['chapa'] = $this->request->getPost('funcionario');
         }else{
             $dados['chapa'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
