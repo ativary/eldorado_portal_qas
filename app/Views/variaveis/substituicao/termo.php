@@ -71,7 +71,7 @@ setlocale(LC_TIME, 'pt_BR.utf8', 'pt_BR', 'Portuguese_Brazil.1252');
     
 
         <p style="text-align: right;">
-            <?= $filial[0]['CIDADE']; ?>, <?= date('d'); ?> de <?= strftime('%B');?> de <?= date('Y'); ?>
+            <?= $filial[0]['CIDADE']; ?>, <?= date('d'); ?> de <?= $mes; ?> de <?= date('Y'); ?>
         </p>
         <div class="signature">
            

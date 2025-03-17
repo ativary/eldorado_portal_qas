@@ -796,7 +796,7 @@ class LiderModel extends Model {
         
         $this->dbportal->query(" UPDATE zcrmportal_hierarquia_lider_ponto SET inativo = 1, usu_inativou = 0, dt_inativou = getdate() WHERE perfim < '".date('Y-m-d')."' AND perfim IS NOT NULL AND inativo IS NULL ");
 
-        $query = $this->dbportal->query("
+        /*$query = $this->dbportal->query("
             UPDATE 
                 zcrmportal_hierarquia_lider_func_ponto 
             SET 
@@ -815,7 +815,7 @@ class LiderModel extends Model {
                     a.inativo IS NULL 
                     AND b.CODSITUACAO = 'D'
                 )
-        ");
+        ");*/
        
             $this->dbportal->query("
                 UPDATE 
@@ -838,7 +838,7 @@ class LiderModel extends Model {
                     )
             ");
         
-        $query = $this->dbportal->query("
+        /*$query = $this->dbportal->query("
             UPDATE 
                 zcrmportal_hierarquia_lider_func_ponto 
             SET 
@@ -857,7 +857,7 @@ class LiderModel extends Model {
                         a.inativo IS NULL 
                     AND b.CODSITUACAO = 'D'
                 )
-        ");
+        ");*/
         $query = $this->dbportal->query("
             UPDATE 
                 zcrmportal_hierarquia_lider_excecao_ponto 
