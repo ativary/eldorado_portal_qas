@@ -100,8 +100,25 @@ Class Sobreaviso extends BaseController {
     {
         $id = $this->request->getVar('id'); // Pega o valor de 'id' no GET ou POST
 
-   
-       
+        $meses = [
+
+            'January' => 'janeiro',
+            'February' => 'fevereiro',
+            'March' => 'março',
+            'April' => 'abril',
+            'May' => 'maio',
+            'June' => 'junho',
+            'July' => 'julho',
+            'August' => 'agosto',
+            'September' => 'setembro',
+            'October' => 'outubro',
+            'November' => 'novembro',
+            'December' => 'dezembro'
+        ];
+
+        $mesAtual = date('F');
+
+        $dados['mes'] = $meses[$mesAtual];
         $dados['empresa']    = $this->mParam->DadosEmpresa();
         $dados['req']     = $this->mParam->getReqDados($id);
         $dados['valores']     = json_decode($dados['req'][0]->valores) ;

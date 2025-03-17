@@ -50,7 +50,9 @@ setlocale(LC_TIME, 'pt_BR.utf8', 'pt_BR', 'Portuguese_Brazil.1252');
         
         <p>Conforme o artigo 244, parágrafo 2º da Consolidação das Leis do Trabalho (CLT), o tempo em que o colaborador estiver de sobreaviso será remunerado em 1/3 (um terço) do valor da hora normal de trabalho.</p>
         
-        <p> <?= $filial[0]['CIDADE']; ?>, <?= date('d'); ?> de <?= strftime('%B');?> de <?= date('Y'); ?></p>
+        <p> 
+            <?= $filial[0]['CIDADE']; ?>, <?= date('d'); ?> de <?= $mes; ?> de <?= date('Y'); ?>
+        </p>
         
         
             <table class="signature-table">
