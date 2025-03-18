@@ -1369,11 +1369,7 @@ class RequisicaoModel extends Model {
 
             if($chapasGestorSubstituto){
                 foreach($chapasGestorSubstituto as $idx  => $value){
-                    $chapa_gerente = $this->GerenteChapa($chapasGestorSubstituto[$idx]['chapa_gestor']);
-
-                    if ($chapa_gerente) {
-                        $chapasGerentesArray[] = " SELECT '" . $chapa_gerente . "' AS GER_CHAPA  ";
-                    }
+                    $chapasGerentesArray[] = " SELECT '" . $chapasGestorSubstituto[$idx]['chapa_gestor'] . "' AS GER_CHAPA  ";
                 }
             }
         }
