@@ -265,12 +265,6 @@ Class Escala extends BaseController {
             return redirect()->to(base_url('ponto/escala'));
         }
 
-        // verifica se o funcionário esta ativo no totvs
-        if($DadosFuncionario[0]['CODSITUACAO'] == "D"){
-            session()->set(array('notificacao' => array('danger', '<i class="mdi mdi-alert-outline"></i> Colaborador não esta ativo no RM.')));
-            return redirect()->to(base_url('ponto/escala'));
-        }
-
         $dados['DadosFuncionario'] = $DadosFuncionario[0];
 
         if($resEscala[0]['situacao'] != 3 && $resEscala[0]['situacao'] != 9){
@@ -342,12 +336,6 @@ Class Escala extends BaseController {
         // verifica se o funcionário existe no totvs
         if(!$DadosFuncionario){
             session()->set(array('notificacao' => array('danger', '<i class="mdi mdi-alert-outline"></i> Colaborador não localizado.')));
-            return redirect()->to(base_url('ponto/escala'));
-        }
-
-        // verifica se o funcionário esta ativo no totvs
-        if($DadosFuncionario[0]['CODSITUACAO'] == "D"){
-            session()->set(array('notificacao' => array('danger', '<i class="mdi mdi-alert-outline"></i> Colaborador não esta ativo no RM.')));
             return redirect()->to(base_url('ponto/escala'));
         }
 
