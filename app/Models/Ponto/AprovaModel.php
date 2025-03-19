@@ -461,29 +461,7 @@ class AprovaModel extends Model
 	// #############################################################################
 	public function listaBatidaApr($status, $codfilial = false, $movimento = false, $tipo_abono = false, $ft_legenda = false, $ft_status = false, $dt_inicio = false, $dt_fim = false, $filtroChapa = '', $periodo = false, $dados = false)
 	{
-
-		// $periodo = "";
-		// if($ft_status == 'S'){
-		// 	if(strlen(trim($dt_inicio)) <= 0){
-		// 		notificacao('danger', 'Data início do período não informado');
-		// 		redireciona(base_url('ponto/aprova/historico'));
-		// 	}
-		// 	if(strlen(trim($dt_fim)) <= 0){
-		// 		notificacao('danger', 'Data término do período não informado');
-		// 		redireciona(base_url('ponto/aprova/historico'));
-		// 	}
-
-		// 	$dias = dataDiff($dt_inicio, $dt_fim);
-		// 	if($dias > 60){
-		// 		notificacao('danger', 'Período informado é superior a 60 dias.');
-		// 		redireciona(base_url('ponto/aprova/historico'));
-		// 	}
-
-		// 	$periodo = " AND A.dtponto BETWEEN '{$dt_inicio}' AND '{$dt_fim}' ";
-		// }
-
-
-		// exit($periodo);
+		
 		$periodo          = explode('|', $periodo);
 		$perInicio        = $periodo[0];
 		$perFim           = $periodo[1];
@@ -539,85 +517,6 @@ class AprovaModel extends Model
 			case 'oracle': $hoje = " SYSDATE "; break;
 		}
 
-		
-
-		$QUERY = " SELECT PFUNC.*, PPESSOA.CPF, PSECAO.DESCRICAO SECAO, PFUNCAO.NOME AS FUNCAO 
-					FROM PFUNC, PPESSOA, PSECAO, PFUNCAO 
-					WHERE PFUNC.CODCOLIGADA = '1' 
-					--AND (PFUNC.DATADEMISSAO > ({$hoje} - 30) OR PFUNC.DATADEMISSAO IS NULL) 
-					AND (
-						SELECT TOP 1 REGISTRO FROM (
-							SELECT
-								CONCAT(CODCOLIGADA,'-',CHAPA) REGISTRO,
-								CASE
-									WHEN DATADEMISSAO IS NOT NULL AND CODSITUACAO = 'D' THEN DATADEMISSAO
-									ELSE '2900-12-31'
-								END DATA
-							FROM
-								PFUNC
-							WHERE
-								CODCOLIGADA = PFUNC.CODCOLIGADA AND CHAPA = PFUNC.CHAPA
-								AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
-						)X WHERE X.DATA >= '{$perInicio}'
-						ORDER BY X.DATA ASC
-					) IS NOT NULL
-					AND PFUNC.CODTIPO <> 'A' 
-					AND PFUNC.CODPESSOA = PPESSOA.CODIGO 
-					AND PFUNC.CODSECAO = PSECAO.CODIGO 
-					AND PFUNC.CODFUNCAO = PFUNCAO.CODIGO 
-					AND PFUNC.CODCOLIGADA = PSECAO.CODCOLIGADA 
-					AND PFUNCAO.CODCOLIGADA = PFUNC.CODCOLIGADA 
-					ORDER BY PFUNC.CHAPA ";
-
-		$qry = $this->dbrm->query($QUERY);
-		$FUNC = ($qry) ? $qry->getResultArray() : false;
-
-		// #################################################################
-		// FILTRO POR ABONO TIPO
-		// #################################################################
-		$QUERY = " SELECT CODIGO, DESCRICAO FROM AABONO WHERE CODCOLIGADA = '" . $_SESSION['func_coligada'] . "' AND ATIVOPORTAL = 1 ORDER BY DESCRICAO ";
-		#$ABONO = $this->execConsultaIntegra($QUERY);
-		$qry = $this->dbrm->query($QUERY);
-		$ABONO = ($qry) ? $qry->getResultArray() : false;
-
-		// #################################################################
-		// FILTRO POR SEÇÃO
-		// #################################################################
-		$LT_SECAO_FUNCA = false;
-
-		$portal_secao = " SELECT * FROM zcrmportal_usuario_secao WHERE id_usu = '" . $_SESSION['log_id'] . "' ";
-		#$resPortalSecao = $this->dbportal->query($portal_secao);
-		$qry = $this->dbportal->query($portal_secao);
-		$resPortalSecao = ($qry) ? $qry->getResultArray() : false;
-		if ($resPortalSecao && is_array($resPortalSecao)) {
-			foreach ($resPortalSecao as $idp => $value) {
-				$LT_SECAO_FUNCA .= "'" . $resPortalSecao[$idp]['secao'] . "',";
-			}
-		}
-		$FILTRO_SECAO = " --AND CODSECAO IN (" . substr($LT_SECAO_FUNCA, 0, -1) . ") ";
-
-		// #################################################################
-		// CHAPA DAS SEÇÕES
-		// #################################################################
-		$FILTRO_CHAPAS = false;
-		if ($_SESSION['log_id'] == '1') {
-			$query = " SELECT CHAPA FROM PFUNC WHERE (DATADEMISSAO > ({$hoje} - 30) OR DATADEMISSAO IS NULL) AND CODTIPO <> 'A' " . $FILTRO_SECAO . " ";
-			// echo $query;
-			$qry = $this->dbrm->query($query);
-			$resCHAPAS = ($qry) ? $qry->getResultArray() : false;
-
-			if ($resCHAPAS && is_array($resCHAPAS)) {
-				foreach ($resCHAPAS as $idxx => $value) {
-					$FILTRO_CHAPAS .= "'" . $resCHAPAS[$idxx]['CHAPA'] . "',";
-				}
-				$FILTRO_CHAPAS = " AND A.chapa in (" . substr($FILTRO_CHAPAS, 0, -1) . ", '" . $chapa . "') ";
-			} else {
-				$FILTRO_CHAPAS = " AND A.chapa in (" . $chapa . ") ";
-			}
-		}
-		// #################################################################
-
-
 		$filtro_gestor = " AND A.CHAPA IN ('') ";
 		$mPortal  = model('PortalModel');
 
@@ -656,35 +555,6 @@ class AprovaModel extends Model
 
 			$FT_STATUS = " A.status in ('1','2')";
 		}
-
-		// filtro hierarquia
-		/*$mHierarquia = model('HierarquiaModel');
-		$Secoes   = $mHierarquia->ListarHierarquiaSecaoPodeVer();
-		$isLider  = $mHierarquia->isLider();
-
-		$in_secao = " AND 1 = 2 ";
-		if($Secoes && !$dados['perfilRH']){
-			$in_secao = "";
-			if($isLider){
-				// lider
-				$Secoes = self::listaChapaLider();
-
-				foreach($Secoes as $key =>$Chapa){
-					$in_secao .= "'{$Chapa['chapa']}',";
-				}
-				$in_secao = " AND a.chapa IN (".rtrim($in_secao, ',').") ";
-			}else{
-				// gestor
-				foreach($Secoes as $key =>$CodSecao){
-					$in_secao .= "'{$CodSecao['codsecao']}',";
-				}
-				$in_secao = " AND B.CODSECAO IN (".rtrim($in_secao, ',').") ";
-			}
-		}*/
-
-
-
-
 
 
 		//-----------------------------------------
@@ -736,44 +606,6 @@ class AprovaModel extends Model
 		$filtro_chapa = (strlen(trim($filtroChapa)) <= 0 || $filtroChapa == 'all') ? "" : " AND a.chapa = '{$filtroChapa}' ";
 
 		if($dados['perfilRH']) $in_secao = "";
-
-		// pega nome do funcionário
-		$query = " 
-			SELECT 
-				A.CHAPA, 
-				A.NOME,
-				B.CPF,
-				C.GESTOR_CHAPA,
-				C.GESTOR_NOME,
-				(CASE WHEN (A.DATADEMISSAO IS NULL OR A.DATADEMISSAO >= '{$perFim}') THEN 'Ativo' ELSE 'Demitido' END) CODSITUACAO
-			FROM 
-				PFUNC A
-				INNER JOIN PPESSOA B ON B.CODIGO = A.CODPESSOA
-				LEFT JOIN ".DBPORTAL_BANCO."..GESTOR_CHAPA C ON C.CHAPA = A.CHAPA AND C.CODCOLIGADA = A.CODCOLIGADA
-			WHERE 
-					A.CODCOLIGADA = '{$_SESSION['func_coligada']}' 
-				--AND (A.DATADEMISSAO > ({$hoje} - 30) OR A.DATADEMISSAO IS NULL)
-				AND (
-                    SELECT TOP 1 REGISTRO FROM (
-                        SELECT
-                            CONCAT(CODCOLIGADA,'-',CHAPA) REGISTRO,
-                            CASE
-                                WHEN DATADEMISSAO IS NOT NULL AND CODSITUACAO = 'D' THEN DATADEMISSAO
-                                ELSE '2900-12-31'
-                            END DATA
-                        FROM
-                            PFUNC
-                        WHERE
-                            CODCOLIGADA = A.CODCOLIGADA AND CHAPA = A.CHAPA
-							AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
-                    )X WHERE X.DATA >= '{$perInicio}'
-                    ORDER BY X. DATA ASC
-                ) IS NOT NULL
-				".(str_replace('B.CODSECAO','A.CODSECAO',$in_secao))."
-				{$filtro_chapa}
-			";
-		// $result = $this->dbrm->query($query);
-		// $dados_func = $result->getResultArray();
 
 		$filtro_tipo = (strlen(trim($dados['filtro_tipo'])) != 0) ? " AND a.movimento = '{$dados['filtro_tipo']}' " : '';
 		$filtro_filial = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND B.CODFILIAL = '{$dados['filtro_filial']}' " : '';
@@ -852,7 +684,7 @@ class AprovaModel extends Model
 											ELSE '2900-12-31'
 										END DATA
 									FROM
-										".DBRM_BANCO."..PFUNC
+										".DBRM_BANCO."..PFUNC (NOLOCK)
 									WHERE
 										CODCOLIGADA = BB.CODCOLIGADA AND CHAPA = BB.CHAPA
 										AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
@@ -871,8 +703,8 @@ class AprovaModel extends Model
 						TOP 1 
 						HB.DESCRICAO
 					FROM
-						".DBRM_BANCO."..PFHSTSIT HA
-						INNER JOIN ".DBRM_BANCO."..PCODSITUACAO HB ON HB.CODCLIENTE = HA.NOVASITUACAO
+						".DBRM_BANCO."..PFHSTSIT HA (NOLOCK)
+						INNER JOIN ".DBRM_BANCO."..PCODSITUACAO HB (NOLOCK) ON HB.CODCLIENTE = HA.NOVASITUACAO
 					WHERE
 							HA.CODCOLIGADA = A.COLIGADA
 						AND HA.CHAPA = A.CHAPA COLLATE Latin1_General_CI_AS
@@ -889,10 +721,10 @@ class AprovaModel extends Model
 						INNER JOIN zcrmportal_ponto_motivos BB (NOLOCK) ON AA.justificativa = BB.id AND AA.coligada = BB.codcoligada WHERE AA.coligada = A.coligada AND AA.dtponto = A.dtponto AND AA.chapa = A.chapa
 					) justificativa_excecao
 				FROM
-					zcrmportal_ponto_horas A
-					INNER JOIN ".DBRM_BANCO."..PFUNC B ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
-					LEFT JOIN zcrmportal_usuario C ON C.id = A.usucad
-					INNER JOIN ".DBRM_BANCO."..PPESSOA E ON E.CODIGO = B.CODPESSOA
+					zcrmportal_ponto_horas A (NOLOCK)
+					INNER JOIN ".DBRM_BANCO."..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
+					LEFT JOIN zcrmportal_usuario C (NOLOCK) ON C.id = A.usucad
+					INNER JOIN ".DBRM_BANCO."..PPESSOA E (NOLOCK) ON E.CODIGO = B.CODPESSOA
 				WHERE
 					" . $FT_STATUS . "
 					AND A.coligada = '{$_SESSION['func_coligada']}'
@@ -955,7 +787,7 @@ class AprovaModel extends Model
 											ELSE '2900-12-31'
 										END DATA
 									FROM
-										".DBRM_BANCO."..PFUNC
+										".DBRM_BANCO."..PFUNC (NOLOCK)
 									WHERE
 										CODCOLIGADA = BB.CODCOLIGADA AND CHAPA = BB.CHAPA
 										AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
@@ -980,8 +812,8 @@ class AprovaModel extends Model
 						TOP 1 
 						HB.DESCRICAO
 					FROM
-						".DBRM_BANCO."..PFHSTSIT HA
-						INNER JOIN ".DBRM_BANCO."..PCODSITUACAO HB ON HB.CODCLIENTE = HA.NOVASITUACAO
+						".DBRM_BANCO."..PFHSTSIT HA (NOLOCK)
+						INNER JOIN ".DBRM_BANCO."..PCODSITUACAO HB (NOLOCK) ON HB.CODCLIENTE = HA.NOVASITUACAO
 					WHERE
 							HA.CODCOLIGADA = A.COLIGADA
 						AND HA.CHAPA = A.CHAPA COLLATE Latin1_General_CI_AS
@@ -995,11 +827,11 @@ class AprovaModel extends Model
 					a.dtcad data_solicitacao,
 					NULL justificativa_excecao
 				FROM
-					zcrmportal_escala a
-					INNER JOIN ".DBRM_BANCO."..PFUNC B ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
-					LEFT JOIN zcrmportal_usuario C ON C.id = A.usucad
-					LEFT JOIN ".DBRM_BANCO."..AHORARIO D ON D.CODIGO = a.codhorario COLLATE Latin1_General_CI_AS AND D.CODCOLIGADA = a.coligada
-					INNER JOIN ".DBRM_BANCO."..PPESSOA E ON E.CODIGO = B.CODPESSOA
+					zcrmportal_escala a (NOLOCK)
+					INNER JOIN ".DBRM_BANCO."..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
+					LEFT JOIN zcrmportal_usuario C (NOLOCK) ON C.id = A.usucad
+					LEFT JOIN ".DBRM_BANCO."..AHORARIO D (NOLOCK) ON D.CODIGO = a.codhorario COLLATE Latin1_General_CI_AS AND D.CODCOLIGADA = a.coligada
+					INNER JOIN ".DBRM_BANCO."..PPESSOA E (NOLOCK) ON E.CODIGO = B.CODPESSOA
 				WHERE
 					a.coligada = '{$_SESSION['func_coligada']}'
 					and a.situacao in (10,2)
@@ -1040,7 +872,7 @@ class AprovaModel extends Model
 
 				unset($result[$key], $key, $Dados);
 			}
-			unset($dados_func);
+			unset($result,$dados_func);
 			return $response;
 		}
 

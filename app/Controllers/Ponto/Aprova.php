@@ -29,6 +29,8 @@ class Aprova extends BaseController
   public function index()
   {
 
+    set_time_limit(60*30);
+
     parent::VerificaPerfil('PONTO_APROVA');
     
     $dados['perfilRH']              = parent::VerificaPerfil('GLOBAL_RH', false);
@@ -105,6 +107,7 @@ class Aprova extends BaseController
         }
 
         $resFuncionarioSecao = $colaboradores;
+        unset($colaboradores);
         
         if($_SERVER['REQUEST_METHOD'] == 'POST' || isset($dados['periodo'])){
 
@@ -215,22 +218,11 @@ class Aprova extends BaseController
              $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
             
         }
-        
-        $nomeFunc = array();
-        if ($objListaBatidaApr) {
-            foreach ($objListaBatidaApr as $idxx => $value) {
-                $nomeFunc[] = $objListaBatidaApr[$idxx]['nomechapa'];
-            }
-        }
-        
-
-        $nomeFunc = array_unique($nomeFunc);
 
         $listaSecaoUsuarioRM = $this->mAprova->listaSecaoUsuario(false, $dados);
         $objSecaoUsu         = $this->mAprova->listaSecaoUsu($_SESSION["log_id"]);
 
         $dados['objListaBatidaApr']   = $objListaBatidaApr;
-        $dados['nomeFunc']            = $nomeFunc;
         $dados['listaSecaoUsuarioRM'] = $listaSecaoUsuarioRM;
         $dados['objSecaoUsu']         = $objSecaoUsu;
         $dados['resFuncionarioSecao'] = $resFuncionarioSecao;
@@ -241,6 +233,8 @@ class Aprova extends BaseController
         $dados['resMotivoReprova']   = $mEspelho->ListarJustificativa(5);
         $dados['isGestorOrLider']   = $mEspelho->isGestorOrLider($dados);
         $dados['isGestor']          = $mEspelho->isGestor($dados);
+
+        unset($objListaBatidaApr,$listaSecaoUsuarioRM,$objSecaoUsu,$resFuncionarioSecao,$chapa);
         
     return parent::ViewPortal('ponto/aprova/index', $dados);
   }

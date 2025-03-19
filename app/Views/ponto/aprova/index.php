@@ -265,7 +265,7 @@ $(document).ready(function(){
                                 </thead>
                                 <tbody>
                                     <?php if($objListaBatidaApr): ?>
-                                        <?php foreach($objListaBatidaApr as $registro): ?>
+                                        <?php foreach($objListaBatidaApr as $key => $registro): ?>
                                             <tr>
                                                 <td width="20" class="text-center">
                                                     <?php
@@ -539,6 +539,7 @@ $(document).ready(function(){
                                                 </div>
                                                 </td>
                                             </tr>
+                                            <?php unset($objListaBatidaApr[$key],$registro); ?>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </tbody>
