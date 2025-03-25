@@ -2980,10 +2980,8 @@ class EspelhoModel extends Model {
         }
     }
 
-    public function isGestorOrLiderAprovador($chapaColaborador = false, $funcao = false)
+    public function isGestorOrLiderAprovador($chapaColaborador = false)
     {
-        //Funcao de aprovador do ponto
-        $funcao = ($funcao == false) ? 181 : $funcao;
 
       $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
       if($chapa == null) return false;
@@ -3000,13 +2998,7 @@ class EspelhoModel extends Model {
         if($result->getNumRows() > 0) return true;
       }
 
-      $query = " SELECT * FROM zcrmportal_hierarquia_gestor_substituto A
-                  LEFT JOIN zcrmportal_hierarquia_gestor_substituto_modulos B ON a.modulos LIKE '%\"' + CAST(B.id AS VARCHAR) + '\"%'
-                  WHERE A.chapa_substituto = '{$chapa}' 
-                    AND A.coligada = '{$this->coligada}' 
-                    AND A.inativo = 0
-                    AND B.funcoes like '%\"{$funcao}\"%'
-      ";
+      $query = " SELECT * FROM zcrmportal_hierarquia_gestor_substituto WHERE chapa_substituto = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo = 0";
       $result = $this->dbportal->query($query);
       if($result){
         if($result->getNumRows() > 0) return true;
@@ -3203,12 +3195,6 @@ class EspelhoModel extends Model {
 
     public function saveAtsMacro($dados)
     {
-		// Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($dados){
             foreach($dados as $key => $Macro){
                 $placa = strlen(trim($Macro->placa)) > 8 ? '' : trim($Macro->placa); 
@@ -3259,12 +3245,6 @@ class EspelhoModel extends Model {
     public function saveAtsTotalizador($dados)
     {
 
-		// Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($dados){
             foreach($dados as $key => $Totalizador){
                 
@@ -3330,23 +3310,19 @@ class EspelhoModel extends Model {
 
     public function CargaAtsMacro($dados)
     {
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($dados){
             foreach($dados as $key => $Macro){
                 $placa = strlen(trim($Macro->placa)) > 8 ? '' : trim($Macro->placa); 
+                
                 $existe = $this->dbportal
                     ->table('zcrmportal_ponto_ats_macro')
                     ->where('cpf', $Macro->cpf)
                     ->where('data_inicio_status', str_replace(['T', 'Z'], [' ', ''], $Macro->data_inicio_status))
                     ->where('status', $Macro->status)
-                    ->countAllResults();
+                    ->get();
 
-                if($existe <= 0 && strlen(trim($Macro->cpf)) > 0){
+                if($existe->getNumRows() <= 0 && strlen(trim($Macro->cpf)) > 0){
+					
                     $this->dbportal
                         ->table('zcrmportal_ponto_ats_macro')
                         ->insert([
@@ -3368,7 +3344,13 @@ class EspelhoModel extends Model {
                         ->where('data_inicio_status', str_replace(['T', 'Z'], [' ', ''], $Macro->data_inicio_status))
                         ->where('status', $Macro->status)
                         ->update([
-                            'tipo_mensagem' => $Macro->tipo_mensagem
+                            'mensagem' => $Macro->mensagem,
+                            'placa' => $placa,
+                            'data_fim_status' => str_replace(['T', 'Z'], [' ', ''], $Macro->data_fim_status),
+                            'tempo' => $Macro->tempo,
+                            'tipo_mensagem' => $Macro->tipo_mensagem,
+                            'data_gravacao' => str_replace(['T', 'Z'], [' ', ''], $Macro->data_gravacao),
+                            'data_importacao' => date('Y-m-d H:i:s')
                         ]);
                 }
 
@@ -3381,22 +3363,15 @@ class EspelhoModel extends Model {
     public function CargaAtsTotalizador($dados)
     {
 
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($dados){
-            foreach($dados as $key => $Totalizador){
-                
+            foreach($dados as $key => $Totalizador){              
                 $existe = $this->dbportal
                     ->table('zcrmportal_ponto_ats_totalizador')
                     ->where('cpf', $Totalizador->cpf)
                     ->where('data_gravacao', str_replace(['T', 'Z'], [' ', ''], $Totalizador->data_gravacao))
-                    ->countAllResults();
+                    ->get();
 
-                if($existe <= 0 && strlen(trim($Totalizador->cpf)) > 0){
+                if($existe->getNumRows() <= 0 && strlen(trim($Totalizador->cpf)) > 0){
                     $this->dbportal
                     ->table('zcrmportal_ponto_ats_totalizador')
                     ->insert([
@@ -3413,138 +3388,12 @@ class EspelhoModel extends Model {
                     ->where('cpf', $Totalizador->cpf)
                     ->where('data_gravacao', str_replace(['T', 'Z'], [' ', ''], $Totalizador->data_gravacao))
                     ->update([
-                        'horas_parado' => $Totalizador->horas_parado
-                    ]);
-                }
-
-            }
-        }
-        return true;
-    }
-
-    public function ProcAtsMacro($dados, $apagar, $dataini, $datafim)
-    {
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
-        if($apagar == 'S') {
-            // Apaga realizados zerados
-            $query = " 
-                DELETE FROM zcrmportal_ponto_ats_macro 
-                WHERE FORMAT(data_inicio_status, 'yyyy-MM-dd') >= '".$dataini."' AND 
-                      FORMAT(data_inicio_status, 'yyyy-MM-dd') <= '".$datafim."'
-            ";
-            $this->dbportal->query($query);
-        }
-
-        if($dados){
-            foreach($dados as $key => $Macro){
-                $placa = strlen(trim($Macro->placa)) > 8 ? '' : trim($Macro->placa); 
-                $existe = $this->dbportal
-                    ->table('zcrmportal_ponto_ats_macro')
-                    ->where('cpf', $Macro->cpf)
-                    ->where('data_inicio_status', str_replace(['T', 'Z'], [' ', ''], $Macro->data_inicio_status))
-                    ->where('status', $Macro->status)
-                    ->countAllResults();
-
-                if($existe <= 0 && strlen(trim($Macro->cpf)) > 0){
-                    $this->dbportal
-                        ->table('zcrmportal_ponto_ats_macro')
-                        ->insert([
-                            'cpf' => $Macro->cpf,
-                            'status' => $Macro->status,
-                            'mensagem' => $Macro->mensagem,
-                            'placa' => $placa,
-                            'data_inicio_status' => str_replace(['T', 'Z'], [' ', ''], $Macro->data_inicio_status),
-                            'data_fim_status' => str_replace(['T', 'Z'], [' ', ''], $Macro->data_fim_status),
-                            'tempo' => $Macro->tempo,
-                            'tipo_mensagem' => $Macro->tipo_mensagem,
-                            'data_gravacao' => str_replace(['T', 'Z'], [' ', ''], $Macro->data_gravacao),
-                            'data_importacao' => date('Y-m-d H:i:s')
-                        ]);
-                } else {
-                    $this->dbportal
-                        ->table('zcrmportal_ponto_ats_macro')
-                        ->where('cpf', $Macro->cpf)
-                        ->where('data_inicio_status', str_replace(['T', 'Z'], [' ', ''], $Macro->data_inicio_status))
-                        ->where('status', $Macro->status)
-                        ->update([
-                            'cpf' => $Macro->cpf,
-                            'status' => $Macro->status,
-                            'mensagem' => $Macro->mensagem,
-                            'placa' => $placa,
-                            'data_inicio_status' => str_replace(['T', 'Z'], [' ', ''], $Macro->data_inicio_status),
-                            'data_fim_status' => str_replace(['T', 'Z'], [' ', ''], $Macro->data_fim_status),
-                            'tempo' => $Macro->tempo,
-                            'tipo_mensagem' => $Macro->tipo_mensagem,
-                            'data_gravacao' => str_replace(['T', 'Z'], [' ', ''], $Macro->data_gravacao),
-                            'data_importacao' => date('Y-m-d H:i:s')
-                        ]);
-                }
-
-            }
-        }
-        return true;
-
-    }
-
-    public function ProcAtsTotalizador($dados, $apagar, $dataini, $datafim)
-    {
-
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
-        if($apagar == 'S') {
-            // Apaga realizados zerados
-            $query = " 
-                DELETE FROM zcrmportal_ponto_ats_totalizador 
-                WHERE FORMAT(data_gravacao, 'yyyy-MM-dd') >= '".$dataini."' AND 
-                      FORMAT(data_gravacao, 'yyyy-MM-dd') <= '".$datafim."'
-            ";
-            $this->dbportal->query($query);
-        }
-
-        if($dados){
-            foreach($dados as $key => $Totalizador){
-                
-                $existe = $this->dbportal
-                    ->table('zcrmportal_ponto_ats_totalizador')
-                    ->where('cpf', $Totalizador->cpf)
-                    ->where('data_gravacao', str_replace(['T', 'Z'], [' ', ''], $Totalizador->data_gravacao))
-                    ->countAllResults();
-
-                if($existe <= 0 && strlen(trim($Totalizador->cpf)) > 0){
-                    $this->dbportal
-                    ->table('zcrmportal_ponto_ats_totalizador')
-                    ->insert([
-                        'cpf' => $Totalizador->cpf,
-                        'data_gravacao' => $Totalizador->data_gravacao,
-                        'horas_em_espera' => $Totalizador->horas_em_espera,
-                        'horas_de_direcao' => $Totalizador->horas_de_direcao,
-                        'horas_parado' => $Totalizador->horas_parado,
-                        'data_importacao' => date('Y-m-d H:i:s')
-                    ]);
-                } else {
-                    $this->dbportal
-                    ->table('zcrmportal_ponto_ats_totalizador')
-                    ->where('cpf', $Totalizador->cpf)
-                    ->where('data_gravacao', str_replace(['T', 'Z'], [' ', ''], $Totalizador->data_gravacao))
-                    ->update([
-                        'cpf' => $Totalizador->cpf,
-                        'data_gravacao' => $Totalizador->data_gravacao,
                         'horas_em_espera' => $Totalizador->horas_em_espera,
                         'horas_de_direcao' => $Totalizador->horas_de_direcao,
                         'horas_parado' => $Totalizador->horas_parado,
                         'data_importacao' => date('Y-m-d H:i:s')
                     ]);
                 }
-
             }
         }
         return true;

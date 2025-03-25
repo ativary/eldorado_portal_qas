@@ -21,6 +21,9 @@ class OcorrenciaModel extends Model {
         $this->coligada = session()->get('func_coligada');
         $this->log_id = session()->get('log_id');
 		$this->now = date('Y-m-d H:i:s');
+		ini_set("pcre.backtrack_limit", "50000000");
+		set_time_limit(60*90);
+		ini_set('max_execution_time', 60*90);
     }
 
 

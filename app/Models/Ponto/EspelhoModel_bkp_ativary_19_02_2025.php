@@ -3203,12 +3203,6 @@ class EspelhoModel extends Model {
 
     public function saveAtsMacro($dados)
     {
-		// Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($dados){
             foreach($dados as $key => $Macro){
                 $placa = strlen(trim($Macro->placa)) > 8 ? '' : trim($Macro->placa); 
@@ -3259,12 +3253,6 @@ class EspelhoModel extends Model {
     public function saveAtsTotalizador($dados)
     {
 
-		// Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($dados){
             foreach($dados as $key => $Totalizador){
                 
@@ -3330,12 +3318,6 @@ class EspelhoModel extends Model {
 
     public function CargaAtsMacro($dados)
     {
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($dados){
             foreach($dados as $key => $Macro){
                 $placa = strlen(trim($Macro->placa)) > 8 ? '' : trim($Macro->placa); 
@@ -3381,12 +3363,6 @@ class EspelhoModel extends Model {
     public function CargaAtsTotalizador($dados)
     {
 
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($dados){
             foreach($dados as $key => $Totalizador){
                 
@@ -3424,12 +3400,6 @@ class EspelhoModel extends Model {
 
     public function ProcAtsMacro($dados, $apagar, $dataini, $datafim)
     {
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($apagar == 'S') {
             // Apaga realizados zerados
             $query = " 
@@ -3494,12 +3464,6 @@ class EspelhoModel extends Model {
     public function ProcAtsTotalizador($dados, $apagar, $dataini, $datafim)
     {
 
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if($apagar == 'S') {
             // Apaga realizados zerados
             $query = " 

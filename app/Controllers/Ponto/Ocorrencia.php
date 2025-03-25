@@ -247,11 +247,9 @@ Class Ocorrencia extends BaseController {
     // download ocorrência em excel
     // ------------------------------------------------------------------
     public function excel(){
-
-        ini_set("pcre.backtrack_limit", "50000000");
-        set_time_limit(60*90);
-        ini_set('max_execution_time', 60*90);
-        // ini_set('memory_limit', '4096M');
+		ini_set("pcre.backtrack_limit", "50000000");
+		set_time_limit(60*90);
+		ini_set('max_execution_time', 60*90);
 
         parent::VerificaPerfil('PONTO_OCORRENCIA');
 

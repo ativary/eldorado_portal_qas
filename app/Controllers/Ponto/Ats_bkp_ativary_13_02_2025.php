@@ -62,12 +62,6 @@ Class Ats extends BaseController {
      */
     public function cronATS(){
 
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         $hoje       = date('Y-m-d');
         $dataInicio = date('Y-m-d', strtotime('-1 days', strtotime($hoje)));
         $dataFim    = $hoje;
@@ -88,12 +82,6 @@ Class Ats extends BaseController {
      */
     public function cronATSMacro(){
 
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         $hoje       = date('Y-m-d');
         // $hoje       = "2024-09-16";
         $dataInicio = date('Y-m-d', strtotime('-1 days', strtotime($hoje)));
@@ -216,12 +204,6 @@ Class Ats extends BaseController {
     private function macro($dataInicio, $dataFim)
     {
 
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if(!$this->auth()) exit('Falha na autenticação');
 
         $result = self::post('/v1/Buscar_dadosstatusmacros', $dataInicio, $dataFim);
@@ -238,12 +220,6 @@ Class Ats extends BaseController {
     private function totalizador($dataInicio, $dataFim)
     {
 
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         if(!$this->auth()) exit('Falha na autenticação');
 
         $result = self::post('/v1/buscar_dadostotalizadordia', $dataInicio, $dataFim);
@@ -256,12 +232,6 @@ Class Ats extends BaseController {
 	
 	public function cargaAtsMacro($jsonFile)
     {
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         echo 'Iniciando carga...<br>';
         if(file_exists($this->folderJSON.$jsonFile)){
             echo 'Processando arquivo '.$jsonFile.'...<br>';
@@ -283,12 +253,6 @@ Class Ats extends BaseController {
 
     public function cargaAtsTotalizador($jsonFile)
     {
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
         echo 'Iniciando carga...<br>';
         if(file_exists($this->folderJSON.$jsonFile)){
             echo 'Processando arquivo '.$jsonFile.'...<br>';
@@ -307,48 +271,5 @@ Class Ats extends BaseController {
         sleep(10);
         exit();
     }
-	
-	public function processa_carga()
-    {
-        // Atualizado por Alvaro Zaragoza em 2025-03-04
-		ini_set("pcre.backtrack_limit", "50000000");
-		set_time_limit(60*90);
-		ini_set('max_execution_time', 60*90);
-		//ini_set('display_errors', true);
-		
-        $dados = $_POST;
-        if(!$this->auth()) return responseJson('error', 'Falha na conexão com o ATS');
-        
-        $data_inicial = $dados['data_inicial'];
-        $data_final = $dados['data_final'];
-        $proc_macros = $dados['proc_macros'];
-        $proc_tots = $dados['proc_tots'];
-        $apagar_dados = $dados['apagar_dados'];
-        $avisos = '';
-        
-        $dataini = date('Y-m-d', strtotime($data_inicial));
-        $datafim = date('Y-m-d', strtotime($data_final));
-  
-        if($proc_macros == 'S') {
-            $result = self::post('/v1/Buscar_dadosstatusmacros', $dataini, $datafim);
-            if($result){
-                $this->mPonto->ProcAtsMacro($result, $apagar_dados, $dataini, $datafim);
-            } else {
-                return responseJson('error', 'Falha no recebimento das Macros do ATS');
-            }
-        }
-
-        if($proc_tots == 'S') {
-            $result = self::post('/v1/buscar_dadostotalizadordia', $dataini, $datafim);
-            if($result){
-                $this->mPonto->ProcAtsTotalizador($result, $apagar_dados, $dataini, $datafim);
-            } else {
-                return responseJson('error', 'Falha no recebimento dos Totalizadores do ATS'); 
-            }
-        }
-
-        return responseJson('success', 'Processamento finalizado.');
-    }
-
 
 }

@@ -1452,7 +1452,7 @@ class RequisicaoModel extends Model {
                     $msgCompl = ' Uma ou mais chapas já existem em outra requisição do mesmo prêmio, período de ponto e tipo.';
                 } else {
 
-                    if(is_null($chapa_coordenador) or $chapa_coordenador == '') {
+                    if(is_null($chapa_coordenador) or $chapa_coordenador = '') {
                         $chapa_coordenador = $this->CoordenadorChapa($chapa);
                     }
                     $query = " INSERT INTO zcrmportal_premios_requisicao_chapas
@@ -1975,23 +1975,22 @@ class RequisicaoModel extends Model {
                 SELECT 
                     codcoligada,
                     chapa,
-                    CASE WHEN dataadmissao >= '2024-12-16' THEN dataadmissao
+                    CASE WHEN dataadmissao BETWEEN '2024-07-16' AND '2024-08-15' THEN dataadmissao
                         ELSE null
                     END d_adm,
-                    CASE WHEN datademissao BETWEEN '2024-12-16' AND '2025-01-15' THEN datademissao
+                    CASE WHEN datademissao BETWEEN '2024-07-16' AND '2024-08-15' THEN datademissao
                         ELSE null
                     END d_dem
                 FROM PFUNC
-				WHERE
-					codcoligada = 1 AND
-                    chapa = '050010841' 
+                WHERE dataadmissao BETWEEN '2024-07-16' AND '2024-08-15'
+                OR    datademissao BETWEEN '2024-07-16' AND '2024-08-15'
                 */
                 $query = "
                     SELECT 
                         codcoligada,
                         chapa,
                         salario,
-                        CASE WHEN dataadmissao >= '".$dtini_ponto."' THEN dataadmissao
+                        CASE WHEN dataadmissao BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."' THEN dataadmissao
                             ELSE null
                         END d_adm,
                         CASE WHEN datademissao BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."' THEN datademissao
@@ -2036,21 +2035,19 @@ class RequisicaoModel extends Model {
                     f.codcoligada,
                     f.chapa,
                     f.codpessoa,
-                    CASE WHEN dtinicio BETWEEN '2024-12-16' AND '2025-01-15' THEN dtinicio
-                        ELSE '2024-12-16'
+                    CASE WHEN dtinicio BETWEEN '2024-07-16' AND '2024-08-15' THEN dtinicio
+                        ELSE '2024-07-16'
                     END d_ini,
-                    CASE WHEN dtfinal BETWEEN '2024-12-16' AND '2025-01-15' THEN dtfinal
-                        ELSE '2025-01-15'
+                    CASE WHEN dtfinal BETWEEN '2024-07-16' AND '2024-08-15' THEN dtfinal
+                        ELSE '2024-08-15'
                     END d_fim,
                     a.dtinicio,
                     a.dtfinal
                 from pfunc f
                 inner JOIN vatestado a on a.codpessoa = f.codpessoa
-                WHERE (a.dtinicio BETWEEN '2024-12-16' AND '2025-01-15'
-                OR    a.dtfinal BETWEEN '2024-12-16' AND '2025-01-15'
-                OR 	(a.dtinicio < '2024-12-16' AND a.dtfinal > '2025-01-15' ) 
-                OR 	(a.dtinicio <= '2025-01-15' AND a.dtfinal is NULL )) 
-                AND CHAPA = '050007847'
+                WHERE a.dtinicio BETWEEN '2024-07-16' AND '2024-08-15'
+                OR    a.dtfinal BETWEEN '2024-07-16' AND '2024-08-15'
+                OR a.dtfinal is null
                 */
                 $query = "
                     SELECT
@@ -2073,8 +2070,7 @@ class RequisicaoModel extends Model {
                         f.codcoligada = ".$codcoligada." AND
                         ((a.dtinicio BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."') OR
                          (a.dtfinal  BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."') OR 
-						 (a.dtinicio < '".$dtini_ponto."' AND a.dtfinal > '".$dtfim_ponto."') OR
-                         ( (a.dtinicio <= '".$dtfim_ponto."') AND a.dtfinal is NULL) ) AND
+						 (a.dtfinal is NULL) ) AND
                         f.chapa = '".$chapa."' 
                 ";
                 /*if($chapa=='050008006') {

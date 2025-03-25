@@ -82,13 +82,6 @@ class AcessoModel extends Model {
                 session()->set('func_coligada', null);
             }
 			
-            if ($func_codsituacao === 'A' || (is_string($user) && ctype_alpha($user)) || $user == '08622962180' || $func_codsituacao === 'V' || $func_codsituacao === 'F') {
-                return responseJson('success', '<b>Login</b> realizado com sucesso.');
-            }else{
-                
-                session()->destroy();
-            }
-            
 			// verifica se é RH Master
             $rh_master = $this->VerificaPerfil('GLOBAL_RH');
             if($rh_master){
@@ -97,6 +90,14 @@ class AcessoModel extends Model {
             } else {
                 session()->set('rh_master', 'N');
             }
+			
+            if ($func_codsituacao === 'A' || (is_string($user) && ctype_alpha($user)) || $user == '08622962180' || $user == 'RAFAEL.AQUINO' || $func_codsituacao === 'V' || $func_codsituacao === 'F') {
+                return responseJson('success', '<b>Login</b> realizado com sucesso.');
+            }else{
+                
+                session()->destroy();
+            }
+            
         }else{
             return responseJson('error', '<b>Usuário ou Senha</b> inválido.');
         }
