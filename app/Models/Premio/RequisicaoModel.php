@@ -1327,6 +1327,11 @@ class RequisicaoModel extends Model {
     // Processar / Recalcular Requisicao
     // -------------------------------------------------------
     public function ProcessarRequisicao($dados){
+		// Atualizado por Alvaro Zaragoza em 2025-03-04
+		ini_set("pcre.backtrack_limit", "50000000");
+		set_time_limit(60*90);
+		ini_set('max_execution_time', 60*90);
+		
         $id_requisicao = $dados['id_requisicao'];
         $tipo_req = $dados['tipo_req'];
         $msgCompl = '';
@@ -1347,6 +1352,8 @@ class RequisicaoModel extends Model {
             ),
             
             CHAPAS AS (
+                SELECT GER_CHAPA AS CHAPA FROM GESTORES
+            	UNION
                 SELECT	N1_CHAPA AS CHAPA
                 FROM	GESTORES_ABAIXO_GERENTE 
                 WHERE GER_CHAPA IN (SELECT GER_CHAPA FROM GESTORES) AND N1_CHAPA IS NOT NULL
@@ -2014,6 +2021,7 @@ class RequisicaoModel extends Model {
                         $d_ini = DateTime::createFromFormat('Y-m-d', $d_ini);
                         $d_fim = DateTime::createFromFormat('Y-m-d', $d_fim);
                         $d_admissao = date_diff($d_ini, $d_fim)->d;
+						$d_admissao = ($d_adm > $dtfim_ponto) ? 30 : $d_admissao;
                         $datas_admissao = $datas_admissao.(($datas_admissao != '') ? ', ' : '');
                         $datas_admissao = $datas_admissao.date_format($d_ini, 'd/m/Y').' a '.date_format($d_fim, 'd/m/Y');
                     }
