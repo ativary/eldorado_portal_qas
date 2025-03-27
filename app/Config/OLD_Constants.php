@@ -5,8 +5,8 @@
  | --------------------------------------------------------------------------
  |
  */
-define('VERSION_JS', '1.0.11');
-define('VERSION_CSS', '1.0.8');
+define('VERSION_JS', '1.0.12');
+define('VERSION_CSS', '1.0.9');
 define('MENU_VERTICAL', true);
 define('NOME_PORTAL', 'Eldorado Brasil');
 define('TAMANHO_SECAO', 13);
@@ -37,8 +37,8 @@ define('EMAIL_DEBUG', false); // true, false
  |
  */
 define('DBPORTAL_TIPO', 'sqlserver'); // mysql, postgre, oracle, sqlserver
-define('DBPORTAL_HOST', '10.254.196.114');
-define('DBPORTAL_BANCO', 'PortalRHDEV');
+define('DBPORTAL_HOST', '10.254.196.116');
+define('DBPORTAL_BANCO', 'PortalRHPRD');
 define('DBPORTAL_PORTA', 1433);
 define('DBPORTAL_USUARIO', 'portalrhuser');
 define('DBPORTAL_SENHA', 'portalrhuser');
@@ -50,8 +50,8 @@ define('DBPORTAL_SENHA', 'portalrhuser');
  |
  */
 define('DBRM_TIPO', 'sqlserver'); // mysql, postgre, oracle, sqlserver
-define('DBRM_HOST', '10.254.196.114');
-define('DBRM_BANCO', 'CorporeRMDEV');
+define('DBRM_HOST', '10.254.196.116');
+define('DBRM_BANCO', 'CorporeRMPRD');
 define('DBRM_PORTA', 1433);
 define('DBRM_USUARIO', 'rm');
 define('DBRM_SENHA', 'rm');

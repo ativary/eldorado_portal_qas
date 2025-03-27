@@ -23,7 +23,7 @@ class App extends BaseConfig
      *
      * @var string
      */
-    public $baseURL = 'https://portalrh3.eldoradobrasil.com.br';
+    public $baseURL = 'http://portalrhqa3.eldoradobrasil.com.br';
 
     /**
      * --------------------------------------------------------------------------
