@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Models\Ponto;
+
 use SimpleXMLElement;
 
 use CodeIgniter\Model;
@@ -10,72 +12,81 @@ use CodeIgniter\Model;
 class AprovaModel extends Model
 {
 
-    protected $dbportal;
-    protected $dbrm;
-    protected $mEscala;
-    private $log_id;
-    private $now;
-    private $coligada;
-    
-    public function __construct() {
-        $this->dbportal = db_connect('dbportal');
-        $this->dbrm     = db_connect('dbrm');
-        $this->log_id   = session()->get('log_id');
-        $this->coligada = session()->get('func_coligada');
-        $this->now      = date('Y-m-d H:i:s');
-		$this->mEscala = model('Ponto/EscalaModel');
+  protected $dbportal;
+  protected $dbrm;
+  protected $mEscala;
+  private $log_id;
+  private $now;
+  private $coligada;
+  public $producao;
 
-        if(DBRM_TIPO == 'oracle') $this->dbrm->query("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
-		if(DBRM_TIPO == 'oracle') $this->dbrm->query("ALTER SESSION SET NLS_NUMERIC_CHARACTERS='.,'");
-    }
+  public function __construct()
+  {
+    $this->dbportal = db_connect('dbportal');
+    $this->dbrm     = db_connect('dbrm');
+    $this->log_id   = session()->get('log_id');
+    $this->coligada = session()->get('func_coligada');
+    $this->now      = date('Y-m-d H:i:s');
+    $this->mEscala = model('Ponto/EscalaModel');
+    $this->producao   = (DBRM_BANCO == 'CorporeRMPRD') ? true : false;
 
-	// #############################################################################
-	// APROVA DE ESCALA
-	// #############################################################################
-	public function aprovaEscala($idEscala, $rh = false)
-	{
+    if(DBRM_TIPO == 'oracle') $this->dbrm->query("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
+    if(DBRM_TIPO == 'oracle') $this->dbrm->query("ALTER SESSION SET NLS_NUMERIC_CHARACTERS='.,'");
+  }
 
-		
+  // #############################################################################
+  // APROVA DE ESCALA
+  // #############################################################################
+  public function aprovaEscala($idEscala, $rh = false)
+  {
 
-		$escala = $this->dbportal->query(" SELECT chapa, situacao FROM zcrmportal_escala WHERE id = '{$idEscala}' AND situacao IN (10,2) ");
-		$result = ($escala) ? $escala->getResultArray() : null;
-		
-		if($result){
 
-			$situacao = $result[0]['situacao'];
-			
-			$chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-			if($chapaUser == $result[0]['chapa']) return false;
 
-			if(!$rh){
-				if(!self::isGestorOrLiderAprovador($result[0]['chapa'])){
-					return false;
-				}
-			}
+    $escala = $this->dbportal->query(" SELECT chapa, situacao FROM zcrmportal_escala WHERE id = '{$idEscala}' AND situacao IN (10,2) ");
+    $result = ($escala) ? $escala->getResultArray() : null;
 
-			switch($situacao){
-				case 10: $query = " UPDATE zcrmportal_escala SET situacao = 2, dtapr = '".date('Y-m-d H:i:s')."', usuapr = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao = 10 "; break;
-				case 2: $query = " UPDATE zcrmportal_escala SET situacao = 3, dtrh = '".date('Y-m-d H:i:s')."', usurh = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao = 2 "; break;
-				default: return false; break;
-			}
+    if($result){
 
-			$this->dbportal->query($query);
-        	if($this->dbportal->affectedRows() > 0){
+      $situacao = $result[0]['situacao'];
 
-				$query = " SELECT id FROM zcrmportal_escala WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' and termo_obrigatorio = 1 AND situacao = 1 ";
-                $result = $this->dbportal->query($query);
-                if($result->getNumRows() > 0){
-                    $this->mEscala->EscalaNotificaSolicitante($idEscala);
-                }
+      $chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+      if($chapaUser == $result[0]['chapa']) return false;
 
-				if($situacao == 2){
-					$result = $this->mEscala->SincronizaRM_Horario($idEscala);
+      if(!$rh){
+        if(!self::isGestorOrLiderAprovador($result[0]['chapa'])){
+          return false;
+        }
+      }
 
-					if($result === false){
+      switch ($situacao){
+        case 10:
+          $query = " UPDATE zcrmportal_escala SET situacao = 2, dtapr = '".date('Y-m-d H:i:s')."', usuapr = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao = 10 ";
+          break;
+        case 2:
+          $query = " UPDATE zcrmportal_escala SET situacao = 3, dtrh = '".date('Y-m-d H:i:s')."', usurh = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao = 2 ";
+          break;
+        default:
+          return false;
+          break;
+      }
 
-						// em caso de erro na sincronização com totvs
-						// faz o rollback da tabela do portal
-						$query = "
+      $this->dbportal->query($query);
+      if($this->dbportal->affectedRows() > 0){
+
+        $query = " SELECT id FROM zcrmportal_escala WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' and termo_obrigatorio = 1 AND situacao = 1 ";
+        $result = $this->dbportal->query($query);
+        if($result->getNumRows() > 0){
+          $this->mEscala->EscalaNotificaSolicitante($idEscala);
+        }
+
+        if($situacao == 2){
+          $result = $this->mEscala->SincronizaRM_Horario($idEscala);
+
+          if($result === false){
+
+            // em caso de erro na sincronização com totvs
+            // faz o rollback da tabela do portal
+            $query = "
 							UPDATE 
 								zcrmportal_escala
 							SET
@@ -86,30 +97,25 @@ class AprovaModel extends Model
 									id = {$idEscala}
 								AND situacao = 3
 						";
-						$this->dbportal->query($query);
+            $this->dbportal->query($query);
 
-						return false;
+            return false;
+          }
+        }
 
-					}
-					
-				}
+        return true;
+      }
+    }
 
-				return true;
+    return false;
+  }
 
-			}
-
-		}
-
-		return false;
-
-	}
-
-    // #############################################################################
-	// APROVA BATIDA RH
-	// #############################################################################
-	public function aprovaBatidaRH($idbatida, $rh = false)
-	{
-		$query = " 
+  // #############################################################################
+  // APROVA BATIDA RH
+  // #############################################################################
+  public function aprovaBatidaRH($idbatida, $rh = false)
+  {
+    $query = " 
 		SELECT
 			COALESCE(ent1, ent2, ent3, ent4, ent5, sai1, sai2, sai3, sai4, sai5) AS batida,
 			COALESCE(ident1, ident2, ident3, ident4, ident5, idsai1, idsai2, idsai3, idsai4, idsai5) AS idbatida,
@@ -136,154 +142,149 @@ class AprovaModel extends Model
 		WHERE 
 				status IN ('1','2','3', 'A') 
 			AND usu_delete IS NULL
-			AND id = '" . $idbatida . "' ";
-		$qry = $this->dbportal->query($query);
-		$res = ($qry) ? $qry->getResultArray() : array();
+			AND id = '".$idbatida."' ";
+    $qry = $this->dbportal->query($query);
+    $res = ($qry) ? $qry->getResultArray() : array();
 
-		try{
+    try {
 
-			$atualizou = false;
+      $atualizou = false;
 
-			// $wsTotvs = model('WsrmModel');
+      // $wsTotvs = model('WsrmModel');
 
-			$chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-			if($chapaUser == $res[0]['chapa']) return false;
+      $chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+      if($chapaUser == $res[0]['chapa']) return false;
 
-			if(!$rh){
-				if(!self::isGestorOrLiderAprovador($res[0]['chapa'])){
-					return false;
-				}
-			}
-
-
-			// ***************************************************************
-			// APROVA NATUREZA
-			// ***************************************************************
-			if ($res[0]['movimento'] == '3') {
-
-				$queryRM = " UPDATE ABATFUN SET NATUREZA = '" . $res[0]['natureza'] . "' WHERE IDAAFDT = '" . $res[0]['idbatida'] . "' AND CODCOLIGADA = '" . $_SESSION['func_coligada'] . "' ";
-				$resRM = $this->dbrm->query($queryRM);
-
-				if($resRM) $atualizou = true;
-			}
-			// FIM  **********************************************************
-
-			// ***************************************************************
-			// APROVA DATA REFERECIA
-			// ***************************************************************
-			if ($res[0]['movimento'] == '4') {
-
-				$queryRM = " UPDATE ABATFUN SET DATAREFERENCIA = '" . $res[0]['dtref'] . "' WHERE IDAAFDT = '" . $res[0]['idbatida'] . "' AND CODCOLIGADA = '" . $_SESSION['func_coligada'] . "' ";
-				$resRM = $this->dbrm->query($queryRM);
-
-				if($resRM) $atualizou = true;
-
-			}
-			// FIM  **********************************************************
-
-			// ***************************************************************
-			// APROVA EXCLUSAO DE BATIDA
-			// ***************************************************************
-			if ($res[0]['movimento'] == '2') {
-
-				$queryRM = " DELETE FROM ABATFUN WHERE DATA = '" . $res[0]["dtponto"] . "' AND CHAPA = '" . $res[0]['chapa'] . "' AND BATIDA = '" . $res[0]["batida"] . "' AND CODCOLIGADA = '" . $_SESSION['func_coligada'] . "' ";
-				$resRM = $this->dbrm->query($queryRM);
+      if(!$rh){
+        if(!self::isGestorOrLiderAprovador($res[0]['chapa'])){
+          return false;
+        }
+      }
 
 
-				$queryRM = " DELETE FROM AJUSTBAT WHERE DATA = '" . $res[0]["dtponto"] . "' AND CHAPA = '" . $res[0]['chapa'] . "' AND BATIDA = '" . $res[0]["batida"] . "' AND CODCOLIGADA = '" . $_SESSION['func_coligada'] . "' ";
-				$resRM = $this->dbrm->query($queryRM);
+      // ***************************************************************
+      // APROVA NATUREZA
+      // ***************************************************************
+      if($res[0]['movimento'] == '3'){
 
-				$queryRM = " DELETE FROM AAFDT WHERE ID = '" . $res[0]['idbatida'] . "' AND CODCOLIGADA = '" . $_SESSION['func_coligada'] . "' ";
-				$resRM = $this->dbrm->query($queryRM);
+        $queryRM = " UPDATE ABATFUN SET NATUREZA = '".$res[0]['natureza']."' WHERE IDAAFDT = '".$res[0]['idbatida']."' AND CODCOLIGADA = '".$_SESSION['func_coligada']."' ";
+        $resRM = $this->dbrm->query($queryRM);
 
-				$minhaquery = " DELETE FROM zcrmportal_ponto_horas  WHERE dtponto = '" . $res[0]["dtponto"] . "' AND chapa = '" . $res[0]['chapa'] . "' AND coligada = '" . $_SESSION['func_coligada'] . "' AND movimento = '2' AND id = '" . $idbatida . "'";
-				$res = $this->dbportal->query($minhaquery);
+        if($resRM) $atualizou = true;
+      }
+      // FIM  **********************************************************
 
-				if($resRM) $atualizou = true;
-			}
-			// FIM  **********************************************************
+      // ***************************************************************
+      // APROVA DATA REFERECIA
+      // ***************************************************************
+      if($res[0]['movimento'] == '4'){
 
-			// ***************************************************************
-			// APROVA INCLUSAO DE BATIDA
-			// ***************************************************************
-			if ($res[0]['movimento'] == '1') {
-				
-				$queryRM = " INSERT INTO ABATFUN 
+        $queryRM = " UPDATE ABATFUN SET DATAREFERENCIA = '".$res[0]['dtref']."' WHERE IDAAFDT = '".$res[0]['idbatida']."' AND CODCOLIGADA = '".$_SESSION['func_coligada']."' ";
+        $resRM = $this->dbrm->query($queryRM);
+
+        if($resRM) $atualizou = true;
+      }
+      // FIM  **********************************************************
+
+      // ***************************************************************
+      // APROVA EXCLUSAO DE BATIDA
+      // ***************************************************************
+      if($res[0]['movimento'] == '2'){
+
+        $queryRM = " DELETE FROM ABATFUN WHERE DATA = '".$res[0]["dtponto"]."' AND CHAPA = '".$res[0]['chapa']."' AND BATIDA = '".$res[0]["batida"]."' AND CODCOLIGADA = '".$_SESSION['func_coligada']."' ";
+        $resRM = $this->dbrm->query($queryRM);
+
+
+        $queryRM = " DELETE FROM AJUSTBAT WHERE DATA = '".$res[0]["dtponto"]."' AND CHAPA = '".$res[0]['chapa']."' AND BATIDA = '".$res[0]["batida"]."' AND CODCOLIGADA = '".$_SESSION['func_coligada']."' ";
+        $resRM = $this->dbrm->query($queryRM);
+
+        $queryRM = " DELETE FROM AAFDT WHERE ID = '".$res[0]['idbatida']."' AND CODCOLIGADA = '".$_SESSION['func_coligada']."' ";
+        $resRM = $this->dbrm->query($queryRM);
+
+        $minhaquery = " DELETE FROM zcrmportal_ponto_horas  WHERE dtponto = '".$res[0]["dtponto"]."' AND chapa = '".$res[0]['chapa']."' AND coligada = '".$_SESSION['func_coligada']."' AND movimento = '2' AND id = '".$idbatida."'";
+        $res = $this->dbportal->query($minhaquery);
+
+        if($resRM) $atualizou = true;
+      }
+      // FIM  **********************************************************
+
+      // ***************************************************************
+      // APROVA INCLUSAO DE BATIDA
+      // ***************************************************************
+      if($res[0]['movimento'] == '1'){
+
+        $queryRM = " INSERT INTO ABATFUN 
 					(CODCOLIGADA, CHAPA, DATA, DATAREFERENCIA, BATIDA, STATUS, NATUREZA, RECCREATEDBY, RECCREATEDON, DATAINSERCAO) 
 						VALUES 
 					('".$_SESSION['func_coligada']."', '".$res[0]['chapa']."', '".$res[0]["dtponto"]."', '".$res[0]["dtref"]."', '".$res[0]["batida"]."', 'T', '".$res[0]["natureza"]."', 'PORT.".$_SESSION['log_id']."', '".date('Y-m-d H:i:s')."', '".date('Y-m-d H:i:s')."') 
 				";
-				$resRM = $this->dbrm->query($queryRM);
-				
-				$queryRM = " INSERT INTO AJUSTBAT 
+        $resRM = $this->dbrm->query($queryRM);
+
+        $queryRM = " INSERT INTO AJUSTBAT 
 					(CODCOLIGADA, CHAPA, DATA, BATIDA, JUSTIFICA, RECCREATEDBY, RECCREATEDON) VALUES
 					('".$_SESSION['func_coligada']."', '".$res[0]['chapa']."', '".$res[0]["dtponto"]."', '".$res[0]["batida"]."', '".trim(addslashes($res[0]["justificativa"]))."', 'PORT.".$_SESSION['log_id']."', '".date('Y-m-d H:i:s')."')
 				";
-				$resRM = $this->dbrm->query($queryRM);
+        $resRM = $this->dbrm->query($queryRM);
 
-				if($resRM) $atualizou = true;
+        if($resRM) $atualizou = true;
+      }
+      // FIM  **********************************************************
 
-			}
-			// FIM  **********************************************************
+      // ***************************************************************
+      // APROVA ABONO
+      // ***************************************************************
+      if($res[0]['movimento'] == '5' || $res[0]['movimento'] == '6' || $res[0]['movimento'] == '9'){
 
-			// ***************************************************************
-			// APROVA ABONO
-			// ***************************************************************
-			if ($res[0]['movimento'] == '5' || $res[0]['movimento'] == '6' || $res[0]['movimento'] == '9') {
+        $SOLUCAOCONFLITO = 0;
 
-				$SOLUCAOCONFLITO = 0;
-			
-				$desconsidera = 1;
-				
-				if($res[0]['movimento'] == '9'){
-					$desconsidera = 0;
-				}
-				
-				if($res[0]['movimento'] == '5' ) $SOLUCAOCONFLITO = 1;
-				
-				if(strlen(trim($res[0]['horas_abono'])) > 0){
-					if((int)$res[0]['horas_abono'] >= (int)$res[0]['htrab']){
-						$SOLUCAOCONFLITO = 6;
-					}
-				}
-				
-				if($res[0]['abn_horaini'] > $res[0]['abn_horafim']){
-					
-					$queryRM = " INSERT INTO AABONFUN
+        $desconsidera = 1;
+
+        if($res[0]['movimento'] == '9'){
+          $desconsidera = 0;
+        }
+
+        if($res[0]['movimento'] == '5') $SOLUCAOCONFLITO = 1;
+
+        if(strlen(trim($res[0]['horas_abono'])) > 0){
+          if((int)$res[0]['horas_abono'] >= (int)$res[0]['htrab']){
+            $SOLUCAOCONFLITO = 6;
+          }
+        }
+
+        if($res[0]['abn_horaini'] > $res[0]['abn_horafim']){
+
+          $queryRM = " INSERT INTO AABONFUN
 						(CODCOLIGADA, CHAPA, DATA, CODABONO, HORAINICIO, HORAFIM, SOLUCAOCONFLITO, ABONOFUTURO, COLIGADARESP, DESCONSIDERA,RESPONSAVEL, RECCREATEDBY, RECCREATEDON)
 							VALUES
 						('".$_SESSION['func_coligada']."', '".$res[0]['chapa']."', '".$res[0]["dtponto"]."', '".$res[0]["abn_codabono"]."', '".$res[0]["abn_horaini"]."', '1440', '".$SOLUCAOCONFLITO."', 0, '".$_SESSION['func_coligada']."', ".$desconsidera.", '".$res[0]['chapa']."', 'PORT.".$_SESSION['log_id']."', '".date('Y-m-d H:i:s')."')
 					";
-					$resRM = $this->dbrm->query($queryRM);				
-					
-					$queryRM = " INSERT INTO AABONFUN
+          $resRM = $this->dbrm->query($queryRM);
+
+          $queryRM = " INSERT INTO AABONFUN
 						(CODCOLIGADA, CHAPA, DATA, CODABONO, HORAINICIO, HORAFIM, SOLUCAOCONFLITO, ABONOFUTURO, COLIGADARESP, DESCONSIDERA,RESPONSAVEL, RECCREATEDBY, RECCREATEDON)
 							VALUES
 						('".$_SESSION['func_coligada']."', '".$res[0]['chapa']."', '".$res[0]["abn_dtfim"]."', '".$res[0]["abn_codabono"]."', '0', '".$res[0]["abn_horafim"]."', '".$SOLUCAOCONFLITO."', 0, '".$_SESSION['func_coligada']."', ".$desconsidera.", '".$res[0]['chapa']."', 'PORT.".$_SESSION['log_id']."', '".date('Y-m-d H:i:s')."')
 					";
-					$resRM = $this->dbrm->query($queryRM);
-					
-				}else{
-					
-					$queryRM = " INSERT INTO AABONFUN
+          $resRM = $this->dbrm->query($queryRM);
+        } else {
+
+          $queryRM = " INSERT INTO AABONFUN
 						(CODCOLIGADA, CHAPA, DATA, CODABONO, HORAINICIO, HORAFIM, SOLUCAOCONFLITO, ABONOFUTURO, COLIGADARESP, DESCONSIDERA,RESPONSAVEL, RECCREATEDBY, RECCREATEDON)
 							VALUES
 						('".$_SESSION['func_coligada']."', '".$res[0]['chapa']."', '".$res[0]["abn_dtini"]."', '".$res[0]["abn_codabono"]."', '".$res[0]["abn_horaini"]."', '".$res[0]["abn_horafim"]."', '".$SOLUCAOCONFLITO."', 0, '".$_SESSION['func_coligada']."',".$desconsidera.", '".$res[0]['chapa']."', 'PORT.".$_SESSION['log_id']."', '".date('Y-m-d H:i:s')."')
 					";
-					$resRM = $this->dbrm->query($queryRM);
-					
-				}
+          $resRM = $this->dbrm->query($queryRM);
+        }
 
-				if($resRM) $atualizou = true;
-				
-			}
+        if($resRM) $atualizou = true;
+      }
 
-			// ***************************************************************
-			// APROVA INCLUSAO JUSTIFICATIVA DE EXCEÇÕES
-			// ***************************************************************
-			if($res[0]['movimento'] == '7'){
-				
-				$update = " 
+      // ***************************************************************
+      // APROVA INCLUSAO JUSTIFICATIVA DE EXCEÇÕES
+      // ***************************************************************
+      if($res[0]['movimento'] == '7'){
+
+        $update = " 
 					UPDATE 
 						AJUSTFUN 
 					SET 
@@ -298,13 +299,13 @@ class AprovaModel extends Model
 						AND CODCOLIGADA = '{$this->coligada}'
 						
 					";
-					$resRM = $this->dbrm->query($update);
-					if($resRM) $atualizou = true;
-			}
+        $resRM = $this->dbrm->query($update);
+        if($resRM) $atualizou = true;
+      }
 
-			if($res[0]['movimento'] == '8'){
+      if($res[0]['movimento'] == '8'){
 
-				$update = " 
+        $update = " 
 				  UPDATE 
 				    AJUSTFUN 
 				  SET 
@@ -318,100 +319,209 @@ class AprovaModel extends Model
 				    AND TIPOOCORRENCIA IN ('A','F','AC', 'SA')
 				    AND CODCOLIGADA = '{$this->coligada}' 
 				";
-				// $update = "
-				// 	UPDATE 
-				// 		AJUSTFUN 
-				// 	SET 
-				// 		ATITUDE = '".$res[0]["atitude_tipo"]."',
-				// 		RECMODIFIEDBY = 'USERPORTAL_".$_SESSION['log_id']."',
-				// 		RECMODIFIEDON = '".date('Y-m-d H:i:s')."'
-						
-				// 	WHERE 
-				// 		CODCOLIGADA = '".$_SESSION['func_coligada']."' 
-				// 		AND CHAPA = '".$res[0]['chapa']."'
-				// 		AND INICIO = '".$res[0]["atitude_ini"]."'
-				// 		AND FIM = '".$res[0]["atitude_fim"]."'
-				// 		AND TIPOOCORRENCIA IN ('A','F','AC')
-				// 		AND DATA = '".$res[0]["atitude_dt"]."'
-				// ";
-				$resRM = $this->dbrm->query($update);
-				if($resRM) $atualizou = true;
-				
-			}
+        // $update = "
+        // 	UPDATE 
+        // 		AJUSTFUN 
+        // 	SET 
+        // 		ATITUDE = '".$res[0]["atitude_tipo"]."',
+        // 		RECMODIFIEDBY = 'USERPORTAL_".$_SESSION['log_id']."',
+        // 		RECMODIFIEDON = '".date('Y-m-d H:i:s')."'
 
-			
-			if($atualizou){
-				$update_batida = " UPDATE zcrmportal_ponto_horas SET status = 'S', aprrh_user = '" . $_SESSION['log_id'] . "', aprrh_data = '" . date('Y-m-d H:i:s') . "' WHERE id = '" . $idbatida . "' ";
-				$res_update = $this->dbportal->query($update_batida);
-				return true;
-			}
+        // 	WHERE 
+        // 		CODCOLIGADA = '".$_SESSION['func_coligada']."' 
+        // 		AND CHAPA = '".$res[0]['chapa']."'
+        // 		AND INICIO = '".$res[0]["atitude_ini"]."'
+        // 		AND FIM = '".$res[0]["atitude_fim"]."'
+        // 		AND TIPOOCORRENCIA IN ('A','F','AC')
+        // 		AND DATA = '".$res[0]["atitude_dt"]."'
+        // ";
+        $resRM = $this->dbrm->query($update);
+        if($resRM) $atualizou = true;
+      }
 
-		}catch(\Exception $e){
 
-			return $e->getMessage();
-	
-		}
+      if($atualizou){
+        $update_batida = " UPDATE zcrmportal_ponto_horas SET status = 'S', aprrh_user = '".$_SESSION['log_id']."', aprrh_data = '".date('Y-m-d H:i:s')."' WHERE id = '".$idbatida."' ";
+        $res_update = $this->dbportal->query($update_batida);
+        return true;
+      }
+    } catch (\Exception $e){
 
-		return true;
-	}
+      return $e->getMessage();
+    }
 
-    // #############################################################################
-	// REPROVA TROCA DE ESCALA
-	// #############################################################################
-	public function reprovaEscala($idEscala, $motivo_reprova = "", $rh = false)
-	{
+    return true;
+  }
 
-		$escala = $this->dbportal->query(" SELECT chapa FROM zcrmportal_escala WHERE id = '{$idEscala}' AND situacao != '3' ");
-		$result = ($escala) ? $escala->getResultArray() : null;
+  // #############################################################################
+  // REPROVA TROCA DE ESCALA
+  // #############################################################################
+  public function reprovaEscala($idEscala, $motivo_reprova = "", $rh = false)
+  {
+    $escala = $this->dbportal->query("
+			SELECT e.chapa, e.id, e.situacao, e.tipo, e.dtcad, FORMAT(e.dtcad, 'dd/MM/yyyy') dtcad_br, 
+				  u.nome, u.email, e.datamudanca, e.datamudanca_folga, e.codindice_folga, e.codhorario, FORMAT(e.datamudanca, 'dd/MM/yyyy') dtmud_br, FORMAT(e.datamudanca_folga, 'dd/MM/yyyy') dtmud_folga_br, 
+					d.DESCRICAO horario, e.codindice, b.nome nome_colab
+			FROM zcrmportal_escala e
+			LEFT JOIN zcrmportal_usuario u (NOLOCK) ON u.id = e.usucad
+			INNER JOIN ".DBRM_BANCO."..PFUNC B (NOLOCK) ON B.CHAPA = e.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = e.coligada
+			LEFT JOIN ".DBRM_BANCO."..AHORARIO D (NOLOCK) ON D.CODIGO = e.codhorario COLLATE Latin1_General_CI_AS AND D.CODCOLIGADA = e.coligada
+			WHERE e.id = '{$idEscala}' 
+			AND e.situacao != '3' 
+		");
+    $result = ($escala) ? $escala->getResultArray() : null;
 
-		if($result){
+    if($result){
 
-			$chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-			if($chapaUser == $result[0]['chapa']) return false;
+      $chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+      if($chapaUser == $result[0]['chapa']) return false;
 
-			if(!$rh){
-				if(!self::isGestorOrLiderAprovador($result[0]['chapa'])){
-					notificacao('danger', 'Alguns movimento não podem ser aprovados.');
-					return false;
-				}
-			}
+      if(!$rh){
+        if(!self::isGestorOrLiderAprovador($result[0]['chapa'])){
+          notificacao('danger', 'Alguns movimento não podem ser aprovados.');
+          return false;
+        }
+      }
 
-			$situacao = $result[0]['situacao'];
+      $situacao = $result[0]['situacao'];
+      $tipo_solicitacao = ($result[0]['tipo'] == 1) ? 'Troca de escala' : 'Troca de dia';
+      $data_solicitacao = $result[0]['dtcad'];
+      $nome_solicitante = $result[0]['nome'];
+      $email_solicitante = $result[0]['email'];
+      $chapa_colab = $result[0]['chapa'];
+      $nome_colab = $result[0]['nome_colab'];
+      $reprovador = $_SESSION['log_nome'];
+      $codindice = $result[0]['codindice'];
+      $codindice_folga = $result[0]['codindice_folga'];
+      $dtmud_br = $result[0]['dtmud_br'];
+      $dtmud_folga_br = $result[0]['dtmud_folga_br'];
+      $horario = $result[0]['horario'];
 
-			$query = " UPDATE zcrmportal_escala SET documento = NULL, dtupload = NULL, usuupload = NULL, situacao = 8, motivocancelado = '(".((!$rh) ? 'Gestor' : 'RH').") {$motivo_reprova}', dtcancelado = '".date('Y-m-d H:i:s')."', usucancelado = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao NOT IN (9, 3, 8) ";
-			$this->dbportal->query($query);
-			if($this->dbportal->affectedRows() > 0){
-				return responseJson('success', 'Escala REPROVADA com sucesso');
-			}
+      $query = " UPDATE zcrmportal_escala SET documento = NULL, dtupload = NULL, usuupload = NULL, situacao = 8, motivocancelado = '(".((!$rh) ? 'Gestor' : 'RH')."){$motivo_reprova}', dtcancelado = '".date('Y-m-d H:i:s')."', usucancelado = '{$this->log_id}' WHERE id = '{$idEscala}' AND coligada = '{$this->coligada}' AND situacao NOT IN (9, 3, 8) ";
+      $this->dbportal->query($query);
+      if($this->dbportal->affectedRows() > 0){
 
+        $tipo_solicitacao = ($result[0]['tipo'] == 1) ? 'Troca de escala' : 'Troca de dia';
+        $data_solicitacao = $result[0]['dtcad_br'];
+        $nome_solicitante = $result[0]['nome'];
+        $email_solicitante = $result[0]['email'];
+
+        $mensagem = '
+				Prezado(a) '.$nome_solicitante.',<br><br>
+				Sua solicitação no Portal RH - Módulo de Ponto foi <strong>reprovada</strong>.<br><br>
+
+				<strong><u>Detalhes da Solicitação</u></strong><br>
+				<strong>• Tipo: </strong>'.$tipo_solicitacao.'<br>
+				<strong>• Data da Solicitação</strong>: '.$data_solicitacao.'<br>
+        <strong>• Colaborador</strong>: '.$chapa_colab.' - '.$nome_colab.'<br>
+        <strong>• Descrição do Tipo:</strong><br>
+				';
+
+        if($result[0]['tipo'] == 1){
+          $mensagem = $mensagem.'
+          <strong>&nbsp&nbsp&nbsp- Índice</strong>: '.$codindice.'<br>
+          <strong>&nbsp&nbsp&nbsp- Horário</strong>: '.$horario.'<br><br>
+          ';
         }
 
-		return false;
+        if($result[0]['tipo'] != 1){
+          $mensagem = $mensagem.'
+          <strong>&nbsp&nbsp&nbsp- Data Útil</strong>: '.$dtmud_br.'<br>
+          <strong>&nbsp&nbsp&nbsp- Índice Útil</strong>: '.$codindice.'<br>
+          <strong>&nbsp&nbsp&nbsp- Data Folga</strong>: '.$dtmud_folga_br.'<br>
+          <strong>&nbsp&nbsp&nbsp- Índice Folga</strong>: '.$codindice_folga.'<br>
+          <strong>&nbsp&nbsp&nbsp- Horário</strong>: '.$horario.'<br><br>
+          ';
+        }
 
-	}
+        $mensagem = $mensagem.'
+				<strong>Motivo da Reprovação</strong>: '.$motivo_reprova.'<br>
+				<strong>Usuário que Reprovou</strong>: '.$reprovador.'<br><br>
+				Caso necessário, você pode realizar um novo envio dentro do período de ponto vigente.<br><br>
 
-    // #############################################################################
-	// REPROVA BATIDA RH
-	// #############################################################################
-	public function reprovaBatidaRH($idbatida, $tipo, $motivo_reprova = "", $rh = false)
-	{
-		$dados = explode('|', $idbatida);
+				Atenciosamente,<br>
+				<strong>Equipe Processos de RH</strong>
+				';
+        $htmlEmail = templateEmail($mensagem);
 
-		$query = " SELECT * FROM zcrmportal_ponto_horas WHERE id = '{$dados[2]}' ";
-		$result = $this->dbportal->query($query); 
-		$chapa = $result->getResultArray()[0]['chapa'];
+        $email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
+        //$email_solicitante = 'alvaro.zaragoza@ativary.com';
+        enviaEmail($email_solicitante, '[Portal RH] Sua Solicitação Foi Reprovada', $htmlEmail);
 
-		if(!$rh){
-			if(!self::isGestorOrLiderAprovador($chapa)){
-				notificacao('danger', 'Alguns movimento não podem ser aprovados.');
-				return false;
-			}
-		}
+        return responseJson('success', 'Escala REPROVADA com sucesso');
+      }
+    }
 
-		// REPROVA RH
-		if ($tipo == 'RH') {
+    return false;
+  }
 
-			$query = " 
+  // #############################################################################
+  // REPROVA BATIDA RH
+  // #############################################################################
+  public function reprovaBatidaRH($idbatida, $tipo, $motivo_reprova = "", $rh = false)
+  {
+    $dados = explode('|', $idbatida);
+
+    $query = " 
+			SELECT 
+        h.id, u.nome, u.email, h.movimento,
+        (
+					SELECT max(CAST(BB.descricao AS VARCHAR)) 
+          FROM zcrmportal_ponto_justificativa_func AA  (NOLOCK) 
+					INNER JOIN zcrmportal_ponto_motivos BB (NOLOCK) ON 
+            AA.justificativa = BB.id AND AA.coligada = BB.codcoligada 
+					WHERE AA.coligada = h.coligada AND AA.dtponto = h.dtponto AND AA.chapa = h.chapa
+				) justificativa_excecao,
+        CAST(COALESCE(h.ent1, h.ent2, h.ent3, h.ent4, h.ent5, h.sai1, h.sai2, h.sai3, h.sai4, h.sai5)  / 60 AS VARCHAR(8)) + ':' + 
+		    FORMAT(COALESCE(h.ent1, h.ent2, h.ent3, h.ent4, h.ent5, h.sai1, h.sai2, h.sai3, h.sai4, h.sai5)  % 60, 'D2') batida,
+        COALESCE(h.justent1, h.justent2, h.justent3, h.justent4, h.justent5, h.justsai1, h.justsai2, h.justsai3, h.justsai4, h.justsai5) motivo,
+		    FORMAT(COALESCE(h.dtrefent1, h.dtrefent2, h.dtrefent3, h.dtrefent4, h.dtrefent5, h.dtrefsai1, h.dtrefsai2, h.dtrefsai3, h.dtrefsai4, h.dtrefsai5), 'dd/MM/yyyy') data_ref_br,
+        FORMAT(h.dtponto, 'dd/MM/yyyy') data_br,
+        FORMAT(h.dtcadastro, 'dd/MM/yyyy') dtcad_br, 
+        h.abn_codabono, d.descricao desc_abono, 
+	      FORMAT(h.abn_dtini, 'dd/MM/yyyy') dtini_br, 
+        FORMAT(h.abn_dtfim, 'dd/MM/yyyy') dtfim_br, 
+	      CAST(h.abn_horaini / 60 AS VARCHAR(8)) + ':' + FORMAT(h.abn_horaini % 60, 'D2') hora_ini,
+	      CAST(h.abn_horafim / 60 AS VARCHAR(8)) + ':' + FORMAT(h.abn_horafim % 60, 'D2') hora_fim,
+        CASE 
+          WHEN h.abn_horafim is NULL THEN NULL
+          WHEN h.abn_horafim >= h.abn_horaini THEN
+            CAST((h.abn_horafim-h.abn_horaini) / 60 AS VARCHAR(8)) + ':' + FORMAT((h.abn_horafim-h.abn_horaini) % 60, 'D2')
+          ELSE
+            CAST((1440+h.abn_horafim-h.abn_horaini) / 60 AS VARCHAR(8)) + ':' + FORMAT((1440+h.abn_horafim-h.abn_horaini) % 60, 'D2')
+          END tot_horas,
+        FORMAT(h.atitude_dt, 'dd/MM/yyyy') dtatitude_br, 
+        CAST(h.atitude_fim / 60 AS VARCHAR(8)) + ':' + FORMAT(h.atitude_fim % 60, 'D2') hora_atitude,
+        CASE 
+              WHEN h.movimento NOT IN (7,8) THEN NULL
+          WHEN h.movimento = 7 THEN 'Atraso não remunerado'
+          WHEN h.atitude_tipo = 1 THEN 'Compensar (Fica BH)'
+          ELSE 'Descontar no pagto'
+        END tipo_atitude,
+	      h.chapa, b.nome nome_colab
+			FROM zcrmportal_ponto_horas h
+			LEFT JOIN zcrmportal_usuario u (NOLOCK) ON u.id = h.usucad
+      INNER JOIN ".DBRM_BANCO."..PFUNC B (NOLOCK) ON B.CHAPA = h.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = h.coligada
+			LEFT JOIN ".DBRM_BANCO."..AABONO D (NOLOCK) ON D.CODIGO = h.abn_codabono COLLATE Latin1_General_CI_AS AND D.CODCOLIGADA = h.coligada
+			WHERE h.id = '{$dados[2]}' ";
+
+    $result = $this->dbportal->query($query);
+    $resbat = $result->getResultArray();
+
+    $chapa = $resbat[0]['chapa'];
+
+    if(!$rh){
+      if(!self::isGestorOrLiderAprovador($chapa)){
+        notificacao('danger', 'Alguns movimento não podem ser aprovados.');
+        //notificacao('danger', 'Alguns movimento não podem ser reprovados.');
+        return false;
+      }
+    }
+
+    // REPROVA RH
+    if($tipo == 'RH'){
+
+      $query = " 
 			UPDATE zcrmportal_ponto_horas SET status = 
 				/*CASE
 					WHEN movimento in (1,2) THEN 1
@@ -422,223 +532,344 @@ class AprovaModel extends Model
 			, apr_user = NULL, apr_data = NULL, aprgestor_data = NULL, aprgestor_user = NULL, motivo_reprova = '".addslashes($motivo_reprova)."', usu_reprova = '".$_SESSION['log_id']."', dt_reprova = '".date('Y-m-d H:i:s')."' WHERE id = '".$dados[2]."'
 				AND status <> 'S'
 			";
-			$result = $this->dbportal->query($query);
+      $result = $this->dbportal->query($query);
 
-			if($result){
-				$query = "
+      if($result){
+        $query = "
 
 					INSERT INTO zcrmportal_ponto_horas_reprova
 					SELECT * FROM zcrmportal_ponto_horas WHERE id = '".$dados[2]."'
 				
 				";
-				$this->dbportal->query($query);
-			}
+        $this->dbportal->query($query);
 
-			return $result;
-        }           
-	}
+        $tipo_solicitacao = '';
+        switch ($resbat[0]['movimento']){
+          case 1:
+            $tipo_solicitacao = 'Inclusão de batida';
+            break;
+          case 2:
+            $tipo_solicitacao = 'Exclusão de batida';
+            break;
+          case 3:
+            $tipo_solicitacao = 'Alteração de natureza';
+            break;
+          case 4:
+            $tipo_solicitacao = 'Alteração jornada referência';
+            break;
+          case 5:
+            $tipo_solicitacao = 'Abono de atrasos';
+            break;
+          case 6:
+            $tipo_solicitacao = 'Abono de faltas';
+            break;
+          case 7:
+            $tipo_solicitacao = 'Justificativa de exceção';
+            break;
+          case 8:
+            if(is_null($resbat[0]['justificativa_excecao'])){
+              $tipo_solicitacao = 'Altera atitude';
+            } else {
+              $tipo_solicitacao = $resbat[0]['justificativa_excecao'];
+            }
+            break;
+          case 9:
+            $tipo_solicitacao = 'Falta não remunerada';
+            break;
+        }
+        $data_solicitacao = $resbat[0]['dtcad_br'];
+        $nome_solicitante = $resbat[0]['nome'];
+        $email_solicitante = $resbat[0]['email'];
 
-	// #############################################################################
-	// APROVA BATIDA GESTOR
-	// #############################################################################
-	public function	aprovaBatidaGestor($idbatida, $tipo){
+        $data_br = $resbat[0]['data_br'];
+        $chapa_colab = $resbat[0]['chapa'];
+        $nome_colab = $resbat[0]['nome_colab'];
+        $reprovador = $_SESSION['log_nome'];
+        $abn_codabono = $resbat[0]['abn_codabono'];
+        $desc_abono = $resbat[0]['desc_abono'];
+        $dtini_br = $resbat[0]['dtini_br'];
+        $dtfim_br = $resbat[0]['dtfim_br'];
+        $hora_ini = $resbat[0]['hora_ini'];
+        $hora_fim = $resbat[0]['hora_fim'];
+        $tot_horas = $resbat[0]['tot_horas'];
+        $batida = $resbat[0]['batida'];
+        $motivo = $resbat[0]['motivo'];
+        $data_ref_br = $resbat[0]['data_ref_br'];
+        $dtatitude_br = $resbat[0]['dtatitude_br'];
+        $hora_atitude = $resbat[0]['hora_atitude'];
+        $tipo_atitude = $resbat[0]['tipo_atitude'];
 
-		$dados = explode('|', $idbatida);
-		// var_dump($dados);exit();
+        $desc_abono = ($tipo_solicitacao == 'Falta não remunerada') ? 'FALTA NÃO REMUNERADA' : $desc_abono;
 
-		// APROVA GESTOR
-		if ($tipo == 'GESTOR') {
+        $mensagem = '
+				Prezado(a) '.$nome_solicitante.',<br><br>
+				Sua solicitação no Portal RH - Módulo de Ponto foi <strong>reprovada</strong>.<br><br>
+				<strong><u>Detalhes da Solicitação</u></strong><br>
+				<strong>• Tipo: </strong>'.$tipo_solicitacao.'<br>
+				<strong>• Data</strong>: '.$data_br.'<br>
+				<strong>• Colaborador</strong>: '.$chapa_colab.' - '.$nome_colab.'<br>
+        ';
 
-			$query = " UPDATE zcrmportal_ponto_horas SET status = '2', aprgestor_user = '".session()->get('log_id')."', aprgestor_data = GETDATE() WHERE id = '" . $dados[2] . "'";
-			// echo $query;exit();
-			return $this->dbportal->query($query); 
-        }  
-	}
+        $mensagem = $mensagem.'
+        <strong>• Descrição do Tipo:</strong><br>
+        ';
 
+        if(!is_null($dtini_br)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Data Início</strong>: '.$dtini_br.' '.$hora_ini.'<br>';
+        }
+        if(!is_null($dtfim_br)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Data Fim</strong>: '.$dtfim_br.' '.$hora_fim.'<br>';
+        }
+        if(!is_null($tot_horas)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Total de Horas</strong>: '.$tot_horas.'<br>';
+        }
+        if(!is_null($abn_codabono)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Tipo de Abono</strong>: '.$abn_codabono.' - '.$desc_abono.'<br>';
+        }
+        if(!is_null($batida)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Batida</strong>: '.$batida.'<br>';
+        }
+        if(!is_null($motivo)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Justificativa</strong>: '.$motivo.'<br>';
+        }
+        if(!is_null($data_ref_br)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Data Referência</strong>: '.$data_ref_br.'<br>';
+        }
+        if(!is_null($dtatitude_br)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Data</strong>: '.$dtatitude_br.'<br>';
+        }
+        if(!is_null($hora_atitude)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Horas</strong>: '.$hora_atitude.'<br>';
+        }
+        if(!is_null($tipo_atitude)){
+          $mensagem = $mensagem.'<strong>&nbsp&nbsp&nbsp- Tipo Atitude</strong>: '.$tipo_atitude.'<br>';
+        }
 
-    // #############################################################################
-	// LISTA BATIDA PRO GESTOR
-	// #############################################################################
-	public function listaBatidaApr($status, $codfilial = false, $movimento = false, $tipo_abono = false, $ft_legenda = false, $ft_status = false, $dt_inicio = false, $dt_fim = false, $filtroChapa = '', $periodo = false, $dados = false)
-	{
-		
-		$periodo          = explode('|', $periodo);
-		$perInicio        = $periodo[0];
-		$perFim           = $periodo[1];
-		$periodo          = " AND A.dtponto BETWEEN '{$periodo[0]}' AND '{$periodo[1]}' ";
-		$periodoEscala    = " AND (a.datamudanca BETWEEN '{$perInicio}' AND '{$perFim}' OR a.datamudanca_folga BETWEEN '{$perInicio}' AND '{$perFim}' ) ";
+        $mensagem = $mensagem.'
+				<strong>• Data da Solicitação</strong>: '.$data_solicitacao.'<br>
+				<strong>• Motivo da Reprovação</strong>: '.$motivo_reprova.'<br>
+				<strong>• Usuário que Reprovou</strong>: '.$reprovador.'<br><br>
+				Caso necessário, você pode realizar um novo envio dentro do período de ponto vigente. <br><br>
 
-        $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-		if ($codfilial) {
-			if ($codfilial != 'all') {
+				Atenciosamente,<br>
+				<strong>Equipe Processos de RH</strong>
+				';
+        $htmlEmail = templateEmail($mensagem);
 
-				// #################################################################
-				// FILTRO POR TODAS SEÇÃO
-				// #################################################################				
-				$LT_CHAPAS = false;
+        $email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
+        //$email_solicitante = 'alvaro.zaragoza@ativary.com';
+        enviaEmail($email_solicitante, '[Portal RH] Sua Solicitação Foi Reprovada', $htmlEmail);
+      }
 
-				$chapasRM = " SELECT CHAPA FROM PFUNC WHERE CODSITUACAO <> 'D' AND CODSECAO = '". $codfilial ."'";
-				// exit($chapasRM);
-				$qry = $this->dbrm->query($chapasRM);
-				$resChapaRM = ($qry) ? $qry->getResultArray() : false;
-				if ($resChapaRM && is_array($resChapaRM)) {
-					foreach ($resChapaRM as $idc => $value) {
-						$LT_CHAPAS .= "'" . $resChapaRM[$idc]['CHAPA'] . "',";
-					}
-				}
+      return $result;
+    }
+  }
 
-				if($resChapaRM && is_array($resChapaRM) && $resChapaRM > 0){
-					$codfilial = " AND A.chapa IN (" . substr($LT_CHAPAS, 0, -1) . ") ";
-				} else {
-					return false;
-				}
+  // #############################################################################
+  // APROVA BATIDA GESTOR
+  // #############################################################################
+  public function  aprovaBatidaGestor($idbatida, $tipo)
+  {
 
-				// #################################################################
+    $dados = explode('|', $idbatida);
+    // var_dump($dados);exit();
 
-			} else {
-				$codfilial = false;
-			}
-		}
+    // APROVA GESTOR
+    if($tipo == 'GESTOR'){
 
-		if ($movimento == 'X') {
-			$movimentoA = " '5','6','7','8' ";
-			$movimentoB = " '5','6','7' ";
-		} elseif ($movimento == '8') {
-			$movimentoA = " '1','2','3','4','5','6','7','8' ";
-			$movimentoB = " '8' ";
-		} else {
-			$movimentoA = " '5','6','7','8' ";
-			$movimentoB = " '5','6','7','8' ";
-		}
-
-		$hoje = "";
-		switch(DBRM_TIPO){
-			case 'sqlserver': $hoje = " GETDATE() "; break;
-			case 'oracle': $hoje = " SYSDATE "; break;
-		}
-
-		$filtro_gestor = " AND A.CHAPA IN ('') ";
-		$mPortal  = model('PortalModel');
-
-		$secaoGestor = $mPortal->listaFuncionarioSecao();
-		if($secaoGestor){
-			$filtro_gestor = "";
-			foreach($secaoGestor as $key => $DadosFunc){
-				$filtro_gestor .= "'{$DadosFunc['CHAPA']}',";
-			}
-			$filtro_gestor = " AND A.CHAPA IN (".rtrim($filtro_gestor, ',').")";
-		}
-
-		if($_SESSION['log_id'] == 1){
-			$filtro_gestor = "";
-		}
-
-		//======= FILTRO POR ABONO ==========//by Matheus
-		$FT_ABONO = false;
-		if ($tipo_abono){
-
-			$FT_ABONO = " AND A.abn_codabono = '".$tipo_abono."'";
-		}
-
-		//========== FILTRO POR MOVIMENTO ==============//by Matheus
-		$FT_MOVIMENTO = false;
-		if($ft_legenda){
-
-			$FT_MOVIMENTO = " AND A.movimento = '". $ft_legenda . "'";
-		}
-
-		$FT_STATUS = false;
-		if($ft_status){
-
-			$FT_STATUS = " A.status = '". $ft_status . "'" ;
-		} else {
-
-			$FT_STATUS = " A.status in ('1','2')";
-		}
+      $query = " UPDATE zcrmportal_ponto_horas SET status = '2', aprgestor_user = '".session()->get('log_id')."', aprgestor_data = GETDATE() WHERE id = '".$dados[2]."'";
+      // echo $query;exit();
+      return $this->dbportal->query($query);
+    }
+  }
 
 
-		//-----------------------------------------
-		// filtro das chapas que o lider pode ver
-		//-----------------------------------------
-        $mHierarquia = Model('HierarquiaModel');
-		$objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
-		$isLider = $mHierarquia->isLider();
+  // #############################################################################
+  // LISTA BATIDA PRO GESTOR
+  // #############################################################################
+  public function listaBatidaApr($status, $codfilial = false, $movimento = false, $tipo_abono = false, $ft_legenda = false, $ft_status = false, $dt_inicio = false, $dt_fim = false, $filtroChapa = '', $periodo = false, $dados = false)
+  {
 
-		$filtro_chapa_lider = "";
-		$filtro_secao_lider = "";
-		if($isLider){
-			$chapas_lider = "";
-			$codsecoes = "";
-			foreach($objFuncLider as $idx => $value){
-				$chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
-			}
-			$filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
-		}
-        
-		
-		//-----------------------------------------
-		// filtro das seções que o gestor pode ver
-		//-----------------------------------------
-		$secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
-		$filtro_secao_gestor = "";
-        
-		if($secoes){
-			$codsecoes = "";
-			foreach($secoes as $ids => $Secao){
-				$codsecoes .= "'".$Secao['codsecao']."',";									   
-			}
-			$filtro_secao_gestor = " B.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
-		}
-		//-----------------------------------------
-		
-		// monta o where das seções
-		if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
-		if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
-		if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
-		$chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-		if($this->log_id  != 1){
-			$in_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.") AND A.CHAPA != '{$chapaFunc}' ";
-		}
-		else{
-			$in_secao = "";
-		}
+    $periodo          = explode('|', $periodo);
+    $perInicio        = $periodo[0];
+    $perFim           = $periodo[1];
+    $periodo          = " AND A.dtponto BETWEEN '{$periodo[0]}' AND '{$periodo[1]}' ";
+    $periodoEscala    = " AND (a.datamudanca BETWEEN '{$perInicio}' AND '{$perFim}' OR a.datamudanca_folga BETWEEN '{$perInicio}' AND '{$perFim}' ) ";
 
-		$filtro_chapa = (strlen(trim($filtroChapa)) <= 0 || $filtroChapa == 'all') ? "" : " AND a.chapa = '{$filtroChapa}' ";
+    $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+    if($codfilial){
+      if($codfilial != 'all'){
 
-		if($dados['perfilRH']) $in_secao = "";
+        // #################################################################
+        // FILTRO POR TODAS SEÇÃO
+        // #################################################################				
+        $LT_CHAPAS = false;
 
-		$filtro_tipo = (strlen(trim($dados['filtro_tipo'])) != 0) ? " AND a.movimento = '{$dados['filtro_tipo']}' " : '';
-		$filtro_filial = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND B.CODFILIAL = '{$dados['filtro_filial']}' " : '';
-		$filtro_legenda = "";
-		$filtro_legenda2 = "";
-		if((strlen(trim($dados['filtro_legenda'])) != 0)){
-			if($dados['filtro_legenda'] == 10){
-				$filtro_legenda2 = " AND a.situacao = '10' ";
-			}
-			if($dados['filtro_legenda'] == 2){
-				$filtro_legenda = " AND 1 = 2 ";
-				$filtro_legenda2 = " AND a.situacao = '2' ";
-			}
-		}
-		
-		
-		(strlen(trim($dados['filtro_legenda'])) != 0) ? " AND a.situacao = '{$dados['filtro_legenda']}' " : '';
-		
-		$filtro_1 = "";
-		$filtro_2 = "";
-		if(strlen(trim($dados['filtro_tipo'])) > 0){
-			if($dados['filtro_tipo'] == 21 || $dados['filtro_tipo'] == 22){
-				$filtro_1 = " AND 1 = 2 ";
-				$filtro_2 = " AND 1 = 1 ";
-				$filtro_tipo = ($dados['filtro_tipo'] == 21) ? ' and a.movimento = 1 ' : ' and a.movimento = 2 ';
-			}else{
-				$filtro_1 = " AND 1 = 1 ";
-				$filtro_2 = " AND 1 = 2 ";
-			}
-		}
+        $chapasRM = " SELECT CHAPA FROM PFUNC WHERE CODSITUACAO <> 'D' AND CODSECAO = '".$codfilial."'";
+        // exit($chapasRM);
+        $qry = $this->dbrm->query($chapasRM);
+        $resChapaRM = ($qry) ? $qry->getResultArray() : false;
+        if($resChapaRM && is_array($resChapaRM)){
+          foreach ($resChapaRM as $idc => $value){
+            $LT_CHAPAS .= "'".$resChapaRM[$idc]['CHAPA']."',";
+          }
+        }
 
-		// nova sql Tiago
-		$query = "
+        if($resChapaRM && is_array($resChapaRM) && $resChapaRM > 0){
+          $codfilial = " AND A.chapa IN (".substr($LT_CHAPAS, 0, -1).") ";
+        } else {
+          return false;
+        }
+
+        // #################################################################
+
+      } else {
+        $codfilial = false;
+      }
+    }
+
+    if($movimento == 'X'){
+      $movimentoA = " '5','6','7','8' ";
+      $movimentoB = " '5','6','7' ";
+    } elseif($movimento == '8'){
+      $movimentoA = " '1','2','3','4','5','6','7','8' ";
+      $movimentoB = " '8' ";
+    } else {
+      $movimentoA = " '5','6','7','8' ";
+      $movimentoB = " '5','6','7','8' ";
+    }
+
+    $hoje = "";
+    switch (DBRM_TIPO){
+      case 'sqlserver':
+        $hoje = " GETDATE() ";
+        break;
+      case 'oracle':
+        $hoje = " SYSDATE ";
+        break;
+    }
+
+    $filtro_gestor = " AND A.CHAPA IN ('') ";
+    $mPortal  = model('PortalModel');
+
+    $secaoGestor = $mPortal->listaFuncionarioSecao();
+    if($secaoGestor){
+      $filtro_gestor = "";
+      foreach ($secaoGestor as $key => $DadosFunc){
+        $filtro_gestor .= "'{$DadosFunc['CHAPA']}',";
+      }
+      $filtro_gestor = " AND A.CHAPA IN (".rtrim($filtro_gestor, ',').")";
+    }
+
+    if($_SESSION['log_id'] == 1){
+      $filtro_gestor = "";
+    }
+
+    //======= FILTRO POR ABONO ==========//by Matheus
+    $FT_ABONO = false;
+    if($tipo_abono){
+
+      $FT_ABONO = " AND A.abn_codabono = '".$tipo_abono."'";
+    }
+
+    //========== FILTRO POR MOVIMENTO ==============//by Matheus
+    $FT_MOVIMENTO = false;
+    if($ft_legenda){
+
+      $FT_MOVIMENTO = " AND A.movimento = '".$ft_legenda."'";
+    }
+
+    $FT_STATUS = false;
+    if($ft_status){
+
+      $FT_STATUS = " A.status = '".$ft_status."'";
+    } else {
+
+      $FT_STATUS = " A.status in ('1','2')";
+    }
+
+
+    //-----------------------------------------
+    // filtro das chapas que o lider pode ver
+    //-----------------------------------------
+    $mHierarquia = Model('HierarquiaModel');
+    $objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+    $isLider = $mHierarquia->isLider();
+
+    $filtro_chapa_lider = "";
+    $filtro_secao_lider = "";
+    if($isLider){
+      $chapas_lider = "";
+      $codsecoes = "";
+      foreach ($objFuncLider as $idx => $value){
+        $chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
+      }
+      $filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
+    }
+
+
+    //-----------------------------------------
+    // filtro das seções que o gestor pode ver
+    //-----------------------------------------
+    $secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+    $filtro_secao_gestor = "";
+
+    if($secoes){
+      $codsecoes = "";
+      foreach ($secoes as $ids => $Secao){
+        $codsecoes .= "'".$Secao['codsecao']."',";
+      }
+      $filtro_secao_gestor = " B.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
+    }
+    //-----------------------------------------
+
+    // monta o where das seções
+    if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
+    if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    $chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+    if($this->log_id  != 1){
+      $in_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.") AND A.CHAPA != '{$chapaFunc}' ";
+    } else {
+      $in_secao = "";
+    }
+
+    $filtro_chapa = (strlen(trim($filtroChapa)) <= 0 || $filtroChapa == 'all') ? "" : " AND a.chapa = '{$filtroChapa}' ";
+
+    if($dados['perfilRH']) $in_secao = "";
+
+    $filtro_tipo = (strlen(trim($dados['filtro_tipo'])) != 0) ? " AND a.movimento = '{$dados['filtro_tipo']}' " : '';
+    $filtro_filial = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND B.CODFILIAL = '{$dados['filtro_filial']}' " : '';
+    $filtro_legenda = "";
+    $filtro_legenda2 = "";
+    if((strlen(trim($dados['filtro_legenda'])) != 0)){
+      if($dados['filtro_legenda'] == 10){
+        $filtro_legenda2 = " AND a.situacao = '10' ";
+      }
+      if($dados['filtro_legenda'] == 2){
+        $filtro_legenda = " AND 1 = 2 ";
+        $filtro_legenda2 = " AND a.situacao = '2' ";
+      }
+    }
+
+
+    (strlen(trim($dados['filtro_legenda'])) != 0) ? " AND a.situacao = '{$dados['filtro_legenda']}' " : '';
+
+    $filtro_1 = "";
+    $filtro_2 = "";
+    if(strlen(trim($dados['filtro_tipo'])) > 0){
+      if($dados['filtro_tipo'] == 21 || $dados['filtro_tipo'] == 22){
+        $filtro_1 = " AND 1 = 2 ";
+        $filtro_2 = " AND 1 = 1 ";
+        $filtro_tipo = ($dados['filtro_tipo'] == 21) ? ' and a.movimento = 1 ' : ' and a.movimento = 2 ';
+      } else {
+        $filtro_1 = " AND 1 = 1 ";
+        $filtro_2 = " AND 1 = 2 ";
+      }
+    }
+
+    // nova sql Tiago
+    $query = "
 			SELECT DISTINCT X.* FROM (
 				SELECT
 					A.id,
@@ -659,6 +890,7 @@ class AprovaModel extends Model
 					A.possui_anexo,
 					A.coligada,
 					A.status,
+					0 situacao,
 					A.justificativa_abono_tipo,
 					A.atitude_dt,
 					A.atitude_ini,
@@ -726,14 +958,15 @@ class AprovaModel extends Model
 					LEFT JOIN zcrmportal_usuario C (NOLOCK) ON C.id = A.usucad
 					INNER JOIN ".DBRM_BANCO."..PPESSOA E (NOLOCK) ON E.CODIGO = B.CODPESSOA
 				WHERE
-					" . $FT_STATUS . "
+					".$FT_STATUS."
 					AND A.coligada = '{$_SESSION['func_coligada']}'
-					AND A.motivo_reprova IS NULL
+          AND A.motivo_reprova IS NULL
+          --and a.id > 1441108
 					AND A.usu_delete IS NULL
 					{$in_secao}
-					" . $FT_ABONO . "
-					" . $FT_MOVIMENTO . "
-					" . $codfilial . "
+					".$FT_ABONO."
+					".$FT_MOVIMENTO."
+					".$codfilial."
 					{$periodo}
 					{$filtro_chapa}
 					".((($dados['filtro_tipo'] ?? 'ponto') == 'ponto') ? '' : $filtro_tipo)."
@@ -762,6 +995,7 @@ class AprovaModel extends Model
 					CASE WHEN a.usuupload IS NULL THEN 0 ELSE 1 END possui_anexo,
 					a.coligada,
 					a.situacao status,
+					a.situacao,
 					NULL justificativa_abono_tipo,
 					NULL atitude_dt,
 					NULL atitude_ini,
@@ -836,9 +1070,9 @@ class AprovaModel extends Model
 					a.coligada = '{$_SESSION['func_coligada']}'
 					and a.situacao in (10,2)
 					{$in_secao}
-					" . $codfilial . "
+					".$codfilial."
 					{$periodoEscala}
-					".(str_replace(['a.movimento','ponto'],['a.tipo','0'],$filtro_tipo))."
+					".(str_replace(['a.movimento', 'ponto'], ['a.tipo', '0'], $filtro_tipo))."
 					{$filtro_chapa}
 					{$filtro_filial}
 					{$filtro_2}
@@ -848,101 +1082,104 @@ class AprovaModel extends Model
 				X.chapa,
 				X.dtponto
 		";
-		$result = $this->dbportal->query($query);
-        if($result->getNumRows() > 0){
-			$response = array();
-			$result = $result->getResultArray();
-			foreach($result as $key => $Dados){
-				$response[$key] = $Dados;
+    //echo $query;
+    //die();
+    $result = $this->dbportal->query($query);
+    if($result->getNumRows() > 0){
+      $response = array();
+      $result = $result->getResultArray();
+      foreach ($result as $key => $Dados){
+        $response[$key] = $Dados;
 
-				$response[$key]['batidas_dia'] = self::listaBatidasDoDia($Dados['coligada'], $Dados['chapa'], dtEn($Dados['dtponto'], true));
+        $response[$key]['batidas_dia'] = self::listaBatidasDoDia($Dados['coligada'], $Dados['chapa'], dtEn($Dados['dtponto'], true));
 
-				$nome_funcionario   = '-demitido-';
-				$cpf_functionario   = '';
-				$nome_gestor        = '';
-				$chapa_gestor       = '';
-				$codsituacao        = '';
-				$response[$key]['nome']           = $Dados['NOME'];
-				$response[$key]['cpf']            = $Dados['CPF'];
-				$response[$key]['nome_gestor']    = $Dados['GESTOR_NOME'];
-				$response[$key]['chapa_gestor']   = $Dados['GESTOR_CHAPA'];
-				$response[$key]['codsituacao']    = $Dados['CODSITUACAO'];
-				$response[$key]['nomechapa']      = $Dados['chapa'].' - '.$Dados['NOME'].' <span style="font-size: 12px; margin-right: 5px;">[Situação: '.$Dados['CODSITUACAO'].']</span> <small><b>=> [GESTOR: '.$Dados['GESTOR_CHAPA'].' - '.$Dados['GESTOR_NOME'].']</b></small>';
-				
-
-				unset($result[$key], $key, $Dados);
-			}
-			unset($result,$dados_func);
-			return $response;
-		}
-
-		return false;
-	}
+        $nome_funcionario   = '-demitido-';
+        $cpf_functionario   = '';
+        $nome_gestor        = '';
+        $chapa_gestor       = '';
+        $codsituacao        = '';
+        $Dados['GESTOR_CHAPA'] = '';
+        $Dados['GESTOR_NOME'] = '';
+        $response[$key]['nome']           = $Dados['NOME'];
+        $response[$key]['cpf']            = $Dados['CPF'];
+        $response[$key]['nome_gestor']    = $Dados['GESTOR_NOME'];
+        $response[$key]['chapa_gestor']   = $Dados['GESTOR_CHAPA'];
+        $response[$key]['codsituacao']    = $Dados['CODSITUACAO'];
+        $response[$key]['nomechapa']      = $Dados['chapa'].' - '.$Dados['NOME'].' <span style="font-size: 12px; margin-right: 5px;">[Situação: '.$Dados['CODSITUACAO'].']</span> <small><b>=> [GESTOR: '.$Dados['GESTOR_CHAPA'].' - '.$Dados['GESTOR_NOME'].']</b></small>';
 
 
-	
+        unset($result[$key], $key, $Dados);
+      }
+      unset($result, $dados_func);
+      return $response;
+    }
 
-    //##################################################################################
-	// Lista Seção
-	//##################################################################################
+    return false;
+  }
 
-	public function listaSecaoUsuario($codsecao = null, $dados = false)
-	{
 
-		//-----------------------------------------
-		// filtro das chapas que o lider pode ver
-		//-----------------------------------------
-        $mHierarquia = Model('HierarquiaModel');
-		$objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
-		$isLider = $mHierarquia->isLider();
 
-		$filtro_chapa_lider = "";
-		$filtro_secao_lider = "";
-		if($isLider){
-			$chapas_lider = "";
-			$codsecoes = "";
-			foreach($objFuncLider as $idx => $value){
-				$chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
-			}
-			$filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
-		}
-        
-		
-		//-----------------------------------------
-		// filtro das seções que o gestor pode ver
-		//-----------------------------------------
-		$secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
-		$filtro_secao_gestor = "";
-        
-		if($secoes){
-			$codsecoes = "";
-			foreach($secoes as $ids => $Secao){
-				$codsecoes .= "'".$Secao['codsecao']."',";									   
-			}
-			$filtro_secao_gestor = " A.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
-		}
-		//-----------------------------------------
-		
-		// monta o where das seções
-		if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
-		if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
-		if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
-		$chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 
-		if($this->log_id  != 1){
-			$qr_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.") AND A.CHAPA != '{$chapaFunc}' ";
-		}
-		else{
-			$qr_secao = "";
-		}
-		
-		// lista seções
-		$filtro_secao = ($codsecao != null) ? " AND A.CODSECAO = '{$codsecao}' " : "";
+  //##################################################################################
+  // Lista Seção
+  //##################################################################################
 
-		if($dados){
-			if(($dados['perfilRH'] ?? false) || ($dados['rh'] ?? false)) $qr_secao = "";
-		}
-		$query = " 
+  public function listaSecaoUsuario($codsecao = null, $dados = false)
+  {
+
+    //-----------------------------------------
+    // filtro das chapas que o lider pode ver
+    //-----------------------------------------
+    $mHierarquia = Model('HierarquiaModel');
+    $objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+    $isLider = $mHierarquia->isLider();
+
+    $filtro_chapa_lider = "";
+    $filtro_secao_lider = "";
+    if($isLider){
+      $chapas_lider = "";
+      $codsecoes = "";
+      foreach ($objFuncLider as $idx => $value){
+        $chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
+      }
+      $filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
+    }
+
+
+    //-----------------------------------------
+    // filtro das seções que o gestor pode ver
+    //-----------------------------------------
+    $secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+    $filtro_secao_gestor = "";
+
+    if($secoes){
+      $codsecoes = "";
+      foreach ($secoes as $ids => $Secao){
+        $codsecoes .= "'".$Secao['codsecao']."',";
+      }
+      $filtro_secao_gestor = " A.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
+    }
+    //-----------------------------------------
+
+    // monta o where das seções
+    if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
+    if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    $chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+
+    if($this->log_id  != 1){
+      $qr_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.") AND A.CHAPA != '{$chapaFunc}' ";
+    } else {
+      $qr_secao = "";
+    }
+
+    // lista seções
+    $filtro_secao = ($codsecao != null) ? " AND A.CODSECAO = '{$codsecao}' " : "";
+
+    if($dados){
+      if(($dados['perfilRH'] ?? false) || ($dados['rh'] ?? false)) $qr_secao = "";
+    }
+    $query = " 
 			SELECT 
 				A.CODSECAO CODIGO, 
 				B.DESCRICAO
@@ -968,130 +1205,128 @@ class AprovaModel extends Model
 				B.DESCRICAO
 		";
 
-		// exit('<pre>'.$query);
-        $result = $this->dbrm->query($query);
-        if(!$result) return false;
-        return ($result->getNumRows() > 0) 
-                ? $result->getResultArray() 
-                : false;
+    // exit('<pre>'.$query);
+    $result = $this->dbrm->query($query);
+    if(!$result) return false;
+    return ($result->getNumRows() > 0)
+      ? $result->getResultArray()
+      : false;
+  }
 
-	}
+  //##################################################################################
+  // LISTA SEÇÃO DO USUÁRIO
+  //##################################################################################
+  public function listaSecaoUsu($idusu = false)
+  {
 
-    //##################################################################################
-	// LISTA SEÇÃO DO USUÁRIO
-	//##################################################################################
-	public function listaSecaoUsu($idusu = false)
-	{
+    $query = " SELECT * FROM zcrmportal_usuario_secao WHERE id_usu = '".$idusu."' AND LEN(secao) = 13  ORDER BY secao";
+    // echo $query;exit();
+    $res = $this->dbportal->query($query);
+    return $res = ($res) ? $res->getResultArray() : array();
+  }
 
-		$query = " SELECT * FROM zcrmportal_usuario_secao WHERE id_usu = '" . $idusu . "' AND LEN(secao) = 13  ORDER BY secao";
-		// echo $query;exit();
-		$res = $this->dbportal->query($query);
-		return $res = ($res) ? $res->getResultArray() : array();
-	}
+  public function ListaDadosAnexos($id_anexo)
+  {
+    $query = "SELECT abono_atestado arquivo, anexo_batida FROM zcrmportal_ponto_horas WHERE id = '".$id_anexo."'";
 
-	public function ListaDadosAnexos($id_anexo){
-		$query = "SELECT abono_atestado arquivo, anexo_batida FROM zcrmportal_ponto_horas WHERE id = '". $id_anexo . "'";
-		
-		$result = $this->dbportal->query($query);
-		return ($result->getNumRows() > 0) 
-                ? $result->getResultArray() 
-                : false;		
+    $result = $this->dbportal->query($query);
+    return ($result->getNumRows() > 0)
+      ? $result->getResultArray()
+      : false;
+  }
 
-	}
 
-	
 
-	public function RecalculoPonto($array_recalculo){
-		
-		$wsTotvs = model('WsrmModel');
-		
-		if($array_recalculo){
-			if(count($array_recalculo) > 0){
-				foreach($array_recalculo as $key => $dadosRecalculo){
-					$recalculo_chapa = $dadosRecalculo['chapa'];
-					$recalculo_data  = $dadosRecalculo['data'];
+  public function RecalculoPonto($array_recalculo)
+  {
 
-					$wsTotvs->ws_recalculo_ponto($recalculo_chapa, $recalculo_data);
+    $wsTotvs = model('WsrmModel');
 
-				}
-			}
-		}
+    if($array_recalculo){
+      if(count($array_recalculo) > 0){
+        foreach ($array_recalculo as $key => $dadosRecalculo){
+          $recalculo_chapa = $dadosRecalculo['chapa'];
+          $recalculo_data  = $dadosRecalculo['data'];
 
-		return true;
+          $wsTotvs->ws_recalculo_ponto($recalculo_chapa, $recalculo_data);
+        }
+      }
+    }
 
-	}
+    return true;
+  }
 
-	public function ListarFuncionariosSecao($codsecao, $dados = false, $aprovacao = true)
-	{
-		if(!is_array($codsecao)){
-			if($codsecao == 'all') $codsecao = null;
-		}
-		//-----------------------------------------
-		// filtro das chapas que o lider pode ver
-		//-----------------------------------------
-        $mHierarquia = Model('HierarquiaModel');
-		$objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
-		$isLider = $mHierarquia->isLider();
+  public function ListarFuncionariosSecao($codsecao, $dados = false, $aprovacao = true)
+  {
+    if(!is_array($codsecao)){
+      if($codsecao == 'all') $codsecao = null;
+    }
+    //-----------------------------------------
+    // filtro das chapas que o lider pode ver
+    //-----------------------------------------
+    $mHierarquia = Model('HierarquiaModel');
+    $objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+    $isLider = $mHierarquia->isLider();
 
-		$filtro_chapa_lider = "";
-		$filtro_secao_lider = "";
-		if($isLider){
-			$chapas_lider = "";
-			$codsecoes = "";
-			foreach($objFuncLider as $idx => $value){
-				$chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
-			}
-			$filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
-		}
-        
-		
-		//-----------------------------------------
-		// filtro das seções que o gestor pode ver
-		//-----------------------------------------
-		$secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
-		$filtro_secao_gestor = "";
-        
-		if($secoes){
-			$codsecoes = "";
-			foreach($secoes as $ids => $Secao){
-				$codsecoes .= "'".$Secao['codsecao']."',";									   
-			}
-			$filtro_secao_gestor = " A.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
-		}
-		//-----------------------------------------
-		
-		// monta o where das seções
-		if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
-		if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
-		if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    $filtro_chapa_lider = "";
+    $filtro_secao_lider = "";
+    if($isLider){
+      $chapas_lider = "";
+      $codsecoes = "";
+      foreach ($objFuncLider as $idx => $value){
+        $chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
+      }
+      $filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
+    }
 
-		$chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-		if($aprovacao){
-			$qr_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.")  AND A.CHAPA != '{$chapaFunc}' ";
-		}else{
-			$qr_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor." OR A.CHAPA = '{$chapaFunc}')";
-		}
-		
 
-		if($dados){
-			if($dados['rh'] ?? false || $dados['perfilRH'] ?? false) $qr_secao = "";
-		}
-		
-		// lista seções
-		if(!is_array($codsecao)){
-			$filtro_secao = ($codsecao != null) ? " AND A.CODSECAO = '{$codsecao}' " : "";
-		}else{
-			if(is_array($codsecao)){
-				$filtro_secao = "";
-				$codsecao_in = "";
-				foreach($codsecao as $codSecao){
-				  $codsecao_in .= "'{$codSecao}',";
-				}
-		
-				$filtro_secao = " AND A.CODSECAO IN (".rtrim($codsecao_in,',').") ";
-			  }
-		}
-		$query = " 
+    //-----------------------------------------
+    // filtro das seções que o gestor pode ver
+    //-----------------------------------------
+    $secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+    $filtro_secao_gestor = "";
+
+    if($secoes){
+      $codsecoes = "";
+      foreach ($secoes as $ids => $Secao){
+        $codsecoes .= "'".$Secao['codsecao']."',";
+      }
+      $filtro_secao_gestor = " A.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
+    }
+    //-----------------------------------------
+
+    // monta o where das seções
+    if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
+    if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+
+    $chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+    if($aprovacao){
+      $qr_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.")  AND A.CHAPA != '{$chapaFunc}' ";
+    } else {
+      $qr_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor." OR A.CHAPA = '{$chapaFunc}')";
+    }
+
+
+    if($dados){
+      if($dados['rh'] ?? false || $dados['perfilRH'] ?? false) $qr_secao = "";
+    }
+
+    // lista seções
+    if(!is_array($codsecao)){
+      $filtro_secao = ($codsecao != null) ? " AND A.CODSECAO = '{$codsecao}' " : "";
+    } else {
+      if(is_array($codsecao)){
+        $filtro_secao = "";
+        $codsecao_in = "";
+        foreach ($codsecao as $codSecao){
+          $codsecao_in .= "'{$codSecao}',";
+        }
+
+        $filtro_secao = " AND A.CODSECAO IN (".rtrim($codsecao_in, ',').") ";
+      }
+    }
+    $query = " 
 			SELECT 
 				A.CHAPA,
 				A.NOME
@@ -1127,20 +1362,20 @@ class AprovaModel extends Model
 			ORDER BY
 				A.NOME
 		";
-		// exit('<pre>'.print_r($query,1));
-        $result = $this->dbrm->query($query);
-        if(!$result) return false;
-        return ($result->getNumRows() > 0) 
-                ? $result->getResultArray() 
-                : false;
-	}
+    // exit('<pre>'.print_r($query,1));
+    $result = $this->dbrm->query($query);
+    if(!$result) return false;
+    return ($result->getNumRows() > 0)
+      ? $result->getResultArray()
+      : false;
+  }
 
-	public function listaChapaLider()
-	{
+  public function listaChapaLider()
+  {
 
-		$chapa_lider = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+    $chapa_lider = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 
-		$query = "
+    $query = "
 			SELECT 
 				DISTINCT
 				b.chapa 
@@ -1155,24 +1390,23 @@ class AprovaModel extends Model
 				SELECT id_hierarquia FROM zcrmportal_hierarquia_lider_ponto WHERE chapa = '{$chapa_lider}' AND inativo IS NULL AND nivel = 1 AND coligada = '{$this->coligada}'
 			)
 		";
-		$result = $this->dbportal->query($query);
-        if(!$result) return false;
-        return ($result->getNumRows() > 0) 
-                ? $result->getResultArray() 
-                : false;
+    $result = $this->dbportal->query($query);
+    if(!$result) return false;
+    return ($result->getNumRows() > 0)
+      ? $result->getResultArray()
+      : false;
+  }
 
-	}
+  public function listaFuncionarioSecao($codsecao = false, $dados = false)
+  {
+    // $mHierarquia = model('HierarquiaModel');
+    // $Secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+    // $isLider = $mHierarquia->isLider();
 
-	public function listaFuncionarioSecao($codsecao = false, $dados = false)
-	{
-		// $mHierarquia = model('HierarquiaModel');
-        // $Secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
-		// $isLider = $mHierarquia->isLider();
+    $rh = ($dados) ? $dados['perfilRH'] : false;
 
-		$rh = ($dados) ? $dados['perfilRH'] : false;
-
-        $in_secao = " AND 1 = 2 ";
-        /*if($Secoes && !$rh){
+    $in_secao = " AND 1 = 2 ";
+    /*if($Secoes && !$rh){
             $in_secao = "";
             if($isLider){
                 // lider
@@ -1193,133 +1427,723 @@ class AprovaModel extends Model
 
 
 
-		//-----------------------------------------
-		// filtro das chapas que o lider pode ver
-		//-----------------------------------------
-        $mHierarquia = Model('HierarquiaModel');
-		$objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
-		$isLider = $mHierarquia->isLider();
+    //-----------------------------------------
+    // filtro das chapas que o lider pode ver
+    //-----------------------------------------
+    $mHierarquia = Model('HierarquiaModel');
+    $objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+    $isLider = $mHierarquia->isLider();
 
-		$filtro_chapa_lider = "";
-		$filtro_secao_lider = "";
-		if($isLider){
-			$chapas_lider = "";
-			$codsecoes = "";
-			foreach($objFuncLider as $idx => $value){
-				$chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
-			}
-			$filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
-		}
-        
-		
-		//-----------------------------------------
-		// filtro das seções que o gestor pode ver
-		//-----------------------------------------
-		$secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
-		$filtro_secao_gestor = "";
-        
-		if($secoes){
-			$codsecoes = "";
-			foreach($secoes as $ids => $Secao){
-				$codsecoes .= "'".$Secao['codsecao']."',";									   
-			}
-			$filtro_secao_gestor = " A.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
-		}
-		//-----------------------------------------
-		
-		// monta o where das seções
-		if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
-		if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
-		if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
-		$chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-		if($this->log_id  != 1){
-			$in_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.") AND A.CHAPA != '{$chapaFunc}' ";
-		}
-		else{
-			$in_secao = "";
-		}
-
-
-
-
-
-		if($rh) $in_secao = "";
-
-
-        
-        $query = " SELECT A.CHAPA, A.NOME, A.CODSECAO FROM PFUNC A WHERE A.CODSITUACAO <> 'D' {$in_secao} ORDER BY A.NOME ASC";
-        
-        $result = $this->dbrm->query($query);
-
-        return ($result->getNumRows() > 0)
-                ? $result->getResultArray()
-                : false;
-	}
-
-	public function isGestorOrLiderAprovador($chapaColaborador = false, $funcao = false)
-    {
-		//Funcao de aprovador do ponto
-		$funcao = ($funcao == false) ? 181 : $funcao;		
-
-      $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-      if($chapa == null) return false;
-
-      $query = " SELECT * FROM zcrmportal_hierarquia_chapa WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' ";
-      $result = $this->dbportal->query($query);
-      if($result){
-        if($result->getNumRows() > 0) return true;
+    $filtro_chapa_lider = "";
+    $filtro_secao_lider = "";
+    if($isLider){
+      $chapas_lider = "";
+      $codsecoes = "";
+      foreach ($objFuncLider as $idx => $value){
+        $chapas_lider .= "'".$objFuncLider[$idx]['chapa']."',";
       }
+      $filtro_secao_lider = " A.CHAPA IN (".substr($chapas_lider, 0, -1).") OR ";
+    }
 
-      $query = " SELECT * FROM zcrmportal_hierarquia_chapa_sub WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo IS NULL ";
-      $result = $this->dbportal->query($query);
-      if($result){
-        if($result->getNumRows() > 0) return true;
+
+    //-----------------------------------------
+    // filtro das seções que o gestor pode ver
+    //-----------------------------------------
+    $secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+    $filtro_secao_gestor = "";
+
+    if($secoes){
+      $codsecoes = "";
+      foreach ($secoes as $ids => $Secao){
+        $codsecoes .= "'".$Secao['codsecao']."',";
       }
+      $filtro_secao_gestor = " A.CODSECAO IN (".substr($codsecoes, 0, -1).") OR ";
+    }
+    //-----------------------------------------
 
-	  $query = " SELECT * FROM zcrmportal_hierarquia_gestor_substituto A
+    // monta o where das seções
+    if($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
+    if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    $chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+    if($this->log_id  != 1){
+      $in_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.") AND A.CHAPA != '{$chapaFunc}' ";
+    } else {
+      $in_secao = "";
+    }
+
+
+
+
+
+    if($rh) $in_secao = "";
+
+
+
+    $query = " SELECT A.CHAPA, A.NOME, A.CODSECAO FROM PFUNC A WHERE A.CODSITUACAO <> 'D' {$in_secao} ORDER BY A.NOME ASC";
+
+    $result = $this->dbrm->query($query);
+
+    return ($result->getNumRows() > 0)
+      ? $result->getResultArray()
+      : false;
+  }
+
+  public function isGestorOrLiderAprovador($chapaColaborador = false, $funcao = false)
+  {
+    //Funcao de aprovador do ponto
+    $funcao = ($funcao == false) ? 181 : $funcao;
+
+    $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+    if($chapa == null) return false;
+
+    $query = " SELECT * FROM zcrmportal_hierarquia_chapa WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' ";
+    $result = $this->dbportal->query($query);
+    if($result){
+      if($result->getNumRows() > 0) return true;
+    }
+
+    $query = " SELECT * FROM zcrmportal_hierarquia_chapa_sub WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo IS NULL ";
+    $result = $this->dbportal->query($query);
+    if($result){
+      if($result->getNumRows() > 0) return true;
+    }
+
+    $query = " SELECT * FROM zcrmportal_hierarquia_gestor_substituto A
                   LEFT JOIN zcrmportal_hierarquia_gestor_substituto_modulos B ON a.modulos LIKE '%\"' + CAST(B.id AS VARCHAR) + '\"%'
                   WHERE A.chapa_substituto = '{$chapa}' 
                     AND A.coligada = '{$this->coligada}' 
                     AND A.inativo = 0
                     AND B.funcoes like '%\"{$funcao}\"%'
       ";
-      $result = $this->dbportal->query($query);
-      if($result){
-        if($result->getNumRows() > 0) return true;
-      }
+    $result = $this->dbportal->query($query);
+    if($result){
+      if($result->getNumRows() > 0) return true;
+    }
 
 
-      $query = "
+    $query = "
         SELECT * FROM zcrmportal_hierarquia_lider_func_ponto WHERE chapa = '{$chapaColaborador}' AND coligada = '{$this->coligada}' AND inativo IS NULL AND id_lider IN (
             SELECT id FROM zcrmportal_hierarquia_lider_ponto WHERE chapa = '{$chapa}' AND coligada = '{$this->coligada}' AND inativo IS NULL AND nivel = 1
         )
        ";
-      $result = $this->dbportal->query($query);
-      if($result){
-        if($result->getNumRows() > 0) return true;
-      }
-
-      return false;
-
+    $result = $this->dbportal->query($query);
+    if($result){
+      if($result->getNumRows() > 0) return true;
     }
 
-	public function listaBatidasDoDia($coligada, $chapa, $data)
-	{
-		$result       = $this->dbrm->query("SELECT BATIDA, NATUREZA FROM ABATFUN WHERE CHAPA = '{$chapa}' AND COALESCE(DATAREFERENCIA, DATA) = '{$data}' AND CODCOLIGADA = '{$coligada}' ORDER BY DATA ASC, BATIDA ASC ");
-		$batidasDia   = '';
+    return false;
+  }
 
-		if($result){
-			$batidas = $result->getResult();
-			foreach($batidas as $batida){
-				switch($batida->NATUREZA){
-					case 0: $batidasDia .= 'Ent: '.m2h($batida->BATIDA).' | '; break;
-					case 1: $batidasDia .= 'Sai: '.m2h($batida->BATIDA).' | '; break;
-				}
-			}
-		}
+  public function listaBatidasDoDia($coligada, $chapa, $data)
+  {
+    $result       = $this->dbrm->query("SELECT BATIDA, NATUREZA FROM ABATFUN WHERE CHAPA = '{$chapa}' AND COALESCE(DATAREFERENCIA, DATA) = '{$data}' AND CODCOLIGADA = '{$coligada}' ORDER BY DATA ASC, BATIDA ASC ");
+    $batidasDia   = '';
 
-		return rtrim($batidasDia, ' | ');
+    if($result){
+      $batidas = $result->getResult();
+      foreach ($batidas as $batida){
+        switch ($batida->NATUREZA){
+          case 0:
+            $batidasDia .= 'Ent: '.m2h($batida->BATIDA).' | ';
+            break;
+          case 1:
+            $batidasDia .= 'Sai: '.m2h($batida->BATIDA).' | ';
+            break;
+        }
+      }
+    }
 
-	}
+    return rtrim($batidasDia, ' | ');
+  }
 
+  // -----------------------------------------------------------------------------
+  // Workflow para verificar aprovações pendentes
+  // -----------------------------------------------------------------------------
+  public function Workflow()
+  {
+
+    $query = "
+		WITH PER AS (
+		SELECT 
+			CODCOLIGADA,
+			INICIOMENSAL,
+			FIMMENSAL
+		FROM
+			".DBRM_BANCO."..APERIODO
+		WHERE
+			ATIVO = 1
+		),
+
+		SUB AS (
+		SELECT 
+			s.coligada,
+			s.chapa_gestor,
+			s.chapa_substituto,
+			u.nome,
+			u.email
+		FROM zcrmportal_hierarquia_gestor_substituto s
+		INNER JOIN zcrmportal_usuario u ON u.id = s.id_substituto
+		WHERE s.modulos like '%\"6\"%' AND s.dtfim >= GETDATE() AND s.inativo = 0
+		),
+
+		EML AS (
+		SELECT 
+			DISTINCT
+			A.CHAPA,
+			A.NOME,
+			A.CODCOLIGADA,
+			C.email EMAIL
+		FROM
+			".DBRM_BANCO."..PFUNC A,
+			".DBRM_BANCO."..PPESSOA B,
+			PortalRHDEV..zcrmportal_usuario C
+		WHERE
+			A.CODPESSOA = B.CODIGO
+			AND C.login = B.CPF COLLATE Latin1_General_CI_AS
+			AND A.CODSITUACAO <> 'D'
+		),
+
+		PAR AS (
+		SELECT 
+			COLIGADA,
+			WFLOW_DIAS_NOTIF		D1,
+			WFLOW_DIAS_NOTIF_ACIMA	D2
+		FROM zcrmportal_espelho_config
+		),
+
+		GES AS (
+		SELECT DISTINCT
+			A.CODCOLIGADA,
+			A.CHAPA,
+			A.NOME,
+			A.CODSECAO,
+			C.id_hierarquia ID_HIERARQUIA,
+			D.chapa GESTOR_CHAPA,
+			E.NOME GESTOR_NOME
+		FROM 
+			".DBRM_BANCO."..PFUNC A,
+			zcrmportal_frente_trabalho B,
+			zcrmportal_hierarquia_frentetrabalho C,
+			zcrmportal_hierarquia_chapa D,
+			".DBRM_BANCO."..PFUNC E
+		WHERE
+			/*A.CODSITUACAO NOT IN ('D')
+			AND */B.codsecao = A.CODSECAO COLLATE Latin1_General_CI_AS
+			AND B.coligada = A.CODCOLIGADA
+			AND B.id = C.id_frentetrabalho
+			AND C.inativo IS NULL
+			AND D.id_hierarquia = C.id_hierarquia
+			AND D.inativo IS NULL
+			AND D.chapa = E.CHAPA COLLATE Latin1_General_CI_AS
+			AND D.coligada = E.CODCOLIGADA
+			AND E.CODSITUACAO NOT IN ('D')
+		),
+
+		APR AS (
+		SELECT A.id,
+			A.dtponto,
+			A.movimento,
+			A.chapa,
+			A.coligada,
+			A.status,
+			E.CPF,
+			B.NOME,
+			a.dtcadastro data_solicitacao,
+			GETDATE() data_hoje,
+			CASE
+				WHEN A.envio_gestor1 IS NULL OR DATEADD(DAY, ISNULL(R.D1, 1), A.envio_gestor1) <= GETDATE() THEN 'S'
+				ELSE 'N'
+			END envia_para_gestor1,
+			A.envio_gestor1,
+			R.D1,
+			DATEADD(DAY, ISNULL(R.D1, 1), A.envio_gestor1) data1_calculada,
+			CASE
+				WHEN DATEADD(DAY, ISNULL(R.D2, 1), A.envio_gestor2) <= GETDATE() THEN 'S'
+				ELSE 'N'
+			END envia_para_gestor2,
+			A.envio_gestor2,
+			R.D2,
+			DATEADD(DAY, ISNULL(R.D2, 1), A.envio_gestor2) data2_calculada
+		FROM zcrmportal_ponto_horas A (NOLOCK)
+			INNER JOIN ".DBRM_BANCO."..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS
+			AND B.CODCOLIGADA = A.coligada
+			LEFT JOIN zcrmportal_usuario C (NOLOCK) ON C.id = A.usucad
+			INNER JOIN ".DBRM_BANCO."..PPESSOA E (NOLOCK) ON E.CODIGO = B.CODPESSOA
+			INNER JOIN PER P ON P.CODCOLIGADA = A.coligada
+			LEFT JOIN PAR R ON R.COLIGADA = A.coligada
+		WHERE 
+      A.status in ('1', '2')
+			AND A.motivo_reprova IS NULL
+			AND A.usu_delete IS NULL
+			AND A.dtponto >= P.INICIOMENSAL
+			
+		UNION ALL
+
+		SELECT a.id,
+			a.datamudanca dtponto,
+			CASE
+				WHEN a.tipo = 1 THEN 21
+				ELSE 22
+			END movimento,
+			a.chapa,
+			a.coligada,
+			a.situacao status,
+			E.CPF,
+			B.NOME,
+			a.dtcad data_solicitacao,
+			GETDATE() data_hoje,
+			CASE
+				WHEN A.envio_gestor1 IS NULL OR DATEADD(DAY, ISNULL(R.D1, 1), A.envio_gestor1) <= GETDATE() THEN 'S'
+				ELSE 'N'
+			END envia_para_gestor1,
+			A.envio_gestor1,
+			R.D1,
+			DATEADD(DAY, ISNULL(R.D1, 1), A.envio_gestor1) data1_calculada,
+			CASE
+				WHEN DATEADD(DAY, ISNULL(R.D2, 1), A.envio_gestor2) <= GETDATE() THEN 'S'
+				ELSE 'N'
+			END envia_para_gestor2,
+			A.envio_gestor2,
+			R.D2,
+			DATEADD(DAY, ISNULL(R.D2, 1), A.envio_gestor2) data2_calculada
+		FROM zcrmportal_escala a (NOLOCK)
+			INNER JOIN ".DBRM_BANCO."..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS
+			AND B.CODCOLIGADA = A.coligada
+			LEFT JOIN zcrmportal_usuario C (NOLOCK) ON C.id = A.usucad
+			LEFT JOIN ".DBRM_BANCO."..AHORARIO D (NOLOCK) ON D.CODIGO = a.codhorario COLLATE Latin1_General_CI_AS
+			AND D.CODCOLIGADA = a.coligada
+			INNER JOIN ".DBRM_BANCO."..PPESSOA E (NOLOCK) ON E.CODIGO = B.CODPESSOA
+			INNER JOIN PER P ON P.CODCOLIGADA = A.coligada
+			LEFT JOIN PAR R ON R.COLIGADA = A.coligada
+		WHERE 
+      a.situacao in (10)
+			AND (
+				a.datamudanca >= P.INICIOMENSAL
+				OR a.datamudanca_folga >= P.INICIOMENSAL 
+			)
+		),
+
+		LID AS (
+		SELECT DISTINCT
+			L.id_lider,
+			O.chapa LIDER,
+			A.* 
+		FROM APR A
+		INNER JOIN PER P ON P.CODCOLIGADA = A.coligada
+		LEFT JOIN zcrmportal_hierarquia_lider_func_ponto L ON L.coligada = A.coligada AND L.chapa = A.chapa AND L.inativo IS NULL
+		LEFT JOIN zcrmportal_hierarquia_lider_ponto O ON O.coligada = A.coligada AND O.id = L.id_lider AND O.inativo IS NULL AND O.perfim >= P.INICIOMENSAL
+		WHERE O.chapa IS NOT NULL AND A.envia_para_gestor1 = 'S'
+		),
+
+		FU1 AS (
+		SELECT DISTINCT COLIGADA, CHAPA FROM APR WHERE envia_para_gestor1 = 'S' OR envia_para_gestor2 = 'S'
+		),
+
+		FU2 AS (
+		SELECT DISTINCT COLIGADA, CHAPA FROM APR WHERE envia_para_gestor2 = 'S'
+		),
+
+		GE0 AS (
+		SELECT 
+			F.COLIGADA,
+			F.CHAPA,
+			G.GESTOR_CHAPA
+		FROM FU1 F
+		LEFT JOIN GES G ON G.CODCOLIGADA = F.COLIGADA AND G.CHAPA = F.CHAPA COLLATE Latin1_General_CI_AS
+		),
+
+		GE1 AS (
+		SELECT 
+			G.COLIGADA,
+			G.CHAPA,
+			ISNULL(G.GESTOR_CHAPA,H.CHAPA_GESTOR_IMEDIATO) GESTOR1_ACIMA,
+			NULL GESTOR2_ACIMA
+		FROM GE0 G
+		LEFT JOIN ".DBRM_BANCO."..CRM_HIERARQUIA3 H ON H.CODCOLIGADA = G.COLIGADA AND H.CHAPA = G.CHAPA COLLATE Latin1_General_CI_AS
+		),
+
+		GE2 AS (
+		SELECT 
+			G1.COLIGADA,
+			G1.CHAPA,
+			G1.GESTOR1_ACIMA,
+			IIF(G2.GESTOR_CHAPA=G1.GESTOR1_ACIMA,NULL,G2.GESTOR_CHAPA) GESTOR2_ACIMA
+		FROM GE1 G1
+		INNER JOIN FU2 F2 ON F2.COLIGADA = G1.COLIGADA AND F2.CHAPA = G1.CHAPA COLLATE Latin1_General_CI_AS
+		LEFT JOIN GES G2 ON G2.CODCOLIGADA = G1.COLIGADA AND G2.CHAPA = G1.GESTOR1_ACIMA COLLATE Latin1_General_CI_AS
+		),
+
+		GE3 AS (
+		SELECT 
+			G.COLIGADA,
+			G.CHAPA,
+			G.GESTOR1_ACIMA,
+			ISNULL(GESTOR2_ACIMA, H.CHAPA_GESTOR_IMEDIATO) GESTOR2_ACIMA
+		FROM GE2 G
+		LEFT JOIN ".DBRM_BANCO."..CRM_HIERARQUIA3 H ON H.CODCOLIGADA = G.COLIGADA AND H.CHAPA = G.GESTOR1_ACIMA COLLATE Latin1_General_CI_AS
+		),
+
+		FUF AS (
+		SELECT 
+			G1.GESTOR1_ACIMA,
+			G2.GESTOR2_ACIMA,
+			A.*
+		FROM APR A 
+		LEFT JOIN GE1 G1 ON G1.COLIGADA = A.COLIGADA AND G1.CHAPA = A.CHAPA COLLATE Latin1_General_CI_AS
+		LEFT JOIN GE3 G2 ON G2.COLIGADA = A.COLIGADA AND G2.CHAPA = A.CHAPA COLLATE Latin1_General_CI_AS
+		),
+
+		LG1 AS (
+		SELECT DISTINCT COLIGADA, GESTOR1_ACIMA GESTOR, ID, MOVIMENTO FROM FUF WHERE FUF.envia_para_gestor1 = 'S'
+		),
+
+		LG2 AS (
+		SELECT DISTINCT COLIGADA,GESTOR2_ACIMA GESTOR, ID, MOVIMENTO FROM FUF WHERE FUF.envia_para_gestor2 = 'S'
+		),
+
+		LG3 AS (
+		SELECT DISTINCT COLIGADA,LIDER GESTOR, ID, MOVIMENTO FROM LID WHERE LID.envia_para_gestor1 = 'S'
+		),
+
+		LGE AS (
+		SELECT * FROM LG1
+		UNION ALL
+		SELECT * FROM LG2
+		UNION ALL
+		SELECT * FROM LG3
+		),
+
+		LGU AS (
+		SELECT DISTINCT * FROM LGE
+		),
+
+		TGE AS (
+		SELECT 
+			COLIGADA,
+			GESTOR,
+			MOVIMENTO,
+			COUNT (MOVIMENTO) AS TOTAL
+		FROM LGE
+		GROUP BY COLIGADA, GESTOR, MOVIMENTO
+		),
+
+		GEN AS (
+		SELECT 
+			TGE.COLIGADA,
+			TGE.GESTOR,
+			EML.NOME,
+			EML.EMAIL,
+			TGE.MOVIMENTO,
+			CASE
+				WHEN TGE.MOVIMENTO = 1 THEN 'Inclusão de batida'
+				WHEN TGE.MOVIMENTO = 2 THEN 'Exclusão de batida'
+				WHEN TGE.MOVIMENTO = 3 THEN 'Alteração de natureza'
+				WHEN TGE.MOVIMENTO = 4 THEN 'Alteração jornada referência'
+				WHEN TGE.MOVIMENTO = 5 THEN 'Abono de atrasos'
+				WHEN TGE.MOVIMENTO = 6 THEN 'Abono de faltas'
+				WHEN TGE.MOVIMENTO = 7 THEN 'Justificativa de exceção'
+				WHEN TGE.MOVIMENTO = 8 THEN 'Altera atitude'
+				WHEN TGE.MOVIMENTO = 9 THEN 'Falta não remunerada'
+				WHEN TGE.MOVIMENTO = 21 THEN 'Troca de escala'
+				WHEN TGE.MOVIMENTO = 22 THEN 'Troca de dia'
+				ELSE 'Movimento '+CAST(TGE.MOVIMENTO AS VARCHAR)+' não identificado'
+			END DESC_MOVIMENTO,
+			TGE.TOTAL
+		FROM TGE
+		LEFT JOIN EML ON EML.CODCOLIGADA = TGE.coligada AND EML.CHAPA = TGE.GESTOR COLLATE Latin1_General_CI_AS
+		),
+
+		SEM AS(
+		SELECT * FROM GEN WHERE EMAIL IS NULL
+		),
+
+		GEM AS (
+		SELECT 
+			G.COLIGADA,
+			H.CHAPA_GESTOR_IMEDIATO COLLATE Latin1_General_CI_AS GESTOR,
+			E.NOME,
+			E.EMAIL,
+			G.MOVIMENTO,
+			G.DESC_MOVIMENTO,
+			G.TOTAL
+		FROM SEM G 
+		LEFT JOIN ".DBRM_BANCO."..CRM_HIERARQUIA3 H ON H.CODCOLIGADA = G.COLIGADA AND H.CHAPA = G.GESTOR COLLATE Latin1_General_CI_AS
+		LEFT JOIN EML E ON E.CODCOLIGADA = H.CODCOLIGADA AND E.CHAPA = H.CHAPA_GESTOR_IMEDIATO COLLATE Latin1_General_CI_AS
+		WHERE G.EMAIL IS NULL
+		),
+
+		FI1 AS (
+		SELECT * FROM GEN WHERE EMAIL IS NOT NULL
+		UNION ALL
+		SELECT * FROM GEM
+		),
+
+		FIN AS (
+		SELECT 
+			F.COLIGADA,
+			F.GESTOR,
+			F.NOME,
+			F.EMAIL,
+			F.MOVIMENTO,
+			F.DESC_MOVIMENTO,
+			MAX( F.TOTAL ) TOTAL
+		FROM FI1 F
+		GROUP BY F.COLIGADA, F.GESTOR, F.NOME, F.EMAIL, F.MOVIMENTO, F.DESC_MOVIMENTO
+		)
+
+		SELECT
+			F.COLIGADA,
+			F.GESTOR,
+			F.NOME,
+			F.EMAIL,
+			F.MOVIMENTO,
+			F.DESC_MOVIMENTO,
+			F.TOTAL,
+			S.chapa_substituto CHAPA_SUB,
+			S.nome NOME_SUB,
+			S.email EMAIL_SUB,
+			FORMAT(P.INICIOMENSAL, 'dd/MM/yyyy') DTINI_BR, 
+			FORMAT(P.FIMMENSAL, 'dd/MM/yyyy') DTFIM_BR
+		FROM FIN F
+		LEFT JOIN SUB S ON S.COLIGADA = F.coligada AND S.chapa_gestor = F.GESTOR COLLATE Latin1_General_CI_AS
+		LEFT JOIN PER P ON P.CODCOLIGADA = F.coligada
+		WHERE F.GESTOR <> '050000350' 
+		ORDER BY F.GESTOR
+		";
+
+    //echo '<PRE> '.$query;
+    //exit();
+
+    $result = $this->dbportal->query($query);
+    $gestor_atu = "";
+    $itens = "";
+    $gestor =  "";
+    $nome =  "";
+    $email =  "";
+    $desc_movimento =  "";
+    $total =  "";
+    $nome_sub =  "";
+    $email_sub =  "";
+    $dtinip_br = "";
+    $dtfimp_br = "";
+
+    if($result->getNumRows() > 0){
+      $resFuncs = $result->getResultArray();
+      foreach ($resFuncs as $key => $Func):
+        //print_r($Func);
+        //exit();
+        //die();
+        if($gestor_atu == ""){
+          $gestor_atu = $Func['GESTOR'];
+        }
+        $gestor = $Func['GESTOR'];
+
+        if($gestor == $gestor_atu){
+          $nome = $Func['NOME'];
+          $email = $Func['EMAIL'];
+          $desc_movimento = $Func['DESC_MOVIMENTO'];
+          $total = $Func['TOTAL'];
+          $nome_sub = $Func['NOME_SUB'];
+          $email_sub = $Func['EMAIL_SUB'];
+          $dtinip_br = $Func['DTINI_BR'];
+          $dtfimp_br = $Func['DTFIM_BR'];
+
+          $itens = $itens.'<strong>•	'.$desc_movimento.':</strong> '.$total.'<br>';
+        } else {
+          $assunto = '[Portal RH] Você possui solicitações pendentes de aprovação';
+          $msg_nome = 'Prezado(a) '.$nome.',<br><br>';
+          $mensagem = '
+						Este é um lembrete de que você possui solicitações pendentes de aprovação no <strong>Portal RH - Módulo de Ponto</strong> no período de <strong>'.$dtinip_br.' a '.$dtfimp_br.'</strong>, ou posterior. Abaixo está um resumo das pendências: <br><br>
+						<strong>Resumo de Pendências:</strong><br><br>
+						'.$itens.'<br>
+						Pedimos que acesse o Portal RH para revisar e aprovar as solicitações pendentes.<br><br>
+						Segue abaixo link para acesso ao Portal RH <a href="'.base_url().'" target="_blank">'.base_url().'</a><br><br>
+						Atenciosamente,<br>
+						<strong>Equipe Processos de RH</strong><br>
+                    ';
+
+          $htmlEmail = templateEmail($msg_nome.$mensagem, '95%');
+
+          $email = 'deivison.batista@eldoradobrasil.com.br';
+          //$email = 'alvaro.zaragoza@ativary.com';
+          $response = enviaEmail($email, $assunto, $htmlEmail);
+          echo 'Enviado email para '.$nome.' - '.$email.'<br>';
+
+          if(!is_null($email_sub)){
+            $msg_nome_sub = 'Prezado(a) '.$nome_sub.',<br><br>';
+            $htmlEmail = templateEmail($msg_nome_sub.$mensagem, '95%');
+            $email_sub = 'deivison.batista@eldoradobrasil.com.br';
+            //$email = 'alvaro.zaragoza@ativary.com';
+            $response = enviaEmail($email_sub, $assunto, $htmlEmail);
+            echo 'Enviado email para '.$nome_sub.' - '.$email_sub.'<br>';
+          }
+
+          $gestor_atu = $Func['GESTOR'];
+          $gestor = $Func['GESTOR'];
+          $itens = '';
+
+          $nome = $Func['NOME'];
+          $email = $Func['EMAIL'];
+          $desc_movimento = $Func['DESC_MOVIMENTO'];
+          $total = $Func['TOTAL'];
+          $nome_sub = $Func['NOME_SUB'];
+          $email_sub = $Func['EMAIL_SUB'];
+          $dtinip_br = $Func['DTINI_BR'];
+          $dtfimp_br = $Func['DTFIM_BR'];
+
+          $itens = $itens.'<strong>•	'.$desc_movimento.':</strong> '.$total.'<br>';
+          /*$query = "UPDATE zcrmportal_premios_emprestimos SET dt_envio_email = '".date('Y-m-d')."' WHERE id = '{$id_acesso}'";
+
+                    $this->dbportal->query($query);
+                    if($this->dbportal->affectedRows() <= 0){
+                        echo 'Falha ao atualizar data de envio para '.$nome_para_chapa.'<br>';
+                    } else {
+                        echo 'Enviado email para '.$nome_para_chapa.' - '.$email_para_chapa.'<br>';
+                    }*/
+        }
+      endforeach;
+      if($nome != ''){
+        $assunto = '[Portal RH] Você possui solicitações pendentes de aprovação';
+        $msg_nome = 'Prezado(a) '.$nome.',<br><br>';
+        $mensagem = '
+						Este é um lembrete de que você possui solicitações pendentes de aprovação no <strong>Portal RH - Módulo de Ponto</strong> no período de <strong>'.$dtinip_br.' a '.$dtfimp_br.'</strong>, ou posterior. Abaixo está um resumo das pendências: <br><br>
+						'.$itens.'<br>
+						Pedimos que acesse o Portal RH para revisar e aprovar as solicitações pendentes.<br><br>
+						Segue abaixo link para acesso ao Portal RH <a href="'.base_url().'" target="_blank">'.base_url().'</a><br><br>
+						Atenciosamente,<br>
+						<strong>Equipe Processos de RH</strong><br>
+                    ';
+
+        $htmlEmail = templateEmail($msg_nome.$mensagem, '95%');
+
+        $email = 'deivison.batista@eldoradobrasil.com.br';
+        //$email = 'alvaro.zaragoza@ativary.com';
+        $response = enviaEmail($email, $assunto, $htmlEmail);
+
+        if(!is_null($email_sub)){
+          $msg_nome_sub = 'Prezado(a) '.$nome_sub.',<br><br>';
+          $htmlEmail = templateEmail($msg_nome_sub.$mensagem, '95%');
+          $email_sub = 'deivison.batista@eldoradobrasil.com.br';
+          //$email_sub = 'alvaro.zaragoza@ativary.com';
+          $response = enviaEmail($email_sub, $assunto, $htmlEmail);
+        }
+      }
+
+      $lista = "
+			WITH PER AS (
+			SELECT 
+				CODCOLIGADA,
+				INICIOMENSAL,
+				FIMMENSAL
+			FROM
+				".DBRM_BANCO."..APERIODO
+			WHERE
+				ATIVO = 1
+			),
+
+			PAR AS (
+			SELECT 
+				COLIGADA,
+				WFLOW_DIAS_NOTIF		D1,
+				WFLOW_DIAS_NOTIF_ACIMA	D2
+			FROM zcrmportal_espelho_config
+			),
+
+			LIS AS (
+			SELECT 
+				'H' AS TIPO,
+				A.id,
+				A.dtponto,
+				A.movimento,
+				A.chapa,
+				A.coligada,
+				A.status,
+				A.dtcadastro data_solicitacao,
+				GETDATE() data_hoje,
+				CASE
+					WHEN A.envio_gestor1 IS NULL OR DATEADD(DAY, ISNULL(R.D1, 1), A.envio_gestor1) <= GETDATE() THEN 'S'
+					ELSE 'N'
+				END envia_para_gestor1,
+				A.envio_gestor1,
+				R.D1,
+				DATEADD(DAY, ISNULL(R.D1, 1), A.envio_gestor1) data1_calculada,
+				CASE
+					WHEN DATEADD(DAY, ISNULL(R.D2, 1), A.envio_gestor2) <= GETDATE() THEN 'S'
+					ELSE 'N'
+				END envia_para_gestor2,
+				A.envio_gestor2,
+				R.D2,
+				DATEADD(DAY, ISNULL(R.D2, 1), A.envio_gestor2) data2_calculada
+			FROM zcrmportal_ponto_horas A (NOLOCK)
+				INNER JOIN PER P ON P.CODCOLIGADA = A.coligada
+				LEFT JOIN PAR R ON R.COLIGADA = A.coligada
+			WHERE A.status in ('1', '2')
+				AND A.coligada = '1'
+				AND A.motivo_reprova IS NULL
+				AND A.usu_delete IS NULL
+				AND A.dtponto >= P.INICIOMENSAL
+
+			UNION ALL
+
+			SELECT 
+				'E' AS TIPO,
+				a.id,
+				a.datamudanca dtponto,
+				CASE
+					WHEN a.tipo = 1 THEN 21
+					ELSE 22
+				END movimento,
+				a.chapa,
+				a.coligada,
+				a.situacao status,
+				a.dtcad data_solicitacao,
+				GETDATE() data_hoje,
+				CASE
+					WHEN A.envio_gestor1 IS NULL OR DATEADD(DAY, ISNULL(R.D1, 1), A.envio_gestor1) <= GETDATE() THEN 'S'
+					ELSE 'N'
+				END envia_para_gestor1,
+				A.envio_gestor1,
+				R.D1,
+				DATEADD(DAY, ISNULL(R.D1, 1), A.envio_gestor1) data1_calculada,
+				CASE
+					WHEN DATEADD(DAY, ISNULL(R.D2, 1), A.envio_gestor2) <= GETDATE() THEN 'S'
+					ELSE 'N'
+				END envia_para_gestor2,
+				A.envio_gestor2,
+				R.D2,
+				DATEADD(DAY, ISNULL(R.D2, 1), A.envio_gestor2) data2_calculada
+			FROM zcrmportal_escala a (NOLOCK)
+				INNER JOIN PER P ON P.CODCOLIGADA = A.coligada
+				LEFT JOIN PAR R ON R.COLIGADA = A.coligada
+			WHERE a.coligada = '1'
+				and a.situacao in (10)
+				AND (
+					a.datamudanca >= P.INICIOMENSAL
+					OR a.datamudanca_folga >= P.INICIOMENSAL 
+				)
+			)
+			
+			";
+
+      // atualiza datas de envio
+      $atuH2 = $lista." UPDATE zcrmportal_ponto_horas SET envio_gestor2 = GETDATE() WHERE id IN ( SELECT id from LIS WHERE TIPO = 'H' AND (envia_para_gestor2 = 'S' OR envio_gestor2 IS NULL) ) ";
+      // echo $query;exit();
+      $this->dbportal->query($atuH2);
+
+      $atuH1 = $lista." UPDATE zcrmportal_ponto_horas SET envio_gestor1 = GETDATE() WHERE id IN ( SELECT id from LIS WHERE TIPO = 'H' AND envia_para_gestor1 = 'S' ) ";
+      $this->dbportal->query($atuH1);
+
+      $atuE2 = $lista." UPDATE zcrmportal_escala SET envio_gestor2 = GETDATE() WHERE id IN ( SELECT id from LIS WHERE TIPO = 'E' AND (envia_para_gestor2 = 'S' OR envio_gestor2 IS NULL) ) ";
+      $this->dbportal->query($atuE2);
+
+      $atuE1 = $lista." UPDATE zcrmportal_escala SET envio_gestor1 = GETDATE() WHERE id IN ( SELECT id from LIS WHERE TIPO = 'E' AND envia_para_gestor1 = 'S' ) ";
+      $this->dbportal->query($atuE1);
+
+      return true;
+    } else {
+      echo 'Nada a enviar';
+      return false;
+    }
+  }
 }

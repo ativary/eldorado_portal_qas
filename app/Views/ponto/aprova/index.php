@@ -234,7 +234,7 @@ $(document).ready(function(){
                         <div class="col-12 text-right"><button onclick="return excel()" type="button" class="btnpeq btn-sm btn-success bteldorado_1"><i class="mdi mdi-file-excel"></i> Exportar excel</button></div>
                     </div>
                     <?php
-                    if (!$periodo_bloqueado && $acessoPermitido) {
+                    if ($acessoPermitido) {
                         echo '<div class="row mt-3 mb-3">';
                         echo '<div class="col-6 text-left"><button onclick="return reprovaBatida()" type="button" class="btnpeq btn-sm btn-danger bteldorado_2"><i class="far fa-thumbs-down"></i> Reprova Selecionados</button></div>';
                         echo '<div class="col-6 text-right"><button onclick="return aprovaBatida()" type="button" class="btnpeq btn-sm btn-success bteldorado_1"><i class="far fa-thumbs-up"></i> Aprova Selecionados</button></div>';

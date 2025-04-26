@@ -13544,6 +13544,20 @@ exit();
 			
 	}
 
+	public function ListaConfiguracaoWorkflowRH()
+	{
+		$result = $this->dbportal
+				->table('zcrmportal_espelho_config')
+				->select('*')
+				->where('coligada', $this->coligada);
+		if($result){
+			return $result->get()->getResult() ?? false;
+		}
+
+		return false;
+			
+	}
+
 	public function ConfiguracaoWorkflow($request)
 	{
 		try{
@@ -13580,6 +13594,33 @@ exit();
 				->insert();
 
 			}
+
+			return 	($this->dbportal->affectedRows() > 0) 
+					? responseJson('success', 'Configuração realizada com sucesso')
+					: responseJson('error', 'Não foi possivel configurar este workflow');
+
+		} catch (\Exception | \Error $e) {
+			return responseJson('error', 'Erro interno: '.$e->getMessage());
+		}
+
+	}
+
+	public function ConfiguracaoWorkflowRH($request)
+	{
+		try{
+
+			$data = [
+				'wflow_dias_notif' 		 => $request['dgestor1'],
+				'wflow_dias_notif_acima' => $request['dgestor2'],
+			];
+
+			$result = self::ListaConfiguracaoWorkflow();
+
+			$this->dbportal
+			->table('zcrmportal_espelho_config')
+			->set($data)
+			->where('coligada', $this->coligada)
+			->update();
 
 			return 	($this->dbportal->affectedRows() > 0) 
 					? responseJson('success', 'Configuração realizada com sucesso')

@@ -1,6 +1,8 @@
+<?= menuConfigPonto('Espelho'); ?>
+
 <div class="container-fluid">
     <div class="row">
-
+        
         <!-- main -->
         <div class="col-12">
             <div class="card">

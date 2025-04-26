@@ -74,7 +74,8 @@ class Espelho extends BaseController {
         $SaldoTotal                 = 0;
         $colaboradores              = [];
         $dados['resFuncionario']    = $this->mPortal->ListarDadosFuncionario(false, $dados['chapa'], false);
-        $dados['resDiasEspelho']    = $this->mEspelho->ListarEspelhoDias($dados['periodo'], $dados['chapa'], $dados['isMotorista']);
+        //$dados['resDiasEspelho']    = $this->mEspelho->ListarEspelhoDias($dados['periodo'], $dados['chapa'], $dados['isMotorista']);
+        $dados['resDiasEspelho']    = $this->mEspelho->ListarEspelhoDias($dados['periodo'], $dados['chapa']);
         
         $dados['dataInicio'] = '';
         if($dados['periodo']){

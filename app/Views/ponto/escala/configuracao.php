@@ -1,3 +1,5 @@
+<?= menuConfigPonto('Escala'); ?>
+
 <div class="container-fluid"> 
     <div class="row">
 

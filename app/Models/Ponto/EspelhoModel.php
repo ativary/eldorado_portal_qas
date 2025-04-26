@@ -2835,7 +2835,7 @@ class EspelhoModel extends Model {
 
     public function ListarJustificativa($tipo)
     {
-        // 1 = falta | 2 = Atraso | 3 = Extra | 4 = Ajuste
+        // 1 = falta | 2 = Atraso | 3 = Extra | 4 = Ajuste | 5 = Reprovas | 6 = Artigo61
         $query = " SELECT * FROM zcrmportal_ponto_motivos WHERE tipo = '{$tipo}' AND codcoligada = '{$this->coligada}' ORDER BY CAST(descricao AS VARCHAR) ";
         $result = $this->dbportal->query($query);
         if(!$result) return false;
@@ -2872,11 +2872,11 @@ class EspelhoModel extends Model {
             $this->dbportal->query($query);
             if($this->dbportal->affectedRows() > 0){
 
-                notificacao('success', '<b>Justificativa de Extra</b> cadastrada com sucesso.');
-                return responseJson('success', '<b>Justificativa de Extra</b> cadastrada com sucesso.');
+                notificacao('success', '<b>Justificativa</b> cadastrada com sucesso.');
+                return responseJson('success', '<b>Justificativa</b> cadastrada com sucesso.');
 
             }else{
-                return responseJson('error', 'Falha ao cadastrar justificativa de extra.');
+                return responseJson('error', 'Falha ao cadastrar justificativa.');
             }
 
         } catch (\Exception $e) {

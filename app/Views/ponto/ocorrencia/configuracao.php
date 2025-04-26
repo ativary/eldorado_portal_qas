@@ -1,6 +1,48 @@
 <?php $isAdmin = ($_SESSION['log_id'] == 1) ? true : false; ?>
+<?= menuConfigPonto('Ocorrências'); ?>
+
 <div class="container-fluid"> 
     <div class="row">
+
+		<!-- main -->
+        <div class="col-12">
+            <div class="card">
+					
+				<div class="card-header mt-0">
+					<div class="row">
+					<h4 class="col-12 mb-1 mt-1"><i class="mdi mdi-email-check"></i> Configuração do Workflow de Aprovação</h4>
+					</div>
+				</div>
+				
+				<div class="card-body">
+				<div class="form-group row p-0 m-0">
+						<label for="ciclo1" class="col-sm-4 col-form-label text-right">Lembrete para Gestor aprovar a cada:</label>
+                        <div class="col-sm-2">
+							<div class="input-group">
+								<input class="form-control form-control-sm" type="number" value="<?= $resWorkflowRH[0]->wflow_dias_notif ?? ''; ?>" name="dgestor1" id="dgestor1" require>
+								<div class="input-group-append">
+									<span class="input-group-text">Dia(s)</span>
+								</div>
+							</div>
+                        </div>
+                    </div>
+                    <div class="form-group row p-0 m-0">
+						<label for="ciclo1" class="col-sm-4 col-form-label text-right">Lembrete p/Gestor acima caso pendência persista em:</label>
+                        <div class="col-sm-2">
+							<div class="input-group">
+								<input class="form-control form-control-sm" type="number" value="<?= $resWorkflowRH[0]->wflow_dias_notif_acima ?? ''; ?>" name="dgestor2" id="dgestor2" require>
+								<div class="input-group-append">
+									<span class="input-group-text">Dia(s)</span>
+								</div>
+							</div>
+                        </div>
+                    </div>
+				</div>
+				<div class="card-footer text-center">
+					<button type="button" class="btn btn-xxs btn-primary" onclick="return salvaConfigWorkflowRH()">Salvar <i class="fas fa-check"></i></button>
+				</div>
+			</div>
+		</div>
 
 		<!-- main -->
         <div class="col-12">
@@ -398,6 +440,41 @@ const salvaConfigWorkflow = () => {
             
         },
     });
+
+}
+
+const salvaConfigWorkflowRH = () => {
+
+var data = {
+	'dgestor1': $("#dgestor1").val(),
+	'dgestor2': $("#dgestor2").val(),
+};
+
+if(data.dgestor1 == ''){alert('error', 'Dias para lembrete gestor não informado.'); return;}
+if(data.dgestor2 == ''){alert('error', 'Dias para aviso ao gestor acima.'); return;}
+
+openLoading();
+
+$.ajax({
+	url: "<?= base_url('ponto/ocorrencia/action/salva_configuracao_workflow_RH'); ?>",
+	type: 'POST',
+	data: {
+		'dados': data
+	},
+	success:function(result){
+
+		try {
+		
+			openLoading(true);
+			var response = JSON.parse(result);
+			exibeAlerta(response.tipo, response.msg);
+
+		} catch (e) {
+			exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+		}
+		
+	},
+});
 
 }
 </script>

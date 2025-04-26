@@ -208,7 +208,7 @@ class Aprova extends BaseController
                 }
 
                 if($resp > 0){
-                    notificacao('warning', 'Movimento reprovado com sucesso. Porém, ocorreram falha parcial na reprovação.');
+                    notificacao('warning', 'Movimento reprovado com sucesso. Porém, ocorreu falha parcial na reprovação.');
                 }else{
                     notificacao('success', 'Movimento reprovado com sucesso.');
                 }
@@ -625,6 +625,14 @@ class Aprova extends BaseController
                 break;
         }        
 
+    }
+
+    //-----------------------------------------------------------
+    // Workflow de envio de emails pendentes de aprovação
+    //-----------------------------------------------------------
+    public function workflow(){
+        $this->mAprova->Workflow();
+        exit();
     }
 
 }

@@ -33,6 +33,7 @@ Class Justificativa extends BaseController {
             'extras'        => $this->mEspelho->ListarJustificativa(3),
             'ajustes'       => $this->mEspelho->ListarJustificativa(4),
             'reprovas'      => $this->mEspelho->ListarJustificativa(5),
+            'artigos61'     => $this->mEspelho->ListarJustificativa(6),
             'ocorrencia'    => $this->mOcorrencia->ListarOcorrenciaMotivo()
         ];
         

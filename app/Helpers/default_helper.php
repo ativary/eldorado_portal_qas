@@ -680,3 +680,105 @@ function meses($mes)
     );
     return $mes_extenso[$mes];
 }
+
+/*  
+    Prepara menu de configurações de ponto
+    Criado por Alvaro Zaragoza em 2025-04-09
+*/
+function menuConfigPonto($opcaoConfig='') {
+    
+    $opcoes = [
+        [ "btnJust", "Justificativas", "ponto/justificativa" ],
+        [ "btnArt61", "Artigo.61", "ponto/art61/config" ],
+        [ "btnOcorrencia", "Ocorrências", "ponto/ocorrencia/config" ],
+        [ "btnCargos", "Cargos", "ponto/ocorrencia/motorista" ],
+        [ "btnTipos", "Tipos", "ponto/ocorrencia/config_ocorrencias" ]            ,
+        [ "btnEspelho", "Espelho", "ponto/espelho/configuracao" ],
+        [ "btnEscala", "Escala", "ponto/escala/configuracao" ]
+    ];
+
+    $style = '
+    <style>
+        .tight-col {
+            padding-left: 3px !important;
+            padding-right: 3px !important;
+            padding-bottom: 3px !important;
+        }
+
+        .custom-btn {
+            min-width: 110px;
+            width: auto;
+            /*background-color: white;*/
+            /*color: #0d6efd; */ /* Bootstrap primary */
+            border: 1px solid #0d6efd;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .custom-btn:hover {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+    </style>
+    ';
+
+    $menuHTML = '
+    <div class="container-fluid">
+        <div class="row">
+            <!-- main -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header mt-0">
+                        <div class="row">
+                            <h5 class="col-12 mb-1 mt-1">Configurações do Ponto</h5>
+                        </div>
+                    </div>
+                    <div class="card-footer m-0">
+                        <div class="row m-0">
+    ';
+    foreach ($opcoes as $opcao) {
+        if($opcaoConfig == $opcao[1]) {
+            $menuHTML .= '
+                <div class="col-auto tight-col">
+                    <button class="btn-sm btn-primary custom-btn" id="'.$opcao[0].'">
+                        '.$opcao[1].'
+                    </button>
+                </div>';
+        } else {
+            $menuHTML .= '
+                <div class="col-auto tight-col">
+                    <button class="btn-sm text-primary border-primary bg-white custom-btn" id="'.$opcao[0].'">
+                        '.$opcao[1].'
+                    </button>
+                </div>';
+        }
+    
+    }
+    $menuHTML .= '
+                            </div>
+                    </div>
+                </div>
+            </div><!-- end main -->
+    
+        </div>
+
+    </div><!-- container -->
+    ';
+
+    $scriptJS = '<script type="text/javascript">';
+    foreach ($opcoes as $opcao) {
+        if($opcaoConfig != $opcao[1]) {
+            $scriptJS .= '
+                document.getElementById("'.$opcao[0].'").onclick = function () {
+                    location.href = "'.base_url($opcao[2]).'";
+                };';
+        }
+    
+    }
+    $scriptJS .= '</script>';
+    
+    echo $style;
+    echo $menuHTML;
+    echo $scriptJS;
+    
+    
+}

@@ -1,3 +1,5 @@
+<?= menuConfigPonto('Justificativas'); ?>
+
 <div class="container-fluid"> 
     <div class="row">
 
@@ -30,6 +32,9 @@
                         </li>
                         <li class="nav-item">
                             <a data-tab="5" class="nav-link" data-toggle="tab" href="#reprova" role="tab"><i class="mdi mdi-account-minus"></i> - Reprova</a>
+                        </li>
+                        <li class="nav-item">
+                            <a data-tab="6" class="nav-link" data-toggle="tab" href="#artigo61" role="tab"><i class="mdi mdi-account-alert"></i> - Artigo 61</a>
                         </li>
                         
                         <li class="nav-item">
@@ -203,6 +208,41 @@
                             </table>
 
                         </div>
+
+                        <div class="tab-pane p-3" id="artigo61" role="tabpanel">
+
+                            <div class="col-12 text-right mb-2">
+                                <button type="button" onclick="return editar(0, '', 6)" class="btn btn-primary btn-xxs mb-0"><i class="fas fa-plus-circle"></i> Nova justificativa de Artigo 61</button>
+                            </div>
+
+                            <table data-table id="datatable_artigo61" class="table table-sm table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" width="80">ID</th>
+                                        <th>Motivo</th>
+                                        <th class="text-center" width="155">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if($motivos['artigos61']): ?>
+                                        <?php foreach($motivos['artigos61'] as $artigo61): ?>
+                                            <tr>
+                                                <td class="text-center"><?= $artigo61['id']; ?></td>
+                                                <td><?= $artigo61['descricao']; ?></td>
+                                                <td class="text-center">
+                                                    <div class="btn-group" aria-label="acao" role="group">
+                                                        <a href="javascript:void(0);" onclick="return excluir(<?= $artigo61['id']; ?>, 5)" class="btn btn-soft-pink waves-effect waves-light btn-xxs"><i class="fa fa-times"></i> excluir</a>
+                                                        <button onclick="return editar(<?= $artigo61['id']; ?>, '<?= $artigo61['descricao']; ?>', 5)" type="button" class="btn btn-soft-primary waves-effect waves-light btn-xxs"><i class="mdi mdi-pencil-outline"></i> editar</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+
+                        </div>
+
                         <div class="tab-pane p-3" id="ocorrencia" role="tabpanel">
 
                             <div class="col-12 text-right mb-2">
@@ -242,11 +282,8 @@
 
             </div>
 
-            
-
         </div><!-- end main -->
-        
-        
+
     </div>
 </div><!-- container -->
 
