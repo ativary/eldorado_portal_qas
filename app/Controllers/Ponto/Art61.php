@@ -44,7 +44,7 @@ Class Art61 extends BaseController {
     }
 
     //-----------------------------------------------------------
-    // Actions Prêmios
+    // Actions Art61
     //-----------------------------------------------------------
     public function action($act)
     {
@@ -114,11 +114,46 @@ Class Art61 extends BaseController {
             //-------------------------------------
             // deleta excecao
             case 'deleta_evento':
-                exit($this->mArt61->Deleta_Codevento($dados));
-                break;
-            //-------------------------------------
+              exit($this->mArt61->Deleta_Codevento($dados));
+              break;
+          //-------------------------------------
 
-            //-------------------------------------
+          //-------------------------------------
+            // grava nova solicitacao
+            case 'nova_solicitacao':
+              exit($this->mArt61->Nova_Solicitacao($dados));
+              break;
+          //-------------------------------------
+
+          //-------------------------------------
+            // apaga solicitacao
+            case 'apaga_requisicao':
+              exit($this->mArt61->Apaga_Requisicao($dados));
+              break;
+          //-------------------------------------
+
+          //-------------------------------------
+            // grava novo colaborador
+            case 'novo_colab_req':
+              exit($this->mArt61->Novo_Colaborador($dados));
+              break;
+          //-------------------------------------
+
+          //-------------------------------------
+            // apaga colaborador
+            case 'apaga_colaborador':
+              exit($this->mArt61->Apaga_Colaborador($dados));
+              break;
+          //-------------------------------------
+
+          //-------------------------------------
+            // grava novo colaborador
+            case 'processar_req':
+              exit($this->mArt61->Processar_Req($dados));
+              break;
+          //-------------------------------------
+
+          //-------------------------------------
             // importa centro de custo
             case 'importar':
                 $dados['documento'] = $_FILES;
@@ -137,7 +172,7 @@ Class Art61 extends BaseController {
   {
     parent::VerificaPerfil('GLOBAL_RH');
 
-	$dados['_titulo'] = "Importar Centros de Custos - Artigo 61";
+	  $dados['_titulo'] = "Importar Centros de Custos - Artigo 61";
     $this->_breadcrumb->add($dados['_titulo'], 'ponto/art61/config');
         
 	return parent::ViewPortal('ponto/art61/importa_areas', $dados);
@@ -226,7 +261,67 @@ Class Art61 extends BaseController {
 
         exit();
 
-    }  
+    }
 
+    public function solicitacao(){
+
+      $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
+      if(!$dados['rh']) { parent::VerificaPerfil('ART61_SOLICITACAO'); }
+
+      $dados['_titulo'] = "Histórico de solicitação";
+      $dados['periodo'] = $this->request->getPost('periodo');
+      //$dados['acessoPermitido']       = ($dados['isGestorHierarquia'] || $dados['perfilRH'] || $dados['isLiderAprovador'] || $dados['isGestorSubstituto']) ? true : false;
+      $dados['acessoPermitido']  = true;
+        
+      $periodo = ($dados['periodo'] != null) ? $dados['periodo'] : '';
+      
+      $dados['resColab'] = $this->mArt61->ListarColabSolicitacao($dados['rh']); 
+      $dados['resListaArt61'] = $this->mArt61->ListarArt61($periodo); 
+      $dados['resPeriodo'] = $this->mArt61->ListarPeriodoPonto();
+      $dados['resConfig'] = $this->mArt61->ListarConfigArt61();
+      $dados['resProroga'] = $this->mArt61->ListarProrroga();
+      
+      return parent::ViewPortal('ponto/art61/solicitacao', $dados);
+
+  }
+
+  public function solicitacao_chapas($id){
+
+    $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
+    if(!$dados['rh']) { parent::VerificaPerfil('ART61_SOLICITACAO'); }
+
+    $dados['_titulo'] = "Detalhes da solicitação";
+    $dados['id_requisicao'] = $id;
+    $dados['pode_editar'] = true;
+    $dados['acessoPermitido'] = true;
+    $dados['em_analise'] = ''; //pode ser 'disabled' para evitar o botão processar;
+
+    /*
+    $mAprova = model('Ponto/AprovaModel');
+    $mRel = model('Relatorio/RelatorioModel');
+    $mPortal = model('PortalModel');
+    
+    $dados['resSecao'] = $mAprova->listaSecaoUsuario(false, $dados);
+    $dados['resFuncao'] = $mPortal->funcoesPodeVer($dados);
+
+    $dados['filtro'] = $this->request->getPost('filtro');
+    $dados['filtro_tipo_troca'] = $this->request->getPost('filtro_tipo_troca');
+    $dados['filtro_colaborador'] = $this->request->getPost('filtro_colaborador');
+    $dados['filtro_secao'] = $this->request->getPost('filtro_secao');
+    $dados['filtro_funcao'] = $this->request->getPost('filtro_funcao');
+    $dados['data_inicio'] = $this->request->getPost('data_inicio');
+    $dados['data_fim'] = $this->request->getPost('data_fim');
+    
+    $dataInicio = ($dados['data_inicio'] != null) ? $dados['data_inicio'] : date('Y-m-d');
+    
+    $dados['colaboradores'] = $mPortal->CarregaColaboradores($dataInicio, $dados, true);
+    */
+    $dados['resColab'] = $this->mArt61->ListarColabSolicitacao($dados['rh']); 
+    $dados['resListaArt61'] = $this->mArt61->ListarArt61('',$id); 
+    $dados['resReqChapas'] = $this->mArt61->ListarReqChapas($id);
+    
+    return parent::ViewPortal('ponto/art61/solicitacao_chapas', $dados);
+
+  }
 
 }

@@ -2040,27 +2040,51 @@ class RequisicaoModel extends Model {
                 }
                 
                 /* CALCULANDO DIAS ATESTADO / AFATAMENTO
-                SELECT
-                    f.codcoligada,
-                    f.chapa,
-                    f.codpessoa,
-                    CASE WHEN dtinicio BETWEEN '2024-12-16' AND '2025-01-15' THEN dtinicio
-                        ELSE '2024-12-16'
+                WITH afast AS (
+SELECT
+           f.codcoligada,
+           f.chapa,
+           f.codpessoa,
+                    CASE WHEN a.dtinicio BETWEEN '2025-03-16' AND '2025-04-15' THEN a.dtinicio
+                        ELSE '2025-03-16'
                     END d_ini,
-                    CASE WHEN dtfinal BETWEEN '2024-12-16' AND '2025-01-15' THEN dtfinal
-                        ELSE '2025-01-15'
+                    CASE WHEN a.dtfinal BETWEEN '2025-03-16' AND '2025-04-15' THEN a.dtfinal
+                        ELSE '2025-04-15'
                     END d_fim,
                     a.dtinicio,
                     a.dtfinal
                 from pfunc f
-                inner JOIN vatestado a on a.codpessoa = f.codpessoa
-                WHERE (a.dtinicio BETWEEN '2024-12-16' AND '2025-01-15'
-                OR    a.dtfinal BETWEEN '2024-12-16' AND '2025-01-15'
-                OR 	(a.dtinicio < '2024-12-16' AND a.dtfinal > '2025-01-15' ) 
-                OR 	(a.dtinicio <= '2025-01-15' AND a.dtfinal is NULL )) 
-                AND CHAPA = '050007847'
+                LEFT JOIN vatestado a on a.codpessoa = f.codpessoa
+                WHERE (a.dtinicio BETWEEN '2025-03-16' AND '2025-04-15'
+                OR    a.dtfinal BETWEEN '2025-03-16' AND '2025-04-15'
+                OR 	(a.dtinicio < '2025-03-16' AND a.dtfinal > '2025-04-15' ) 
+                OR 	(a.dtinicio <= '2025-04-15' AND a.dtfinal is NULL )) 
+                AND f.CHAPA = '050004423'               
+)
+
+SELECT * FROM afast
+
+UNION ALL
+
+SELECT
+           f.codcoligada,
+           f.chapa,
+           f.codpessoa,
+                    CASE WHEN h.dtinicio BETWEEN '2025-03-16' AND '2025-04-15' THEN h.dtinicio
+                        ELSE '2025-03-16'
+                    END d_ini,
+                    '2025-04-15' d_fim,
+                    h.dtinicio,
+                    h.dtfinal
+                from pfunc f
+                LEFT JOIN PFHSTAFT h ON h.CODCOLIGADA = f.CODCOLIGADA AND h.CHAPA = f.CHAPA
+                	AND h.DTFINAL IS NULL AND h.TIPO IN ('Q','I','C')
+                WHERE f.CODCOLIGADA = 1
+                AND f.CHAPA = '050004423'
+                AND (SELECT COUNT(CHAPA) FROM AFAST) = 0
                 */
                 $query = "
+                WITH afast AS (
                     SELECT
                         f.codcoligada,
                         f.chapa,
@@ -2081,9 +2105,35 @@ class RequisicaoModel extends Model {
                         f.codcoligada = ".$codcoligada." AND
                         ((a.dtinicio BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."') OR
                          (a.dtfinal  BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."') OR 
-						 (a.dtinicio < '".$dtini_ponto."' AND a.dtfinal > '".$dtfim_ponto."') OR
+						              (a.dtinicio < '".$dtini_ponto."' AND a.dtfinal > '".$dtfim_ponto."') OR
                          ( (a.dtinicio <= '".$dtfim_ponto."') AND a.dtfinal is NULL) ) AND
                         f.chapa = '".$chapa."' 
+                )
+
+                SELECT * FROM afast
+
+                UNION ALL
+
+                SELECT
+                    f.codcoligada,
+                    f.chapa,
+                    f.codpessoa,
+                    CASE WHEN h.dtinicio BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."' THEN h.dtinicio
+                        ELSE '".$dtini_ponto."'
+                    END d_ini,
+                    '".$dtfim_ponto."' d_fim,
+                    h.dtinicio,
+                    CASE WHEN h.dtfinal IS NOT NULL THEN h.dtfinal
+                            ELSE '".$dtfim_ponto."' 
+                        END dtfinal
+                from pfunc f
+                LEFT JOIN PFHSTAFT h ON h.CODCOLIGADA = f.CODCOLIGADA AND h.CHAPA = f.CHAPA
+                	AND h.DTFINAL IS NULL AND h.TIPO IN ('Q','I','C')
+                WHERE f.CODCOLIGADA = ".$codcoligada."
+                AND f.CHAPA = '".$chapa."'
+                AND h.dtinicio IS NOT NULL
+                AND (SELECT COUNT(CHAPA) FROM AFAST) = 0
+
                 ";
                 /*if($chapa=='050008006') {
                     echo '<pre> '.$query;

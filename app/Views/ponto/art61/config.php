@@ -50,7 +50,7 @@
 
                                             <div class="card-body">
                                                 <div class="form-group row">
-                                                    <label for="dtper_ponto" class="col-sm-2 col-form-label text-right">Período de Ponto:</label>
+                                                    <label for="dtper_ponto" class="col-sm-2 col-form-label text-right">Período do Ponto:</label>
                                                     <div class="col-sm-4">
                                                         <select class="select2 form-control form-control-sm mb-1" name="dtper_ponto" id="dtper_ponto">
                                                             <?php foreach ($resPonto as $key => $Ponto): ?>
