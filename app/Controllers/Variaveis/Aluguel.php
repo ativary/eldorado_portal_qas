@@ -48,6 +48,7 @@ Class Aluguel extends BaseController {
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
         $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
         $dados['chapaFunc'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+        $dados['funcionario'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
         $dados['param6']   = json_encode($this->mParam->getParametros(7));
         $this->_breadcrumb->add('Novo Auxilio Aluguel');
 

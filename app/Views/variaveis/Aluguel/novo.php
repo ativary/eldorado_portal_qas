@@ -34,10 +34,7 @@
                                     <select  class="select2 custom-select form-control form-control-sm" name="tipoReq" id="tipoReq">
                                         <option value=""> ... </option>
                                         <option selected value="1"> Mensal </option>
-                                        
-                                       
                                     </select>
-                                   
                                 </div>
                             </div> -->
                             <div class="form-group row mb-2">

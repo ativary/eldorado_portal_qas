@@ -567,11 +567,21 @@ class VariaveisModel extends Model {
 
     public function DeleteReq($id)
     {
+        /* código até 06/05/2025 - alterado por Alvaro Zaragoza
         $query = " 
         DELETE FROM dbo.zcrmportal_variaveis_req
-            WHERE id = '".$id."'
-           
+            WHERE id = '".$id."' 
+        ";*/
+
+        $query = "
+        UPDATE dbo.zcrmportal_variaveis_req
+        SET 
+          status = 0,
+          dtalt = '".date('Y-m-d H:i:s')."',
+          usualt = ".$this->logId."
+        WHERE id = '".$id."' 
         ";
+
         // exit('<pre>'.print_r($query,1));
         return $this->dbportal->query($query);
 

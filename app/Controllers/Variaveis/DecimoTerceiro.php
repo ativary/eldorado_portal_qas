@@ -27,14 +27,14 @@ Class Decimoterceiro extends BaseController {
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
         $dados['data_inicio']         = $this->request->getPost('data_inicio');
         $dados['data_fim']            = $this->request->getPost('data_fim');
-        $dados['secao']            = $this->request->getPost('secao');
+        $dados['secao']               = $this->request->getPost('secao');
         $dados['funcionario']         = $this->request->getPost('funcionario');
         $dados['situacao']            = $this->request->getPost('situacao');
         $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
 
         $dados['listaEventos']  = $this->mParam->listaEventos();
-       
-      
+        $dados['listaSecao']  = false;
+        
         $dados['listaReqs']     = $this->mParam->getReq(9, $dados['data_inicio'],$dados['data_fim'],$dados['funcionario'],false, $dados['situacao'] );
        
        // $dados['listaSecao']    = $this->mParam->listaSecaoGestor( $dados['rh']);
@@ -58,6 +58,8 @@ Class Decimoterceiro extends BaseController {
        
      
         $dados['chapaFunc'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+        $dados['funcionario'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+        
         $dados['log_nome'] = session()->get('log_nome');
        
         $dados['param6']   = json_encode($this->mParam->getParametros(9));
