@@ -1577,6 +1577,18 @@ class AprovaModel extends Model
 			ATIVO = 1
 		),
 
+		PRESDIR AS (
+		select 
+			distinct c.chapa as chapa
+		from zcrmportal_hierarquia a
+		left join zcrmportal_hierarquia_grupocargo b on b.id = a.id_grupocargo
+		left join zcrmportal_hierarquia_chapa c on c.id_hierarquia = a.id
+		where 
+			(b.descricao = '01 - Diretor' or b.descricao = '00 - Presidente') and
+			a.inativo is null and
+			c.chapa is not null
+		),
+
 		SUB AS (
 		SELECT 
 			s.coligada,
@@ -1910,7 +1922,7 @@ class AprovaModel extends Model
 		FROM FIN F
 		LEFT JOIN SUB S ON S.COLIGADA = F.coligada AND S.chapa_gestor = F.GESTOR COLLATE Latin1_General_CI_AS
 		LEFT JOIN PER P ON P.CODCOLIGADA = F.coligada
-		WHERE F.GESTOR <> '050000350' 
+		WHERE F.GESTOR NOT IN (SELECT CHAPA FROM PRESDIR) 
 		ORDER BY F.GESTOR
 		";
 

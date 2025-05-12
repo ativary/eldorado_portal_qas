@@ -101,22 +101,23 @@ class Espelho extends BaseController {
             $colaboradores                    = $this->mPortal->CarregaColaboradores($dataInicio, $dadosColaboradores, true);
             $dados['dataFim'] = \DateTime::createFromFormat('d/m/Y', substr($dados['periodo'],10,10))->format('Y-m-d');
 
-            if(strlen(trim($dados['resFuncionario'][0]['DATADEMISSAO'])) > 0){
-
-                $fimPeriodo         = \DateTime::createFromFormat('d/m/Y', substr($dados['periodo'],10,10))->format('Y-m-d');
-                $ultimoDia          = ($dados['resDiasEspelho']) ? end($dados['resDiasEspelho']) : false;
-                if(!$ultimoDia) $ultimoDia['DATA'] = $fimPeriodo;
-                if($ultimoDia['DATA'] < $fimPeriodo){
-                    $diasDiff       = dataDiff($ultimoDia['DATA'], $fimPeriodo);
-                    for($i=1;$i<=$diasDiff;$i++){
-                        $data       = \DateTime::createFromFormat('Y-m-d', dtEn($ultimoDia['DATA'], true));
-                        $data->add(new \DateInterval('P'.$i.'D')); // 2 dias
-                        $dataDia    = $data->format('Y-m-d');
-                        $dados['resDiasEspelho'][] = [
-                            "DATA" => $dataDia
-                        ];
-                    }
-                }
+            if($dados['resFuncionario'] and $dados['resFuncionario'][0]['DATADEMISSAO']) {
+              if(strlen(trim($dados['resFuncionario'][0]['DATADEMISSAO'])) > 0){
+                  $fimPeriodo         = \DateTime::createFromFormat('d/m/Y', substr($dados['periodo'],10,10))->format('Y-m-d');
+                  $ultimoDia          = ($dados['resDiasEspelho']) ? end($dados['resDiasEspelho']) : false;
+                  if(!$ultimoDia) $ultimoDia['DATA'] = $fimPeriodo;
+                  if($ultimoDia['DATA'] < $fimPeriodo){
+                      $diasDiff       = dataDiff($ultimoDia['DATA'], $fimPeriodo);
+                      for($i=1;$i<=$diasDiff;$i++){
+                          $data       = \DateTime::createFromFormat('Y-m-d', dtEn($ultimoDia['DATA'], true));
+                          $data->add(new \DateInterval('P'.$i.'D')); // 2 dias
+                          $dataDia    = $data->format('Y-m-d');
+                          $dados['resDiasEspelho'][] = [
+                              "DATA" => $dataDia
+                          ];
+                      }
+                  }
+              }
             }
             
         }
@@ -149,15 +150,16 @@ class Espelho extends BaseController {
 
     private function checkMotorista($dadosFunc)
     {
-
+      if($dadosFunc and $dadosFunc[0]['CODFUNCAO']) {
         $motoristas = $this->mOcorrencia->ListaConfiguracaoMotorita();
         if($motoristas){
             foreach($motoristas as $funcao){
                 if($dadosFunc[0]['CODFUNCAO'] == $funcao->codfuncao) return true;
             }
         }
+      }
 
-        return false;
+      return false;
 
     }
 

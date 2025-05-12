@@ -2982,7 +2982,11 @@ function m2h(minutos) {
                             <span><div id="data_macro">-</div></span>
                             <span><button id="dia_posterior" type="button" class="text-primary" style="border: none; background: none;"><i class="fa fa-arrow-right"></i></button></span>
                         </h3>
-                        <h3 class="m-0"><?= $resFuncionario[0]['CHAPA'].' - '.$resFuncionario[0]['NOME']; ?></h3>
+                        <?php if( $resFuncionario and $resFuncionario[0]['CHAPA'] ) { ?>
+                          <h3 class="m-0"><?= $resFuncionario[0]['CHAPA'].' - '.$resFuncionario[0]['NOME']; ?></h3>
+                        <?php } else { ?>
+                          <h3 class="m-0"> </h3>
+                        <?php } ?>
                         <h5 data-h-escala class="h7 mt-0"></h5>
 
                         <table class="table table-sm" id="table_macro">

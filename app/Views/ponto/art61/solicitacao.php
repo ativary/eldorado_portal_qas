@@ -1,7 +1,7 @@
 <script>
-$(document).ready(function(){
+  $(document).ready(function() {
     alteraPeriodo();
-});
+  });
 </script>
 <style>
   #selecctall {
@@ -27,7 +27,9 @@ $(document).ready(function(){
       } else {
         $("[type=checkbox]").prop('checked', false);
       }
+      VerificaCheck();
     });
+    VerificaCheck();
   });
 </script>
 
@@ -61,10 +63,9 @@ $(document).ready(function(){
 
                 <div class="col-sm-2">
                   <select class="select2  form-control form-control-sm " name="periodo" id="periodo" onchange="return alteraPeriodo()">
-                    <option value="">- selecione um período -</option>
                     <?php if ($resPeriodo) : ?>
                       <?php foreach ($resPeriodo as $key => $DadosPeriodo) : ?>
-                        <option value="<?= $DadosPeriodo['PERIODO_SQL']; ?>" <?= ($DadosPeriodo['PERIODO_SQL']==$periodo) ? 'selected' : '';?>><?= $DadosPeriodo['PERIODO_BR']; ?></option>
+                        <option value="<?= $DadosPeriodo['PERIODO_SQL']; ?>" <?= ($DadosPeriodo['PERIODO_SQL'] == $periodo) ? 'selected' : ''; ?>><?= $DadosPeriodo['PERIODO_BR']; ?></option>
                       <?php endforeach; ?>
                     <?php endif; ?>
                   </select>
@@ -75,6 +76,8 @@ $(document).ready(function(){
                 </div>
 
                 <div class="col-sm-7 text-right">
+                  <button style="margin-left: 20px;" id="btnJust" name="btnJust" class="btnpeq btn-sm btn-success" type="button" onclick="return enviarLoteAprovacao()"><i class="far fa-paper-plane"></i> Enviar para aprovação</button>
+
                   <button style="margin-left: 20px; display: none;" id="btnNova" name="btnNova" class="btnpeq btn-sm btn-primary" type="button" onclick="return novaSolicitacao()"><i class="fa fa-plus"></i> Nova Solicitação</button>
                 </div>
               </div>
@@ -99,7 +102,7 @@ $(document).ready(function(){
                     <?php foreach ($resListaArt61 as $key => $registro): ?>
                       <tr data-linha="<?= $registro['id'] ?>">
                         <td width="20" class="text-center">
-                          <input type="checkbox" name="idart61[]" data-checkbox="<?= $registro['id']; ?>" value="<?= $registro['id']; ?>">
+                          <input type="checkbox" onclick="VerificaCheck()" name="idart61[]" data-checkbox="<?= $registro['id']; ?>" value="<?= $registro['id']; ?>">
                         </td>
                         <td class="n-mobile-cell"><?= $registro['id']; ?></td>
                         <td class="n-mobile-cell text-center">
@@ -137,16 +140,15 @@ $(document).ready(function(){
                             <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                             <div class="dropdown-menu" style="margin-left: -131px;">
 
-                              <?php /*if($registro['movimento'] == 21 || $registro['movimento'] == 22): */ ?>
-                              <a href="<?= base_url('ponto/art61/solicitacao_chapas/' . $registro['id']); ?>" class="dropdown-item"><i class="mdi mdi-pencil"></i> Editar requisição</a>
-                              <!--button type="button" onclick="justificativas('<?= id($registro['id']); ?>')" class="dropdown-item"><i class="mdi mdi-comment-eye-outline"></i> Ver justificativa</button-->
+                              <?php if ($registro['status'] == 1 || $registro['status'] == 4):  ?>
+                                <a href="<?= base_url('ponto/art61/solicitacao_chapas/' . $registro['id']); ?>" class="dropdown-item"><i class="mdi mdi-pencil"></i> Editar requisição</a>
+                                <button type="button" onclick="enviarAprovacao('<?= $registro['id']; ?>', <?= $registro['status']; ?>)" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
+                                <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
 
-                              <?php /*else: */ ?>
-                              <a href="/ponto/art61/solicitacao_chapas/<?= $registro['id']; ?>" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Ver Solicitação</a>
-                              <?php /* endif; */ ?>
-
-                              <button type="button" onclick="enviarAprovacao('<?= $registro['id']; ?>')" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
-                              <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
+                              <?php else:  ?>
+                                <a href="/ponto/art61/solicitacao_chapas/<?= $registro['id']; ?>" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Ver Solicitação</a>
+                              <?php endif;  ?>
+                              
                             </div>
                           </div>
                         </td>
@@ -164,115 +166,6 @@ $(document).ready(function(){
     </div>
   </div>
 </div>
-
-<script>
-  const aprovarIndividual = (idRegistro) => {
-    <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
-    Swal.fire({
-      icon: 'question',
-      title: 'Confirmar aprovação deste registro?',
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: `Sim aprovar`,
-      denyButtonText: `Cancelar`,
-      showCancelButton: false,
-      showCloseButton: false,
-      allowOutsideClick: false,
-      width: 600,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        $("[data-checkbox]").prop('checked', false);
-        openLoading();
-        $("[data-checkbox='" + idRegistro + "']").prop('checked', true);
-        $('[data-act]').val('apr');
-        $("#form1").attr('target', '_top');
-        document.getElementById('form1').action = "";
-        document.getElementById('form1').submit();
-      }
-    });
-  }
-  const reprovarIndividual = (idRegistro) => {
-    <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
-    $("[data-checkbox]").prop('checked', false);
-    $("[data-checkbox='" + idRegistro + "']").prop('checked', true);
-    reprovaBatida();
-  }
-  const carregaVisualizador = (id, nome) => {
-    <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
-    $("#titulo_modal").html('Anexo enviado por | ' + nome);
-    $("#conteudo_modal").html('<div class="text-center"><div class="spinner-border thumb-md text-primary" role="status"></div></div>');
-    $(".modal_visualizador").modal('show');
-    openLoading();
-    var hFrame = $(".modal-body").height();
-
-    $("#iframe_preview").html('<iframe id="iframe" src="/ponto/preview/index/' + id + '" frameborder="0" width="100%" height="' + (hFrame - 50) + 'px" allowfullscreen></iframe>');
-
-    var myTimeout = setTimeout(function() {
-      openLoading(true);
-      var wFrame = $("#iframe").width();
-      $('#iframe').contents().find("html").find('img').attr('style', 'max-width:' + wFrame + 'px;');
-      clearTimeout(myTimeout);
-    }, 4000);
-
-  }
-  const carregaVisualizadorEscala = (id, nome) => {
-    <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
-    $("#titulo_modal").html('Anexo enviado por | ' + nome);
-    $("#conteudo_modal").html('<div class="text-center"><div class="spinner-border thumb-md text-primary" role="status"></div></div>');
-    $(".modal_visualizador").modal('show');
-    openLoading();
-    var hFrame = $(".modal-body").height();
-
-    $("#iframe_preview").html('<iframe id="iframe" src="/ponto/preview/escala/' + id + '" frameborder="0" width="100%" height="' + (hFrame - 50) + 'px" allowfullscreen></iframe>');
-
-    var myTimeout = setTimeout(function() {
-      openLoading(true);
-      var wFrame = $("#iframe").width();
-      $('#iframe').contents().find("html").find('img').attr('style', 'max-width:' + wFrame + 'px;');
-      clearTimeout(myTimeout);
-    }, 4000);
-
-  }
-</script>
-
-<!-- modal visualizador -->
-<div class="modal modal_visualizador" tabindex="-1" role="dialog" aria-labelledby="modal_visualizador" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-  <div class="modal-dialog modal-dialog-full">
-    <div class="modal-content modal-content-full">
-      <div class="modal-header">
-        <h5 class="modal-title mt-0" id="titulo_modal"></h5>
-      </div>
-      <div class="modal-body">
-
-        <div class="row">
-          <div class="col-md-12">
-            <h4>Preview Do Anexo</h4>
-            <div id="iframe_preview"></div>
-          </div>
-        </div>
-
-      </div>
-      <div class="modal-footer"><button type="button" class="btn btn-danger btn-xxs" data-dismiss="modal">Fechar</button></div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-<!-- modal visualizador -->
-
-<!-- modal justificativa -->
-<div class="modal modal_justificativa" tabindex="-1" role="dialog" data-animation="blur" aria-labelledby="modal_justificativa" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content modal-content-full">
-      <div class="modal-header text-dark pt-3 pb-2" style="background: #ffffff;">
-        <h5 class="modal-title mt-0">Justificativas da requisição</h5>
-        <button type="button" class="close text-dark" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
-      </div>
-      <div class="modal-body" style="background: #ffffff;" id="justificativas">
-
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-<!-- modal upload -->
 
 <!-- modal -->
 <div class="modal" id="modalNova" tabindex="1" role="dialog" aria-labelledby="modalNova" aria-hidden="true">
@@ -339,6 +232,103 @@ $(document).ready(function(){
 </style>
 
 <script>
+  function enviarLoteAprovacao() {
+    if ($("[data-checkbox]:checked").length <= 0) {
+      exibeAlerta('warning', 'Nenhum registro selecionado.')
+      return;
+    }
+    enviarAprovacao(-1);
+  }
+
+  function VerificaCheck() {
+    console.log($("[data-checkbox]:checked").length);
+    if ($("[data-checkbox]:checked").length <= 0) {
+      $("#btnJust").hide();
+    } else {
+      $("#btnJust").show();
+    }
+  }
+
+  const enviarAprovacao = (id_req, status = -1) => {
+    //abre modal
+    let validas = true;
+    console.log(id_req, status, validas);
+
+    // Get all checkboxes with name="idart61[]"
+    const checkboxes = document.querySelectorAll('input[name="idart61[]"]');
+
+    if (id_req == -1) {
+      checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+          // Find the parent <tr> of the checkbox
+          const row = checkbox.closest('tr');
+          // Get all <td> elements in the row
+          const cells = row.querySelectorAll('td');
+          // Check if the third <td> exists and log its text
+          if (cells.length >= 3) {
+            console.log(cells[2].innerText.trim());
+            if (cells[2].innerText.trim() != 'Criada' && cells[2].innerText.trim() != 'Reprovada') {
+              validas = false;
+            }
+          }
+        }
+      });
+    } else {
+      if (status != 1 && status != 4) {
+        validas = false;
+      }
+    };
+
+    if (!validas) {
+      exibeAlerta('warning', 'Somente solicitações criadas ou reprovadas podem ser enviadas para aprovação.')
+      return;
+    }
+    var selecionados = $('input[name="idart61[]"]:checked')
+      .map(function() {
+        return this.value;
+      }).get().join(', ');
+
+    let dados = {
+      "id": id_req,
+      "sel_ids": selecionados,
+    }
+    console.log(dados);
+
+    let msg = (selecionados.includes(',')) ? 'Confirma o envio para aprovação das solicitações selecionadas?' : 'Confirma o envio para aprovação das solicitação selecionada?';
+
+    Swal.fire({
+      icon: 'question',
+      title: msg,
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: `Sim Enviar`,
+      denyButtonText: `Cancelar`,
+      showCancelButton: false,
+      showCloseButton: false,
+      allowOutsideClick: false,
+      width: 600,
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        $.ajax({
+          url: "<?= base_url('ponto/art61/action/envia_aprovacao'); ?>",
+          type: 'POST',
+          data: dados,
+          success: function(result) {
+            var response = JSON.parse(result);
+            if (response.tipo != 'success') {
+              exibeAlerta(response.tipo, response.msg);
+            } else {
+              exibeAlerta(response.tipo, response.msg, 2, '<?= base_url('ponto/art61/solicitacao'); ?>');
+            }
+          },
+        });
+
+      }
+    });
+
+  }
+
   function limpaFiltro() {
     <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
     $('#secao').val('all');
