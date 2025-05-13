@@ -271,7 +271,7 @@ $("#anexo").fileinput({
     fileType: "any",
     showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
     browseLabel: "Selecionar Arquivo", // Texto personalizado do botão de anexar
-    dropZoneTitle: "Arraste os arquivos aqui", // Texto personalizado da zona de drop
+    dropZoneTitle: "Arraste o(s) arquivo(s) aqui. Para anexar mais de um arquivo arraste todos de uma vez. Os navegadores de internet não permitem arrastar um arquivo por vez. O mesmo vale para a seleção de arquivos, caso queira mais de um arquivo selecione todos de uma vez, usando o SHIFT ou CRTL junto com o clique do mouse.", // Texto personalizado da zona de drop
     dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
     allowedFileExtensions: ['pdf', 'jpeg', 'jpg'], // Permite apenas arquivos PDF e JPEG
     msgInvalidFileExtension: 'Tipo de arquivo não suportado. Apenas arquivos PDF e JPEG são permitidos.' // Mensagem personalizada

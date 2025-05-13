@@ -51,6 +51,7 @@ Class Substituicao extends BaseController {
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
         $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
         $dados['chapaFunc'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+        $dados['funcionario'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 
         $dados['chapaFunc'] = ''.$dados['chapaFunc'].'';
         $dados['resFuncionarioSub']  = $this->mParam->ListarFuncionariosSecao('all', $dados, false, false,1);

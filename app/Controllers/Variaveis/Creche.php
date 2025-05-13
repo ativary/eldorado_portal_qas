@@ -63,6 +63,7 @@ Class Creche extends BaseController {
         }
         $dados['param4']   = json_encode($this->mParam->getParametros(2));
         $dados['chapaFunc'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+        $dados['funcionario'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
         $dados['log_nome'] = session()->get('log_nome');
        
         $this->_breadcrumb->add('Novo Auxilio Creche');
@@ -122,10 +123,11 @@ Class Creche extends BaseController {
     public function save()
     {
 
+        $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
         $request    = $this->request->getPost();
         $files = $this->request->getFiles(); // Pega todos os arquivos
       
-        $result     = $this->mParam->saveRequisicao($request);
+        $result     = $this->mParam->saveRequisicao($request, $dados['rh']);
        
       
         if($result){

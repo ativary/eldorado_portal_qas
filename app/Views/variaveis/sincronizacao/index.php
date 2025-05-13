@@ -193,6 +193,11 @@
                                                             }
                                                         }
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -256,6 +261,7 @@
                                                                 <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                                 <div class="dropdown-menu">
                                                                     <button onclick="aprovarReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
+                                                                    
                                                                     <button onclick="sincReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ?'style="color: blue;"' : 'disabled'; ?> > Sincronizar</button>
                                                                     <?php if ($dados->status == '2'): ?>
                                                                      <!-- <button onclick="abrirReq('<?= base64_encode(json_encode($dados)); ?>')" class="dropdown-item">Ver requisição</button> -->
@@ -263,9 +269,9 @@
                                                                     <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button>
                                                                     <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>' )" class="dropdown-item  " > Documentos</button>
                                                  
-                                                                    <a  href="<?= base_url('variaveis/moradia/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                    <a  href="<?= base_url('variaveis/moradia/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?> ">Editar requisição</a>
                                                                 
-                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -329,6 +335,11 @@
                                             <?php foreach ($listaReqs4 as $key => $dados) : ?>
                                                 <?php $valores = json_decode($dados->valores); 
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -415,9 +426,9 @@
                                                                <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button>
                                                                <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>' )" class="dropdown-item  " > Documentos</button>
                                                  
-                                                                <a  href="<?= base_url('variaveis/pcd/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item <?= ($dados->status == '2') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                <a  href="<?= base_url('variaveis/pcd/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?> ">Editar requisição</a>
                                                             
-                                                                <button onclick="reprovarReq('<?= $dados->id; ?>', 4,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                <button onclick="reprovarReq('<?= $dados->id; ?>', 4,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -482,6 +493,11 @@
                                             <?php foreach ($listaReqs2 as $key => $dados) : ?>
                                                 <?php $valores = json_decode($dados->valores); 
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -567,9 +583,9 @@
                                                                <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button>
                                                                <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>' )" class="dropdown-item  " > Documentos</button>
                                                  
-                                                                <a  href="<?= base_url('variaveis/creche/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item <?= ($dados->status == '2') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                <a  href="<?= base_url('variaveis/creche/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?> ">Editar requisição</a>
                                                             
-                                                                <button onclick="reprovarReq('<?= $dados->id; ?>', 2,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                <button onclick="reprovarReq('<?= $dados->id; ?>', 2,'<?= $dados->status; ?>')" class="dropdown-item  <?= ($dados->status == '0') ? 'disabled' : ''; ?> " style="color: red;">Reprovar</button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -629,6 +645,11 @@
                                             <?php foreach ($listaReqs8 as $key => $dados) : ?>
                                                 <?php $valores = json_decode($dados->valores); 
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -719,9 +740,9 @@
                                                                <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button>
                                                                <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>','8' )" class="dropdown-item  " > Documentos</button>
                                                  
-                                                                <a  href="<?= base_url('variaveis/coparticipacao/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item <?= ($dados->status == '2') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                <a  href="<?= base_url('variaveis/coparticipacao/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item  <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                             
-                                                                <button onclick="reprovarReq('<?= $dados->id; ?>', 8,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                <button onclick="reprovarReq('<?= $dados->id; ?>', 8,'<?= $dados->status; ?>')" class="dropdown-item  <?= ($dados->status == '0') ? 'disabled' : ''; ?> " style="color: red;">Reprovar</button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -795,6 +816,11 @@
                                                             }
                                                         }
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -885,9 +911,9 @@
                                                                      <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button>
                                                                     <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>' )" class="dropdown-item  " > Documentos</button>
                                                  
-                                                                    <a  href="<?= base_url('variaveis/desconto/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '9') ? 'disabled' : ''; ?> ">Editar requisição</a>
-                                                                
-                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 5,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                    <a  href="<?= base_url('variaveis/desconto/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '9' || $dados->status == '0') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                     
+                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 5,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -957,6 +983,11 @@
                                                             }
                                                         }
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -1028,9 +1059,9 @@
                                                                      <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button>
                                                                     <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>' )" class="dropdown-item  " > Documentos</button>
                                                  
-                                                                    <a  href="<?= base_url('variaveis/sobreaviso/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                    <a  href="<?= base_url('variaveis/sobreaviso/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                                 
-                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 3,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 3,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1103,6 +1134,11 @@
                                                             }
                                                         }
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -1178,9 +1214,9 @@
                                                                     <?php if ($dados->status == '7' && $rh): ?>
                                                                      <button onclick="logCalculo('<?= $dados->id; ?>')" class="dropdown-item">Log de Calculo</button>
                                                                     <?php endif; ?>
-                                                                    <a  href="<?= base_url('variaveis/substituicao/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                    <a  href="<?= base_url('variaveis/substituicao/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                                 
-                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 1,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 1,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1249,6 +1285,11 @@
                                                             }
                                                         }
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -1319,9 +1360,9 @@
                                                                      <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button>
                                                                     <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>' )" class="dropdown-item  " > Documentos</button>
                                                  
-                                                                    <a  href="<?= base_url('variaveis/decimoterceiro/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                    <a  href="<?= base_url('variaveis/decimoterceiro/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                                 
-                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 9,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 9,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1392,6 +1433,11 @@
                                                             }
                                                         }
                                                     switch ($dados->status) {
+                                                        case 0:
+                                                            $descricao = "Excluída";
+                                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                            $corTexto = "#f57878"; // Cor do texto
+                                                            break;
                                                         case 1:
                                                             $descricao = "Criada";
                                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -1464,9 +1510,9 @@
                                                                      <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button>
                                                                     <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>' )" class="dropdown-item  " > Documentos</button>
                                                  
-                                                                    <a  href="<?= base_url('variaveis/aluguel/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2') ? 'disabled' : ''; ?> ">Editar requisição</a>
+                                                                    <a  href="<?= base_url('variaveis/aluguel/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                                 
-                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 7,'<?= $dados->status; ?>')" class="dropdown-item" style="color: red;">Reprovar</button>
+                                                                    <button onclick="reprovarReq('<?= $dados->id; ?>', 7,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1510,6 +1556,11 @@
                                                 <?php 
                                                  $valores = json_decode($dados->valores); 
                                                  switch ($dados->status) {
+                                                    case 0:
+                                                        $descricao = "Excluída";
+                                                        $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                                        $corTexto = "#f57878"; // Cor do texto
+                                                        break;
                                                     case 1:
                                                         $descricao = "Criada";
                                                         $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"

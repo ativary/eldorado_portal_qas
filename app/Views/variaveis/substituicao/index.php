@@ -132,6 +132,11 @@
                                     <?php $valores = json_decode($dados->valores);
 
                                     switch ($dados->status) {
+                                        case 0:
+                                            $descricao = "Excluída";
+                                            $corFundo = "#f0f0f0"; // Cor de fundo para "Excluída"
+                                            $corTexto = "#f57878"; // Cor do texto
+                                            break;
                                         case 1:
                                             $descricao = "Criada";
                                             $corFundo = "#f0f0f0"; // Cor de fundo para "Criada"
@@ -203,7 +208,8 @@
                                                 
                                                 <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                 <div class="dropdown-menu">
-                                                    <button onclick="aprovarReq('<?= $dados->id; ?>')" class="dropdown-item" <?= ($dados->status != '1') ? 'disabled' : 'style="color: blue;"'; ?> > Enviar para aprovação</button>
+                                                    <button onclick="aprovarReq('<?= $dados->id; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'd-none' : ''; ?> <?= ($dados->status > '1') ? 'disabled' : ''; ?>" style="color: blue;"> Enviar para aprovação</button>
+
                                                     <button onclick="verAnexos('<?= $dados->id; ?>','<?= $dados->status; ?>' )" class="dropdown-item  " > Documentos</button>
                                                     
                                                     <button onclick="abrirReq('<?= base64_encode(json_encode($dados)); ?>')" class="dropdown-item">Ver requisição</button>
@@ -211,9 +217,10 @@
                                                     <?php if ($rh) : ?>
                                                     <button onclick="logCalculo('<?= $dados->id; ?>')" class="dropdown-item">Log de Calculo</button>
                                                     <?php endif; ?>
-                                                    <a href="<?= base_url('variaveis/substituicao/editar/'.base64_encode($dados->id)); ?>" class="dropdown-item <?= ($dados->status != '1') ? 'disabled' : ''; ?>">Editar requisição</a>
 
-                                                    <button onclick="excluirReq('<?= $dados->id; ?>')" <?= ($dados->status != '1') ? 'disabled' : 'style="color: red;"'; ?> class="dropdown-item" >Excluir</button>
+                                                    <a  href="<?= base_url('variaveis/substituicao/editar/'.base64_encode($dados->id)); ?>" class="dropdown-item <?= ($dados->status != '1') ? 'd-none' : ''; ?>">Editar requisição</a>
+                                                  
+                                                    <button  onclick="excluirReq('<?= $dados->id; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'd-none' : ''; ?>" <?= ($dados->status != '1') ? 'disabled' : 'style="color: red;"'; ?>>Excluir</button>
                                                 </div>
                                             </div>
                                         </div>
