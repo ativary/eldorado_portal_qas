@@ -45,6 +45,7 @@ Class Substituto extends BaseController {
         $dados['_titulo'] = "Novo gestor substituto";
         $this->_breadcrumb->add('Gestor substituto', 'hierarquia/substituto');
         $this->_breadcrumb->add($dados['_titulo'], 'hierarquia/substituto');
+        $dados['chapaGestor'] = '';
 
         if($dados['rh']){
             $dados['idGestor']   = ($this->request->getPost('idGestor') != null) ? $this->request->getPost('idGestor') : $idGestor;
@@ -107,6 +108,8 @@ Class Substituto extends BaseController {
         $this->_breadcrumb->add($dados['_titulo'], 'hierarquia/substituto');
 
         $dados['perfis'] = $this->mManager->ListarPerfil();
+        $dados['funcoesSelecionadas'] = [];
+        $dados['chapaGestor'] = '';
 
         return parent::ViewPortal('hierarquia/substituto/novomodulo', $dados);
 

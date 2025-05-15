@@ -262,20 +262,22 @@ class RequisicaoModel extends Model {
         $dt_requisicao = strlen(trim($dados['dt_requisicao'])) > 0 ? "{$dados['dt_requisicao']}" : "NULL";
         $tipo = strlen(trim($dados['tipo'])) > 0 ? "{$dados['tipo']}" : "NULL";
         $chapa_requisitor = strlen(trim($dados['chapa_requisitor'])) > 0 ? "{$dados['chapa_requisitor']}" : "NULL";
+        // ATIVADO EM 14/05/2025 - Alvaro Zaragoza
+        $chapa_gerente = strlen(trim($dados['chapa_gerente'])) > 0 ? "{$dados['chapa_gerente']}" : "NULL";
 
         // verifica se já existe uma requisição ativa com o mesmos parâmetros
-        $where = "id_acesso = {$id_acesso} AND tipo = '{$tipo}' AND chapa_requisitor = '{$chapa_requisitor}' AND status <> 'I'";
+        $where = "id_acesso = {$id_acesso} AND tipo = '{$tipo}' AND chapa_requisitor = '{$chapa_requisitor}' AND chapa_gerente = '{$chapa_gerente}' AND status <> 'I'";
         $query = "SELECT id FROM zcrmportal_premios_requisicao WHERE {$where}";
         $result = $this->dbportal->query($query);
         if ($result->getNumRows() > 0) {
             return responseJson('error', 'Já existe requisição com os mesmos parâmetros');
         }
 
-        // busca gerente da chapa
-        $chapa_gerente = $this->GerenteChapa($chapa_requisitor);
-        if (!$chapa_gerente) {
-            return responseJson('error', 'Não foi possível identificar o gestor dessa chapa. Nova requisição não pode ser criada.');
-        }
+        // busca gerente da chapa - DESATIVADO EM 14/05/2025 - Alvaro Zaragoza
+        //$chapa_gerente = $this->GerenteChapa($chapa_requisitor);
+        //if (!$chapa_gerente) {
+        //    return responseJson('error', 'Não foi possível identificar o gestor dessa chapa. Nova requisição não pode ser criada.');
+        //}
 
         // insere a requisição
         $query = " INSERT INTO zcrmportal_premios_requisicao
@@ -659,6 +661,52 @@ class RequisicaoModel extends Model {
         } else {
             return false;
         }
+    }
+
+    //-------------------------------
+    // Retorna os gestores que a chapa substitui para premios
+    //-------------------------------
+    public function GerenteChapaSub($dados){
+
+      $id_coligada = $_SESSION['func_coligada'];
+      if(!isset($dados['chapa_requisitor'])) return [];
+
+      $chapa = $dados['chapa_requisitor'];
+      $ger_chapa = $this->GerenteChapa($chapa);
+      if($ger_chapa) {
+        $sqlger = "
+          SELECT '".$ger_chapa."' AS CHAPA
+          UNION";
+      } else {
+        $sqlger = "";
+      }
+      $sql = "
+        WITH LISTA AS 
+        (
+        ".$sqlger." 
+        SELECT
+              chapa_gestor AS CHAPA
+        FROM zcrmportal_hierarquia_gestor_substituto
+        WHERE 
+          getdate() between dtini and dtfim
+        AND inativo = 0
+        AND CHARINDEX('\"11\"', modulos) > 0
+        AND chapa_substituto = '".$chapa."'
+        AND coligada = ".$id_coligada."
+        )
+
+        SELECT DISTINCT 
+          L.CHAPA,
+          F.NOME
+        FROM 
+          LISTA L
+        INNER JOIN ".DBRM_BANCO."..PFUNC F ON F.CODCOLIGADA = 1 AND F.CHAPA = L.CHAPA COLLATE Latin1_General_CI_AS
+      ";
+      
+      $result = $this->dbportal->query($sql);
+        return ($result->getNumRows() > 0) 
+                ? $result->getResultArray() 
+                : [];
     }
 
     //-----------------------------------
@@ -1443,6 +1491,9 @@ class RequisicaoModel extends Model {
         // AND ( g.dt_demissao_colab IS NULL OR g.dt_demissao_colab >= a.dtini_ponto )
         // CODIGO REMOVIDO DO SELECT ACIMA EM 04/12, substutuido por  AND g.codsituacao_colab <> 'D'
 
+        //echo "<PRE> ".$chapas;
+        //exit();
+        //die();
         $qry = $this->dbportal->query($chapas);
 		$resChapa = ($qry) ? $qry->getResultArray() : false;
 		if ($resChapa && is_array($resChapa)) {
@@ -1569,6 +1620,7 @@ class RequisicaoModel extends Model {
     // Listar Requisições a aprovar
     // -------------------------------------------------------
     public function ListarAprovaRequisicao(){
+        $mHierarquia = Model('HierarquiaModel');
 
         $coligada = $_SESSION['func_coligada'];
         $user_id = " AND e.id_coligada = ".$coligada;
@@ -1576,7 +1628,18 @@ class RequisicaoModel extends Model {
         // Filtra requisições de chapas abaixo do gestor requisitor
         if(!($_SESSION['log_id'] == 1 or $_SESSION['rh_master'] == 'S')) {
             
-            $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+            $chapa = "'". util_chapa(session()->get('func_chapa'))['CHAPA'] ."'" ?? null;
+
+            if($chapa){
+            
+                $chapasGestorSubstituto = $mHierarquia->getChapasGestorSubstituto($chapa);
+
+                if($chapasGestorSubstituto){
+                    foreach($chapasGestorSubstituto as $idx  => $value){
+                        $chapa .= " , '" . $chapasGestorSubstituto[$idx]['chapa_gestor'] . "' ";
+                    }
+                }
+            }
 
             /* desativado em função da nova regra de aprovação
             $q = "
@@ -1590,7 +1653,7 @@ class RequisicaoModel extends Model {
             $chapas = is_null($row->chapas) ? "-1" : $row->chapas;
             */
 
-            $user_id = $user_id." AND (e.chapa_gerente = '".$chapa."' OR r.chapa_coordenador = '".$chapa."') ";
+            $user_id = $user_id." AND (e.chapa_gerente in (".$chapa.") OR r.chapa_coordenador in (".$chapa.")) ";
         }
         $query = " 
             SELECT 

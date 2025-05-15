@@ -50,7 +50,7 @@
                                                 
                                                 <option value="<?=$perfil['id']?>"><?=$perfil['id']?> - <?=$perfil['nome']?></option>
                                                     
-                                                <?php unset($perfils[$key], $key, $perfil); ?>
+                                                <?php unset($perfis[$key], $key, $perfil); ?>
                                             <?php endforeach; ?>
                                         <?php endif; ?>
                                         </select>

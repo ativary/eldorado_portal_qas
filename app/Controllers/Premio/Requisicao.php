@@ -57,6 +57,7 @@ class Requisicao extends BaseController
     $dados['func_chapa'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
     $dados['func_nome'] = $_SESSION['log_nome'];
     $dados['resAcessos'] = $this->mRequisicao->ListarAcessosPremios();
+    $dados['resGerSub'] = $this->mRequisicao->GerenteChapaSub($dados['func_chapa']);
     
     return parent::ViewPortal('premio/requisicao/novo', $dados);
   }
@@ -305,6 +306,10 @@ class Requisicao extends BaseController
         // sincronizar com RM
         case 'sincRM':
           exit($this->mRequisicao->SincRMrequisicaoRH($dados));
+          break;
+        // sincronizar com RM
+        case 'busca_gerente':
+          exit(json_encode($this->mRequisicao->GerenteChapaSub($dados)));
           break;
       }
 
