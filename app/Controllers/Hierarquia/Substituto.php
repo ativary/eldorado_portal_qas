@@ -79,6 +79,8 @@ Class Substituto extends BaseController {
         $dados['dadosSubstituicao'] = $this->mSubstituto->getDadosSubstituicao($idReq);
 
         $dados['modulosSelecionados'] = $this->mSubstituto->getModulosSelecionados($dados['dadosSubstituicao'][0]['modulos']);
+        $dados['funcoesSelecionadas'] = [];
+        $dados['chapaGestor'] = '';
         
         $dados['modulos'] = $this->mSubstituto->getModulosGestor($dados['dadosSubstituicao'][0]['id_gestor']);
         

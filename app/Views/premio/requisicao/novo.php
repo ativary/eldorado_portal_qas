@@ -90,6 +90,10 @@
 </div><!-- container -->
 
 <script>
+$(document).ready(function() {
+  buscaGerente();
+});
+
 const salvaDados = () => {
     
     //nome_de_gestor

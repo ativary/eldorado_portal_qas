@@ -96,32 +96,29 @@ $(document).ready(function(){
 							<div class="col-sm-3">
 								<div class="checkbox">
 									<div class="custom-control custom-checkbox">
-										<input type="checkbox" class="custom-control-input" name="ck_semPar" id="ck_semPar" value="1" <?php if (isset($_POST['ck_semPar']) && $_POST['ck_semPar'] == '1') {
-																																			echo 'checked="checked"';
-																																		} else if ($ck_semPar == '1') {
-																																			echo 'checked="checked"';
-																																		} ?> />
-										<label class="custom-control-label" for="ck_semPar">Sem par correspondente</label>
+										<input type="checkbox" class="custom-control-input" name="ck_jorMaior12" id="ck_jorMaior12" value="1" <?php if (isset($_POST['ck_jorMaior12']) && $_POST['ck_jorMaior12'] == '1') {
+																																					echo 'checked="checked"';
+																																				} else if ($ck_jorMaior12 == '1') {
+																																					echo 'checked="checked"';
+																																				} ?> />
+										<label class="custom-control-label" for="ck_jorMaior12">Jorn. maior 12h</label>
 									</div>
 								</div>
 							</div>
 
 							<div class="col-sm-3">
-									<div class="checkbox">
-										<div class="custom-control custom-checkbox">
-											<input type="checkbox" class="custom-control-input" name="ck_bancohoras" id="ck_bancohoras" value="1" <?php if (isset($_POST['ck_bancohoras']) && $_POST['ck_bancohoras'] == '1') {
-																																				echo 'checked="checked"';
-																																			} else if ($ck_bancohoras == '1') {
-																																				echo 'checked="checked"';
-																																			} ?> />
-											<label class="custom-control-label" for="ck_bancohoras">BH Confirmado</label>
-										</div>
-									</div>
+                  <div class="checkbox">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input" name="ck_semPar" id="ck_semPar" value="1" <?php if (isset($_POST['ck_semPar']) && $_POST['ck_semPar'] == '1') {
+                                                                        echo 'checked="checked"';
+                                                                      } else if ($ck_semPar == '1') {
+                                                                        echo 'checked="checked"';
+                                                                      } ?> />
+                      <label class="custom-control-label" for="ck_semPar">Sem par correspondente</label>
+                    </div>
+                  </div>                                        
 								</div>
-							
-								
 
-							
 						</div>
 
 						<div class="form-group row mb-0">
@@ -151,11 +148,22 @@ $(document).ready(function(){
 								</div>
 								
 							</div>
-
+              <div class="col-sm-3">
+                  <div class="checkbox">
+										<div class="custom-control custom-checkbox">
+											<input type="checkbox" class="custom-control-input" name="ck_todos" id="ck_todos" value="1" <?php if (isset($_POST['ck_todos']) && $_POST['ck_todos'] == '1') {
+																																				echo 'checked="checked"';
+																																			} else if ($ck_todos == '1') {
+																																				echo 'checked="checked"';
+																																			} ?> />
+											<label class="custom-control-label" for="ck_todos">Todos</label>
+										</div>
+									</div>
+              </div>
 						</div>
 						<div class="form-group row mb-0">
 							<div class="col-sm-3 offset-sm-2">
-							<div class="checkbox">
+							  <div class="checkbox">
 									<div class="custom-control custom-checkbox">
 										<input type="checkbox" class="custom-control-input" name="ck_jorMaior10" id="ck_jorMaior10" value="1" <?php if (isset($_POST['ck_jorMaior10']) && $_POST['ck_jorMaior10'] == '1') {
 																																					echo 'checked="checked"';
@@ -243,6 +251,7 @@ $(document).ready(function(){
 								<?php if ($ck_Atrasos) { ?><td class="n-mobile-cell" data-orderable="false">Atrasos</td><?php } ?>
 								<?php if ($ck_Faltas) { ?><td class="n-mobile-cell" data-orderable="false">Faltas</td><?php } ?>
 								<?php if ($ck_jorMaior10) { ?><td class="n-mobile-cell" data-orderable="false">Jor. > 10h</td><?php } ?>
+								<?php if ($ck_jorMaior12) { ?><td class="n-mobile-cell" data-orderable="false">Jor. > 12h</td><?php } ?>
 								<?php if ($ck_interjornada) { ?><td class="n-mobile-cell" data-orderable="false">Interjornada</td><?php } ?>
 								<td class="n-mobile-cell" data-orderable="false">Justificativa (Atraso/Falta/Extra)</td>
 
@@ -290,7 +299,7 @@ $(document).ready(function(){
 										}
 									}
 								}
-								if($statusPeriodo == 0) $periodo_bloqueado = true;
+								//if($statusPeriodo == 0) $periodo_bloqueado = true;
 								//-----------------------------------------------
 
 
@@ -847,7 +856,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
-														'justificativa_batida'	=> $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
+														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b1 = m2h($resBatidasApontadas[$idba]['ent1'],4);
 													$status_1 = $resBatidasApontadas[$idba]['status'];
@@ -866,7 +875,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
-														'justificativa_batida'	=> $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
+														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b3 = m2h($resBatidasApontadas[$idba]['ent2'],4);
 													$status_3 = $resBatidasApontadas[$idba]['status'];
@@ -885,7 +894,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
-														'justificativa_batida'	=> $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
+														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b5 = m2h($resBatidasApontadas[$idba]['ent3'],4);
 													$status_5 = $resBatidasApontadas[$idba]['status'];
@@ -904,7 +913,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
-														'justificativa_batida'	=> $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
+														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b7 = m2h($resBatidasApontadas[$idba]['ent4'],4);
 													$status_7 = $resBatidasApontadas[$idba]['status'];
@@ -923,7 +932,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
-														'justificativa_batida'	=> $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
+														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b2 = m2h($resBatidasApontadas[$idba]['sai1'],4);
 													$status_2 = $resBatidasApontadas[$idba]['status'];
@@ -942,7 +951,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
-														'justificativa_batida'	=> $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
+														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b4 = m2h($resBatidasApontadas[$idba]['sai2'],4);
 													$status_4 = $resBatidasApontadas[$idba]['status'];
@@ -961,7 +970,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
-														'justificativa_batida'	=> $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
+														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b6 = m2h($resBatidasApontadas[$idba]['sai3'],4);
 													$status_6 = $resBatidasApontadas[$idba]['status'];
@@ -980,7 +989,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
-														'justificativa_batida'	=> $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
+														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b8 = m2h($resBatidasApontadas[$idba]['sai4'],4);
 													$status_8 = $resBatidasApontadas[$idba]['status'];
@@ -1085,6 +1094,7 @@ $(document).ready(function(){
 										if ($ck_Atrasos && ($resData[$i]['ATRASO_CASE'])) $html .= '<button type="button" class="btn pl-0 pr-0 btn-info btn-block btn-xxs m-0" align="center">' . (($resData[$i]['ATRASO_CASE']) ? '<span style="cursor: pointer;" >' . 'Atraso '.m2h($resData[$i]['ATRASO_CASE']) . '</span>' : '') . '</button>';
 										if ($ck_Faltas && ($resData[$i]['FALTA_CASE'] && $resData[$i]['BATIDAS_PORTAL'] == 0)) $html .= '<button type="button" class="btn pl-0 pr-0 btn-danger btn-block btn-xxs m-0" align="center">' . (($resData[$i]['FALTA_CASE'] && $resData[$i]['BATIDAS_PORTAL'] == 0) ? '<span style="cursor: pointer;" >Falta ' . m2h($resData[$i]['FALTA_CASE']) . '</span>' : '') . '</button>';
 										if ($ck_jorMaior10 && ($resData[$i]['JORNADA_MAIOR_10HORAS'])) $html .= '<button type="button" class="btn pl-0 pr-0 btn-success btn-block btn-xxs m-0" title="' . $resData[$i]['JORNADA_MAIOR_10HORAS_DESC'] . '" align="center">' . (($resData[$i]['JORNADA_MAIOR_10HORAS']) ? 'Jorn. > 10h <i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</button>';
+										if ($ck_jorMaior12 && ($resData[$i]['JORNADA_MAIOR_12HORAS'])) $html .= '<button type="button" class="btn pl-0 pr-0 btn-success btn-block btn-xxs m-0" title="' . $resData[$i]['JORNADA_MAIOR_12HORAS_DESC'] . '" align="center">' . (($resData[$i]['JORNADA_MAIOR_12HORAS']) ? 'Jorn. > 12h <i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</button>';
 										if ($ck_interjornada && ($resData[$i]['INTERJORNADA'])) $html .= '<button type="button" class="btn pl-0 pr-0 btn-dark btn-block btn-xxs m-0" title="' . $resData[$i]['INTERJORNADA_DESC'] . '" align="center">' . (($resData[$i]['INTERJORNADA']) ? 'Interjornada <i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</button>';
 									$html .= '</td>';
 									
@@ -1119,12 +1129,24 @@ $(document).ready(function(){
 										$html .= '<td class="n-mobile-cell" title="' . $resData[$i]['SEM_PAR_CORRESPONDENTE_DESC'] . '" align="center">' . (($resData[$i]['SEM_PAR_CORRESPONDENTE']) ? '<i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</td>';
 									if ($ck_ExtraExecutado && $vl_extra_executado > 0)
 										$html .= '<td class="n-mobile-cell" align="center">' . (($resData[$i]['EXTRAEXECUTADO_CASE']) ? m2h($resData[$i]['EXTRAEXECUTADO_CASE']) : '') . '</td>';
-									if ($ck_Atrasos)
-										$html .= '<td class="n-mobile-cell" align="center" '.(($abono_pendente_rh > 0 && $resData[$i]['ATRASO_CASE']) ? ' title="Aguardando Aprovação RH" style="background:#dbdcdd;" ':'').' '.(($abono_pendente_atraso == 1) ? ' title="Aguardando Aprovação" style="background:#feca07;"  ' : '').' '.(($abono_reprovado_atraso != '') ? ' title="'.$abono_reprovado_atraso.'" style="background:#f4811f;" class="txteldorado_2" ' : '').'>' . (($resData[$i]['ATRASO_CASE']) ? m2h($resData[$i]['ATRASO_CASE']) : '') . '</td>';
-									if ($ck_Faltas)
-										$html .= '<td class="n-mobile-cell" align="center" '.(($abono_pendente_rh > 0 && $resData[$i]['FALTA_CASE']) ? ' title="Aguardando Aprovação RH" style="background:#dbdcdd;" ':'').' '.(($abono_pendente_falta == 1 || $status_atitude == 1) ? ' title="Aguardando Aprovação" style="background:#feca07;"  ' : '').' '.(($abono_reprovado_falta != '' || $status_atitude == 3) ? ' title="'.$abono_reprovado_falta.'" style="background:#f4811f;"  class="txteldorado_2"' : '').'>' . (($resData[$i]['FALTA_CASE']) ? m2h($resData[$i]['FALTA_CASE']) : '') . '</td>';
-									if ($ck_jorMaior10)
+									if ($ck_Atrasos) {
+                    if ($ck_todos and $resData[$i]['SEM_PAR_CORRESPONDENTE'])  { 
+                      $html .= '<td class="n-mobile-cell" align="center"> </td>';
+                    } else {
+                      $html .= '<td class="n-mobile-cell" align="center" '.(($abono_pendente_rh > 0 && $resData[$i]['ATRASO_CASE']) ? ' title="Aguardando Aprovação RH" style="background:#dbdcdd;" ':'').' '.(($abono_pendente_atraso == 1) ? ' title="Aguardando Aprovação" style="background:#feca07;"  ' : '').' '.(($abono_reprovado_atraso != '') ? ' title="'.$abono_reprovado_atraso.'" style="background:#f4811f;" class="txteldorado_2" ' : '').'>' . (($resData[$i]['ATRASO_CASE']) ? m2h($resData[$i]['ATRASO_CASE']) : '') . '</td>';
+                    }
+                  }
+									if ($ck_Faltas) {
+                    if ($ck_todos and $resData[$i]['SEM_PAR_CORRESPONDENTE'])  { 
+                      $html .= '<td class="n-mobile-cell" align="center"> </td>';
+                    } else {
+										  $html .= '<td class="n-mobile-cell" align="center" '.(($abono_pendente_rh > 0 && $resData[$i]['FALTA_CASE']) ? ' title="Aguardando Aprovação RH" style="background:#dbdcdd;" ':'').' '.(($abono_pendente_falta == 1 || $status_atitude == 1) ? ' title="Aguardando Aprovação" style="background:#feca07;"  ' : '').' '.(($abono_reprovado_falta != '' || $status_atitude == 3) ? ' title="'.$abono_reprovado_falta.'" style="background:#f4811f;"  class="txteldorado_2"' : '').'>' . (($resData[$i]['FALTA_CASE']) ? m2h($resData[$i]['FALTA_CASE']) : '') . '</td>';
+                    }
+                  }
+                  if ($ck_jorMaior10)
 										$html .= '<td class="n-mobile-cell" title="' . $resData[$i]['JORNADA_MAIOR_10HORAS_DESC'] . '" align="center">' . (($resData[$i]['JORNADA_MAIOR_10HORAS']) ? '<i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</td>';
+                  if ($ck_jorMaior12)
+										$html .= '<td class="n-mobile-cell" title="' . $resData[$i]['JORNADA_MAIOR_12HORAS_DESC'] . '" align="center">' . (($resData[$i]['JORNADA_MAIOR_12HORAS']) ? '<i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</td>';
 									if ($ck_interjornada)
 										$html .= '<td class="n-mobile-cell" title="' . $resData[$i]['INTERJORNADA_DESC'] . '" align="center">' . (($resData[$i]['INTERJORNADA']) ? '<i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</td>';
 
@@ -1150,16 +1172,31 @@ $(document).ready(function(){
 														$inicioEscala   = $escala[0];
 														$terminoEscala  = end($escala);
 
-														$html .= '<button onclick="abrirAlteracaoBatida(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_batidas)).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.$resData[$i]['CPF'].'\', \''.(int)$resData[$i]['IS_MOTORISTA'].'\')" type="button" class="dropdown-item" title="Alterar batida"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar batida</button>';
+                            if ($status_atitude = '') {
+														  $html .= '<button onclick="abrirAlteracaoBatida(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_batidas)).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.$resData[$i]['CPF'].'\', \''.(int)$resData[$i]['IS_MOTORISTA'].'\')" type="button" class="dropdown-item" title="Alterar batida"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar batida</button>';
+                            } else {
+                              $html .= '<button type="button" class="dropdown-item disabled" title="Incluir/Alterar batida" disabled><i class="mdi mdi-lock-alert" disabled ></i> Incluir/Alterar batida</button>';
+                            }
 
 														if ($ck_Atrasos && ($resData[$i]['ATRASO_CASE'])){
-															$html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_atraso)).'\', 5, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \'0:00\', \''.m2h($resData[$i]['ATRASO_CASE']).'\')" type="button" class="dropdown-item" title="Solicitar Abono Atraso"><i class="mdi mdi-av-timer"></i> Solicitar Abono Atraso</button>';
+
+                              if ($status_atitude = '') {
+															  $html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_atraso)).'\', 5, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \'0:00\', \''.m2h($resData[$i]['ATRASO_CASE']).'\')" type="button" class="dropdown-item" title="Solicitar Abono Atraso"><i class="mdi mdi-av-timer"></i> Solicitar Abono Atraso</button>';
+                              } else {
+                                $html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Atraso" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Atraso</button>';
+                              }
+
 															$html .= '<button onclick="abrirAlteraAtitude(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \'A\', \''.$resData[$i]['USABANCOHORAS'].'\')" type="button" class="dropdown-item" title="Altera Atitude Atraso"><i class="mdi mdi-calendar-question"></i> Altera Atitude Atraso</button>';
 															// $html .= '<button onclick="InsereAbonoAtraso(\'' . date('d/m/Y', strtotime($resData[$i]['DATA'])) . '\',\'' . $resData[$i]['CHAPA'] . '\',\'' . m2h($resData[$i]['FALTA_CASE']) . '\', \'' . $resData[$i]['NOME'] . '\', \'\', \'' . $resData[$i]['CODFILIAL'] . '\')" type="button" class="dropdown-item" title="Justificativa de exceção"><i class="mdi mdi-calendar-star"></i> Justificativa de exceção</button>';
 														}
 
 														if ($ck_Faltas && ($resData[$i]['FALTA_CASE'] && $resData[$i]['BATIDAS_PORTAL'] == 0)){
-															$html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_falta)).'\', 6, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.m2h($resData[$i]['FALTA_CASE']).'\', \'0:00\')" type="button" class="dropdown-item" title="Solicitar Abono Falta"><i class="mdi mdi-timer-off"></i> Solicitar Abono Falta</button>';
+                              if ($status_atitude = '') {
+                                $html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_falta)).'\', 6, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.m2h($resData[$i]['FALTA_CASE']).'\', \'0:00\')" type="button" class="dropdown-item" title="Solicitar Abono Falta"><i class="mdi mdi-timer-off"></i> Solicitar Abono Falta</button>';
+                              } else {
+                                $html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Falta" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Falta</button>';
+                              }
+
 															if($status_atitude != 'S') $html .= '<button onclick="abrirAlteraAtitude(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \'F\', \''.$resData[$i]['USABANCOHORAS'].'\')" type="button" class="dropdown-item" title="Altera Atitude Falta"><i class="mdi mdi-calendar-question"></i> Altera Atitude Falta</button>';
 															// $html .= '<button onclick="InsereAbonoFalta(\'' . date('d/m/Y', strtotime($resData[$i]['DATA'])) . '\',\'' . $resData[$i]['CHAPA'] . '\',\'' . m2h($resData[$i]['FALTA_CASE']) . '\', \'' . $resData[$i]['NOME'] . '\', \'\', \'' . $resData[$i]['CODFILIAL'] . '\')" type="button" class="dropdown-item" title="Falta"><i class="mdi mdi-calendar-question"></i> Altera Atitude/Justificativa</button>';
 														}
@@ -1583,7 +1620,7 @@ $(document).ready(function(){
 				[25, 50, 100, 200, -1],
 				[25, 50, 100, 200, "Todos"]
 			],
-			"iDisplayLength": -1,
+			"iDisplayLength": 25,
 			"aaSorting": [
 				[4, "desc"]
 			],
@@ -2012,8 +2049,9 @@ $(document).ready(function(){
 			"ck_Atrasos"       : $("#ck_Atrasos").is(':checked'),
 			"ck_Faltas"        : $("#ck_Faltas").is(':checked'),
 			"ck_jorMaior10"    : $("#ck_jorMaior10").is(':checked'),
+			"ck_jorMaior12"    : $("#ck_jorMaior12").is(':checked'),
 			"ck_interjornada"  : $("#ck_interjornada").is(':checked'),
-			"ck_bancohoras"    : $("#ck_bancohoras").is(':checked'),
+			"ck_todos"         : $("#ck_todos").is(':checked'),
 			"funcionario"      : $('#funcionario').val(),
 		}
 		
@@ -2030,7 +2068,7 @@ $(document).ready(function(){
 			return false;
 		}
 
-		if(!dados.ck_ExtraExecutado && !dados.ck_semPar && !dados.ck_Atrasos && !dados.ck_Faltas && !dados.ck_jorMaior10 && !dados.ck_interjornada && !dados.ck_bancohoras){
+		if(!dados.ck_ExtraExecutado && !dados.ck_semPar && !dados.ck_Atrasos && !dados.ck_Faltas && !dados.ck_jorMaior10 && !dados.ck_jorMaior12 && !dados.ck_interjornada && !dados.ck_todos){
 			exibeAlerta("error", "Selecione ao menos 1 ocorrência.");
 			return false;
 		}
@@ -2082,8 +2120,9 @@ $(document).ready(function(){
 			"ck_Atrasos"       : $("#ck_Atrasos").is(':checked'),
 			"ck_Faltas"        : $("#ck_Faltas").is(':checked'),
 			"ck_jorMaior10"    : $("#ck_jorMaior10").is(':checked'),
+			"ck_jorMaior12"    : $("#ck_jorMaior12").is(':checked'),
 			"ck_interjornada"  : $("#ck_interjornada").is(':checked'),
-			"ck_bancohoras"    : $("#ck_bancohoras").is(':checked'),
+			"ck_todos"         : $("#ck_todos").is(':checked'),
 			"funcionario"      : $('#funcionario').val(),
 		}
 		
@@ -2100,7 +2139,7 @@ $(document).ready(function(){
 			return false;
 		}
 
-		if(!dados.ck_ExtraExecutado && !dados.ck_semPar && !dados.ck_Atrasos && !dados.ck_Faltas && !dados.ck_jorMaior10 && !dados.ck_interjornada && !dados.ck_bancohoras){
+		if(!dados.ck_ExtraExecutado && !dados.ck_semPar && !dados.ck_Atrasos && !dados.ck_Faltas && !dados.ck_jorMaior10 && !dados.ck_jorMaior12 && !dados.ck_interjornada && !dados.ck_todos){
 			exibeAlerta("error", "Selecione ao menos 1 ocorrência.");
 			return false;
 		}
@@ -3599,7 +3638,8 @@ const abrirAlteraAtitude = (data, data_br, diasemana, chapa, escala, batidas, ti
 	$('[data-atitude-horas]').val('');
 	$('[data-atitude-atitude]').val('');
 
-	var bancodehoras = (usabanco == 1) ? '<option value="1">Banco de Horas</option>' : '';
+	//var bancodehoras = (usabanco == 1) ? '<option value="1">Banco de Horas</option>' : '';
+  var bancodehoras =  ''; //DESTIVADO POR ALVARO ZARAGOZA EM 16/06/2025
 
 	if(tipo == 'F'){
 		$('[data-atitude-atitude]').html(`
@@ -3709,15 +3749,28 @@ const salvarAtitude = () => {
 	});
 
 }
+
 $(document).ready(function(){
-	$("#ck_bancohoras").on('click', function(e){
+	$("#ck_todos").on('click', function(e){
 		if($(this).prop('checked')){
-			$("#ck_Faltas").prop('checked', true);
+			$("#ck_ExtraExecutado").prop('checked', true);
+			$("#ck_semPar").prop('checked', true);
 			$("#ck_Atrasos").prop('checked', true);
+			$("#ck_Faltas").prop('checked', true);
+			$("#ck_jorMaior10").prop('checked', true);
+			$("#ck_jorMaior12").prop('checked', true);
+			$("#ck_interjornada").prop('checked', true);
+      $("#vl_extra_executado").val('00:01');
 			$("#vl_atrasos").val('00:01');
 		}else{
-			$("#ck_Faltas").prop('checked', false);
+			$("#ck_ExtraExecutado").prop('checked', false);
+			$("#ck_semPar").prop('checked', false);
 			$("#ck_Atrasos").prop('checked', false);
+			$("#ck_Faltas").prop('checked', false);
+			$("#ck_jorMaior10").prop('checked', false);
+			$("#ck_jorMaior12").prop('checked', false);
+			$("#ck_interjornada").prop('checked', false);
+      $("#vl_extra_executado").val('');
 			$("#vl_atrasos").val('');
 		}
 	});

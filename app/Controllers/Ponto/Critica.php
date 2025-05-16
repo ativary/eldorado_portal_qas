@@ -39,7 +39,7 @@ Class Critica extends BaseController {
       $dados['resFuncionario']      = $this->mCritica->listaFuncionarios($dados);
       $colaboradores = [];
       
-      $dados['resPeriodo']          = $this->mCritica->ListarCriticaPeriodoRM();
+      $dados['resPeriodo']          = $this->mCritica->ListarCriticaPeriodoRM($dados['rh']);
       $dados['periodo']             = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), 0, -1) : null;
       $dados['statusPeriodo']       = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), -1) : 0;
       $dados['data_inicio']         = $this->request->getPost('data_inicio');
@@ -49,11 +49,13 @@ Class Critica extends BaseController {
       $dados['ck_Atrasos']          = $this->request->getPost('ck_Atrasos');
       $dados['ck_Faltas']           = $this->request->getPost('ck_Faltas');
       $dados['ck_jorMaior10']       = $this->request->getPost('ck_jorMaior10');
+      $dados['ck_jorMaior12']       = $this->request->getPost('ck_jorMaior12');
       $dados['ck_interjornada']     = $this->request->getPost('ck_interjornada');
       $dados['vl_extra_executado']  = $this->request->getPost('vl_extra_executado');
       $dados['vl_atrasos']          = $this->request->getPost('vl_atrasos');
       $dados['funcionario']         = $this->request->getPost('funcionario');
-      $dados['ck_bancohoras']       = $this->request->getPost('ck_bancohoras');
+      $dados['ck_todos']            = $this->request->getPost('ck_todos');
+
       $dados['secao']               = $this->request->getPost('secao');
 
       $mAprova = model('Ponto/AprovaModel');
@@ -122,7 +124,7 @@ Class Critica extends BaseController {
 
       $dados['resFuncionario']      = $this->mCritica->listaFuncionarios($dados);
       $dados['resFuncionarioSecao'] = $this->mPortal->ListaFuncionarioSecao($dados);
-      $dados['resPeriodo']          = $this->mCritica->ListarCriticaPeriodoRM();
+      $dados['resPeriodo']          = $this->mCritica->ListarCriticaPeriodoRM($dados['rh']);
       $dados['periodo']             = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), 0, -1) : null;
       $dados['statusPeriodo']       = ($this->request->getPost('periodo') != null) ? substr($this->request->getPost('periodo'), -1) : 0;
       $dados['data_inicio']         = $this->request->getPost('data_inicio');
@@ -132,11 +134,12 @@ Class Critica extends BaseController {
       $dados['ck_Atrasos']          = $this->request->getPost('ck_Atrasos');
       $dados['ck_Faltas']           = $this->request->getPost('ck_Faltas');
       $dados['ck_jorMaior10']       = $this->request->getPost('ck_jorMaior10');
+      $dados['ck_jorMaior12']       = $this->request->getPost('ck_jorMaior12');
       $dados['ck_interjornada']     = $this->request->getPost('ck_interjornada');
       $dados['vl_extra_executado']  = $this->request->getPost('vl_extra_executado');
       $dados['vl_atrasos']          = $this->request->getPost('vl_atrasos');
       $dados['funcionario']         = $this->request->getPost('funcionario');
-      $dados['ck_bancohoras']       = $this->request->getPost('ck_bancohoras');
+      $dados['ck_todos']            = $this->request->getPost('ck_todos');
       $dados['secao']               = $this->request->getPost('secao');
 
       $mAprova = model('Ponto/AprovaModel');
@@ -239,6 +242,7 @@ Class Critica extends BaseController {
       if(strlen(trim($dados['ck_Atrasos'])) > 0){$n++; $sheet->setCellValue($colunas[$n].'4', 'ATRASO');}
       if(strlen(trim($dados['ck_Faltas'])) > 0){$n++; $sheet->setCellValue($colunas[$n].'4', 'FALTA');}
       if(strlen(trim($dados['ck_jorMaior10'])) > 0){$n++; $sheet->setCellValue($colunas[$n].'4', 'JOR. MAIOR QUE 10h');}
+      if(strlen(trim($dados['ck_jorMaior12'])) > 0){$n++; $sheet->setCellValue($colunas[$n].'4', 'JOR. MAIOR QUE 12h');}
       if(strlen(trim($dados['ck_interjornada'])) > 0){$n++; $sheet->setCellValue($colunas[$n].'4', 'INTERJORNADA');}
 
       // cor do texto
@@ -940,37 +944,52 @@ Class Critica extends BaseController {
           if($dados['ck_ExtraExecutado'] == 1){$n++; $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['EXTRAEXECUTADO_CASE']) ? m2h($resData[$i]['EXTRAEXECUTADO_CASE']) : '');}
           if($dados['ck_semPar'] == 1){$n++; $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['SEM_PAR_CORRESPONDENTE']) ? $resData[$i]['SEM_PAR_CORRESPONDENTE_DESC'] : '');}
           if($dados['ck_Atrasos'] == 1){
-            $n++; $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['ATRASO_CASE']) ? m2h($resData[$i]['ATRASO_CASE']) : '');
+            $n++; 
+            
+            if($dados['ck_todos'] == 1 and $resData[$i]['SEM_PAR_CORRESPONDENTE']) {
+              $sheet->setCellValue($colunas[$n].$rows, '');
 
-            if($abono_pendente_atraso == 1 || $abono_reprovado_atraso != '' || $resData[$i]['ABONO_PENDENTE_RH'] > 0){
-              $color = ($abono_reprovado_atraso != '') ? 'f4811f' : 'feca07';
-              if($resData[$i]['ABONO_PENDENTE_RH'] > 0) $color = 'dbdcdd';
-              $spreadsheet
-              ->getActiveSheet()
-              ->getStyle($colunas[$n].$rows)
-              ->getFill()
-              ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-              ->getStartColor()
-              ->setARGB($color);
+            } else {
+              $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['ATRASO_CASE']) ? m2h($resData[$i]['ATRASO_CASE']) : '');
+
+              if($abono_pendente_atraso == 1 || $abono_reprovado_atraso != '' || $resData[$i]['ABONO_PENDENTE_RH'] > 0){
+                $color = ($abono_reprovado_atraso != '') ? 'f4811f' : 'feca07';
+                if($resData[$i]['ABONO_PENDENTE_RH'] > 0) $color = 'dbdcdd';
+                $spreadsheet
+                ->getActiveSheet()
+                ->getStyle($colunas[$n].$rows)
+                ->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setARGB($color);
+              }
             }
           }
           if($dados['ck_Faltas'] == 1){
-            $n++; $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['FALTA_CASE']) ? m2h($resData[$i]['FALTA_CASE']) : '');
-            if($abono_pendente_falta == 1 || $abono_reprovado_falta != '' || $resData[$i]['ABONO_PENDENTE_RH'] > 0){
-              $color = ($abono_reprovado_falta != '') ? 'f4811f' : 'feca07';
+            $n++; 
+            
+            if($dados['ck_todos'] == 1 and $resData[$i]['SEM_PAR_CORRESPONDENTE']) {
+              $sheet->setCellValue($colunas[$n].$rows, '');
 
-              if($resData[$i]['ABONO_PENDENTE_RH'] > 0) $color = 'dbdcdd';
+            } else {
+              $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['FALTA_CASE']) ? m2h($resData[$i]['FALTA_CASE']) : '');
+              if($abono_pendente_falta == 1 || $abono_reprovado_falta != '' || $resData[$i]['ABONO_PENDENTE_RH'] > 0){
+                $color = ($abono_reprovado_falta != '') ? 'f4811f' : 'feca07';
 
-              $spreadsheet
-              ->getActiveSheet()
-              ->getStyle($colunas[$n].$rows)
-              ->getFill()
-              ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-              ->getStartColor()
-              ->setARGB($color);
+                if($resData[$i]['ABONO_PENDENTE_RH'] > 0) $color = 'dbdcdd';
+
+                $spreadsheet
+                ->getActiveSheet()
+                ->getStyle($colunas[$n].$rows)
+                ->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setARGB($color);
+              }
             }
           }
           if($dados['ck_jorMaior10'] == 1){$n++; $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['JORNADA_MAIOR_10HORAS']) ? 'JOR. MAIOR QUE 10h' : '');}
+          if($dados['ck_jorMaior12'] == 1){$n++; $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['JORNADA_MAIOR_12HORAS']) ? 'JOR. MAIOR QUE 12h' : '');}
           if($dados['ck_interjornada'] == 1){$n++; $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['INTERJORNADA']) ? 'INTERJORNADA' : '');}
           
           $spreadsheet->getActiveSheet()->getStyle('A'.$rows.':'.$colunas[$n].$rows)->applyFromArray($styleBorda);
