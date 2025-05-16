@@ -1996,7 +1996,7 @@ class VariaveisModel extends Model {
                 ->where('aprovador', $_SESSION['log_login']);
                 if($aprovacao == '2'){
                 
-                    $builder->orWhereIn('status', [3, 7,8]); 
+                    $builder->orWhereIn('status', [1,3,7,8]); 
                 }
                 $builder->groupEnd(); 
             }else{

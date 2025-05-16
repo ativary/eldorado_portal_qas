@@ -36,6 +36,9 @@
                             <select class="select2 custom-select form-control form-control-sm" name="situacao" id="situacao">
                                 <option value="" > Todas </option>
                               
+                                <?php if ($rh): ?>
+                                <option value="1"<?= ($situacao == '1'  ) ? 'selected' : ''; ?>>  Criada </option>
+                                <?php endif; ?>
                                 <option value="2"<?= ($situacao == '2'  ) ? 'selected' : ''; ?>>  Pendente Ação gestor </option>
                                 <option value="3"<?= ($situacao == '3'  ) ? 'selected' : ''; ?>>  Pendente Ação RH </option>
                                 <option value="4"<?= ($situacao == '4'  ) ? 'selected' : ''; ?>>  Sincronizado </option>
@@ -260,7 +263,7 @@
                                                             <div class="dropdown">
                                                                 <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                                 <div class="dropdown-menu">
-                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
+                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
                                                                     
                                                                     <button onclick="sincReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ?'style="color: blue;"' : 'disabled'; ?> > Sincronizar</button>
                                                                     <?php if ($dados->status == '2'): ?>
@@ -417,7 +420,7 @@
                                                         <div class="dropdown">
                                                             <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                             <div class="dropdown-menu">
-                                                                <button onclick="aprovarReq('<?= $dados->id; ?>', 4,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?>> Aprovar</button>
+                                                                <button onclick="aprovarReq('<?= $dados->id; ?>', 4,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?>> Aprovar</button>
                                                                 <button onclick="sincReq('<?= $dados->id; ?>', 4,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ? 'style="color: blue;"' : 'disabled' ; ?> > Sincronizar</button>
                                                                 
                                                                 <?php if ($dados->status == '2'): ?>
@@ -574,7 +577,7 @@
                                                         <div class="dropdown">
                                                             <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                             <div class="dropdown-menu">
-                                                                <button onclick="aprovarReq('<?= $dados->id; ?>', 2,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?>> Aprovar</button>
+                                                                <button onclick="aprovarReq('<?= $dados->id; ?>', 2,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?>> Aprovar</button>
                                                                 <button onclick="sincReq('<?= $dados->id; ?>', 2,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ? 'style="color: blue;"' : 'disabled' ; ?> > Sincronizar</button>
                                                                 
                                                                 <?php if ($dados->status == '2'): ?>
@@ -731,7 +734,7 @@
                                                         <div class="dropdown">
                                                             <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                             <div class="dropdown-menu">
-                                                                <button onclick="aprovarReq('<?= $dados->id; ?>', 8,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?>> Aprovar</button>
+                                                                <button onclick="aprovarReq('<?= $dados->id; ?>', 8,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?>> Aprovar</button>
                                                                 <button onclick="sincReq('<?= $dados->id; ?>', 8,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ? 'style="color: blue;"' : 'disabled' ; ?> > Sincronizar</button>
                                                                 
                                                                 <?php if ($dados->status == '2'): ?>
@@ -892,7 +895,7 @@
                                                       
                                                         <td class="n-mobile-cell"><?=   $desconto ?></td>
                                                         <td class="n-mobile-cell"> R$ <?= $valores->valor ?></td>
-                                                        <td class="n-mobile-cell"> R$ <?= $valores->valor_desconto ?></td>
+                                                        <td class="n-mobile-cell"> R$ <?= isset($valores->valor_desconto) ? $valores->valor_desconto : 0 ?></td>
                                                         <td class="n-mobile-cell"><?= $valores->Nome ?></td>
                                                         <td class="n-mobile-cell"><?= $valores->funcao ?></td>
                                                         <td class="n-mobile-cell"><?= $valores->quantMes ?></td>
@@ -903,7 +906,7 @@
                                                             <div class="dropdown">
                                                                 <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                                 <div class="dropdown-menu">
-                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 5,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' && $dados->status != '8'  ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
+                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 5,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' && $dados->status != '8'  ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
                                                                     <button onclick="sincReq('<?= $dados->id; ?>', 5,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ?'style="color: blue;"' : 'disabled'; ?> > Sincronizar</button>
                                                                     <?php if ($dados->status == '2'): ?>
                                                                      <!-- <button onclick="abrirReq('<?= base64_encode(json_encode($dados)); ?>')" class="dropdown-item">Ver requisição</button> -->
@@ -1051,7 +1054,7 @@
                                                             <div class="dropdown">
                                                                 <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                                 <div class="dropdown-menu">
-                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 3,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
+                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 3,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
                                                                     <button onclick="sincReq('<?= $dados->id; ?>', 3,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ?'style="color: blue;"' : 'disabled'; ?> > Sincronizar</button>
                                                                     <?php if ($dados->status == '2'): ?>
                                                                      <!-- <button onclick="abrirReq('<?= base64_encode(json_encode($dados)); ?>')" class="dropdown-item">Ver requisição</button> -->
@@ -1204,7 +1207,7 @@
                                                             <div class="dropdown">
                                                                 <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                                 <div class="dropdown-menu">
-                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 1,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
+                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 1,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
                                                                     <button onclick="sincReq('<?= $dados->id; ?>', 1,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ?'style="color: blue;"' : 'disabled'; ?> > Sincronizar</button>
                                                                     <?php if ($dados->status == '2'): ?>
                                                                      <!-- <button onclick="abrirReq('<?= base64_encode(json_encode($dados)); ?>')" class="dropdown-item">Ver requisição</button> -->
@@ -1352,7 +1355,7 @@
                                                             <div class="dropdown">
                                                                 <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                                 <div class="dropdown-menu">
-                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 9,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
+                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 9,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
                                                                     <button onclick="sincReq('<?= $dados->id; ?>', 9,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ?'style="color: blue;"' : 'disabled'; ?> > Sincronizar</button>
                                                                     <?php if ($dados->status == '2'): ?>
                                                                      <!-- <button onclick="abrirReq('<?= base64_encode(json_encode($dados)); ?>')" class="dropdown-item">Ver requisição</button> -->
@@ -1501,7 +1504,7 @@
                                                             <div class="dropdown">
                                                                 <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                                                                 <div class="dropdown-menu">
-                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 7,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
+                                                                    <button onclick="aprovarReq('<?= $dados->id; ?>', 7,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status != '1' && $dados->status != '3' && $dados->status != '2' ) ? 'disabled'  : 'style="color: blue;"'; ?> > Aprovar</button>
                                                                     <button onclick="sincReq('<?= $dados->id; ?>', 7,'<?= $dados->status; ?>')" class="dropdown-item" <?= ($dados->status == '7') ?'style="color: blue;"' : 'disabled'; ?> > Sincronizar</button>
                                                                     
                                                                     <?php if ($dados->status == '2'): ?>
