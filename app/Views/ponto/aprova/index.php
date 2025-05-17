@@ -135,20 +135,8 @@ $(document).ready(function(){
                                 <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Categoria</label></div>
                                 <div class="col-sm-10">
                                     <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_tipo" id="filtro_tipo" class="form-control form-control-sm">
-                                        <option value="">Todos</option>
-                                        <!-- <optgroup label="Ponto">
-                                            <option <?= ($filtro_tipo == "1") ? 'selected' : ''; ?> value="1">&bull; Inclusão de batida</option>
-                                            <option <?= ($filtro_tipo == "3") ? 'selected' : ''; ?> value="3">&bull; Alteração de natureza</option>
-                                            <option <?= ($filtro_tipo == "4") ? 'selected' : ''; ?> value="4">&bull; Alteração jornada referência</option>
-                                            <option <?= ($filtro_tipo == "5") ? 'selected' : ''; ?> value="5">&bull; Abono de atrasos</option>
-                                            <option <?= ($filtro_tipo == "6") ? 'selected' : ''; ?> value="6">&bull; Abono de faltas</option>
-                                            <option <?= ($filtro_tipo == "7") ? 'selected' : ''; ?> value="7">&bull; Justificativa de exceção</option>
-                                            <option <?= ($filtro_tipo == "8") ? 'selected' : ''; ?> value="8">&bull; Altera atitude</option>
-                                            <option <?= ($filtro_tipo == "9") ? 'selected' : ''; ?> value="9">&bull; Falta não remunerada</option>
-                                        </optgroup> -->
-                                            <option <?= ($filtro_tipo == "ponto") ? 'selected' : ''; ?> value="ponto">&bull; Ponto</option>
-                                            <option <?= ($filtro_tipo == "21") ? 'selected' : ''; ?> value="21">&bull; Troca de escala</option>
-                                            <option <?= ($filtro_tipo == "22") ? 'selected' : ''; ?> value="22">&bull; Troca de dia</option>
+                                      <option <?= ($filtro_tipo == "ponto") ? 'selected' : ''; ?> value="ponto">&bull; Ponto</option>
+                                      <option <?= ($filtro_tipo == "art61") ? 'selected' : ''; ?> value="art61">&bull; Artigo.61</option>
                                     </select>
                                 </div>
 
@@ -247,15 +235,16 @@ $(document).ready(function(){
                                 <thead>
                                     <tr>
                                         <th><input type="checkbox" id="checkall"></th>
+                                        <th class="n-mobile-cell"><strong>ID</strong></th>
                                         <th class="n-mobile-cell"><strong>Status</strong></th>
                                         <th><strong>Tipo</strong></th>
-                                        <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><th class="n-mobile-cell"><strong>Data</strong></th><?php endif; ?>
+                                        <th class="n-mobile-cell"><strong>Data</strong></th>
                                         <th class="n-mobile-cell"><strong>Colaborador</strong></th>
                                         <th class="n-mobile-cell" style="min-width: 290px;"><strong>Descrição Tipo</strong></th>
                                         <th class="n-mobile-cell"><strong>Justificativa</strong></th>
                                         <th class="n-mobile-cell"><strong>Anexo</strong></th>
-                                        <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><th class="n-mobile-cell"><strong>Batidas do Dia</strong></th><?php endif; ?>
-                                        <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><th class="n-mobile-cell"><strong>Data de Referência</strong></th><?php endif; ?>
+                                        <th class="n-mobile-cell"><strong>Batidas do Dia</strong></th>
+                                        <th class="n-mobile-cell"><strong>Data de Referência</strong></th>
                                         <th class="n-mobile-cell"><strong>Data solicitação</strong></th>
                                         <th class="n-mobile-cell"><strong>Solicitante</strong></th>
                                         <!-- <th class="n-mobile-cell"><strong>Aprovador</strong></th> -->
@@ -267,7 +256,7 @@ $(document).ready(function(){
                                     <?php if($objListaBatidaApr): ?>
                                         <?php foreach($objListaBatidaApr as $key => $registro): ?>
                                             <tr>
-                                                <td width="20" class="text-center">
+                                            <td width="20" class="text-center">
                                                     <?php
                                                     if(
                                                         ($perfilRH && $registro['status'] == 2 && ($registro['movimento'] == 21 || $registro['movimento'] == 22)) ||
@@ -277,6 +266,9 @@ $(document).ready(function(){
                                                     ?>
                                                     <input type="checkbox" name="idbatida[]" data-checkbox="<?= $registro['id'].'|'.$registro['movimento']; ?>" data-chapa="<?= $registro['chapa']; ?>" value="<?= $registro['chapa'] . '|' . dtEn($registro['dtponto'], true) . '|' . $registro['id'].'|'.$registro['movimento']; ?>">
                                                     <?php endif; ?>
+                                                </td>
+                                                <td width="20" class="text-right">
+                                                    <?= $registro['id'] ?>
                                                 </td>
                                                 <td class="n-mobile-cell">
                                                     <?php
@@ -315,7 +307,7 @@ $(document).ready(function(){
                                                     echo $tipoRequisicao;
                                                 ?>
                                                 </td>
-                                                <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><td class="n-mobile-cell"><?= dtBr($registro['dtponto']); ?></td><?php endif; ?>
+                                                <td class="n-mobile-cell"><?= dtBr($registro['dtponto']); ?></td>
                                                 <td class="n-mobile-cell"><?= $registro['chapa'].' - '.$registro['nome']; ?></td>
                                                 <td class="n-mobile-cell">
                                                     <?php
@@ -437,8 +429,8 @@ $(document).ready(function(){
                                                     echo '</div>';
                                                     ?>
                                                 </td>
-                                                <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><td class="n-mobile-cell"><?= $registro['batidas_dia']; ?></td><?php endif; ?>
-                                                <?php if($filtro_tipo != "21" && $filtro_tipo != "22"): ?><td class="n-mobile-cell"><?= (strlen(trim($registro['data_referencia'])) > 0 ? dtBr($registro['data_referencia']) : ''); ?></td><?php endif; ?>
+                                                <td class="n-mobile-cell"><?= $registro['batidas_dia']; ?>
+                                                <td class="n-mobile-cell"><?= (strlen(trim($registro['data_referencia'])) > 0 ? dtBr($registro['data_referencia']) : ''); ?></td>
                                                 <td class="n-mobile-cell"><?= dtBr($registro['data_solicitacao']); ?></td>
                                                 <td class="n-mobile-cell"><?= $registro['chapa_solicitante'].' - '.$registro['solicitante']; ?></td>
                                                 <!-- <td class="n-mobile-cell"><?= $registro['chapa_gestor'].' - '.$registro['nome_gestor']; ?></td> -->
@@ -1056,7 +1048,7 @@ body {
             api.columns().every(function () {
                 var column = this;
 
-                if (column[0][0] == 0 || column[0][0] >= (p_linha - 2) || column[0][0] == 7 || column[0][0] == 5) return false;
+                if (column[0][0] == 0 || column[0][0] == 1 || column[0][0] >= (p_linha - 2) || column[0][0] == 8 || column[0][0] == 6) return false;
 
                 var select = $('<select class="form-control form-control-sm filtro_table"><option value="">Todos</option></select>')
                     .appendTo($(column.header()))

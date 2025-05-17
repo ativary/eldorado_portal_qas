@@ -29,7 +29,7 @@ class Aprova extends BaseController
   public function index()
   {
 
-    set_time_limit(60*30);
+    set_time_limit(60*2);
 
     parent::VerificaPerfil('PONTO_APROVA');
     

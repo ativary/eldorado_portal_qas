@@ -840,7 +840,6 @@ class AprovaModel extends Model
 
     if ($dados['perfilRH']) $in_secao = "";
 
-    $filtro_tipo = (strlen(trim($dados['filtro_tipo'])) != 0) ? " AND a.movimento = '{$dados['filtro_tipo']}' " : '';
     $filtro_filial = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND B.CODFILIAL = '{$dados['filtro_filial']}' " : '';
     $filtro_legenda = "";
     $filtro_legenda2 = "";
@@ -857,6 +856,7 @@ class AprovaModel extends Model
 
     (strlen(trim($dados['filtro_legenda'])) != 0) ? " AND a.situacao = '{$dados['filtro_legenda']}' " : '';
 
+    /* DESATIVADO EM 17/05/2025 - Unificação PONTO E TROCAS ESCALA/DIA
     $filtro_1 = "";
     $filtro_2 = "";
     if (strlen(trim($dados['filtro_tipo'])) > 0) {
@@ -869,9 +869,12 @@ class AprovaModel extends Model
         $filtro_2 = " AND 1 = 2 ";
       }
     }
+    */
 
-    // nova sql Tiago
-    $query = "
+    // if(isset($dados['filtro_tipo'])) { if($dados['filtro_tipo'] == "") { return false; } } else { return false; }
+    // UNIFICAÇÃO DE Unificação PONTO E TROCAS ESCALA/DIA
+    if($dados['filtro_tipo'] == "ponto") {
+      $query = "
 			SELECT DISTINCT X.* FROM (
 				SELECT
 					A.id,
@@ -971,9 +974,7 @@ class AprovaModel extends Model
 					" . $codfilial . "
 					{$periodo}
 					{$filtro_chapa}
-					" . ((($dados['filtro_tipo'] ?? 'ponto') == 'ponto') ? '' : $filtro_tipo) . "
 					{$filtro_filial}
-					{$filtro_1}
 					{$filtro_legenda}
 					
 				UNION ALL
@@ -1074,16 +1075,18 @@ class AprovaModel extends Model
 					{$in_secao}
 					" . $codfilial . "
 					{$periodoEscala}
-					" . (str_replace(['a.movimento', 'ponto'], ['a.tipo', '0'], $filtro_tipo)) . "
 					{$filtro_chapa}
 					{$filtro_filial}
-					{$filtro_2}
 					{$filtro_legenda2}
 			)X
 			ORDER BY
 				X.chapa,
 				X.dtponto
-		";
+		  ";
+    } else {
+      return false;
+    }
+
     //echo $query;
     //die();
     $result = $this->dbportal->query($query);
@@ -1118,8 +1121,6 @@ class AprovaModel extends Model
 
     return false;
   }
-
-
 
 
   //##################################################################################
@@ -1236,8 +1237,6 @@ class AprovaModel extends Model
       ? $result->getResultArray()
       : false;
   }
-
-
 
   public function RecalculoPonto($array_recalculo)
   {
