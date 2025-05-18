@@ -445,6 +445,20 @@ class PortalModel extends Model {
             }
         }
 
+        $in_ccusto = "";
+        if($dados){
+          if($dados['codccusto'] ?? false){
+              if(!is_array($dados['codccusto'])){
+                  if($dados['codccusto']<>'all') {
+                    $dados['codccusto'] = [$dados['codccusto']];
+                    $in_ccusto .= " AND '".implode(",", $dados['codccusto'])."'  LIKE CONCAT('%', C.CODCCUSTO, '%') ";
+                  }
+              } else {
+                $in_ccusto .= " AND '".implode(",", $dados['codccusto'])."'  LIKE CONCAT('%', C.CODCCUSTO, '%') ";
+              }
+          }
+        } 
+
         $utilizaPonto = '';
         if($passaPonto){
             $utilizaPonto = '
@@ -467,9 +481,12 @@ class PortalModel extends Model {
             SELECT 
                 A.CHAPA, 
                 A.NOME, 
-                A.CODSECAO 
+                A.CODSECAO,
+                C.CODCCUSTO
             FROM 
-                PFUNC A 
+                PFUNC A
+            LEFT JOIN PSECAO S ON S.CODCOLIGADA = A.CODCOLIGADA AND S.CODIGO = A.CODSECAO
+            LEFT JOIN GCCUSTO C ON C.CODCOLIGADA = S.CODCOLIGADA AND C.CODCCUSTO = S.NROCENCUSTOCONT
             WHERE 
                     A.CODSITUACAO IS NOT NULL 
                 AND A.CODCOLIGADA = '{$_SESSION['func_coligada']}' 
@@ -490,6 +507,7 @@ class PortalModel extends Model {
                     ORDER BY X. DATA ASC
                 ) IS NOT NULL
                 {$in_secao}
+                {$in_ccusto}
                 {$utilizaPonto}
             ORDER BY 
                 A.NOME 

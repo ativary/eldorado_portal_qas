@@ -689,7 +689,7 @@ class AprovaModel extends Model
   // #############################################################################
   // LISTA BATIDA PRO GESTOR
   // #############################################################################
-  public function listaBatidaApr($status, $codfilial = false, $movimento = false, $tipo_abono = false, $ft_legenda = false, $ft_status = false, $dt_inicio = false, $dt_fim = false, $filtroChapa = '', $periodo = false, $dados = false)
+  public function listaBatidaApr($status, $codfilial = false, $codccusto = false, $movimento = false, $tipo_abono = false, $ft_legenda = false, $ft_status = false, $dt_inicio = false, $dt_fim = false, $filtroChapa = '', $periodo = false, $dados = false)
   {
 
     $periodo          = explode('|', $periodo);
@@ -727,6 +727,47 @@ class AprovaModel extends Model
 
       } else {
         $codfilial = false;
+      }
+    }
+
+    if ($codccusto) {
+      if ($codccusto != 'all') {
+
+        // #################################################################
+        // FILTRO POR CENTRO DE CUSTO
+        // #################################################################				
+        $LT_CHAPAS = false;
+
+        $chapasRM = " 
+            SELECT
+                A.CHAPA
+            FROM 
+                PFUNC A
+            LEFT JOIN PSECAO S ON S.CODCOLIGADA = A.CODCOLIGADA AND S.CODIGO = A.CODSECAO
+            LEFT JOIN GCCUSTO C ON C.CODCOLIGADA = S.CODCOLIGADA AND C.CODCCUSTO = S.NROCENCUSTOCONT
+
+            WHERE 
+                A.CODSITUACAO <> 'D' 
+            AND C.CODCCUSTO = '" . $codccusto . "'";
+        // exit($chapasRM);
+        $qry = $this->dbrm->query($chapasRM);
+        $resChapaRM = ($qry) ? $qry->getResultArray() : false;
+        if ($resChapaRM && is_array($resChapaRM)) {
+          foreach ($resChapaRM as $idc => $value) {
+            $LT_CHAPAS .= "'" . $resChapaRM[$idc]['CHAPA'] . "',";
+          }
+        }
+
+        if ($resChapaRM && is_array($resChapaRM) && $resChapaRM > 0) {
+          $codccusto = " AND A.chapa IN (" . substr($LT_CHAPAS, 0, -1) . ") ";
+        } else {
+          return false;
+        }
+
+        // #################################################################
+
+      } else {
+        $codccusto = '';
       }
     }
 
@@ -854,7 +895,7 @@ class AprovaModel extends Model
     }
 
 
-    (strlen(trim($dados['filtro_legenda'])) != 0) ? " AND a.situacao = '{$dados['filtro_legenda']}' " : '';
+    //(strlen(trim($dados['filtro_legenda'])) != 0) ? " AND a.situacao = '{$dados['filtro_legenda']}' " : '';
 
     /* DESATIVADO EM 17/05/2025 - Unificação PONTO E TROCAS ESCALA/DIA
     $filtro_1 = "";
@@ -870,6 +911,27 @@ class AprovaModel extends Model
       }
     }
     */
+
+    $filtro_tipo_ponto = '';
+    if ($dados['filtro_tipo2'] == '1') {$filtro_tipo_ponto = ' and a.movimento = 1 ';}
+    if ($dados['filtro_tipo2'] == '2') {$filtro_tipo_ponto = ' and a.movimento = 2 ';}
+    if ($dados['filtro_tipo2'] == '3') {$filtro_tipo_ponto = ' and a.movimento = 3 ';}
+    if ($dados['filtro_tipo2'] == '4') {$filtro_tipo_ponto = ' and a.movimento = 4 ';}
+    if ($dados['filtro_tipo2'] == '5') {$filtro_tipo_ponto = ' and a.movimento = 5 ';}
+    if ($dados['filtro_tipo2'] == '6') {$filtro_tipo_ponto = ' and a.movimento = 6 ';}
+    if ($dados['filtro_tipo2'] == '7') {$filtro_tipo_ponto = ' and a.movimento = 7 ';}
+    if ($dados['filtro_tipo2'] == '8') {$filtro_tipo_ponto = ' and a.movimento = 8 ';}
+    if ($dados['filtro_tipo2'] == '9') {$filtro_tipo_ponto = ' and a.movimento = 9 ';}
+    if ($dados['filtro_tipo2'] == '21' or $dados['filtro_tipo2'] == '22') {
+      $filtro_tipo_ponto = ' and a.movimento = -1 ';
+    }
+
+    $filtro_tipo_escala = '';
+    if ($dados['filtro_tipo2'] == '21') {$filtro_tipo_escala = ' and a.tipo = 1 ';}
+    if ($dados['filtro_tipo2'] == '22') {$filtro_tipo_escala = ' and a.tipo = 2 ';}
+    if ($dados['filtro_tipo2'] == '1' or $dados['filtro_tipo2'] == '2' or $dados['filtro_tipo2'] == '3' or  $dados['filtro_tipo2'] == '4' or $dados['filtro_tipo2'] == '5' or $dados['filtro_tipo2'] == '6' or $dados['filtro_tipo2'] == '7' or $dados['filtro_tipo2'] == '8' or $dados['filtro_tipo2'] == '9') {
+      $filtro_tipo_escala = ' and a.tipo = -1 ';
+    }
 
     // if(isset($dados['filtro_tipo'])) { if($dados['filtro_tipo'] == "") { return false; } } else { return false; }
     // UNIFICAÇÃO DE Unificação PONTO E TROCAS ESCALA/DIA
@@ -972,10 +1034,12 @@ class AprovaModel extends Model
 					" . $FT_ABONO . "
 					" . $FT_MOVIMENTO . "
 					" . $codfilial . "
+					" . $codccusto . "
 					{$periodo}
 					{$filtro_chapa}
 					{$filtro_filial}
 					{$filtro_legenda}
+					{$filtro_tipo_ponto}
 					
 				UNION ALL
 				
@@ -1074,10 +1138,12 @@ class AprovaModel extends Model
 					and a.situacao in (10,2)
 					{$in_secao}
 					" . $codfilial . "
+					" . $codccusto . "
 					{$periodoEscala}
 					{$filtro_chapa}
 					{$filtro_filial}
 					{$filtro_legenda2}
+					{$filtro_tipo_escala}
 			)X
 			ORDER BY
 				X.chapa,
@@ -2159,4 +2225,102 @@ class AprovaModel extends Model
       return false;
     }
   }
+
+  public function listaCCustoUsuario($codsecao = null, $dados = false)
+  {
+
+    //-----------------------------------------
+    // filtro das chapas que o lider pode ver
+    //-----------------------------------------
+    $mHierarquia = Model('HierarquiaModel');
+    $objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+    $isLider = $mHierarquia->isLider();
+
+    $filtro_chapa_lider = "";
+    $filtro_secao_lider = "";
+    if ($isLider) {
+      $chapas_lider = "";
+      $codsecoes = "";
+      foreach ($objFuncLider as $idx => $value) {
+        $chapas_lider .= "'" . $objFuncLider[$idx]['chapa'] . "',";
+      }
+      $filtro_secao_lider = " A.CHAPA IN (" . substr($chapas_lider, 0, -1) . ") OR ";
+    }
+
+
+    //-----------------------------------------
+    // filtro das seções que o gestor pode ver
+    //-----------------------------------------
+    $secoes = $mHierarquia->ListarHierarquiaSecaoPodeVer();
+    $filtro_secao_gestor = "";
+
+    if ($secoes) {
+      $codsecoes = "";
+      foreach ($secoes as $ids => $Secao) {
+        $codsecoes .= "'" . $Secao['codsecao'] . "',";
+      }
+      $filtro_secao_gestor = " A.CODSECAO IN (" . substr($codsecoes, 0, -1) . ") OR ";
+    }
+    //-----------------------------------------
+
+    // monta o where das seções
+    if ($filtro_secao_lider != "" && $filtro_secao_gestor == "") $filtro_secao_lider = rtrim($filtro_secao_lider, "OR ");
+    if ($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    if ($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
+    $chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+
+    if ($this->log_id  != 1) {
+      $qr_secao = " AND (" . $filtro_secao_lider . " " . $filtro_secao_gestor . ") AND A.CHAPA != '{$chapaFunc}' ";
+    } else {
+      $qr_secao = "";
+    }
+
+    // lista seções
+    $filtro_secao = ($codsecao != null) ? " AND A.CODSECAO = '{$codsecao}' " : "";
+
+    if ($dados) {
+      if (($dados['perfilRH'] ?? false) || ($dados['rh'] ?? false)) $qr_secao = "";
+    }
+    $query = " 
+		WITH LISTA AS (
+			SELECT 
+				A.CODSECAO CODIGO, 
+				B.DESCRICAO,
+				C.CODCCUSTO CCUSTO,
+				C.NOME DESC_CCUSTO
+				
+			FROM 
+				PFUNC A,
+				PSECAO B,
+				GCCUSTO C
+
+			WHERE 
+				    A.CODCOLIGADA = '{$this->coligada}'
+				AND A.CODCOLIGADA = B.CODCOLIGADA
+				AND B.SECAODESATIVADA = 0
+				AND A.CODSECAO = B.CODIGO
+				AND A.CODSITUACAO NOT IN ('D')
+				AND B.CODCOLIGADA = C.CODCOLIGADA
+				AND B.NROCENCUSTOCONT = C.CODCCUSTO
+				{$qr_secao}
+        {$filtro_secao}
+
+			GROUP BY
+				A.CODSECAO, 
+				B.DESCRICAO,
+				C.CODCCUSTO,
+				C.NOME
+
+    )
+    SELECT DISTINCT CCUSTO, DESC_CCUSTO FROM LISTA
+		";
+
+    // exit('<pre>'.$query);
+    $result = $this->dbrm->query($query);
+    if (!$result) return false;
+    return ($result->getNumRows() > 0)
+      ? $result->getResultArray()
+      : false;
+  }
+
 }

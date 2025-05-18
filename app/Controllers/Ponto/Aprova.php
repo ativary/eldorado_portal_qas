@@ -29,7 +29,7 @@ class Aprova extends BaseController
   public function index()
   {
 
-    set_time_limit(60*2);
+    //set_time_limit(60*2);
 
     parent::VerificaPerfil('PONTO_APROVA');
     
@@ -62,6 +62,7 @@ class Aprova extends BaseController
         $idbatida                   = $this->request->getPost('idbatida');
         $act                        = $this->request->getPost('act');
         $codsecao                   = $this->request->getPost('secao');
+        $codccusto                  = $this->request->getPost('ccusto');
         $tipo_abono                 = $this->request->getPost('tipo_abono');
         $ft_legenda                 = $this->request->getPost('ft_legenda');
         $ft_status                  = $this->request->getPost('ft_status');
@@ -70,6 +71,7 @@ class Aprova extends BaseController
         $dados['filtro_tipo']       = $this->request->getPost('filtro_tipo');
         $dados['filtro_filial']     = $this->request->getPost('filtro_filial');
         $dados['filtro_legenda']    = $this->request->getPost('filtro_legenda');
+        $dados['filtro_tipo2']      = $this->request->getPost('filtro_tipo2');
         $filtroPeriodo              = $this->request->getPost('periodo');
         $statusPeriodo              = $this->request->getPost('statusPeriodo');
 
@@ -78,11 +80,13 @@ class Aprova extends BaseController
         if(isset($_SESSION['statusPeriodo'])) $statusPeriodo = $_SESSION['statusPeriodo'];
         if(isset($_SESSION['filtro_filial'])) $dados['filtro_filial'] = $_SESSION['filtro_filial'];
         if(isset($_SESSION['secao'])) $codsecao = $_SESSION['secao'];
+        if(isset($_SESSION['ccusto'])) $codccusto = $_SESSION['ccusto'];
         if(isset($_SESSION['funcionario'])) $chapa = $_SESSION['funcionario'];
         if(isset($_SESSION['filtro_legenda'])) $dados['filtro_legenda'] = $_SESSION['filtro_legenda'];
+        if(isset($_SESSION['filtro_tipo2'])) $dados['filtro_tipo2'] = $_SESSION['filtro_tipo2'];
 
         if(isset($_SESSION['filtro_tipo'])){
-            unset($_SESSION['filtro_tipo'], $_SESSION['periodo'], $_SESSION['statusPeriodo'], $_SESSION['filtro_filial'], $_SESSION['secao'], $_SESSION['funcionario'], $_SESSION['filtro_legenda']);
+            unset($_SESSION['filtro_tipo'], $_SESSION['periodo'], $_SESSION['statusPeriodo'], $_SESSION['filtro_filial'], $_SESSION['secao'], $_SESSION['funcionario'], $_SESSION['filtro_tipo2']);
         }
 
         if($motivo_reprova == null){
@@ -94,6 +98,7 @@ class Aprova extends BaseController
         }
 
         $dados['codsecao'] = $codsecao;
+        $dados['codccusto'] = $codccusto;
         $objListaBatidaApr = false;
 
 
@@ -102,6 +107,7 @@ class Aprova extends BaseController
         if($dados['periodo']){
             $dadosColaboradores['rh']         = $dados['perfilRH'];
             $dadosColaboradores['codsecao']   = ($dados['codsecao'] == 'all') ? null : $dados['codsecao'];
+            $dadosColaboradores['codccusto']  = ($dados['codccusto'] == 'all') ? null : $dados['codccusto'];
             $dataInicio                       = substr($dados['periodo'],0,10);
             $colaboradores                    = $this->mPortal->CarregaColaboradores($dataInicio, $dadosColaboradores, false);
         }
@@ -126,8 +132,10 @@ class Aprova extends BaseController
                     $_SESSION['statusPeriodo']  = $statusPeriodo;
                     $_SESSION['filtro_filial']  = $dados['filtro_filial'];
                     $_SESSION['secao']          = $codsecao;
+                    $_SESSION['ccusto']         = $codccusto;
                     $_SESSION['funcionario']    = $chapa;
                     $_SESSION['filtro_legenda'] = $dados['filtro_legenda'];
+                    $_SESSION['filtro_tipo2']   = $dados['filtro_tipo2'];
 
                     $sucesso = 0;
                     $erro = '';
@@ -215,15 +223,17 @@ class Aprova extends BaseController
                 
             }
 
-             $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
+             $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, $codccusto, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
             
         }
 
         $listaSecaoUsuarioRM = $this->mAprova->listaSecaoUsuario(false, $dados);
+        $listaCCustoUsuarioRM = $this->mAprova->listaCCustoUsuario(false, $dados);
         $objSecaoUsu         = $this->mAprova->listaSecaoUsu($_SESSION["log_id"]);
 
         $dados['objListaBatidaApr']   = $objListaBatidaApr;
         $dados['listaSecaoUsuarioRM'] = $listaSecaoUsuarioRM;
+        $dados['listaCCustoUsuarioRM'] = $listaCCustoUsuarioRM;
         $dados['objSecaoUsu']         = $objSecaoUsu;
         $dados['resFuncionarioSecao'] = $resFuncionarioSecao;
         $dados['chapa']               = $chapa;
@@ -255,6 +265,7 @@ class Aprova extends BaseController
         $idbatida   = false;
         $act        = false;
         $codsecao   = false;
+        $codcusto   = false;
         $tipo_abono = false;
         $ft_legenda = false;
         $ft_status  = false;
@@ -266,6 +277,7 @@ class Aprova extends BaseController
         if (isset($_POST['idbatida'])) $idbatida        = $_POST['idbatida'];
         if (isset($_POST['act']))      $act             = $_POST['act'];
         if (isset($_POST['secao']))    $codsecao        = $_POST['secao'];
+        if (isset($_POST['ccusto']))    $codccusto        = $_POST['codccusto'];
         if (isset($_POST['tipo_abono']))    $tipo_abono = $_POST['tipo_abono'];
         if (isset($_POST['ft_legenda']))    $ft_legenda = $_POST['ft_legenda'];
         if (isset($_POST['ft_status']))      $ft_status = $_POST['ft_status'];
@@ -274,7 +286,7 @@ class Aprova extends BaseController
 
         $objListaBatidaApr = false;
         if($codsecao){
-            $objListaBatidaApr = $this->mAprova->listaBatidaApr('S', $codsecao, false, $tipo_abono, $ft_legenda, 'S', $ft_dtini, $ft_dtfim);
+            $objListaBatidaApr = $this->mAprova->listaBatidaApr('S', $codsecao, $codccusto, false, $tipo_abono, $ft_legenda, 'S', $ft_dtini, $ft_dtfim);
         }
 
         $nomeFunc = array();
@@ -360,6 +372,7 @@ class Aprova extends BaseController
         $dados['perfilRH'] = parent::VerificaPerfil('GLOBAL_RH', false);
         
         $codsecao                   = $this->request->getPost('secao');
+        $codccusto                   = $this->request->getPost('ccusto');
         $tipo_abono                 = $this->request->getPost('tipo_abono');
         $ft_legenda                 = $this->request->getPost('ft_legenda');
         $ft_status                  = $this->request->getPost('ft_status');
@@ -367,6 +380,7 @@ class Aprova extends BaseController
         $dados['filtro_tipo']       = $this->request->getPost('filtro_tipo');
         $dados['filtro_filial']     = $this->request->getPost('filtro_filial');
         $dados['filtro_legenda']    = $this->request->getPost('filtro_legenda');
+        $dados['filtro_tipo2']      = $this->request->getPost('filtro_tipo2');
         $motivo_reprova             = $this->request->getPost('motivo_reprova');
 
        
@@ -376,7 +390,7 @@ class Aprova extends BaseController
         
         // $objListaBatidaApr      = $this->mAprova->listaBatidaApr(3, $codsecao, false, false, false, false, false, false, $chapa, $periodo, $dados);
 
-        $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
+        $objListaBatidaApr = $this->mAprova->listaBatidaApr(3, $codsecao, $codccusto, false, $tipo_abono, $ft_legenda, $ft_status, false, false, $chapa, $dados['periodo'], $dados);
 
         $spreadsheet = new Spreadsheet();
 

@@ -132,14 +132,6 @@ $(document).ready(function(){
                         <form action="" method="POST" name="form_secao" id="form_secao">
                             <div class="form-group row">
 
-                                <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Categoria</label></div>
-                                <div class="col-sm-10">
-                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_tipo" id="filtro_tipo" class="form-control form-control-sm">
-                                      <option <?= ($filtro_tipo == "ponto") ? 'selected' : ''; ?> value="ponto">&bull; Ponto</option>
-                                      <option <?= ($filtro_tipo == "art61") ? 'selected' : ''; ?> value="art61">&bull; Artigo.61</option>
-                                    </select>
-                                </div>
-
                                 <div class="col-sm-2 text-right"><label for="opt_periodo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Período</label></div>
 
                                 <div class="col-sm-10">
@@ -153,10 +145,37 @@ $(document).ready(function(){
                                 </select>
                                 </div>
 
+                                <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Categoria</label></div>
+                                <div class="col-sm-10">
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_tipo" id="filtro_tipo" class="form-control select2 form-control-sm">
+                                      <option value="">- selecione uma categoria -</option>
+                                      <option <?= ($filtro_tipo == "ponto") ? 'selected' : ''; ?> value="ponto">&bull; Ponto</option>
+                                      <option <?= ($filtro_tipo == "art61") ? 'selected' : ''; ?> value="art61">&bull; Artigo.61</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2 text-right"><label for="filtro_tipo2" class=" col-form-label text-right text-left-sm">Tipo</label></div>
+                                <div class="col-sm-10">
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_tipo2" id="filtro_tipo2" class="form-control select2 form-control-sm">
+                                        <option value="">Todos os tipos</option>
+                                        <option <?= ($filtro_tipo2 == "1") ? 'selected' : ''; ?> value="1">Inclusão de batida</option>
+                                        <option <?= ($filtro_tipo2 == "2") ? 'selected' : ''; ?> value="2">Exclusão de batida</option>
+                                        <option <?= ($filtro_tipo2 == "3") ? 'selected' : ''; ?> value="3">Alteração de natureza</option>
+                                        <option <?= ($filtro_tipo2 == "4") ? 'selected' : ''; ?> value="4">Alteração jornada referência</option>
+                                        <option <?= ($filtro_tipo2 == "5") ? 'selected' : ''; ?> value="5">Abono de atrasos'</option>
+                                        <option <?= ($filtro_tipo2 == "6") ? 'selected' : ''; ?> value="6">Abono de faltas</option>
+                                        <option <?= ($filtro_tipo2 == "7") ? 'selected' : ''; ?> value="7">Justificativa de exceção</option>
+                                        <option <?= ($filtro_tipo2 == "8") ? 'selected' : ''; ?> value="8">Altera atitude</option>
+                                        <option <?= ($filtro_tipo2 == "9") ? 'selected' : ''; ?> value="9">Falta não remunerada</option>
+                                        <option <?= ($filtro_tipo2 == "21") ? 'selected' : ''; ?> value="21">Troca de escala</option>
+                                        <option <?= ($filtro_tipo2 == "22") ? 'selected' : ''; ?> value="22">Troca de dia</option>
+                                    </select>
+                                </div>
+
                                 <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Filial</label></div>
                                 <div class="col-sm-10">
-                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_filial" id="filtro_filial" class="form-control form-control-sm">
-                                        <option value="">Todos</option>
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_filial" id="filtro_filial" class="form-control select2 form-control-sm">
+                                        <option value="">Todas as filiais</option>
                                         <?php if($resFilial): ?>
                                                 <?php foreach($resFilial as $key => $Filial): ?>
                                                     <option value="<?= $Filial['CODFILIAL']; ?>" <?= (($filtro_filial ?? "") == $Filial['CODFILIAL']) ? " selected " : ""; ?>><?= $Filial['CODFILIAL'].' - '.$Filial['NOMEFILIAL']; ?></option>
@@ -176,6 +195,19 @@ $(document).ready(function(){
                                     }
                                     ?>
                                 </select></div>
+
+                                <div class="col-sm-2 text-right"><label for="ccusto" class="col-form-label text-right text-left-sm">Centro de Custo:</label></div>
+                                <div class="col-sm-10 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="ccusto" id="ccusto" class="form-control select2  form-control-sm " onchange="return carregaColaboradores()">
+                                    <option value="all">Todos os centros de custo</option>
+                                    <?php
+                                    if ($listaCCustoUsuarioRM) {
+                                        foreach ($listaCCustoUsuarioRM as $key => $CCusto) {
+                                            echo '<option value="' . $CCusto['CCUSTO'] . '" ' . (($codccusto == $CCusto['CCUSTO']) ? ' selected ' : '') . '>' . $CCusto['DESC_CCUSTO'] . ' - ' . $CCusto['CCUSTO'] . '</option>';
+                                        }
+                                    }
+                                    ?>
+                                </select></div>
+
                                 <div class="col-sm-2 text-right"><label for="funcionario" class=" col-form-label text-right text-left-sm">Colaborador:</label></div>
                                 <div class="col-sm-10 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="funcionario" id="funcionario" class="form-control select2 form-control-sm ">
                                     <option value="all">Todos</option>
@@ -188,10 +220,10 @@ $(document).ready(function(){
                                     <?php endif; ?>
                                 </select></div>
 
-                                <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Legenda</label></div>
+                                <div class="col-sm-2 text-right"><label for="filtro_legenda" class=" col-form-label text-right text-left-sm">Legenda</label></div>
                                 <div class="col-sm-10">
-                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_legenda" id="filtro_legenda" class="form-control form-control-sm">
-                                        <option value="">Todos</option>
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_legenda" id="filtro_legenda" class="form-control select2 form-control-sm">
+                                        <option value="">Todas as legendas</option>
                                         <option <?= ($filtro_legenda == "10") ? 'selected' : ''; ?> value="10">Pend/Ação Gestor</option>
                                         <option <?= ($filtro_legenda == "2") ? 'selected' : ''; ?> value="2">Pend/Ação RH</option>
                                     </select>
@@ -541,7 +573,9 @@ $(document).ready(function(){
                             <input type="hidden" name="periodo" value="<?= $periodo; ?>">
                             <input type="hidden" name="statusPeriodo" value="<?= $statusPeriodo; ?>">
                             <input type="hidden" name="filtro_tipo" value="<?= $filtro_tipo; ?>">
+                            <input type="hidden" name="filtro_tipo2" value="<?= $filtro_tipo2; ?>">
                             <input type="hidden" name="codsecao" value="<?= $codsecao; ?>">
+                            <input type="hidden" name="codccusto" value="<?= $codccusto; ?>">
                             <input type="hidden" name="funcionario" value="<?= $chapa; ?>">
                         </form>
                     </div>
@@ -690,10 +724,10 @@ $(document).ready(function(){
             exibeAlerta('error', 'Período não informado.');
             return false;
         }
-        var secao = document.getElementById('secao').value;
-        if (secao == '') {
-            alert('Selecione uma seção');
-            return false;
+        var filtro_tipo = document.getElementById('filtro_tipo').value;
+        if (filtro_tipo == '') {
+          exibeAlerta('error', 'Categoria não informada.');
+          return false;
         }
         openLoading();
         $("#form_secao").attr('target', '_top');
@@ -882,7 +916,9 @@ $(document).ready(function(){
 
         var periodo = $("#periodo option:selected").attr('data-iniciomensal');
         var codsecao = $("#secao").val() ?? null;
+        var codccusto = $("#ccusto").val() ?? null;
         if(codsecao == 'all') codsecao = null;
+        if(codccusto == 'all') codcusto = null;
 
         $("#funcionario").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
 
@@ -890,6 +926,7 @@ $(document).ready(function(){
             url: "<?= base_url('ponto/espelho/action/carrega_colaboradores') ?>",
             type: 'POST',
             data: {
+                'codccusto'   : codccusto,
                 'codsecao'    : codsecao,
                 'periodo'     : periodo
             },
@@ -1011,9 +1048,11 @@ body {
 <script type="text/javascript" src="<?= base_url('public/assets/plugins/datatables/fixedHeader/dataTables.fixedHeader.js'); ?>"></script>
 <script>
     $(document).ready(function () {
-        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
-    // Inicialização do DataTable
-    var tabelaAprovacao = $('#datatableAprovacao').DataTable({
+      if($("#periodo").val() != ''){carregaColaboradores();}
+ 
+      <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
+      // Inicialização do DataTable
+      var tabelaAprovacao = $('#datatableAprovacao').DataTable({
         "aLengthMenu": [[25, 50, 100, 200, -1], [25, 50, 100, 200, "Todos"]],
         "iDisplayLength": 25,
         "aaSorting": [[0, "desc"]],
