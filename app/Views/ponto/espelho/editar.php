@@ -66,7 +66,7 @@ table th {
             <table width="100%" style="margin:0;">
                 <tr>
                     <td style="padding: 0px;" width="150">Chapa<br><?= $resFuncionario[0]['CHAPA']; ?></td>
-                    <td style="padding: 0px;">Nome do Funcionário<br><?= $resFuncionario[0]['NOME']; ?></td>
+                    <td style="padding: 0px;">Nome do Colaborador<br><?= $resFuncionario[0]['NOME']; ?></td>
                     <td style="padding: 0px;" width="150">CPF<br><?= $resFuncionario[0]['CPF']; ?></td>
                     <td style="padding: 0px;" width="150" align="center">Data de Admissão<br><?= dtBr($resFuncionario[0]['DATAADMISSAO']); ?></td>
                 </tr>
@@ -135,10 +135,10 @@ table th {
                                 </div>
                             </div>
                             <div class="row">
-                                <label for="funcionario" class="col-sm-2 col-form-label text-right text-left-sm">Funcionário:</label>
+                                <label for="funcionario" class="col-sm-2 col-form-label text-right text-left-sm">Colaborador:</label>
                                 <div class="col-sm-10">
                                     <select class="select2 custom-select form-control form-control-sm" name="funcionario" id="funcionario">
-                                        <option value="">- selecione o funcionário -</option>
+                                        <option value="">- selecione o colaborador -</option>
                                         <?php if ($resFuncionarioSecao) : ?>
                                             <?php foreach ($resFuncionarioSecao as $key => $DadosFunc) : ?>
                                                 <option value="<?= $DadosFunc['CHAPA'] ?>" <?= ($chapa == $DadosFunc['CHAPA']) ? " selected " : ""; ?>><?= $DadosFunc['CHAPA'] . ' - ' . $DadosFunc['NOME'] ?></option>
@@ -951,7 +951,7 @@ table th {
                                                                         $inicioEscala   = $escala[0];
                                                                         $terminoEscala  = end($escala);
                                                                         ?>
-                                                                        <button onclick="abrirAlteracaoBatida('<?= dtEn($DiasEspelho['DATA'], true); ?>', '<?= urlencode(json_encode($array_batidas)); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= dtBr($DiasEspelho['DATA']); ?>', '<?= ($periodo_bloqueado) ? 1 : 0; ?>', '<?= $inicioEscala; ?>', '<?= $terminoEscala; ?>')" type="button" class="dropdown-item" title="Alterar batida"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar batida</button>
+                                                                        <button onclick="abrirAlteracaoBatida('<?= dtEn($DiasEspelho['DATA'], true); ?>', '<?= urlencode(json_encode($array_batidas)); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= dtBr($DiasEspelho['DATA']); ?>', '<?= ($periodo_bloqueado) ? 1 : 0; ?>', '<?= $inicioEscala; ?>', '<?= $terminoEscala; ?>')" type="button" class="dropdown-item" title="Alterar registro"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar registro</button>
                                                                         <button onclick="abrirResumoDiario('<?= dtBr($DiasEspelho['DATA']); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= ((int)$DiasEspelho['HTRAB'] > 0) ? m2h($DiasEspelho['HTRAB']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['ATRASO'] > 0) ? m2h($DiasEspelho['ATRASO']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['FALTA'] > 0) ? m2h($DiasEspelho['FALTA']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['EXTRAAUTORIZADO'] > 0) ? m2h($DiasEspelho['EXTRAAUTORIZADO']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['ABONO'] > 0) ? m2h($DiasEspelho['ABONO']) : '0:00'; ?>', '<?= urlencode(json_encode($array_batidas)); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= ((int)$DiasEspelho['total_refeicao'] > 0) ? m2h($DiasEspelho['total_refeicao']) : "0:00"; ?>', '<?= ((int)$DiasEspelho['total_direcao'] > 0) ? ($DiasEspelho['total_direcao'].':00') : "0:00"; ?>', '<?= ((int)$DiasEspelho['total_espera'] > 0) ? m2h($DiasEspelho['total_espera']) : "0:00"; ?>', '<?= ((int)$DiasEspelho['total_parado'] > 0) ? m2h($DiasEspelho['total_parado']) : "0:00"; ?>', '<?= m2h($DiasEspelho['ADICIONAL']); ?>', '0:00')" type="button" class="dropdown-item" title="Resumo diário"><i class="mdi mdi-file-document-box-outline"></i> Resumo diário</button>
                                                                         
                                                                         
@@ -1201,16 +1201,16 @@ table th {
                     return false;
                 }
                 if (dados.horario_batida == "") {
-                    exibeAlerta('error', '<b>Batida</b> não informada.');
+                    exibeAlerta('error', '<b>Registro</b> não informado.');
                     return false;
                 }
                 if (!validaHorario(dados.horario_batida)) {
-                    exibeAlerta('error', '<b>Batida</b> inválida.');
+                    exibeAlerta('error', '<b>Registro</b> inválido.');
                     return false;
                 }
                 var batida = parseInt(dados.horario_batida.replace(':', ''));
                 if (batida > 2359) {
-                    exibeAlerta('error', '<b>Batida</b> não pode ser superior a <b>23:59</b>.');
+                    exibeAlerta('error', '<b>Registro</b> não pode ser superior a <b>23:59</b>.');
                     return false;
                 }
                 if (dados.justificativa_batida == "") {
@@ -1271,7 +1271,7 @@ table th {
             
             $(".modal_alterar_batida [data-h-data]").html(data_br + ' <small style="color: #999999;">' + diaSemana + '</small>');
             $(".modal_alterar_batida [data-h-escala], .modal_macro [data-h-escala]").html('Escala: '+escala);
-            $(".modal_alterar_batida [data-h-batidas]").html('Batidas existentes: ');
+            $(".modal_alterar_batida [data-h-batidas]").html('Registros existentes: ');
 
             var batidas = JSON.parse(decodeURIComponent(batidas));
             
@@ -1340,7 +1340,7 @@ table th {
 
             Swal.fire({
                 icon: 'question',
-                title: 'Deseja excluir essa batida?',
+                title: 'Deseja excluir esse registro?',
                 showDenyButton: true,
                 showCancelButton: true,
                 confirmButtonText: `Sim, confirmar`,
@@ -1406,7 +1406,7 @@ table th {
 
             Swal.fire({
                 icon: 'info',
-                title: 'Digite uma justificativa para excluir essa batida:',
+                title: 'Digite uma justificativa para excluir esse registro:',
                 showDenyButton: true,
                 showCancelButton: true,
                 confirmButtonText: `Confirmar e excluir`,
@@ -1783,10 +1783,10 @@ table th {
                         if(data_ref > data_nova_batida) batidaInformadaCheck = batidaInformadaCheck +2400;
 
                         if(batidaInformadaCheck < Vinicio_escala){
-                            msg_aviso_batida = '<b>Batida</b> esta fora de sua jornada.';
+                            msg_aviso_batida = '<b>Registro</b> está fora de sua jornada.';
                         }
                         if(batidaInformadaCheck > Vtermino_escala){
-                            msg_aviso_batida = '<b>Batida</b> esta fora de sua jornada.';
+                            msg_aviso_batida = '<b>Registro</b> está fora de sua jornada.';
                         }
 
                         if (just != undefined) {
@@ -1850,7 +1850,7 @@ table th {
             // $(".modal_abono h3").html(data_br + ' <small style="color: #999999;">' + diasemana + '</small>');
             $(".modal_abono [data-h-data]").html(data_br + ' <small style="color: #999999;">' + diasemana + '</small>');
             $(".modal_abono [data-h-escala]").html('Escala: '+escala);
-            $(".modal_abono [data-h-batidas]").html('Batidas existentes: ');
+            $(".modal_abono [data-h-batidas]").html('Registros existentes: ');
             var batidas = JSON.parse(decodeURIComponent(batidas));
 
             for (var x = 0; x < batidas.length; x++) {
@@ -2386,11 +2386,11 @@ table th {
                     termino = parseInt(termino.replace(':', ''));
 
                     if (inicio > 2359) {
-                        msg_erro = '<b>Batida</b> não pode ser superior a <b>23:59</b>.';
+                        msg_erro = '<b>Registro</b> não pode ser superior a <b>23:59</b>.';
                         return false;
                     }
                     if (termino > 2359) {
-                        msg_erro = '<b>Batida</b> não pode ser superior a <b>23:59</b>.';
+                        msg_erro = '<b>Registro</b> não pode ser superior a <b>23:59</b>.';
                         return false;
                     }
                     
@@ -2564,7 +2564,7 @@ table th {
             $(".modal_resumo_diario").modal('show');
             $(".modal_resumo_diario [data-h-data]").html(data + ' <small style="color: #999999;">' + diasemana + '</small>');
             $(".modal_resumo_diario [data-h-escala]").html('Escala: '+escala);
-            $(".modal_resumo_diario [data-h-batidas]").html('Batidas existentes: ');
+            $(".modal_resumo_diario [data-h-batidas]").html('Registros existentes: ');
             var batidas = JSON.parse(decodeURIComponent(batidas));
 
             for (var x = 0; x < batidas.length; x++) {
@@ -2597,7 +2597,7 @@ table th {
             
             $(".modal_justificativa_extra [data-h-data]").html(data_br + ' <small style="color: #999999;">' + diasemana + '</small>');
             $(".modal_justificativa_extra [data-h-escala]").html('Escala: '+escala);
-            $(".modal_justificativa_extra [data-h-batidas]").html('Batidas existentes: ');
+            $(".modal_justificativa_extra [data-h-batidas]").html('Registros existentes: ');
             var batidas = JSON.parse(decodeURIComponent(batidas));
 
             for (var x = 0; x < batidas.length; x++) {
@@ -2722,7 +2722,7 @@ function m2h(minutos) {
     <div class="modal-dialog modal-dialog-full">
         <div class="modal-content modal-content-full">
             <div class="modal-header bg-primary">
-                <h5 class="modal-title mt-0 text-white"><i class="fas fa-plus-circle"></i> Inclusão de Batida</h5>
+                <h5 class="modal-title mt-0 text-white"><i class="fas fa-plus-circle"></i> Inclusão de Registro</h5>
                 <button type="button" class="close text-white" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
             </div>
             <div class="modal-body">
@@ -2730,7 +2730,7 @@ function m2h(minutos) {
                 <div class="row">
                     <div class="col-6">
                         <div class="form-group row mb-1">
-                            <label for="data_batida" class="col-sm-12 col-form-label text-left pb-1">Data batida:</label>
+                            <label for="data_batida" class="col-sm-12 col-form-label text-left pb-1">Data registro:</label>
                             <div class="col-sm-12">
                                 <input type="date" name="data_batida" class="form-control" disabled>
                             </div>
@@ -2746,7 +2746,7 @@ function m2h(minutos) {
                     </div>
                     <div class="col-6">
                         <div class="form-group row mb-1">
-                            <label for="horario_batida" class="col-sm-12 col-form-label text-left pb-1">Batida:</label>
+                            <label for="horario_batida" class="col-sm-12 col-form-label text-left pb-1">Registro:</label>
                             <div class="col-sm-12">
                                 <input type="time" name="horario_batida" class="form-control" placeholder="__:__">
                             </div>
@@ -2775,7 +2775,7 @@ function m2h(minutos) {
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="return cadastraBatida()">Incluir Batida <i class="fas fa-check"></i></button>
+                <button type="button" class="btn btn-primary" onclick="return cadastraBatida()">Incluir Registro <i class="fas fa-check"></i></button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -2787,7 +2787,7 @@ function m2h(minutos) {
     <div class="modal-dialog modal-dialog-full">
         <div class="modal-content modal-content-full">
             <div class="modal-header bg-info">
-                <h5 class="modal-title mt-0 text-white"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar Batida</h5>
+                <h5 class="modal-title mt-0 text-white"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar Registro</h5>
                 <button type="button" class="close text-white" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
             </div>
             <div class="modal-body">
@@ -2804,7 +2804,7 @@ function m2h(minutos) {
                                 <tr>
                                     <th>Data</th>
                                     <th>Data referencia</th>
-                                    <th class="colbatida">Batida</th>
+                                    <th class="colbatida">Registro</th>
                                     <th>Natureza</th>
                                     <th></th>
                                 </tr>
@@ -2823,13 +2823,13 @@ function m2h(minutos) {
                             </div>
                         </div>
 
-                        <button data-btn-add class="btn btn-outline-primary waves-effect waves-light btn-block" type="button" onclick="incluirNovaBatida()"><i class="mdi mdi-plus-circle-outline"></i> Adicionar batida</button>
+                        <button data-btn-add class="btn btn-outline-primary waves-effect waves-light btn-block" type="button" onclick="incluirNovaBatida()"><i class="mdi mdi-plus-circle-outline"></i> Adicionar registro</button>
                     </div>
                 </div>
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-info" onclick="return alterarBatida()">Salvar Batida <i class="fas fa-check"></i></button>
+                <button type="button" class="btn btn-info" onclick="return alterarBatida()">Salvar Registro <i class="fas fa-check"></i></button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -3083,7 +3083,7 @@ const carregaFuncionariosSecao = (codSecao) => {
 
     openLoading();
 
-    $("#funcionario").html('<option value="">-- selecione um funcionário --</option>').trigger('change');
+    $("#funcionario").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
     if (codSecao == '') {
         // openLoading(true);
         // return false;

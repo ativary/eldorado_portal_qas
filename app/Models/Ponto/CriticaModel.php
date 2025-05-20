@@ -208,7 +208,7 @@ class CriticaModel extends Model {
           (SELECT CODAVISO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '11') JORNADA_MAIOR_12HORAS,
 					--(SELECT DESCRICAO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '5') SEM_PAR_CORRESPONDENTE_DESC,
 
-          'Batida sem par correspondente' SEM_PAR_CORRESPONDENTE_DESC,
+          'Registro sem par correspondente' SEM_PAR_CORRESPONDENTE_DESC,
 
           CASE (
             SELECT
@@ -481,7 +481,7 @@ class CriticaModel extends Model {
             (SELECT CODAVISO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '11') JORNADA_MAIOR_12HORAS,
             --(SELECT DESCRICAO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '5') SEM_PAR_CORRESPONDENTE_DESC,
 
-            'Batida sem par correspondente' SEM_PAR_CORRESPONDENTE_DESC,
+            'Registro sem par correspondente' SEM_PAR_CORRESPONDENTE_DESC,
 
             CASE (
             	SELECT
@@ -816,8 +816,8 @@ class CriticaModel extends Model {
 
 
         return ($this->dbportal->affectedRows() > 0) 
-        ? responseJson('success', 'batida aprovada com sucesso.')
-        : responseJson('error', 'Falha ao aprovar batida.');
+        ? responseJson('success', 'Registro aprovado com sucesso.')
+        : responseJson('error', 'Falha ao aprovar registro.');
     }
     public function listarCriticaPeriodoPonto(){
 
@@ -946,8 +946,8 @@ class CriticaModel extends Model {
           }
 
         return ($this->dbportal->affectedRows() > 0) 
-            ? responseJson('success', 'Cadastro de batida realizado com sucesso')
-            : responseJson('error', 'Falha cadastrar batida.');
+            ? responseJson('success', 'Cadastro de registro realizado com sucesso')
+            : responseJson('error', 'Falha cadastrar registro.');
 
         }
 

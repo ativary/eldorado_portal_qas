@@ -548,10 +548,10 @@ class AprovaModel extends Model
         $tipo_solicitacao = '';
         switch ($resbat[0]['movimento']) {
           case 1:
-            $tipo_solicitacao = 'Inclusão de batida';
+            $tipo_solicitacao = 'Inclusão de registro';
             break;
           case 2:
-            $tipo_solicitacao = 'Exclusão de batida';
+            $tipo_solicitacao = 'Exclusão de registro';
             break;
           case 3:
             $tipo_solicitacao = 'Alteração de natureza';
@@ -629,7 +629,7 @@ class AprovaModel extends Model
           $mensagem = $mensagem . '<strong>&nbsp&nbsp&nbsp- Tipo de Abono</strong>: ' . $abn_codabono . ' - ' . $desc_abono . '<br>';
         }
         if (!is_null($batida)) {
-          $mensagem = $mensagem . '<strong>&nbsp&nbsp&nbsp- Batida</strong>: ' . $batida . '<br>';
+          $mensagem = $mensagem . '<strong>&nbsp&nbsp&nbsp- Registro</strong>: ' . $batida . '<br>';
         }
         if (!is_null($motivo)) {
           $mensagem = $mensagem . '<strong>&nbsp&nbsp&nbsp- Justificativa</strong>: ' . $motivo . '<br>';
@@ -1915,8 +1915,8 @@ class AprovaModel extends Model
 			EML.EMAIL,
 			TGE.MOVIMENTO,
 			CASE
-				WHEN TGE.MOVIMENTO = 1 THEN 'Inclusão de batida'
-				WHEN TGE.MOVIMENTO = 2 THEN 'Exclusão de batida'
+				WHEN TGE.MOVIMENTO = 1 THEN 'Inclusão de registro'
+				WHEN TGE.MOVIMENTO = 2 THEN 'Exclusão de registro'
 				WHEN TGE.MOVIMENTO = 3 THEN 'Alteração de natureza'
 				WHEN TGE.MOVIMENTO = 4 THEN 'Alteração jornada referência'
 				WHEN TGE.MOVIMENTO = 5 THEN 'Abono de atrasos'

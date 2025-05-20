@@ -135,7 +135,7 @@ class Saldobancohoras extends BaseController {
         // titulo das colunas
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'SEÇÃO');
-        $sheet->setCellValue('A2', 'FUNCIONÁRIO');
+        $sheet->setCellValue('A2', 'COLABORADOR');
         $sheet->setCellValue('A3', 'PERÍODO');
         $sheet->setCellValue('A4', 'CHAPA');
         $sheet->setCellValue('B4', 'NOME');

@@ -872,7 +872,7 @@ $(document).ready(function(){
         <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         openLoading();
 
-        $("#funcionario").html('<option value="">-- selecione um funcionário --</option>').trigger('change');
+        $("#funcionario").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
         if (codSecao == '') {
             openLoading(true);
             return false;

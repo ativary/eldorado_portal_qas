@@ -127,7 +127,7 @@
                                     <div class="card-body bg-secondary p-1">
                                         <div class="row">
                                             <div class="col-9">
-                                                <small class="m-0 p-0 text-primary"><b>Funcionário</b></small>
+                                                <small class="m-0 p-0 text-primary"><b>Colaborador</b></small>
                                                 <h5 class="mt-0"><?= $SaldoBancoHoras['NOME']; ?><br><small><?= $SaldoBancoHoras['CHAPA']; ?></small></h5>
                                             </div>
                                             <div class="col-3 text-right"><small class="m-0 p-0 text-primary"><b>Saldo</b></small><h4 class="mt-0 <?= ($SaldoBancoHoras['SALDO'] < 0) ? ' text-danger ' : ' text-success '; ?>"><?= m2h($SaldoBancoHoras['SALDO']); ?></h4></div>
@@ -169,7 +169,7 @@ const carregaFuncionariosSecao = (codSecao) => {
 
     openLoading();
     
-    $("#chapa").html('<option value="">-- selecione um funcionário --</option>').trigger('change');
+    $("#chapa").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
     if(codSecao == ''){
         openLoading(true);
         return false;

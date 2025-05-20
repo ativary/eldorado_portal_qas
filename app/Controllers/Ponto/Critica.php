@@ -595,8 +595,8 @@ Class Critica extends BaseController {
               ) {
 
                 #	[MOVIMENTO]
-                #	1 - Inclusão de batida
-                #	2 - Exclusão de batida
+                #	1 - Inclusão de registro
+                #	2 - Exclusão de registro
                 #	3 - Altera natureza
                 #	4 - Altera Jornada Referencia
                 #	5 - Abonos Atrasos
@@ -1298,7 +1298,7 @@ Class Critica extends BaseController {
                       if(($objListaAbonoInseridos[$ido2]['status'] == 2) || ($objListaAbonoInseridos[$ido2]['status'] == 3 && strlen(trim($objListaAbonoInseridos[$ido2]['aprgestor_user'])) <= 0) || strlen(trim($objListaAbonoInseridos[$ido2]['motivo_reprova'])) > 0){
                         $html_retorno .= '<a href="javascript:void(0);" onclick="return removeAbono(\''.$objListaAbonoInseridos[$ido2]['id'].'\');" style="color: red !important;"><b class="fa fa-times"></b></a>';
                       }else{
-                        $html_retorno .= utf8_decode('<a href="javascript:void(0);" onclick="alert(\'Abono não pode ser excluido porque já foi aprovado pelo Funcionário ou Gestor.\')" style="color: red !important;"><b class="fa fa-times"></b></a>');
+                        $html_retorno .= utf8_decode('<a href="javascript:void(0);" onclick="alert(\'Abono não pode ser excluido porque já foi aprovado pelo Colaborador ou Gestor.\')" style="color: red !important;"><b class="fa fa-times"></b></a>');
                       }
                     
                       $html_retorno .= '</td></tr>
@@ -1337,7 +1337,7 @@ Class Critica extends BaseController {
                   if(($objListaAbonoInseridos[$ido2]['status'] == 2) || ($objListaAbonoInseridos[$ido2]['status'] == 3 && strlen(trim($objListaAbonoInseridos[$ido2]['aprgestor_user'])) <= 0) || strlen(trim($objListaAbonoInseridos[$ido2]['motivo_reprova'])) > 0){
                     $html_retorno .= '<a href="javascript:void(0);" onclick="return removeAbono(\''.$objListaAbonoInseridos[$ido2]['id'].'\');" style="color: red !important;"><b class="fa fa-times"></b></a>';
                   }else{
-                    $html_retorno .= utf8_decode('<a href="javascript:void(0);" onclick="alert(\'Abono não pode ser excluido porque já foi aprovado pelo Funcionário ou Gestor.\')" style="color: red !important;"><b class="fa fa-times"></b></a>');
+                    $html_retorno .= utf8_decode('<a href="javascript:void(0);" onclick="alert(\'Abono não pode ser excluido porque já foi aprovado pelo Colaborador ou Gestor.\')" style="color: red !important;"><b class="fa fa-times"></b></a>');
                   }
                   
                   $html_retorno .= '</td>';
@@ -1433,7 +1433,7 @@ Class Critica extends BaseController {
                     if(($objListaAbonoInseridos[$ido2]['status'] == 2) || ($objListaAbonoInseridos[$ido2]['status'] == 3 && strlen(trim($objListaAbonoInseridos[$ido2]['aprgestor_user'])) <= 0) || strlen(trim($objListaAbonoInseridos[$ido2]['motivo_reprova'])) > 0){
                       $html_retorno .= '<a href="javascript:void(0);" onclick="return removeAbono(\''.$objListaAbonoInseridos[$ido2]['id'].'\');" style="color: red !important;"><b class="fa fa-times"></b></a>';
                     }else{
-                      $html_retorno .= utf8_decode('<a href="javascript:void(0);" onclick="alert(\'Abono não pode ser excluido porque já foi aprovado pelo Funcionário ou Gestor.\')" style="color: red !important;"><b class="fa fa-times"></b></a>');
+                      $html_retorno .= utf8_decode('<a href="javascript:void(0);" onclick="alert(\'Abono não pode ser excluido porque já foi aprovado pelo Colaborador ou Gestor.\')" style="color: red !important;"><b class="fa fa-times"></b></a>');
                     }
                     
                     $html_retorno .= '</td>';

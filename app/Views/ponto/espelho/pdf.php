@@ -326,7 +326,7 @@ $saldo_liquido = ($objSaldoBancoMesAnt) + ($objSaldoBancoHorasPer[0]->saldo);
 <br><br>
 <?php if($listaMovimentos){
 	foreach($listaMovimentos as $idx => $value){
-		if(trim($listaMovimentos[$idx]->jornada) == "X") echo "<br><strong>Horário do Funcionário</strong><br><br>";
+		if(trim($listaMovimentos[$idx]->jornada) == "X") echo "<br><strong>Horário do Colaborador</strong><br><br>";
 		echo "<div style='float: left; width: 60px;border-bottom: 1px dotted #000000;'>" . $listaMovimentos[$idx]->codigo . "</div>";
 		if(trim($listaMovimentos[$idx]->jornada) == "X")
 			echo "<div style='float: left; width: 500px; margin-left: 10px;border-bottom: 1px dotted #000000;'>";

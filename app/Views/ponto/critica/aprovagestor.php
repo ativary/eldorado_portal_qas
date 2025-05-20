@@ -504,7 +504,7 @@ const AdicionarBatida = () => {
     }
 
     if(dados.addNatureza == "")				{ exibeAlerta("error", "Natureza não informada."); 			return false; }
-    if(dados.addBatida == "")					{ exibeAlerta("error", "Batida não informada."); 				return false; }
+    if(dados.addBatida == "")					{ exibeAlerta("error", "Registro não informado."); 				return false; }
     if(dados.addJustificativa == "")	{ exibeAlerta("error", "Justificativa não informada."); return false; }
 		if(dados.addJustificativa == "outros" && dados.textoJustOutros == ""){ exibeAlerta("error", "Justificativa (outros) não especificada."); return false; }
 

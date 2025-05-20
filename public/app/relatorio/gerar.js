@@ -8,8 +8,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODIGO_FILIAL', 'name': 'Cód. Filial'},
                 {'value':'NOME_FILIAL', 'name': 'Nome Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODIGO_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'CC', 'name': 'Cód. Centro de Custo'},
@@ -28,8 +28,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'COD_COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'COD_FILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'COD_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'DATA_ADMISSAO', 'name': 'Data Admissão'},
@@ -53,8 +53,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODIGO_FILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODIGO_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'CC', 'name': 'Cód. Centro de Custo'},
@@ -73,8 +73,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODIGO_FILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODIGO_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'CC', 'name': 'Cód. Centro de Custo'},
@@ -117,8 +117,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODIGO_FILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODIGO_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'CC', 'name': 'Cód. Centro de Custo'},
@@ -130,7 +130,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'ESCALA', 'name': 'Escala'},
                 {'value':'HORARIO', 'name': 'Horário'},
                 {'value':'DESC_HORARIO', 'name': 'Desc. horário'},
-                {'value':'BATIDAS', 'name': 'batidas'},
+                {'value':'REGISTROS', 'name': 'registros'},
                 {'value':'HORAS_TRABALHADAS', 'name': 'Hrs trabalhadas (+06 horas)'}
              
             ];
@@ -139,8 +139,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODIGO_FILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODIGO_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'CC', 'name': 'Cód. Centro de Custo'},
@@ -153,7 +153,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'HORARIO', 'name': 'Horário'},
                 {'value':'JORNADA', 'name': 'Jornada'},
                 {'value':'HORARIO_NOME', 'name': 'Desc. Horário'},
-                {'value':'BATIDAS', 'name': 'Batidas'},
+                {'value':'REGISTROS', 'name': 'Registros'},
                 {'value':'INTERJORNADA', 'name': 'Interjornada'}
              
             ];
@@ -162,8 +162,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODIGO_FILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODIGO_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'CC', 'name': 'Cód. Centro de Custo'},
@@ -176,7 +176,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'JORNADA', 'name': 'Jornada'},
                 {'value':'HORARIO', 'name': 'Horário'},
                 {'value':'HORARIO_NOME', 'name': 'Desc. horário'},
-                {'value':'BATIDAS', 'name': 'batidas'},
+                {'value':'REGISTROS', 'name': 'registros'},
                 {'value':'VALOR', 'name': 'Valor'}
              
             ];
@@ -186,8 +186,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODIGO_FILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODIGO_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'CC', 'name': 'Cód. Centro de Custo'},
@@ -201,7 +201,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'ESCALA', 'name': 'Escala'},
                 {'value':'HORARIO', 'name': 'Horário'},
                 {'value':'HORARIO_NOME', 'name': 'Desc. horário'},
-                {'value':'BATIDAS', 'name': 'batidas'},
+                {'value':'REGISTROS', 'name': 'registros'},
                 {'value':'HR_REFEICAO', 'name': 'Hrs refeição'}
              
             ];
@@ -211,8 +211,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'COLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODIGO_FILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODIGO_FUNCAO', 'name': 'Cód. Função'},
                 {'value':'FUNCAO', 'name': 'Nome Função'},
                 {'value':'CC', 'name': 'Cód. Centro de Custo'},
@@ -226,7 +226,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'JORNADA', 'name': 'Jornada'},
                 {'value':'HORARIO', 'name': 'Horário'},
                 {'value':'DESCRICAO_HORARIO', 'name': 'Desc. horário'},
-                {'value':'BATIDAS', 'name': 'batidas'},
+                {'value':'REGISTROS', 'name': 'registros'},
                 {'value':'HORARIO_BRITANICO', 'name': 'Horario britanico'}
              
             ];
@@ -235,8 +235,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
         case '10':
             colunas = [
                 {'value':'CODCOLIGADA', 'name': 'Cód. Coligada'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'SALDO', 'name': 'Saldo'}
             ];
         break;
@@ -244,8 +244,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
         case '11':
             colunas = [
                 {'value':'CODCOLIGADA', 'name': 'Cód. Coligada'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODFILIAL', 'name': 'Cód. Filial'},
                 {'value':'NOMESECAO', 'name': 'Nome Seção'},
                 {'value':'CODCUSTO', 'name': 'Cód. Centro de Custo'},
@@ -266,8 +266,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
         case '12':
             colunas = [
                 {'value':'CODCOLIGADA', 'name': 'Cód. Coligada'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'NOMEFUNCAO', 'name': 'Nome Função'},
                 {'value':'CODCUSTO', 'name': 'Cód. Centro de Custo'},
                 {'value':'DESCRICAO_CUSTO', 'name': 'Nome Centro de Custo'},
@@ -283,17 +283,17 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'CODCOLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODFILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSECAO', 'name': 'Cód. Seção'},
                 {'value':'SECAO', 'name': 'Descrição Seção'},
                 {'value':'CODCUSTO', 'name': 'Cód. Centro Custo'},
                 {'value':'CENTROCUSTO', 'name': 'Nome Centro de Custo'},
-                {'value':'DATA', 'name': 'Data Batida'},
-                {'value':'BATIDA', 'name': 'Batida'},
+                {'value':'DATA', 'name': 'Data Registro'},
+                {'value':'REGISTRO', 'name': 'Registro'},
                 {'value':'STATUS', 'name': 'Status'},
-                {'value':'JUSTIFICATIVA', 'name': 'Justificativa da Batida'},
+                {'value':'JUSTIFICATIVA', 'name': 'Justificativa do Registro'},
                 {'value':'DATA_REGISTRO', 'name': 'Data Registro'},
                 {'value':'HORA_REGISTRO', 'name': 'Hora Registro'},
                 {'value':'USUARIO', 'name': 'Usuário'},
@@ -308,17 +308,17 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'CODCOLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODFILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSECAO', 'name': 'Cód. Seção'},
                 {'value':'SECAO', 'name': 'Seção'},
                 {'value':'CCUSTO', 'name': 'Cód. Centro Custo'},
                 {'value':'CUSTO', 'name': 'Nome Centro de Custo'},
-                {'value':'DATA', 'name': 'Data Batida'},
-                {'value':'BATIDA', 'name': 'Batida'},
+                {'value':'DATA', 'name': 'Data Registro'},
+                {'value':'REGISTRO', 'name': 'Registro'},
                 {'value':'STATUS', 'name': 'Status'},
-                {'value':'JUSTIFICATIVA', 'name': 'Justificativa da Batida'},
+                {'value':'JUSTIFICATIVA', 'name': 'Justificativa do Registro'},
                 {'value':'CODUSUARIO', 'name': 'Usuário'},
                 {'value':'DATA_ALTERACAO', 'name': 'Data Alteração'},
                 {'value':'HORA_ALTERACAO', 'name': 'Hora Alteração'},
@@ -331,17 +331,17 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'CODCOLIGADA', 'name': 'Cód. Coligada'},
                 {'value':'CODFILIAL', 'name': 'Cód. Filial'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSECAO', 'name': 'Cód. Seção'},
                 {'value':'SECAO', 'name': 'Seção'},
                 {'value':'CODCUSTO', 'name': 'Cód. Centro Custo'},
                 {'value':'CENTROCUSTO', 'name': 'Nome Centro de Custo'},
-                {'value':'DATA', 'name': 'Data Batida'},
-                {'value':'BATIDA', 'name': 'Batida'},
+                {'value':'DATA', 'name': 'Data Registro'},
+                {'value':'REGISTRO', 'name': 'Registro'},
                 {'value':'STATUS', 'name': 'Status'},
-                {'value':'JUSTIFICATIVA', 'name': 'Justificativa da Batida'},
+                {'value':'JUSTIFICATIVA', 'name': 'Justificativa do Registro'},
                 {'value':'USUARIO', 'name': 'Usuário'},
                 {'value':'DATA_REGISTRO', 'name': 'Data Registro'},
                 {'value':'HORA_REGISTRO', 'name': 'Hora Registro'},
@@ -355,8 +355,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
          
         case '16':
             colunas = [
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CODSECAO', 'name': 'Cód. Seção'},
                 {'value':'SECAO', 'name': 'Seção'},
@@ -376,8 +376,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
@@ -403,8 +403,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CODSECAO', 'name': 'Cód. Seção'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
@@ -431,8 +431,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CODSECAO', 'name': 'Cód. Seção'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
@@ -460,8 +460,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
@@ -489,8 +489,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
 
-                {'value':'CHAPA_SUB', 'name': 'Chapa Funcionário substituido'},
-                {'value':'NOME_SUB', 'name': 'Nome Funcionário substituido'},
+                {'value':'CHAPA_SUB', 'name': 'Chapa Colaborador substituido'},
+                {'value':'NOME_SUB', 'name': 'Nome Colaborador substituido'},
                 {'value':'CODSITUACAO_SUB', 'name': 'Cód. Situação substituido'},
                 {'value':'CODSECAO_SUB', 'name': 'Cód. Seção substituido'},
                 {'value':'SECAO_SUB', 'name': 'Seção substituido'},
@@ -499,8 +499,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DESC_CUST_SUB', 'name': 'Descrição custo substituido'},
                 {'value':'SALARIO_SUB', 'name': 'Salário substituido'},
 
-                {'value':'CHAPA', 'name': 'Chapa Funcionário Substituto'},
-                {'value':'NOME', 'name': 'Nome Funcionário Substituto'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador Substituto'},
+                {'value':'NOME', 'name': 'Nome Colaborador Substituto'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
                 {'value':'DESC_CUST', 'name': 'Descrição custo'},
                 {'value':'SALARIO', 'name': 'Salário subistituido'},
@@ -534,8 +534,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
@@ -563,8 +563,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
             colunas = [
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
@@ -594,8 +594,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
@@ -622,8 +622,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                
                 {'value':'ID_REQUISIÇÂO', 'name': 'N requisição'},
                 {'value':'TIPO_REQUISIÇÂO', 'name': 'Tipo da requisição'},
-                {'value':'CHAPA', 'name': 'Chapa Funcionário'},
-                {'value':'NOME', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA', 'name': 'Chapa Colaborador'},
+                {'value':'NOME', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO', 'name': 'Função'},
                 {'value':'CODSITUACAO', 'name': 'Cód. Situação'},
                 {'value':'CENTROCUSTO', 'name': 'Centro de custo'},
@@ -654,8 +654,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DT_INICIO_PONTO', 'name': 'Início do Ponto'},
                 {'value':'DT_FIM_PONTO', 'name': 'Fim do Ponto'},
                 {'value':'CODFILIAL_COLAB', 'name': 'Filial'},
-                {'value':'CHAPA_COLAB', 'name': 'Chapa Funcionário'},
-                {'value':'NOME_COLAB', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA_COLAB', 'name': 'Chapa Colaborador'},
+                {'value':'NOME_COLAB', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO_COLAB', 'name': 'Função'},
                 {'value':'DT_ADMISSAO_COLAB', 'name': 'Data de Admissão'},
                 {'value':'CCUSTO_COLAB', 'name': 'Centro de Custo'},
@@ -719,8 +719,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DT_INICIO_PONTO', 'name': 'Início do Ponto'},
                 {'value':'DT_FIM_PONTO', 'name': 'Fim do Ponto'},
                 {'value':'CODFILIAL_COLAB', 'name': 'Filial'},
-                {'value':'CHAPA_COLAB', 'name': 'Chapa Funcionário'},
-                {'value':'NOME_COLAB', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA_COLAB', 'name': 'Chapa Colaborador'},
+                {'value':'NOME_COLAB', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO_COLAB', 'name': 'Função'},
                 {'value':'DT_ADMISSAO_COLAB', 'name': 'Data de Admissão'},
                 {'value':'CCUSTO_COLAB', 'name': 'Centro de Custo'},
@@ -744,8 +744,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DT_INICIO_PONTO', 'name': 'Início do Ponto'},
                 {'value':'DT_FIM_PONTO', 'name': 'Fim do Ponto'},
                 {'value':'CODFILIAL_COLAB', 'name': 'Filial'},
-                {'value':'CHAPA_COLAB', 'name': 'Chapa Funcionário'},
-                {'value':'NOME_COLAB', 'name': 'Nome Funcionário'},
+                {'value':'CHAPA_COLAB', 'name': 'Chapa Colaborador'},
+                {'value':'NOME_COLAB', 'name': 'Nome Colaborador'},
                 {'value':'FUNCAO_COLAB', 'name': 'Função'},
                 {'value':'DT_ADMISSAO_COLAB', 'name': 'Data de Admissão'},
                 {'value':'CCUSTO_COLAB', 'name': 'Centro de Custo'},
@@ -879,7 +879,7 @@ const procurarFuncionario = () => {
             try {
                 var response = JSON.parse(result);
 
-                $("select[name=chapa]").append('<option value="">Selecione o Funcionário ('+response.length+')</option>');
+                $("select[name=chapa]").append('<option value="">Selecione o Colaborador ('+response.length+')</option>');
                 if(response.length >= 1000){exibeAlerta('info', 'Qtde de registro ultrapassou o limite permitido, exibindo os primeiros 1000 registros.');}
                 for(var x = 0; x < response.length; x++){
                     $("select[name=chapa]").append('<option value="'+response[x].CHAPA+'">'+response[x].NOME + ' - ' +response[x].CHAPA+'</option>');

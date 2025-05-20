@@ -236,9 +236,9 @@ class EscalaModel extends Model {
         $indice = $dados['indice'] ?? null;
         $qtde_dias = 10;
 
-        //return responseJson('error', '<b>Funcionário</b> não informado.');
+        //return responseJson('error', '<b>Colaborador</b> não informado.');
         if($data == null) return responseJson('error', '<b>Data</b> não informada.');
-        if($chapa == null) return responseJson('error', '<b>Funcionário</b> não informado.');
+        if($chapa == null) return responseJson('error', '<b>Colaborador</b> não informado.');
         if($codhorario == null) return responseJson('error', '<b>Horário</b> não informado.');
         if($indice == null) return responseJson('error', '<b>Índice</b> não informado.');
 

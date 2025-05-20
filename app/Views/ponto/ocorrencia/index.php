@@ -1974,7 +1974,7 @@ body {
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-dark">
-                <h5 class="modal-title mt-0 text-white"><i class="mdi mdi-clock-outline"></i> Batidas do Dia</h5>
+                <h5 class="modal-title mt-0 text-white"><i class="mdi mdi-clock-outline"></i> Registros do Dia</h5>
                 <button type="button" class="close text-white" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
             </div>
             <div class="modal-body">

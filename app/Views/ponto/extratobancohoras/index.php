@@ -107,7 +107,7 @@ const procurarFuncionario = () => {
             try {
                 var response = JSON.parse(result);
 
-                $("select[name=chapa]").append('<option value="">Selecione o Funcionário ('+response.length+')</option>');
+                $("select[name=chapa]").append('<option value="">Selecione o Colaborador ('+response.length+')</option>');
                 if(response.length >= 1000){exibeAlerta('info', 'Qtde de registro ultrapassou o limite permitido, exibindo os primeiros 1000 registros.');}
                 for(var x = 0; x < response.length; x++){
                     $("select[name=chapa]").append('<option value="'+response[x].CHAPA+'">'+response[x].NOME + ' - ' +response[x].CHAPA+'</option>');

@@ -56,7 +56,7 @@ $(document).ready(function(){
 							</div>
 						</div>
 						<div class="form-group row mb-0">
-							<label for="funcionario" class="col-sm-2 col-form-label text-right text-left-sm">Funcionário:</label>
+							<label for="funcionario" class="col-sm-2 col-form-label text-right text-left-sm">Colaborador:</label>
 							<div class="col-sm-10">
 								<select class="select2 custom-select form-control form-control-sm" name="funcionario" id="funcionario">
 									<option value="">- Todos -</option>
@@ -1173,9 +1173,9 @@ $(document).ready(function(){
 														$terminoEscala  = end($escala);
 
                             if ($status_atitude = '') {
-														  $html .= '<button onclick="abrirAlteracaoBatida(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_batidas)).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.$resData[$i]['CPF'].'\', \''.(int)$resData[$i]['IS_MOTORISTA'].'\')" type="button" class="dropdown-item" title="Alterar batida"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar batida</button>';
+														  $html .= '<button onclick="abrirAlteracaoBatida(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_batidas)).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.$resData[$i]['CPF'].'\', \''.(int)$resData[$i]['IS_MOTORISTA'].'\')" type="button" class="dropdown-item" title="Alterar registro"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar registro</button>';
                             } else {
-                              $html .= '<button type="button" class="dropdown-item disabled" title="Incluir/Alterar batida" disabled><i class="mdi mdi-lock-alert" disabled ></i> Incluir/Alterar batida</button>';
+                              $html .= '<button type="button" class="dropdown-item disabled" title="Incluir/Alterar registro" disabled><i class="mdi mdi-lock-alert" disabled ></i> Incluir/Alterar registro</button>';
                             }
 
 														if ($ck_Atrasos && ($resData[$i]['ATRASO_CASE'])){
@@ -1246,7 +1246,7 @@ $(document).ready(function(){
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title text-center" id="modalAdicionalabel"><span class="oi oi-people"></span> Inserir Batida </h5>
+				<h5 class="modal-title text-center" id="modalAdicionalabel"><span class="oi oi-people"></span> Inserir Registro </h5>
 
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="fa fa-times"></span>
@@ -1285,7 +1285,7 @@ $(document).ready(function(){
 
 				<div class="input-group mb-3">
 					<div class="input-group-prepend">
-						<label class="input-group-text" style="width: 128px;" for="addBatida">Batida: </label>
+						<label class="input-group-text" style="width: 128px;" for="addBatida">Registro: </label>
 					</div>
 					<input type="text" id="addBatida" name="addBatida" value="" mask-batida style="border:1px solid #d6d6d6;" maxlength="4">
 				</div>
@@ -1334,7 +1334,7 @@ $(document).ready(function(){
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title text-center" id="modalAlteralabel"><span class="oi oi-people"></span> Alterar Batida </h5>
+				<h5 class="modal-title text-center" id="modalAlteralabel"><span class="oi oi-people"></span> Alterar Registro </h5>
 
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="fa fa-times"></span>
@@ -1373,7 +1373,7 @@ $(document).ready(function(){
 					<select class="custom-select" id="alteraAcao" name="alteraAcao">
 						<option selected value=""></option>
 						<option value="AN">Alterar natureza</option>
-						<option value="EB">Excluir batida</option>
+						<option value="EB">Excluir registro</option>
 						<option value="AR">Alternar Jornada de Referência</option>
 					</select>
 				</div>
@@ -1420,7 +1420,7 @@ $(document).ready(function(){
 
 				<div class="input-group mb-3">
 					<div class="input-group-prepend">
-						<label class="input-group-text">Funcionário: </label>
+						<label class="input-group-text">Colaborador: </label>
 					</div>
 					<input type="text" id="abonoFaltaNome" name="abonoFaltaNome" value="" class="form-control" style="background-color: #e0e0e0; border:1px solid #d6d6d6;" readonly>
 				</div>
@@ -1527,7 +1527,7 @@ $(document).ready(function(){
 
 					<div class="input-group mb-3">
 						<div class="input-group-prepend">
-							<label class="input-group-text">Funcionário: </label>
+							<label class="input-group-text">Colaborador: </label>
 						</div>
 						<input type="text" id="abonoAtrasoNome" name="abonoAtrasoNome" value="" class="form-control" style="background-color: #e0e0e0; border:1px solid #d6d6d6;" readonly>
 					</div>
@@ -2205,7 +2205,7 @@ $(document).ready(function(){
 			return false;
 		}
 		if (dados.addBatida == "") {
-			exibeAlerta("error", "Batida não informada.");
+			exibeAlerta("error", "Registro não informado.");
 			return false;
 		}
 		if (dados.addJustificativa == "") {
@@ -2254,7 +2254,7 @@ $(document).ready(function(){
 				} catch (e) {
 					exibeAlerta(
 						"error",
-						"Não foi possível alterar batida."
+						"Não foi possível alterar registro."
 					);
 				}
 			},
@@ -2521,10 +2521,10 @@ const validaDados = () => {
 				let batidaInformada = parseInt(batida.replace(':', ''));
 
 				if(batidaInformada < Vinicio_escala){
-					msg_aviso_batida = '<b>Batida</b> esta fora de sua jornada.';
+					msg_aviso_batida = '<b>Registro</b> está fora de sua jornada.';
 				}
 				if(batidaInformada > Vtermino_escala){
-					msg_aviso_batida = '<b>Batida</b> esta fora de sua jornada.';
+					msg_aviso_batida = '<b>Registro</b> está fora de sua jornada.';
 				}
 
 				if (just != undefined) {
@@ -2574,7 +2574,7 @@ const abrirAlteracaoBatida = (data, data_br, diasemana, batidas, chapa, escala, 
 	$(".modal_alterar_batida").modal('show');
 	$(".modal_alterar_batida [data-h-data]").html(data_br + ' <small style="color: #999999;">' + diasemana + '</small>');
 	$(".modal_alterar_batida [data-h-escala], .modal_macro [data-h-escala]").html('Escala: '+escala);
-	$(".modal_alterar_batida [data-h-batidas]").html('Batidas existentes: ');
+	$(".modal_alterar_batida [data-h-batidas]").html('Registros existentes: ');
 
 	var batidas = JSON.parse(decodeURIComponent(batidas));
 	
@@ -2823,7 +2823,7 @@ const excluirBatidaPT = (data_ref, batida) => {
 
 	Swal.fire({
 		icon: 'question',
-		title: 'Deseja excluir essa batida?',
+		title: 'Deseja excluir esse registro?',
 		showDenyButton: true,
 		showCancelButton: true,
 		confirmButtonText: `Sim, confirmar`,
@@ -2903,7 +2903,7 @@ const abrirSolicitacaoAbono = (data, data_br, diasemana, abonos, tipo_ocorrencia
 	// $(".modal_abono h3").html(data_br + ' <small style="color: #999999;">' + diasemana + '</small>');
 	$(".modal_abono [data-h-data]").html(data_br + ' <small style="color: #999999;">' + diasemana + '</small>');
 	$(".modal_abono [data-h-escala]").html('Escala: '+escala);
-	$(".modal_abono [data-h-batidas]").html('Batidas existentes: ');
+	$(".modal_abono [data-h-batidas]").html('Registros existentes: ');
 	try{
 		var batidas = JSON.parse(decodeURIComponent(batidas));
 	} catch (e) {	
@@ -3292,11 +3292,11 @@ const validaDadosAbono = () => {
 			termino = parseInt(termino.replace(':', ''));
 
 			if (inicio > 2359) {
-				msg_erro = '<b>Batida</b> não pode ser superior a <b>23:59</b>.';
+				msg_erro = '<b>Registro</b> não pode ser superior a <b>23:59</b>.';
 				return false;
 			}
 			if (termino > 2359) {
-				msg_erro = '<b>Batida</b> não pode ser superior a <b>23:59</b>.';
+				msg_erro = '<b>Registro</b> não pode ser superior a <b>23:59</b>.';
 				return false;
 			}
 			
@@ -3559,7 +3559,7 @@ const abrirJustificativaExtra = (data, data_br, diasemana, codigoJustificativa, 
 	chapaFunc = chapa;
 	$(".modal_justificativa_extra [data-h-data]").html(data_br + ' <small style="color: #999999;">' + diasemana + '</small>');
 	$(".modal_justificativa_extra [data-h-escala]").html('Escala: '+escala);
-	$(".modal_justificativa_extra [data-h-batidas]").html('Batidas existentes: ');
+	$(".modal_justificativa_extra [data-h-batidas]").html('Registros existentes: ');
 	var batidas = JSON.parse(decodeURIComponent(batidas));
 
 	for (var x = 0; x < batidas.length; x++) {
@@ -3625,7 +3625,7 @@ const abrirAlteraAtitude = (data, data_br, diasemana, chapa, escala, batidas, ti
 	chapaFunc = chapa;
 	$(".modal_altera_atitude [data-h-data]").html(data_br + ' <small style="color: #999999;">' + diasemana + '</small>');
 	$(".modal_altera_atitude [data-h-escala]").html('Escala: '+escala);
-	$(".modal_altera_atitude [data-h-batidas]").html('Batidas existentes: ');
+	$(".modal_altera_atitude [data-h-batidas]").html('Registros existentes: ');
 	var batidas = JSON.parse(decodeURIComponent(batidas));
 
 	for (var x = 0; x < batidas.length; x++) {
@@ -3851,7 +3851,7 @@ $.ajax({
     <div class="modal-dialog modal-dialog-full">
         <div class="modal-content modal-content-full">
             <div class="modal-header bg-info">
-                <h5 class="modal-title mt-0 text-white"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar Batida</h5>
+                <h5 class="modal-title mt-0 text-white"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar Registro</h5>
                 <button type="button" class="close text-white" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
             </div>
             <div class="modal-body">
@@ -3867,7 +3867,7 @@ $.ajax({
                                 <tr>
 									<th>Data</th>
                                     <th>Data referencia</th>
-                                    <th class="colbatida">Batida</th>
+                                    <th class="colbatida">Registro</th>
                                     <th>Natureza</th>
                                     <th></th>
                                 </tr>
@@ -3884,13 +3884,13 @@ $.ajax({
                                 <input type="file" name="anexo_batida" class="form-control">
                             </div>
                         </div>
-                        <button data-btn-add class="btn btn-outline-primary waves-effect waves-light btn-block" type="button" onclick="incluirNovaBatida()"><i class="mdi mdi-plus-circle-outline"></i> Adicionar batida</button>
+                        <button data-btn-add class="btn btn-outline-primary waves-effect waves-light btn-block" type="button" onclick="incluirNovaBatida()"><i class="mdi mdi-plus-circle-outline"></i> Adicionar registro</button>
                     </div>
                 </div>
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-info" onclick="return alterarBatida()">Alterar Batida <i class="fas fa-check"></i></button>
+                <button type="button" class="btn btn-info" onclick="return alterarBatida()">Alterar Registro <i class="fas fa-check"></i></button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -4157,7 +4157,7 @@ const carregaFuncionario = () => {
 
 openLoading();
 var codSecao = $("[data-secao]").val();
-$("#funcionario").html('<option value="">-- selecione um funcionário --</option>').trigger('change');
+$("#funcionario").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
 if(codSecao == ''){
 	codSecao = 'all';
 }

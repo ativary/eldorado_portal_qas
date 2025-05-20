@@ -123,7 +123,7 @@ class Aprova extends BaseController
                 exit();
             }
         
-            // APROVA BATIDA RH COM RM
+            // APROVA REGISTRO RH COM RM
             if ($act == 'apr') {
 
                 
@@ -190,15 +190,15 @@ class Aprova extends BaseController
                 
             }
 
-            // APROVA BATIDA GESTOR
+            // APROVA REGISTRO GESTOR
             if ($act == 'aprGestor') {
                 foreach ($idbatida as $id_batida) {
                     $this->mAprova->aprovaBatidaGestor($id_batida, 'GESTOR');
                 }
-                notificacao('success', 'Batida aprovada com sucesso.');
+                notificacao('success', 'Registro aprovado com sucesso.');
             }
 
-            // REPROVA BATIDA
+            // REPROVA REGISTRO
             if ($act == 'rep') {
                 $resp = 0;
                 foreach ($idbatida as $id_batida) {
@@ -434,7 +434,7 @@ class Aprova extends BaseController
         $sheet->setCellValue('E1', 'DESCRIÇÃO TIPO');
         $sheet->setCellValue('F1', 'JUSTIFICATIVA');
         $sheet->setCellValue('G1', 'ANEXO');
-        $sheet->setCellValue('H1', 'BATIDAS DO DIA');
+        $sheet->setCellValue('H1', 'REGISTROS DO DIA');
         $sheet->setCellValue('I1', 'DATA REFERÊNCIA');
         $sheet->setCellValue('J1', 'DATA SOLICITAÇÃO');
         $sheet->setCellValue('K1', 'SOLICITANTE');
@@ -462,8 +462,8 @@ class Aprova extends BaseController
 
                 $tipo = "";
                 switch($registro['movimento']){
-                    case 1: $tipo = 'Inclusão de batida'; break;
-                    case 2: $tipo = 'Exclusão de batida'; break;
+                    case 1: $tipo = 'Inclusão de registro'; break;
+                    case 2: $tipo = 'Exclusão de registro'; break;
                     case 3: $tipo = 'Alteração de natureza'; break;
                     case 4: $tipo = 'Alteração jornada referência'; break;
                     case 5: $tipo = 'Abono de atrasos'; break;
@@ -499,7 +499,7 @@ class Aprova extends BaseController
                     }
                 }
                 
-                // inclusão de batida
+                // inclusão de registro
                 $descricao_tipo = "";
                 if ($registro['movimento'] == 21) {
                     $descricao_tipo .= 'Indice: [' . $registro['codindice'] . '] ';
@@ -513,7 +513,7 @@ class Aprova extends BaseController
                     $descricao_tipo .= 'Horário: [' . $registro['horario']. '] ';
                 }
                 if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
-                    $descricao_tipo .= 'Batida: [' . sprintf("%05s", m2h($registro['batida'])) . '] ';
+                    $descricao_tipo .= 'Registro: [' . sprintf("%05s", m2h($registro['batida'])) . '] ';
                 }
                 // abono
                 if ($registro['movimento'] == 5 || $registro['movimento'] == 6 || $registro['movimento'] == 9) {
@@ -540,7 +540,7 @@ class Aprova extends BaseController
                 if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
                     $justificativa = $registro['justificativa_escala'];
                 }
-                // inclusão de batida
+                // inclusão de registro
                 if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
                     if (strlen(trim($registro['motivo'] ?? '')) > 0) $justificativa = $registro['motivo'];
                 }

@@ -33,7 +33,7 @@
                                     <option value="12" <?php if($relatorio == 12){ echo 'selected';}?>>Relação Geral-Equipe</option>
                                     <option value="13" <?php if($relatorio == 13){ echo 'selected';}?>>Ponto Digitado x Coletado</option>
                                     <?php if($rh): ?><option value="14" <?php if($relatorio == 14){ echo 'selected';}?>>Ponto Digitado x Excluídos</option><?php endif; ?>
-                                    <?php if($rh): ?><option value="15" <?php if($relatorio == 15){ echo 'selected';}?>>Ponto Batidas Reprovadas</option><?php endif; ?>
+                                    <?php if($rh): ?><option value="15" <?php if($relatorio == 15){ echo 'selected';}?>>Ponto Registros Reprovados</option><?php endif; ?>
                                     <option value="16" <?php if($relatorio == 16){ echo 'selected';}?>>Relatório (Macros)</option>
                                     <option value="30" <?php if($relatorio == 30){ echo 'selected';}?>>Troca de Escala/Dia</option>
                                     <?php if($rh): ?><option value="29" <?php if($relatorio == 29){ echo 'selected';}?>>Aprovações e Reprovações</option><?php endif; ?> 

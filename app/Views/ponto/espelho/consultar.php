@@ -39,7 +39,7 @@
                 <div class="card noprint">
                     <div class="card-header mt-0">
                         <div class="row">
-                            <h4 class="col-12 mb-1 mt-1">Selecione o funcionário e o período</h4>
+                            <h4 class="col-12 mb-1 mt-1">Selecione o colaborador e o período</h4>
                         </div>
                     </div>
                     <div class="card-body">
@@ -47,10 +47,10 @@
                             <form action="" method="post" name="form_holerite" id="form_holerite">
 
                                 <div class="col-sm-12 d-flex">
-                                    <label for="funcionario" class="col-6 col-form-label text-right">Funcionário:</label>
+                                    <label for="funcionario" class="col-6 col-form-label text-right">Colaborador:</label>
                                     <div class="col-sm-12">
                                         <select class="select2 custom-select form-control form-control-sm" name="funcionario" id="funcionario">
-                                            <option value="">- selecione um funcionário -</option>
+                                            <option value="">- selecione um colaborador -</option>
                                             <?php if ($ListaFuncionarioSecao) : ?>
                                                 <?php foreach ($ListaFuncionarioSecao as $key => $DadosFunc) : ?>
                                                     <option value="<?= $DadosFunc['CHAPA'] ?>" <?= ($chapa == $DadosFunc['CHAPA']) ? " selected " : ""; ?>><?= $DadosFunc['CHAPA'] . ' - ' . $DadosFunc['NOME'] ?></option>
@@ -476,7 +476,7 @@
         }
 
         if (dados.funcionario == "") {
-            exibeAlerta("error", "<b>Funcionário</b> não selecionado.");
+            exibeAlerta("error", "<b>Colaborador</b> não selecionado.");
             return false;
         }
         if (dados.periodo == "") {

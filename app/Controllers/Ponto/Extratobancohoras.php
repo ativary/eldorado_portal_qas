@@ -85,7 +85,7 @@ class Extratobancohoras extends BaseController
                             <td>'.$objFuncBH[$idx]->sindicato.'</td>
                         </tr>
                         <tr>
-                            <td>Dia a Dia por Funcionário de '.date('d/m/Y', strtotime($objFuncBH[$idx]->inicio)).' até '.date('d/m/Y', strtotime($objFuncBH[$idx]->fim)).'</td>
+                            <td>Dia a Dia por Colaborador de '.date('d/m/Y', strtotime($objFuncBH[$idx]->inicio)).' até '.date('d/m/Y', strtotime($objFuncBH[$idx]->fim)).'</td>
                         </tr>
                         <tr>
                             <td>'.$objFuncBH[$idx]->codcusto.' - '.$objFuncBH[$idx]->centrodecusto.'</td>
@@ -95,7 +95,7 @@ class Extratobancohoras extends BaseController
                     
                     <table bgcolor="#cccccc" width="100%" cellspacing="2" border="0" style="font-size: 10px !important;">
                         <tr>
-                            <td colspan="5">Funcionário: <strong>'.$objFuncBH[$idx]->chapa.' - '.$objFuncBH[$idx]->funcionario.'</strong></td>
+                            <td colspan="5">Colaborador: <strong>'.$objFuncBH[$idx]->chapa.' - '.$objFuncBH[$idx]->funcionario.'</strong></td>
                         </tr>
                         <tr>
                             <td align="center" colspan="2">Dia</td>

@@ -45,10 +45,10 @@
                             </div>
                         </div>
                             <div class="row">
-                                <label for="funcionario" class="col-sm-2 col-form-label text-right text-left-sm">Funcionário:</label>
+                                <label for="funcionario" class="col-sm-2 col-form-label text-right text-left-sm">Colaborador:</label>
                                 <div class="col-sm-10">
                                     <select class="select2 custom-select form-control form-control-sm" name="funcionario" id="funcionario">
-                                        <option value="">- selecione o funcionário -</option>
+                                        <option value="">- selecione o colaborador -</option>
                                         <?php if ($resFuncionarioSecao) : ?>
                                             <?php foreach ($resFuncionarioSecao as $key => $DadosFunc) : ?>
                                                 <option value="<?= $DadosFunc['CHAPA'] ?>"><?= $DadosFunc['CHAPA'] . ' - ' . $DadosFunc['NOME'] ?></option>
@@ -104,7 +104,7 @@ const procurarFuncionario = () => {
             try {
                 var response = JSON.parse(result);
 
-                $("select[name=chapa]").append('<option value="">Selecione o Funcionário ('+response.length+')</option>');
+                $("select[name=chapa]").append('<option value="">Selecione o Colaborador ('+response.length+')</option>');
                 if(response.length >= 1000){exibeAlerta('info', 'Qtde de registro ultrapassou o limite permitido, exibindo os primeiros 1000 registros.');}
                 for(var x = 0; x < response.length; x++){
                     $("select[name=chapa]").append('<option value="'+response[x].CHAPA+'">'+response[x].NOME + ' - ' +response[x].CHAPA+'</option>');
@@ -122,7 +122,7 @@ const carregaFuncionariosSecao = (codSecao) => {
 
     openLoading();
 
-    $("#funcionario").html('<option value="">-- selecione um funcionário --</option>').trigger('change');
+    $("#funcionario").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
     if (codSecao == '') {
         // openLoading(true);
         // return false;

@@ -1003,7 +1003,7 @@ class EspelhoModel extends Model {
                     foreach($Batidas['batidas'] as $key2 => $batida){
                         if($batida['batida'] == $batida_inserida){
                            
-                            return responseJson('error', '<b>Batida</b> já foi registrada.');
+                            return responseJson('error', '<b>Registro</b> já existe.');
                             break;
                         }
                         // unset($Batidas[$key2], $batida);
@@ -1023,7 +1023,7 @@ class EspelhoModel extends Model {
 
             // verifica se digitou a justificativa
             if(strlen(trim($dados['justificativa_batida'])) <= 0){
-                return responseJson('error', '<b>Justificativa da batida</b> não informada.');
+                return responseJson('error', '<b>Justificativa do registro</b> não informada.');
             }
 
             $possui_anexo = "NULL";
@@ -1090,10 +1090,10 @@ class EspelhoModel extends Model {
                     $mAprova = model('Ponto/AprovaModel');
                     $mAprova->aprovaBatidaRH($insertID);
                 }
-                return responseJson('success', 'Batida incluida com sucesso.');
+                return responseJson('success', 'Registro incluido com sucesso.');
             }
 
-            return responseJson('error', 'Falha ao incluir batida.');
+            return responseJson('error', 'Falha ao incluir registro.');
 
         } catch (\Exception $e) {
             return responseJson('error', 'Erro interno: ' . $e);
@@ -2427,10 +2427,10 @@ class EspelhoModel extends Model {
                 $response = explode(';', $result);
                 
                 if($result == 'Exclusão de registro(s) realizado com sucesso'){
-                    return responseJson('error', 'Não foi possivel excluir batida!');
+                    return responseJson('error', 'Não foi possivel excluir registro!');
                 }else{
                     $wsTotvs->ws_recalculo_ponto($res[0]['CHAPA'], dtEn($res[0]['DATA'], true));
-                    return responseJson('success', 'Batida excluida com sucesso!');
+                    return responseJson('success', 'Registro excluido com sucesso!');
                 }
 
                 $atualizou = ($response[0] == $_SESSION['func_coligada'] && ($response[1] ?? '') == $res[0]['chapa']) ? true : false;
@@ -2461,8 +2461,8 @@ class EspelhoModel extends Model {
         //echo $query;
 
         return ($res)
-                ? responseJson('success', 'Batida excluida com sucesso.')
-                : responseJson('error', 'Falha ao excluir batida.');
+                ? responseJson('success', 'Registro excluido com sucesso.')
+                : responseJson('error', 'Falha ao excluir registro.');
     }
 
     public function SaldoBancoHorasEquipe($periodo, $chapa){

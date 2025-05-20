@@ -57,7 +57,7 @@
                     -->
 
                     <div class="form-group row">
-                        <label for="limite_funcionario" class="col-sm-12 col-form-label text-left">Limite bloqueio Funcionário/Lider:</label>
+                        <label for="limite_funcionario" class="col-sm-12 col-form-label text-left">Limite bloqueio Colaborador/Lider:</label>
                         <div class="col-md-6 col-sm-10">
                             <div class="input-group">
                                 <input class="form-control" type="date" value="<?= isset($EspelhoConfiguracao[0]['limite_funcionario']) ? dtEn($EspelhoConfiguracao[0]['limite_funcionario'],true) : ""; ?>" name="limite_funcionario" id="limite_funcionario" require>                                
@@ -237,7 +237,7 @@
                     try {
                         var response = JSON.parse(result);
 
-                        $("select[name=chapa]").append('<option value="">Selecione o Funcionário ('+response.length+')</option>');
+                        $("select[name=chapa]").append('<option value="">Selecione o Colaborador ('+response.length+')</option>');
                         if(response.length >= 1000){exibeAlerta('info', 'Qtde de registro ultrapassou o limite permitido, exibindo os primeiros 1000 registros.');}
                         for(var x = 0; x < response.length; x++){
                             $("select[name=chapa]").append('<option value="'+response[x].CHAPA+'">'+response[x].NOME + ' - ' +response[x].CHAPA+'</option>');

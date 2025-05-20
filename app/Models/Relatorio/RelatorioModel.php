@@ -2494,7 +2494,7 @@ class RelatorioModel extends Model {
                 , ESCALA
                 , HORARIO
                 , DESC_HORARIO
-                , BATIDAS
+                , BATIDAS AS REGISTROS
                 ,(CASE WHEN ISNULL(PRIMEIRO_PAR,0) > 0 THEN 'Par1 '   + dbo.mintotime(PRIMEIRO_PAR) ELSE '' END)
                     +(CASE WHEN ISNULL(SEGUNDO_PAR,0)  > 0 THEN '  Par2 ' + dbo.mintotime(SEGUNDO_PAR) ELSE '' END)
                     +(CASE WHEN ISNULL(TERCEIRO_PAR,0) > 0 THEN '  Par3 ' + dbo.mintotime(TERCEIRO_PAR) ELSE '' END)
@@ -2748,7 +2748,7 @@ class RelatorioModel extends Model {
                 , JORNADA
                 , HORARIO
                 , HORARIO_NOME
-                , BATIDAS
+                , BATIDAS AS REGISTROS
                 , ' 11h entre jornadas desrespeitado [' +
                     (CASE WHEN DBO.MINTOTIME(DATEDIFF(minute ,BAT_anterior, BAT_atual)) IS NULL or DATEDIFF(minute ,BAT_anterior, BAT_atual) > 660 THEN '[Bat.Inválida]'
                         ELSE DBO.MINTOTIME(DATEDIFF(minute ,BAT_anterior, BAT_atual)) END) 
@@ -2952,7 +2952,7 @@ class RelatorioModel extends Model {
                       ,JORNADA
                       ,HORARIO
                       ,HORARIO_NOME
-                      ,BATIDAS
+                      ,BATIDAS AS REGISTROS
                       ,'7 dias de ' + CONVERT(VARCHAR(10),DATAFINAL,103) + ' à ' + CONVERT(VARCHAR(10),DATA,103) PERIODO
                       ,(UM + DOIS + TRES + QUATRO + CINCO + SEIS + SETE) VALOR
                 
@@ -3167,7 +3167,7 @@ class RelatorioModel extends Model {
                     ,ESCALA
                     ,HORARIO
                     ,HORARIO_NOME
-                    ,BATIDAS
+                    ,BATIDAS AS REGISTROS
                     ,dbo.MINTOTIME(HR_REFEICAO) AS HR_REFEICAO
                 FROM (
 
@@ -3380,7 +3380,7 @@ class RelatorioModel extends Model {
                     , JORNADA
                     , HORARIO
                     , DESCRICAO_HORARIO
-                    , BATIDAS
+                    , BATIDAS AS REGISTROS
                     
                     , CONCAT(HOR_UM,' ',HOR_DOIS,' ',HOR_TRES,' ',HOR_QUATRO) HORARIO_BRITANICO
                 
@@ -4267,7 +4267,7 @@ FROM (
                     CODCUSTO, 
                     CENTROCUSTO, 
                     DATA, 
-                    BATIDA, 
+                    BATIDA AS REGISTRO, 
                     STATUS, 
                     (CASE WHEN STATUS <> 'C' THEN JUSTIFICATIVA ELSE '' END) JUSTIFICATIVA,
                     CONVERT(VARCHAR, DATA_REGISTRO, 103) DATA_REGISTRO,
@@ -4584,7 +4584,7 @@ FROM (
                         ,E.NROCENCUSTOCONT CCUSTO 
                         ,G.NOME CUSTO 
                         ,CONVERT(VARCHAR, B.DATAHORA, 103)DATA
-		                ,SUBSTRING(CONVERT(VARCHAR, B.DATAHORA, 108),0,6) BATIDA
+		                ,SUBSTRING(CONVERT(VARCHAR, B.DATAHORA, 108),0,6) REGISTRO
                         ,(CASE 
                             WHEN B.IDIMPORTACAO IS NOT NULL AND PROCESSO = '13'  THEN 'E' 
                             WHEN A.STATUS      = 'D' THEN 'D'
@@ -4730,7 +4730,7 @@ FROM (
                     SUBSTRING(B.CODSECAO,5, 5) CODCUSTO,
                     F.NOME CENTROCUSTO,
                     CONVERT(VARCHAR, A.dtponto, 103) DATA,
-                    DBO.MINTOTIME(COALESCE(A.ent1, A.ent2, A.ent3, A.ent4, A.ent5, A.sai1, A.sai2, A.sai3, A.sai4, A.sai5)) BATIDA,
+                    DBO.MINTOTIME(COALESCE(A.ent1, A.ent2, A.ent3, A.ent4, A.ent5, A.sai1, A.sai2, A.sai3, A.sai4, A.sai5)) REGISTRO,
                     'R' STATUS,
                     COALESCE(A.justent1, A.justent2, A.justent3, A.justent4, A.justent5, A.justsai1, A.justsai2, A.justsai3, A.justsai4, A.justsai5) JUSTIFICATIVA,
                    
