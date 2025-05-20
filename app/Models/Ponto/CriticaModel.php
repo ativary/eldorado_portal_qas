@@ -283,7 +283,7 @@ class CriticaModel extends Model {
 				ORDER BY DATA, BATIDA ASC
 		";
 
-     //if($_SESSION['log_id'] == 1) echo '<pre>'.$query.'</pre>';exit();
+    //if($_SESSION['log_id'] == 1) echo '<pre>'.$query.'</pre>';exit();
     $result = $this->dbrm->query($query);
     // if(!$result) return false;
     return ($result->getNumRows() > 0) 
