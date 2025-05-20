@@ -24,7 +24,8 @@ Class Justificativa extends BaseController {
 
     public function index(){
        
-        parent::VerificaPerfil('PONTO_CONFIG_JUSTIFICATIVA');
+        parent::VerificaPerfil('GLOBAL_RH');
+        parent::VerificaPerfil('PONTO_CONFIG');
         $dados['_titulo'] = "Justificativas de Ponto";
 
         $dados['motivos'] = [

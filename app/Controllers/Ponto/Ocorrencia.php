@@ -165,8 +165,9 @@ Class Ocorrencia extends BaseController {
 	public function config(){
 		 
 		 
-		parent::VerificaPerfil('PONTO_OCORRENCIAS_CONFIG');
-		$dados['_titulo'] = "Configuração Ocorrência de Ponto";
+		parent::VerificaPerfil('GLOBAL_RH');
+    parent::VerificaPerfil('PONTO_CONFIG');
+    $dados['_titulo'] = "Configuração Ocorrência de Ponto";
 		$dados['resHorario'] = $this->mOcorrencia->ListarOcorrenciaHorarios();
 		$dados['resWorkflow'] = $this->mOcorrencia->ListaConfiguracaoWorkflow();
 		$dados['resWorkflowRH'] = $this->mOcorrencia->ListaConfiguracaoWorkflowRH();
@@ -178,8 +179,9 @@ Class Ocorrencia extends BaseController {
 
     public function motorista(){
         
-		parent::VerificaPerfil('PONTO_OCORRENCIAS_CONFIG');
-		$dados['_titulo'] = "Configuração de Cargos";
+        parent::VerificaPerfil('GLOBAL_RH');
+        parent::VerificaPerfil('PONTO_CONFIG');
+        $dados['_titulo'] = "Configuração de Cargos";
         $this->_breadcrumb->add($dados['_titulo'], '');
         $dados['resFuncao'] = model('PortalModel')->ListarFuncao();
         $dados['resMotorista'] = $this->mOcorrencia->ListaConfiguracaoMotorita();
@@ -189,8 +191,9 @@ Class Ocorrencia extends BaseController {
 
     public function config_ocorrencias(){
 		 
-        $dados['_titulo'] = "Configuração Ocorrência de Ponto";
-		parent::VerificaPerfil('PONTO_OCORRENCIAS_CONFIG');
+    parent::VerificaPerfil('GLOBAL_RH');
+    parent::VerificaPerfil('PONTO_CONFIG');
+    $dados['_titulo'] = "Configuração Ocorrência de Ponto";
 		$dados['resTipos'] = $this->mOcorrencia->ListarOcorrenciaTipoPortal();
 		
 		return parent::ViewPortal('ponto/ocorrencia/config_ocorrencias', $dados);

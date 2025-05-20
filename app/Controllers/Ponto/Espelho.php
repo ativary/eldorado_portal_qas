@@ -213,7 +213,8 @@ class Espelho extends BaseController {
     // ------------------------------------------------------------------
     public function configuracao(){
 
-        parent::VerificaPerfil('PONTO_ESPELHO_CONFIGURACAO');
+        parent::VerificaPerfil('GLOBAL_RH');
+        parent::VerificaPerfil('PONTO_CONFIG');
         $dados['_titulo'] = "Configuração Espelho de Ponto";
         $this->_breadcrumb->add('Configuração', 'ponto/espelho/configuracao');
 

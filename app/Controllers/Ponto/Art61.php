@@ -29,6 +29,7 @@ class Art61 extends BaseController
   {
 
     parent::VerificaPerfil('GLOBAL_RH');
+    parent::VerificaPerfil('PONTO_CONFIG');
     $dados['_titulo'] = "Artigo.61";
     $this->_breadcrumb->add($dados['_titulo'], '');
     $dados['resConfig'] = $this->mArt61->ListarConfigArt61();

@@ -380,7 +380,8 @@ Class Escala extends BaseController {
     // ------------------------------------------------------------------
     public function configuracao(){
 
-        parent::VerificaPerfil('PONTO_TROCADEESCALA_CONFIGURACAO');
+        parent::VerificaPerfil('GLOBAL_RH');
+        parent::VerificaPerfil('PONTO_CONFIG');
         $dados['_titulo'] = "Configuração";
         $dados['resConfiguracao'] = $this->mEscala->Configuracao();
         
