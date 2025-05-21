@@ -689,7 +689,7 @@ class CriticaModel extends Model {
         AND CODCOLIGADA = '{$this->coligada}' {$qr_secao})
        ";
 
-      // if($_SESSION['log_id'] == 2767) exit($query);
+      if($_SESSION['log_id'] == 1) echo '<pre>'.$query.'</pre>';exit();
       $result = $this->dbportal->query($query);
       if(!$result) return false;
       return ($result->getNumRows() > 0) 
@@ -770,7 +770,7 @@ class CriticaModel extends Model {
         FROM zcrmportal_ponto_horas WHERE id IN (".substr($id_batidas, 0, -1).") AND coligada = '{$this->coligada}' AND status <> 'S' ";
 
 
-        // if($_SESSION['log_id'] == 1) echo '<pre>'.$query.'</pre>';exit();
+        //if($_SESSION['log_id'] == 1) echo '<pre>'.$query.'</pre>';exit();
         $result = $this->dbportal->query($query);
 
          if(!$result) return false;

@@ -1,0 +1,294 @@
+USE [CorporeRMDEV]
+GO
+
+/****** Object:  UserDefinedFunction [dbo].[AY_CRITICAS_BATIDAS]    Script Date: 21/05/2025 10:15:35 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE FUNCTION [dbo].[AY_CRITICAS_BATIDAS](@CODCOLIGADA INT, @DATAINIC DATE, @DATAFIM DATE)
+RETURNS TABLE AS
+
+RETURN (
+SELECT DISTINCT 
+  CODCOLIGADA,
+  CHAPA, 
+  NOME,
+  DATA,
+  DATAREFERENCIA,
+  DATAREFERENCIA2,
+  IDAAFDT,
+  BATIDA,
+  NATUREZA,
+  (
+    CASE
+      WHEN ATRASO_JUST = 0 THEN 0
+      WHEN ATRASO_JUST > 0
+      AND ATRASO_JUST < ATRASO_CASE THEN ATRASO_JUST
+      WHEN ATRASO_JUST > 0
+      AND ATRASO_JUST > ATRASO_CASE THEN ATRASO_CASE
+      ELSE ATRASO_CASE
+    END
+  ) ATRASO_CASE,
+  ISNULL(FALTA_CASE, 0) FALTA_CASE,
+  EXTRAEXECUTADO_CASE,
+  SEM_PAR_CORRESPONDENTE,
+  INTERJORNADA,
+  JORNADA_MAIOR_10HORAS,
+  JORNADA_MAIOR_12HORAS,
+  (
+	CASE WHEN SEM_PAR_CORRESPONDENTE IS NULL THEN NULL
+	ELSE SEM_PAR_CORRESPONDENTE
+	END
+  ) SEM_PAR_CORRESPONDENTE_DESC,
+  INTERJORNADA_DESC,
+  JORNADA_MAIOR_10HORAS_DESC,
+  JORNADA_MAIOR_12HORAS_DESC,
+  BANCO_HORA,
+  STATUS,
+  JUSTIFICATIVA_BATIDA
+FROM (
+    SELECT 
+	  A.CODCOLIGADA,
+	  A.CHAPA,
+      B.NOME,
+      Z.DATA,
+      ATRASO,
+      FALTA,
+      EXTRAEXECUTADO,
+      (
+        CASE
+          WHEN Z.DATAREFERENCIA IS NOT NULL THEN Z.DATAREFERENCIA
+          ELSE Z.DATA
+        END
+      ) DATAREFERENCIA,
+      Z.DATAREFERENCIA DATAREFERENCIA2,
+      Z.IDAAFDT,
+      Z.BATIDA,
+      Z.NATUREZA,
+      Z.STATUS,
+      (
+        CASE
+          WHEN (
+            SELECT ISNULL(SUM(FIM - INICIO), 0)
+            FROM AJUSTFUN
+            WHERE CODCOLIGADA = A.CODCOLIGADA
+              AND CHAPA = A.CHAPA
+              AND DATAREFERENCIA = A.DATA
+              AND APROVADO = '1'
+          ) > 0 THEN 0
+          WHEN ATRASO >= '0' THEN ATRASO
+          ELSE NULL
+        END
+      ) ATRASO_CASE,
+      ISNULL(
+        (
+          SELECT SUM(FIM - INICIO)
+          FROM AJUSTFUN D
+          WHERE A.CODCOLIGADA = D.CODCOLIGADA
+            AND A.CHAPA = D.CHAPA
+            AND A.DATA = D.DATAREFERENCIA
+            AND TIPOOCORRENCIA IN ('A', 'AC')
+            AND JUSTIFICATIVA IS NULL
+        ),
+        0
+      ) ATRASO_JUST,
+      (
+        CASE
+          WHEN FALTA > '0' THEN FALTA
+          ELSE NULL
+        END
+      ) FALTA_CASE,
+      ISNULL(
+        (
+          SELECT COUNT(CHAPA)
+          FROM AABONFUN
+          WHERE CHAPA = A.CHAPA
+            AND CODCOLIGADA = A.CODCOLIGADA
+            AND DATA = A.DATA
+            AND CODABONO = '030'
+        ),
+        0
+      ) FALTA_JUST,
+      (
+        CASE
+          WHEN EXTRAEXECUTADO >= '0' THEN EXTRAEXECUTADO
+          ELSE NULL
+        END
+      ) EXTRAEXECUTADO_CASE,
+      (
+        SELECT CODAVISO
+        FROM AAVISOCALCULADO C
+        WHERE A.CODCOLIGADA = C.CODCOLIGADA
+          AND A.CHAPA = C.CHAPA
+          AND A.DATA = C.DATAREFERENCIA
+          AND CODAVISO = '1'
+      ) INTERJORNADA,
+      (
+        SELECT CODAVISO
+        FROM AAVISOCALCULADO C
+        WHERE A.CODCOLIGADA = C.CODCOLIGADA
+          AND A.CHAPA = C.CHAPA
+          AND A.DATA = C.DATAREFERENCIA
+          AND CODAVISO = '2'
+      ) JORNADA_MAIOR_10HORAS,
+      (
+        SELECT CODAVISO
+        FROM AAVISOCALCULADO C
+        WHERE A.CODCOLIGADA = C.CODCOLIGADA
+          AND A.CHAPA = C.CHAPA
+          AND A.DATA = C.DATAREFERENCIA
+          AND CODAVISO = '11'
+      ) JORNADA_MAIOR_12HORAS,
+      CASE
+        (
+          SELECT COUNT(BAT.BATIDA)
+          FROM ABATFUN BAT (NOLOCK)
+          WHERE BAT.CODCOLIGADA = A.CODCOLIGADA
+            AND BAT.CHAPA = A.CHAPA
+            AND COALESCE(BAT.DATAREFERENCIA, BAT.DATA) = A.DATA
+        ) % 2
+        WHEN 0 THEN NULL
+        ELSE '5'
+      END SEM_PAR_CORRESPONDENTE,
+      (
+        SELECT DESCRICAO
+        FROM AAVISOCALCULADO C
+        WHERE A.CODCOLIGADA = C.CODCOLIGADA
+          AND A.CHAPA = C.CHAPA
+          AND A.DATA = C.DATAREFERENCIA
+          AND CODAVISO = '1'
+      ) INTERJORNADA_DESC,
+      (
+        SELECT DESCRICAO
+        FROM AAVISOCALCULADO C
+        WHERE A.CODCOLIGADA = C.CODCOLIGADA
+          AND A.CHAPA = C.CHAPA
+          AND A.DATA = C.DATAREFERENCIA
+          AND CODAVISO = '2'
+      ) JORNADA_MAIOR_10HORAS_DESC,
+      (
+        SELECT DESCRICAO
+        FROM AAVISOCALCULADO C
+        WHERE A.CODCOLIGADA = C.CODCOLIGADA
+          AND A.CHAPA = C.CHAPA
+          AND A.DATA = C.DATAREFERENCIA
+          AND CODAVISO = '11'
+      ) JORNADA_MAIOR_12HORAS_DESC,
+      (
+        CASE
+          WHEN D.justificativa IN (1, 21) THEN 'X'
+          ELSE NULL
+        END
+      ) BANCO_HORA,
+      (
+        SELECT MAX(
+            COALESCE(
+              A.justent1,
+              A.justent2,
+              A.justent3,
+              A.justent4,
+              A.justsai1,
+              A.justsai2,
+              A.justsai3,
+              A.justsai4
+            )
+          )
+        FROM PortalRHDEV..zcrmportal_ponto_horas A
+        WHERE A.dtponto = Z.DATA
+          AND A.chapa = Z.CHAPA COLLATE Latin1_General_CI_AS
+          AND A.movimento = 1
+          AND A.coligada = Z.CODCOLIGADA
+          AND COALESCE(
+            A.ent1,
+            A.ent2,
+            A.ent3,
+            A.ent4,
+            A.sai1,
+            A.sai2,
+            A.sai3,
+            A.sai4
+          ) = Z.BATIDA
+      ) JUSTIFICATIVA_BATIDA
+    FROM AAFHTFUN A
+      LEFT JOIN PortalRHDEV..zcrmportal_ponto_justificativa_func D ON A.DATA = D.dtponto
+      AND A.CHAPA = D.chapa Collate Database_Default
+      AND A.CODCOLIGADA = D.coligada
+      AND D.justificativa IN (1, 21),
+      PFUNC B,
+      ABATFUN Z
+    WHERE A.CODCOLIGADA = B.CODCOLIGADA
+      AND A.CHAPA = B.CHAPA
+      AND Z.CODCOLIGADA = A.CODCOLIGADA
+      AND Z.CHAPA = A.CHAPA
+      AND (
+        CASE
+          WHEN Z.DATAREFERENCIA IS NOT NULL THEN Z.DATAREFERENCIA
+          ELSE Z.DATA
+        END
+      ) = A.DATA
+      AND A.CODCOLIGADA = @CODCOLIGADA
+
+      AND (
+        CASE
+          WHEN Z.DATAREFERENCIA IS NOT NULL THEN Z.DATAREFERENCIA
+          ELSE Z.DATA
+        END
+      ) BETWEEN @DATAINIC AND @DATAFIM 
+      AND (
+        SELECT TOP 1 REGISTRO
+        FROM (
+            SELECT CONCAT(CODCOLIGADA, '-', CHAPA) REGISTRO,
+              CASE
+                WHEN DATADEMISSAO IS NOT NULL
+                AND CODSITUACAO = 'D' THEN DATADEMISSAO
+                ELSE GETDATE()
+              END DATA
+            FROM PFUNC
+            WHERE CODCOLIGADA = A.CODCOLIGADA
+              AND CHAPA = A.CHAPA
+              AND ISNULL(TIPODEMISSAO, '0') NOT IN ('5', '6')
+          ) X
+        WHERE X.DATA >= @DATAINIC
+        ORDER BY X.DATA ASC
+      ) IS NOT NULL
+  ) X
+WHERE (
+    ATRASO_CASE IS NOT NULL
+    OR FALTA_CASE IS NOT NULL
+    OR EXTRAEXECUTADO_CASE IS NOT NULL
+    OR SEM_PAR_CORRESPONDENTE IS NOT NULL
+    OR INTERJORNADA IS NOT NULL
+    OR JORNADA_MAIOR_10HORAS IS NOT NULL
+    OR JORNADA_MAIOR_12HORAS IS NOT NULL
+  )
+  AND (
+    SEM_PAR_CORRESPONDENTE IS NOT NULL
+    OR EXTRAEXECUTADO_CASE >= '1'
+    OR (
+      CASE
+        WHEN ATRASO_JUST = 0 THEN 0
+        WHEN ATRASO_JUST > 0
+        AND ATRASO_JUST < ATRASO_CASE THEN ATRASO_JUST
+        WHEN ATRASO_JUST > 0
+        AND ATRASO_JUST > ATRASO_CASE THEN ATRASO_CASE
+        ELSE ATRASO_CASE
+      END
+    ) >= '1'
+    OR ISNULL(
+      CASE
+        WHEN FALTA_JUST > 0 THEN 1
+        ELSE FALTA_CASE
+      END,
+      0
+    ) > 0
+    OR JORNADA_MAIOR_10HORAS IS NOT NULL
+    OR JORNADA_MAIOR_12HORAS IS NOT NULL
+    OR INTERJORNADA IS NOT NULL
+  )
+);
+GO
+
+
