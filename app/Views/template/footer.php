@@ -3,7 +3,7 @@
                     
 
                     <footer class="footer text-center text-sm-left noprint">
-                        &copy; <?= date('Y'); ?> Eldorado - Ariany <span class="text-muted d-none d-sm-inline-block float-right"><i class="mdi mdi-factory text-danger"></i> Coligada: <?= $_dadosColigadaAtiva.' - [<i class="mdi mdi-database text-success"></i> '.DBRM_BANCO.']'; ?></span>
+                        &copy; <?= date('Y'); ?> Eldorado - Ariany<span class="text-muted d-none d-sm-inline-block float-right"><i class="mdi mdi-factory text-danger"></i> Coligada: <?= $_dadosColigadaAtiva.' - [<i class="mdi mdi-database text-success"></i> '.DBRM_BANCO.']'; ?></span>
                     </footer>
                 </div>
                 <!-- end page content -->
