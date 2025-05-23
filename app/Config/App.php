@@ -6,7 +6,7 @@ use CodeIgniter\Config\BaseConfig;
 
 class App extends BaseConfig
 {
-    /**
+   /**
      * --------------------------------------------------------------------------
      * Base Site URL
      * --------------------------------------------------------------------------
@@ -23,7 +23,13 @@ class App extends BaseConfig
      *
      * @var string
      */
-    public $baseURL = 'https://portalrhqa3.eldoradobrasil.com.br';
+    public $baseURL;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->baseURL = env('BASE_URL', 'https://portalrhqa3.eldoradobrasil.com.br');
+    }
 
     /**
      * --------------------------------------------------------------------------
