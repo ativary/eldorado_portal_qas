@@ -658,11 +658,11 @@ class EspelhoModel extends Model {
             ORDER BY 
                 DATA
         ";
-        if($_SESSION['log_id'] == 1){
+        
          //echo '<pre>';
          //echo $query;
          //exit();
-        }
+      
         $result = $this->dbrm->query($query);
         return ($result->getNumRows() > 0) 
                 ? $result->getResultArray() 
@@ -826,7 +826,7 @@ class EspelhoModel extends Model {
             --ORDER BY CASE WHEN DATAREFERENCIA IS NOT NULL THEN DATAREFERENCIA ELSE DATA END ASC, CASE WHEN DATAREFERENCIA <> DATA THEN BATIDA+1440 ELSE BATIDA END ASC, NATUREZA ASC
             ORDER BY CASE WHEN DATAREFERENCIA IS NOT NULL THEN CASE WHEN DATAREFERENCIA > DATA THEN DATA ELSE DATAREFERENCIA END ELSE DATA END ASC, CASE WHEN DATAREFERENCIA <> DATA THEN BATIDA+1440 ELSE BATIDA END ASC, NATUREZA ASC
         ";
-        //  if($_SESSION['log_id'] == 1) echo '<pre>'.$query.'</pre>';exit();
+        //echo '<pre>'.$query.'</pre>';exit();
         $result = $this->dbrm->query($query);
         
 

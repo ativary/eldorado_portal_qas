@@ -511,7 +511,7 @@ class CriticaModel extends Model {
             ) JUSTIFICATIVA_CODIGO,
 
             (
-              select max(CONCAT(justificativa_excecao,status)) FROM ".DBPORTAL_BANCO."..zcrmportal_ponto_horas AA WHERE AA.chapa = A.CHAPA Collate Database_Default AND AA.coligada = A.CODCOLIGADA AND AA.dtponto = A.DATA AND AA.movimento = 9 AND dt_delete IS NULL
+              select max(CONCAT(justificativa_excecao,status)) FROM ".DBPORTAL_BANCO."..zcrmportal_ponto_horas AA WHERE AA.chapa = A.CHAPA Collate Database_Default AND AA.coligada = A.CODCOLIGADA AND AA.dtponto = A.DATA AND AA.movimento in (9) AND dt_delete IS NULL
             ) JUSTIFICATIVA_ATITUDE,
             ISNULL(AC.USABANCOHORAS,0) USABANCOHORAS,
             (SELECT COUNT(CHAPA) FROM AABONFUN (NOLOCK) WHERE CODCOLIGADA = A.CODCOLIGADA AND CHAPA = A.CHAPA AND DATA = A.DATA) QTDE_ABONO,
@@ -689,7 +689,7 @@ class CriticaModel extends Model {
         AND CODCOLIGADA = '{$this->coligada}' {$qr_secao})
        ";
 
-      if($_SESSION['log_id'] == 1) echo '<pre>'.$query.'</pre>';exit();
+      //if($_SESSION['log_id'] == 1) echo '<pre>'.$query.'</pre>';exit();
       $result = $this->dbportal->query($query);
       if(!$result) return false;
       return ($result->getNumRows() > 0) 

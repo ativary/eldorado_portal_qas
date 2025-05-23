@@ -219,6 +219,8 @@ $(document).ready(function(){
 					<i title="Aguardando Aprovação Gestor" class="mdi mdi-square ml-3 txteldorado_5" style="font-size:20px; color: #feca07;"></i> Pendente Aprovação
 					<i title="Pendente Aprovação RH" class="mdi mdi-square ml-3 txteldorado_8" style="font-size:20px; color: #37b550;"></i> Pendente Aprovação RH
 					<i title="Ação Reprovada" class="mdi mdi-square ml-3 txteldorado_2" style="font-size:20px; color: #f4811f;"></i> Ação Reprovada
+          <i title="Registro Coletado" class="mdi mdi-alpha-c-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Coletado
+          <i title="Registro Digitado" class="mdi mdi-alpha-d-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Digitado
 				</p>
 
 				<div class="table-responsive">
@@ -1172,7 +1174,7 @@ $(document).ready(function(){
 														$inicioEscala   = $escala[0];
 														$terminoEscala  = end($escala);
 
-                            if ($status_atitude = '') {
+                            if ($motivo_justificativa == 'Não justificado') {
 														  $html .= '<button onclick="abrirAlteracaoBatida(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_batidas)).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.$resData[$i]['CPF'].'\', \''.(int)$resData[$i]['IS_MOTORISTA'].'\')" type="button" class="dropdown-item" title="Alterar registro"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar registro</button>';
                             } else {
                               $html .= '<button type="button" class="dropdown-item disabled" title="Incluir/Alterar registro" disabled><i class="mdi mdi-lock-alert" disabled ></i> Incluir/Alterar registro</button>';
@@ -1180,7 +1182,7 @@ $(document).ready(function(){
 
 														if ($ck_Atrasos && ($resData[$i]['ATRASO_CASE'])){
 
-                              if ($status_atitude = '') {
+                              if ($motivo_justificativa == 'Não justificado') {
 															  $html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_atraso)).'\', 5, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \'0:00\', \''.m2h($resData[$i]['ATRASO_CASE']).'\')" type="button" class="dropdown-item" title="Solicitar Abono Atraso"><i class="mdi mdi-av-timer"></i> Solicitar Abono Atraso</button>';
                               } else {
                                 $html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Atraso" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Atraso</button>';
@@ -1191,7 +1193,7 @@ $(document).ready(function(){
 														}
 
 														if ($ck_Faltas && ($resData[$i]['FALTA_CASE'] && $resData[$i]['BATIDAS_PORTAL'] == 0)){
-                              if ($status_atitude = '') {
+                              if ($motivo_justificativa == 'Não justificado') {
                                 $html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_falta)).'\', 6, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.m2h($resData[$i]['FALTA_CASE']).'\', \'0:00\')" type="button" class="dropdown-item" title="Solicitar Abono Falta"><i class="mdi mdi-timer-off"></i> Solicitar Abono Falta</button>';
                               } else {
                                 $html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Falta" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Falta</button>';

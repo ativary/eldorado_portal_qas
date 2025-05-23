@@ -31,6 +31,31 @@ table th {
 .text-center {text-align: center !important;}
 .txtpdf {color: #ffffff !important;}
 .badge {font-size: 7px !important;}
+/* colors eldorado text */
+.txteldorado_1 {
+    color: #006b44 !important;
+}
+.bgeldorado_2 {
+    color: #f5943f !important;
+}
+.bgeldorado_3 {
+    color: #9de3ad !important;
+}
+.txteldorado_4 {
+    color: #c8c02d !important;
+}
+.txteldorado_5 {
+    color: #feca07 !important;
+}
+.txteldorado_6 {
+    color: #cb7b3a !important;
+}
+.txteldorado_8 {
+    color: #dbdcdd !important;
+}
+.txteldorado_9 {
+    color: #f3dab0 !important;
+}
 </style>
 <div class="no-border">
 		
@@ -202,20 +227,20 @@ table th {
                                 <div class="card-body">
                                     <div class="d-flex justify-content-around text-center">
                                         <div>
-                                            <p class="<?= ($HorasPositivas > 0) ? 'txteldorado_1' : 'txteldorado_2'; ?> mb-0" style="font-weight: 700;font-size: 170%;text-align: center;" id="h_anterior">  </p>
-                                            <p class="<?= ($HorasPositivas > 0) ? 'txteldorado_1' : 'txteldorado_2'; ?> mb-0">Saldo Anterior</p>
+                                            <p class="<?= ($HorasPositivas > 0) ? 'txteldorado_1' : 'bgeldorado_2'; ?> mb-0" style="font-weight: 700;font-size: 170%;text-align: center;" id="h_anterior">  </p>
+                                            <p class="<?= ($HorasPositivas > 0) ? 'txteldorado_1' : 'bgeldorado_2'; ?> mb-0">Saldo Anterior</p>
                                         </div>
                                         <div>
                                             <p class="txteldorado_1 mb-0" style="font-weight: 700;font-size: 170%;text-align: center;" id="h_mes_positivo"> </p>
                                             <p class="txteldorado_1 mb-0">Saldo Mês Positivo</p>
                                         </div>
                                         <div>
-                                            <p class="txteldorado_2 mb-0" style="font-weight: 700;font-size: 170%;text-align: center;" id="h_mes_negativo"> </p>
-                                            <p class="txteldorado_2 mb-0">Saldo Mês Negativo</p>
+                                            <p class="bgeldorado_2 mb-0" style="font-weight: 700;font-size: 170%;text-align: center;" id="h_mes_negativo"> </p>
+                                            <p class="bgeldorado_2 mb-0">Saldo Mês Negativo</p>
                                         </div>
                                         <div>
-                                            <p class="<?= m2h($SaldoTotal) > 0 ? 'txteldorado_1 mb-0' : 'txteldorado_2 mb-0' ?>" style="font-weight: 700;font-size: 170%;text-align: center;" id="h_total"> </p>
-                                            <p class="<?= m2h($SaldoTotal) > 0 ? 'txteldorado_1 mb-0' : 'txteldorado_2 mb-0' ?>">Saldo total</p>
+                                            <p class="<?= m2h($SaldoTotal) > 0 ? 'txteldorado_1 mb-0' : 'bgeldorado_2 mb-0' ?>" style="font-weight: 700;font-size: 170%;text-align: center;" id="h_total"> </p>
+                                            <p class="<?= m2h($SaldoTotal) > 0 ? 'txteldorado_1 mb-0' : 'bgeldorado_2 mb-0' ?>">Saldo total</p>
                                         </div>
                                     </div>
                                 </div>
@@ -224,11 +249,14 @@ table th {
 
                         <p class="m-0">
                             <b>Legenda:</b> 
-                            <i title="Aguardando Aprovação Gestor" class="mdi mdi-square ml-3 txteldorado_5" style="font-size:20px; color: #dbdcdd;"></i> Pendente Aprovação
-                            <i title="Aprovado Gestor" class="mdi mdi-square ml-3 txteldorado_8" style="font-size:20px; color: #dbdcdd;"></i> Pendente Aprovação RH
-                            <i title="Ação Reprovada" class="mdi mdi-square ml-3 txteldorado_2" style="font-size:20px; color: #f4811f;"></i> Ação Reprovada
-                            <i title="Necessária Ação" class="mdi mdi-square ml-3 txteldorado_9" style="font-size:20px; color: #feca07;"></i> Necessária Ação
-                            <i title="Justificar extra" class="mdi mdi-square ml-3 txteldorado_4" style="font-size:20px; color: #f3dab0;"></i> Justificar extra
+                            <i title="Necessária Ação" class="mdi mdi-square ml-3 txteldorado_9" style="font-size:20px; color: #f3dab0;"></i> Necessária Ação
+                            <i title="Aguardando Ação Gestor" class="mdi mdi-square ml-3 txteldorado_5" style="font-size:20px; color: #feca07;"></i> Pend/Ação Gestor
+                            <i title="Aprovado Gestor" class="mdi mdi-square ml-3 txteldorado_8" style="font-size:20px; color: #dbdcdd;"></i> Pend/Ação RH
+                            <i title="Ação Reprovada" class="mdi mdi-square ml-3 bgeldorado_2" style="font-size:20px; color: #f5943f;"></i> Ação Reprovada
+                            <i title="Ação Aprovada" class="mdi mdi-square ml-3 bgeldorado_3" style="font-size:20px; color: #9de3ad;"></i> Ação Aprovada
+                            <i title="Justificar extra" class="mdi mdi-square ml-3 txteldorado_4" style="font-size:20px; color: #c8c02d;"></i> Justificar extra
+                            <i title="Registro Coletado" class="mdi mdi-alpha-c-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Coletado
+                            <i title="Registro Digitado" class="mdi mdi-alpha-d-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Digitado
                         </p>
                         <?php endif; ?>
                         <div class="table-responsive">
@@ -784,11 +812,11 @@ table th {
                                                     
                                                     if($SolicitacaoAbono['status'] == 3){
                                                         $abono_reprovado = 1;
-                                                        $abono_pendente = '<i title="'.$SolicitacaoAbono['motivo_reprova'].'" class="mdi mdi-square txteldorado_2" style="font-size:20px;"></i>';
-                                                        $abono_pendente_mobile = '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="'.$SolicitacaoAbono['motivo_reprova'].'" class="mdi mdi-timer-off tippy-btn txteldorado_2" style="font-size:20px;"></i>';
+                                                        $abono_pendente = '<i title="'.$SolicitacaoAbono['motivo_reprova'].'" class="mdi mdi-square bgeldorado_2" style="font-size:20px;"></i>';
+                                                        $abono_pendente_mobile = '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="'.$SolicitacaoAbono['motivo_reprova'].'" class="mdi mdi-timer-off tippy-btn bgeldorado_2" style="font-size:20px;"></i>';
                                                     }else{
                                                         $abono_pendente = '<i title="Aguardando Aprovação Gestor" class="mdi mdi-square txteldorado_5" style="font-size:20px;"></i>';
-                                                        $abono_pendente_mobile = '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="Abono Pendente de Aprovação" class="mdi mdi-timer-off tippy-btn txteldorado_5" style="font-size:20px; color: #dbdcdd;"></i>';
+                                                        $abono_pendente_mobile = '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="Abono Pendente de Aprovação" class="mdi mdi-timer-off tippy-btn txteldorado_5" style="font-size:20px; color: #feca07 ;"></i>';
                                                     }
                                                     unset($resSolicitacaoAbono[$keyb]);
                                                 }
@@ -816,13 +844,13 @@ table th {
                                         }
 
                                         $possui_extra = ((int)$DiasEspelho['EXTRAEXECUTADO'] > 0) ? true : false;
-                                        if($possui_extra){
-                                            $bglinha = ' style="background-color: #f9d399;" ';
+                                        if($possui_extra and $justificativa_extra == "" ){
+                                            $bglinha = ' style="background-color: #c8c02d;" ';
                                         }
 
                                         $possui_falta_atraso = ((int)$DiasEspelho['FALTA'] > 0 || (int)$DiasEspelho['ATRASO'] > 0) ? true : false;
                                         if($possui_falta_atraso){
-                                            $bglinha = ' style="background-color: #fff08f;" ';
+                                            $bglinha = ' style="background-color: #f3dab0;" ';
                                         }
 
                                         $tipo_ocorrencia = 0;
@@ -859,12 +887,12 @@ table th {
 																					
 																																												   
 														 
-                                                <td <?php if(strlen(trim($ent_motivo_reprova[1])) > 0){echo ' style="background:#f4811f;" title="'.$ent_motivo_reprova[1].'"';}elseif(strlen(trim($ent_portal[1])) > 0 && $status_ent[1] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[1] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[1])) > 0): ?><?= $ent[1].' <span class="badge badge-light">'.(($status_ent[1] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if(strlen(trim($sai_motivo_reprova[1])) > 0){echo ' style="background:#f4811f;" title="'.$sai_motivo_reprova[1].'"';}elseif(strlen(trim($sai_portal[1])) > 0 && $status_sai[1] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[1] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[1])) > 0): ?><?= $sai[1].' <span class="badge badge-light">'.(($status_sai[1] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if(strlen(trim($ent_motivo_reprova[2])) > 0){echo ' style="background:#f4811f;" title="'.$ent_motivo_reprova[2].'"';}elseif(strlen(trim($ent_portal[2])) > 0 && $status_ent[2] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[2] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[2])) > 0): ?><?= $ent[2].' <span class="badge badge-light">'.(($status_ent[2] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if(strlen(trim($sai_motivo_reprova[2])) > 0){echo ' style="background:#f4811f;" title="'.$sai_motivo_reprova[2].'"';}elseif(strlen(trim($sai_portal[2])) > 0 && $status_sai[2] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[2] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[2])) > 0): ?><?= $sai[2].' <span class="badge badge-light">'.(($status_sai[2] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if(strlen(trim($ent_motivo_reprova[3])) > 0){echo ' style="background:#f4811f;" title="'.$ent_motivo_reprova[3].'"';}elseif(strlen(trim($ent_portal[3])) > 0 && $status_ent[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[3])) > 0): ?><?= $ent[3].' <span class="badge badge-light">'.(($status_ent[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if(strlen(trim($sai_motivo_reprova[3])) > 0){echo ' style="background:#f4811f;" title="'.$sai_motivo_reprova[3].'"';}elseif(strlen(trim($sai_portal[3])) > 0 && $status_sai[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[3])) > 0): ?><?= $sai[3].' <span class="badge badge-light">'.(($status_sai[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_ent[1] > 0 && $status_ent[1] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($ent_motivo_reprova[1])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[1].'"';}elseif(strlen(trim($ent_portal[1])) > 0 && $status_ent[1] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[1] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[1])) > 0): ?><?= $ent[1].' <span class="badge badge-light">'.(($status_ent[1] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_sai[1] > 0 && $status_sai[1] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($sai_motivo_reprova[1])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[1].'"';}elseif(strlen(trim($sai_portal[1])) > 0 && $status_sai[1] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[1] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[1])) > 0): ?><?= $sai[1].' <span class="badge badge-light">'.(($status_sai[1] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_ent[2] > 0 && $status_ent[2] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($ent_motivo_reprova[2])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[2].'"';}elseif(strlen(trim($ent_portal[2])) > 0 && $status_ent[2] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[2] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[2])) > 0): ?><?= $ent[2].' <span class="badge badge-light">'.(($status_ent[2] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_sai[2] > 0 && $status_sai[2] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($sai_motivo_reprova[2])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[2].'"';}elseif(strlen(trim($sai_portal[2])) > 0 && $status_sai[2] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[2] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[2])) > 0): ?><?= $sai[2].' <span class="badge badge-light">'.(($status_sai[2] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_ent[3] > 0 && $status_ent[3] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($ent_motivo_reprova[3])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[3].'"';}elseif(strlen(trim($ent_portal[3])) > 0 && $status_ent[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[3])) > 0): ?><?= $ent[3].' <span class="badge badge-light">'.(($status_ent[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_sai[3] > 0 && $status_sai[1] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($sai_motivo_reprova[3])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[3].'"';}elseif(strlen(trim($sai_portal[3])) > 0 && $status_sai[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[3])) > 0): ?><?= $sai[3].' <span class="badge badge-light">'.(($status_sai[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
                                                 <?php if(strlen(trim($resFuncionario[0]['DATADEMISSAO'])) > 0 && $DiasEspelho['DATA'] >= $resFuncionario[0]['DATADEMISSAO']): ?>
                                                     <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-dark  txtpdf" style="background: #004d95 !important;">Demitido - Não Utiliza Ponto</span></td>
                                                 <?php elseif($DiasEspelho['AFASTAMENTO'] > 0): ?>
@@ -878,8 +906,8 @@ table th {
                                                 <?php elseif($DiasEspelho['FERIAS'] > 0): ?>
                                                     <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: #004d95 !important;">FÉRIAS</span></td>
                                                 <?php else: ?>
-                                                    <td <?php if(strlen(trim($ent_motivo_reprova[4])) > 0){echo ' style="background:#f4811f;" title="'.$ent_motivo_reprova[4].'"';}elseif(strlen(trim($ent_portal[4])) > 0 && $status_ent[4] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[4] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?= $ent[4]; ?></td>
-                                                    <td <?php if(strlen(trim($sai_motivo_reprova[4])) > 0){echo ' style="background:#f4811f;" title="'.$sai_motivo_reprova[4].'"';}elseif(strlen(trim($sai_portal[4])) > 0 && $status_sai[4] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[4] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?= $sai[4]; ?></td>
+                                                    <td <?php if($idaafdt_ent[4] > 0 && $status_ent[4] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($ent_motivo_reprova[4])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[4].'"';}elseif(strlen(trim($ent_portal[4])) > 0 && $status_ent[4] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[4] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?= $ent[4]; ?></td>
+                                                    <td <?php if($idaafdt_sai[4] > 0 && $status_sai[4] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($sai_motivo_reprova[4])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[4].'"';}elseif(strlen(trim($sai_portal[4])) > 0 && $status_sai[4] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[4] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?= $sai[4]; ?></td>
                                                 <?php endif; ?>
 														   
                                             <td <?= $bglinha; ?> class="n-mobile-cell text-center text-primary"><?= ((int)$DiasEspelho['HTRAB'] > 0) ? m2h($DiasEspelho['HTRAB']) : ""; ?></td>
@@ -923,18 +951,18 @@ table th {
 
                                                 <?php $numero_batida = 0; ?>
                                                 <?php $proxima_batida = 1; ?>
-                                                <?php if (strlen(trim($ent[1])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($ent_motivo_reprova[1])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $ent_motivo_reprova[1]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f4811f;"></i>' : $ent_portal[1]) . $ent[1].(($status_ent[1] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">E1</small></h3><?php $numero_batida++;                                                                                                                                                                                                                            $proxima_batida = 1; ?><?php endif; ?>
-                                                <?php if (strlen(trim($ent[2])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($ent_motivo_reprova[2])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $ent_motivo_reprova[2]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f4811f;"></i>' : $ent_portal[2]) . $ent[2].(($status_ent[2] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">E2</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                $proxima_batida = 2; ?><?php endif; ?>
-                                                <?php if (strlen(trim($ent[3])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($ent_motivo_reprova[3])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $ent_motivo_reprova[3]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f4811f;"></i>' : $ent_portal[3]) . $ent[3].(($status_ent[3] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">E3</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                    $proxima_batida = 3; ?><?php endif; ?>
-                                                <?php if (strlen(trim($ent[4])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($ent_motivo_reprova[4])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $ent_motivo_reprova[4]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f4811f;"></i>' : $ent_portal[4]) . $ent[4].(($status_ent[4] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">E4</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                                    $proxima_batida = 4; ?><?php endif; ?>
+                                                <?php if (strlen(trim($ent[1])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($ent_motivo_reprova[1])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $ent_motivo_reprova[1]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f5943f;"></i>' : $ent_portal[1]) . $ent[1].(($status_ent[1] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">E1</small></h3><?php $numero_batida++;                                                                                                                                                                                                                            $proxima_batida = 1; ?><?php endif; ?>
+                                                <?php if (strlen(trim($ent[2])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($ent_motivo_reprova[2])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $ent_motivo_reprova[2]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f5943f;"></i>' : $ent_portal[2]) . $ent[2].(($status_ent[2] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">E2</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                $proxima_batida = 2; ?><?php endif; ?>
+                                                <?php if (strlen(trim($ent[3])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($ent_motivo_reprova[3])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $ent_motivo_reprova[3]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f5943f;"></i>' : $ent_portal[3]) . $ent[3].(($status_ent[3] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">E3</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                    $proxima_batida = 3; ?><?php endif; ?>
+                                                <?php if (strlen(trim($ent[4])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($ent_motivo_reprova[4])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $ent_motivo_reprova[4]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f5943f;"></i>' : $ent_portal[4]) . $ent[4].(($status_ent[4] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">E4</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                                    $proxima_batida = 4; ?><?php endif; ?>
 
                                             </td>
                                             <td <?= $bglinha; ?> class="y-mobile-cell d-none text-center align-top">
 
-                                                <?php if (strlen(trim($sai[1])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($sai_motivo_reprova[1])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $sai_motivo_reprova[1]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f4811f;"></i>' :  $sai_portal[1]) . $sai[1].(($status_sai[1] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">S1</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                        $proxima_batida = 2; ?><?php endif; ?>
-                                                <?php if (strlen(trim($sai[2])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($sai_motivo_reprova[2])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $sai_motivo_reprova[2]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f4811f;"></i>' :  $sai_portal[2]) . $sai[2].(($status_sai[2] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">S2</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                            $proxima_batida = 3; ?><?php endif; ?>
-                                                <?php if (strlen(trim($sai[3])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($sai_motivo_reprova[3])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $sai_motivo_reprova[3]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f4811f;"></i>' :  $sai_portal[3]) . $sai[3].(($status_sai[3] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">S3</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                                $proxima_batida = 4; ?><?php endif; ?>
-                                                <?php if (strlen(trim($sai[4])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($sai_motivo_reprova[4])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $sai_motivo_reprova[4]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f4811f;"></i>' :  $sai_portal[4]) . $sai[4].(($status_sai[4] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">S4</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                                    $proxima_batida = 5; ?><?php endif; ?>
+                                                <?php if (strlen(trim($sai[1])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($sai_motivo_reprova[1])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $sai_motivo_reprova[1]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f5943f;"></i>' :  $sai_portal[1]) . $sai[1].(($status_sai[1] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">S1</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                        $proxima_batida = 2; ?><?php endif; ?>
+                                                <?php if (strlen(trim($sai[2])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($sai_motivo_reprova[2])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $sai_motivo_reprova[2]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f5943f;"></i>' :  $sai_portal[2]) . $sai[2].(($status_sai[2] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">S2</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                            $proxima_batida = 3; ?><?php endif; ?>
+                                                <?php if (strlen(trim($sai[3])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($sai_motivo_reprova[3])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $sai_motivo_reprova[3]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f5943f;"></i>' :  $sai_portal[3]) . $sai[3].(($status_sai[3] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">S3</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                                $proxima_batida = 4; ?><?php endif; ?>
+                                                <?php if (strlen(trim($sai[4])) > 0) : ?><h3><span class="text-primary" style="font-size: 20px;display: inline-block;"><?= ((strlen(trim($sai_motivo_reprova[4])) > 0) ? '<i data-tippy-followCursor="true" data-tippy-arrow="true" data-tippy-animation="fade" title="' . $sai_motivo_reprova[4]. '" class="mdi mdi-square tippy-btn" style="font-size:20px; color: #f5943f;"></i>' :  $sai_portal[4]) . $sai[4].(($status_sai[4] != 'C') ? 'D' : 'C'); ?></span> <small style="color: #999999;">S4</small></h3><?php $numero_batida++;                                                                                                                                                                                                                                                    $proxima_batida = 5; ?><?php endif; ?>
 
                                             </td>
                                             <td <?= $bglinha; ?> class="text-center">
@@ -980,9 +1008,11 @@ table th {
                                 </tbody>
                             </table>
                         </div>
-                        
+                        <div style="text-align: left; font-size:10px; color:rgb(75, 74, 74);">
+                            Legenda: &nbsp;&nbsp; ( c ) Coletado &nbsp;&nbsp; ( d ) Digitado
+                        </div>
                         <?php if($impressao): ?><br>
-                            <div style="text-align: right;">
+                            <div style="text-align: right; ">
                             Total Hrs. Trab. <?= m2h($resDiasEspelho[0]['QTDE_HORAS']); ?>
                             </div>
                             <table>
@@ -2798,7 +2828,12 @@ function m2h(minutos) {
                         <?php if($is_motorista): ?><button class="btn btn-primary btn-sm float-right" type="button" onclick="carregaMacro()" id="btnConsultaMacro"><i class="fa fa-cogs"></i> Consulta Macros</button><?php endif; ?>
                         <h3 data-h-data class="m-0"></h3>
                         <h5 data-h-escala class="h7 m-0"></h5>
-						<h6 data-h-batidas class="h7 m-0"></h6>
+						            <h6 data-h-batidas class="h7 m-0"></h6>
+                        <p class="m-0">
+					                <b>Legenda:</b> 
+                          <i title="Registro Coletado" class="mdi mdi-alpha-c-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Coletado
+                          <i title="Registro Digitado" class="mdi mdi-alpha-d-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Digitado 
+                        </p>
                         <table class="table table-sm tablebatida">
                             <thead>
                                 <tr>
