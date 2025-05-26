@@ -258,58 +258,54 @@ class Espelho extends BaseController {
         return parent::ViewPortal('ponto/espelho/impressao', $dados);
     }
 
-    public function pdf($periodo, $codsecao = false, $chapa = false)
+    public function pdf($periodos, $codsecao = false, $chapa = false)
     {
 
         $mSaldoBanco = model('Ponto/SaldobancohorasModel');
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
         $resSecaoGestor = $mSaldoBanco->ListarSecaoUsuario(false, $dados['rh']);
 
-        $dadosColaboradores['rh']         = $dados['rh'];
-        $dadosColaboradores['codsecao']   = $codsecao;
-        $dataInicio                       = \DateTime::createFromFormat('d/m/Y', substr($periodo,0,10))->format('Y-m-d');
-        $colaboradores                    = $this->mPortal->CarregaColaboradores($dataInicio, $dadosColaboradores, true);
-
-        $resFuncionarioSecao   = $colaboradores;
+        $dadosColaboradores['rh'] = $dados['rh'];
+        $dadosColaboradores['codsecao'] = $codsecao;
 
         $mpdf = new \Mpdf\Mpdf([
             'format' => 'A4',
             'margin_bottom' => 9,
             'margin_top' => 9,
         ]);
+        
+        foreach ($periodos as $periodo) {
 
-        if($chapa){
-            $html = self::dados_html($chapa, $periodo);
-            $mpdf->WriteHTML(($html));
-        }else
-        if($codsecao){
-            if($resFuncionarioSecao){
-                foreach($resFuncionarioSecao as $key => $Chapa){
-                    $html = '';
-                    $html = self::dados_html($Chapa['CHAPA'], $periodo);
-                    // echo $html;
-                    if($html){
-                        $mpdf->AddPage();
-                        $mpdf->WriteHTML(($html));
+            $dataInicio = \DateTime::createFromFormat('d/m/Y', substr($periodo, 0, 10))->format('Y-m-d');
+            $colaboradores = $this->mPortal->CarregaColaboradores($dataInicio, $dadosColaboradores, true);
+            $resFuncionarioSecao = $colaboradores;
+    
+            if ($chapa) {
+                $html = self::dados_html($chapa, $periodo);
+                $mpdf->AddPage();
+                $mpdf->WriteHTML($html);
+            } elseif ($codsecao) {
+                if ($resFuncionarioSecao) {
+                    foreach ($resFuncionarioSecao as $key => $Chapa) {
+                        $html = self::dados_html($Chapa['CHAPA'], $periodo);
+                        if ($html) {
+                            $mpdf->AddPage();
+                            $mpdf->WriteHTML($html);
+                        }
                     }
                 }
-            }
-        }else
-        if(!$codsecao && !$resSecaoGestor){
-
-            
-            $html = self::dados_html(util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null, $periodo);
-            $mpdf->WriteHTML(($html));
-        }else{
-            if($resFuncionarioSecao){
-                foreach($resFuncionarioSecao as $key => $Chapa){
-                    
-                    $html = '';
-                    $html = self::dados_html($Chapa['CHAPA'], $periodo);
-                    // echo $html;
-                    if($html){
-                        $mpdf->AddPage();
-                        $mpdf->WriteHTML(($html));
+            } elseif (!$codsecao && !$resSecaoGestor) {
+                $html = self::dados_html(util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null, $periodo);
+                $mpdf->AddPage();
+                $mpdf->WriteHTML($html);
+            } else {
+                if ($resFuncionarioSecao) {
+                    foreach ($resFuncionarioSecao as $key => $Chapa) {
+                        $html = self::dados_html($Chapa['CHAPA'], $periodo);
+                        if ($html) {
+                            $mpdf->AddPage();
+                            $mpdf->WriteHTML($html);
+                        }
                     }
                 }
             }

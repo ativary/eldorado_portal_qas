@@ -19,7 +19,7 @@
                         <div class="row">
                             <label for="periodo" class="col-sm-2 col-form-label text-right text-left-sm">Período:</label>
                             <div class="col-sm-10">
-                                <select class="select2 custom-select form-control form-control-sm" name="periodo" id="periodo" <?php if($isGestorOrLider): ?>onchange="carregaColaboradores()"<?php endif; ?>>
+                                <select class="select2 custom-select select2-multiple form-control form-control-sm" multiple="multiple"  data-placeholder="- Selecione um período -" name="periodo[]" id="periodo" <?php if($isGestorOrLider): ?>onchange="carregaColaboradores()"<?php endif; ?>>
                                     <option value="">- selecione um período -</option>
                                     <?php if ($resPeriodo) : ?>
                                         <?php foreach($resPeriodo as $key => $Periodo): ?>
@@ -157,12 +157,15 @@ const carregaFuncionariosSecao = (codSecao) => {
 const carregaColaboradores = () => {
 
     openLoading();
-
+    
     var periodo = $("#periodo").val();
-    if(periodo == ''){
+
+    if (!periodo || periodo.length === 0) {
         exibeAlerta('warning', 'Período não selecionado.');
         return;
     }
+
+    var primeiroPeriodo = periodo[0]; // <-- Aqui pegamos o primeiro item.
 
     $("#funcionario").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
 
@@ -171,7 +174,7 @@ const carregaColaboradores = () => {
         type: 'POST',
         data: {
             'codsecao'    : $("#secao").val() ?? null,
-            'periodo'     : periodo
+            'periodo'     : primeiroPeriodo
         },
         success: function(result) {
 
