@@ -165,7 +165,7 @@ const carregaColaboradores = () => {
         return;
     }
 
-    var primeiroPeriodo = periodo[0]; // <-- Aqui pegamos o primeiro item.
+    var periodoMaisAntigo = periodo[periodo.length - 1]; // <-- Aqui pegamos o primeiro item.
 
     $("#funcionario").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
 
@@ -174,7 +174,7 @@ const carregaColaboradores = () => {
         type: 'POST',
         data: {
             'codsecao'    : $("#secao").val() ?? null,
-            'periodo'     : primeiroPeriodo
+            'periodo'     : periodoMaisAntigo
         },
         success: function(result) {
 
