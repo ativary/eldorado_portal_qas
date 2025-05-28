@@ -78,8 +78,9 @@
 const executar = () => {
 
     var dados = {
-        'periodo' : $("[name=periodo]").val(),
+        'periodo' : $("#periodo").val(),
     }
+    
     if(dados.periodo instanceof Array)
     {
         if(!dados.periodo || dados.periodo.length == 0){exibeAlerta('error', '<b>Período</b> não informado'); return false;}

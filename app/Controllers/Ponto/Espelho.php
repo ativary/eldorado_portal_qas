@@ -248,7 +248,7 @@ class Espelho extends BaseController {
         $dados['isGestor'] = $this->mEspelho->isGestor($dados);
         $dados['statusPeriodo'] = 0;
 
-        $dados['resPeriodo'] = $this->mEspelho->ListarEspelhoPeriodoRM();
+        $dados['resPeriodo'] = $this->mEspelho->ListarEspelhoPeriodoRM($dados['rh']);
         $mSaldoBanco = model('Ponto/SaldobancohorasModel');
         $dados['resSecaoGestor'] = $mSaldoBanco->ListarSecaoUsuario(false, $dados['rh']);
         
