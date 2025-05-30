@@ -1252,36 +1252,50 @@ table th {
                     return false;
                 }
 
-                openLoading();
+                // openLoading();
 
-                $.ajax({
-                    url: "<?= base_url('ponto/espelho/action/cadastrar_batida') ?>",
-                    type: 'POST',
-                    data: dados,
-                    success: function(result) {
-
-                        openLoading(true);
-
-                        try {
-                            var response = JSON.parse(result);
-
-                            if (response.tipo != 'success') {
-                                exibeAlerta(response.tipo, response.msg);
-                            } else {
-                                exibeAlerta(response.tipo, response.msg, 3);
-                                var myTimeout = setTimeout(function() {
-                                    consultarEspelho();
-                                    clearTimeout(myTimeout);
-                                }, 2000);
-                            }
-
-                        } catch (e) {
-                            exibeAlerta('error', '<b>Erro interno:</b> ' + e);
-                        }
-
-                    },
+                // Pergunta se quer adicionar observação
+                Swal.fire({
+                    title: 'Deseja incluir informações adicionais?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sim',
+                    cancelButtonText: 'Não',
+                    customClass: {
+                        title: 'swal2-title'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        abrirModalObservacao(dados, enviarBatidaComObservacao);
+                    } else {
+                        enviarBatidaComObservacao(dados);
+                    }
                 });
 
+                function enviarBatidaComObservacao(dados) {
+                    openLoading();
+                    $.ajax({
+                        url: "<?= base_url('ponto/espelho/action/cadastrar_batida') ?>",
+                        type: 'POST',
+                        data: dados,
+                        success: function(result) {
+                            openLoading(true);
+                            try {
+                                var response = JSON.parse(result);
+                                if (response.tipo != 'success') {
+                                    exibeAlerta(response.tipo, response.msg);
+                                } else {
+                                    exibeAlerta(response.tipo, response.msg, 3);
+                                    setTimeout(function() {
+                                        consultarEspelho();
+                                    }, 2000);
+                                }
+                            } catch (e) {
+                                exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+                            }
+                        },
+                    });
+                }
             } catch (e) {
                 exibeAlerta('error', '<b>Erro interno:</b> ' + e);
             }
@@ -2657,42 +2671,76 @@ table th {
 
                 if(dados.justificativa == ""){exibeAlerta('error', '<b>Justificativa de Extra</b> não informado.'); return false; }
 
-                openLoading();
+                // openLoading();
 
-                $.ajax({
-                    url: "<?= base_url('ponto/espelho/action/cadastrar_justificativa_extra') ?>",
-                    type: 'POST',
-                    data: dados,
-                    success: function(result) {
-
-                        openLoading(true);
-
-                        try {
-                            var response = JSON.parse(result);
-
-                            if (response.tipo != 'success') {
-                                exibeAlerta(response.tipo, response.msg);
-                            } else {
-                                exibeAlerta(response.tipo, response.msg, 3);
-                                var myTimeout = setTimeout(function() {
-                                    consultarEspelho();
-                                    clearTimeout(myTimeout);
-                                }, 2000);
-                            }
-
-                        } catch (e) {
-                            exibeAlerta('error', '<b>Erro interno:</b> ' + e);
-                        }
-
-
-                    },
+                // Pergunta se quer adicionar observação
+                Swal.fire({
+                    title: 'Deseja incluir informações adicionais?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sim',
+                    cancelButtonText: 'Não',
+                    customClass: {
+                        title: 'swal2-title'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        abrirModalObservacao(dados, enviarJustificativaExtraComObservacao);
+                    } else {
+                        enviarJustificativaExtraComObservacao(dados);
+                    }
                 });
+
+                function enviarJustificativaExtraComObservacao(dados) {
+                    openLoading();
+                    $.ajax({
+                        url: "<?= base_url('ponto/espelho/action/cadastrar_justificativa_extra') ?>",
+                        type: 'POST',
+                        data: dados,
+                        success: function(result) {
+                            openLoading(true);
+                            try {
+                                var response = JSON.parse(result);
+                                if (response.tipo != 'success') {
+                                    exibeAlerta(response.tipo, response.msg);
+                                } else {
+                                    exibeAlerta(response.tipo, response.msg, 3);
+                                    setTimeout(function() {
+                                        consultarEspelho();
+                                    }, 2000);
+                                }
+                            } catch (e) {
+                                exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+                            }
+                        },
+                    });
+                }
 
             } catch (e) {
                 exibeAlerta('error', '<b>Erro interno:</b> ' + e);
             }
 
         }
+
+        let dadosObservacao = null;
+        let callbackObservacao = null;
+
+        function abrirModalObservacao(dados, callback) {
+            dadosObservacao = dados;
+            callbackObservacao = callback;
+            $("#campoObservacao").val('');
+            $("#modalObservacao").modal('show');
+        }
+
+        // Ao clicar em salvar no modal
+        $("#btnSalvarObservacao").off('click').on('click', function() {
+            if (callbackObservacao) {
+                dadosObservacao.obs = $("#campoObservacao").val();
+                $("#modalObservacao").modal('hide');
+                callbackObservacao(dadosObservacao);
+            }
+        });
+
         <?php endif; // if(!$periodo_bloqueado || $rh || 1==1): ?>
 
     <?php endif; //if($resDiasEspelho && $chapa): 
@@ -2745,6 +2793,16 @@ function m2h(minutos) {
         min-height: 100%;
         border-radius: 0;
     }
+
+	.swal2-popup .swal2-title {
+		background: #1ecab8; /* ou a cor do seu header, ex: var(--success) */
+		color: #fff;
+		padding: 12px 24px;
+		border-top-left-radius: 2px;
+		border-top-right-radius: 2px;
+		font-size: 16px;
+		text-align: left;
+	}
 </style>
 
 <!-- modal modal_incluir_batida -->
@@ -3055,7 +3113,27 @@ function m2h(minutos) {
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <!-- modal modal_macro -->
-
+<!-- Modal Observação -->
+<div class="modal fade" id="modalObservacao" tabindex="-1" role="dialog" aria-labelledby="modalObservacaoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalObservacaoLabel">Adicionar Observação</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea id="campoObservacao" class="form-control" rows="4" placeholder="Digite sua observação aqui..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="btnSalvarObservacao">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Observação -->
 <script>
     $(function() {
         $(".modal").draggable();

@@ -3571,53 +3571,74 @@ const abrirJustificativaExtra = (data, data_br, diasemana, codigoJustificativa, 
 	$("#justificativa_extra").val(codigoJustificativa);
 
 }
-const justificarExtra = () => {
+function justificarExtra() {
+    try {
+        let dados = {
+            "justificativa" : $("#justificativa_extra").val(),
+            "chapa"         : chapaFunc,
+            "data"          : data_nova_batida
+        }
 
-	try {
+        if(dados.justificativa == ""){exibeAlerta('error', '<b>Justificativa de Extra</b> não informado.'); return false; }
 
-		let dados = {
-			"justificativa" : $("#justificativa_extra").val(),
-			"chapa"         : chapaFunc,
-			"data"          : data_nova_batida
-		}
+        // Pergunta se quer adicionar observação
+        Swal.fire({
+            title: 'Deseja incluir informações adicionais?',
+            showDenyButton: true,
+            confirmButtonText: 'Sim',
+            denyButtonText: 'Não',
+			customClass: {
+				title: 'swal2-title'
+			}
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Limpa o campo antes de mostrar
+                $("#campoObservacaoExtra").val('');
+                // Abre o modal de observação
+                $("#modalObservacaoExtra").modal('show');
 
-		if(dados.justificativa == ""){exibeAlerta('error', '<b>Justificativa de Extra</b> não informado.'); return false; }
+                // Ao clicar em salvar no modal de observação
+                $("#btnSalvarObservacaoExtra").off('click').on('click', function() {
+                    dados.obs = $("#campoObservacaoExtra").val();
+                    $("#modalObservacaoExtra").modal('hide');
+                    enviarJustificativaExtra(dados);
+                });
+            } else if (result.isDenied) {
+                // Se não, segue fluxo normal
+                enviarJustificativaExtra(dados);
+            }
+        });
 
-		openLoading();
+    } catch (e) {
+        exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+    }
+}
 
-		$.ajax({
-			url: "<?= base_url('ponto/espelho/action/cadastrar_justificativa_extra') ?>",
-			type: 'POST',
-			data: dados,
-			success: function(result) {
-
-				openLoading(true);
-
-				try {
-					var response = JSON.parse(result);
-
-					if (response.tipo != 'success') {
-						exibeAlerta(response.tipo, response.msg);
-					} else {
-						exibeAlerta(response.tipo, response.msg, 3);
-						var myTimeout = setTimeout(function() {
-							Filtro();
-							clearTimeout(myTimeout);
-						}, 2000);
-					}
-
-				} catch (e) {
-					exibeAlerta('error', '<b>Erro interno:</b> ' + e);
-				}
-
-
-			},
-		});
-
-	} catch (e) {
-		exibeAlerta('error', '<b>Erro interno:</b> ' + e);
-	}
-
+// NOVA função auxiliar para envio AJAX
+function enviarJustificativaExtra(dados) {
+    openLoading();
+    $.ajax({
+        url: "<?= base_url('ponto/espelho/action/cadastrar_justificativa_extra') ?>",
+        type: 'POST',
+        data: dados,
+        success: function(result) {
+            openLoading(true);
+            try {
+                var response = JSON.parse(result);
+                if (response.tipo != 'success') {
+                    exibeAlerta(response.tipo, response.msg);
+                } else {
+                    exibeAlerta(response.tipo, response.msg, 3);
+                    var myTimeout = setTimeout(function() {
+                        Filtro();
+                        clearTimeout(myTimeout);
+                    }, 2000);
+                }
+            } catch (e) {
+                exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+            }
+        },
+    });
 }
 //-----------------------------------------------------------
 // altera atitude
@@ -4095,6 +4116,26 @@ $.ajax({
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <!-- modal modal_macro -->
+ <!-- Modal Observação -->
+<div class="modal" id="modalObservacaoExtra" tabindex="-1" role="dialog" aria-labelledby="modalObservacaoExtraLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-success">
+        <h5 class="modal-title" id="modalObservacaoExtraLabel">Observação</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span class="fa fa-times"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea id="campoObservacaoExtra" class="form-control" rows="4" placeholder="Digite sua observação aqui..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" id="btnSalvarObservacaoExtra">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Observação -->
 <script>
 $(function() {
 	$(".modal").draggable();
@@ -4243,6 +4284,16 @@ function getNextAndPreviousDates(dateString) {
         min-height: 100%;
         border-radius: 0;
     }
+
+	.swal2-popup .swal2-title {
+		background: #1ecab8; /* ou a cor do seu header, ex: var(--success) */
+		color: #fff;
+		padding: 12px 24px;
+		border-top-left-radius: 2px;
+		border-top-right-radius: 2px;
+		font-size: 16px;
+		text-align: left;
+	}
 </style>
 <style>
     @media (max-width: 500px){
