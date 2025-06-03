@@ -92,6 +92,7 @@
                     <th class="n-mobile-cell"><strong>Status</strong></th>
                     <th class="n-mobile-cell"><strong>Data Solicitação</strong></th>
                     <th class="n-mobile-cell" style="min-width: 290px;"><strong>Solicitante</strong></th>
+                    <th class="n-mobile-cell" style="min-width: 290px;"><strong>Gestor</strong></th>
                     <th class="n-mobile-cell"><strong>Competência</strong></th>
                     <th class="n-mobile-cell"><strong>Período do Ponto</strong></th>
                     <th>Ação</th>
@@ -115,16 +116,19 @@
                               echo '<span class="badge badge-warning">Pend/Ação Gestor</span>';
                               break;
                             case 3:
-                              echo '<span class="badge badge-info">Pend/Ação RH</span>';
+                              echo '<span class="badge badge-info">Pend/Calc.RH</span>';
                               break;
                             case 4:
-                              echo '<span class="badge badge-danger">Reprovada</span>';
+                              echo '<span class="badge badge-info">Pend/Ação RH</span>';
                               break;
                             case 5:
                               echo '<span class="badge badge-primary">Pend/Sincronização</span>';
                               break;
                             case 6:
                               echo '<span class="badge badge-success">Sincronizada</span>';
+                              break;
+                            case 9:
+                              echo '<span class="badge badge-danger">Reprovada</span>';
                               break;
                             default:
                               echo '';
@@ -133,6 +137,7 @@
                         </td>
                         <td class="n-mobile-cell"><?= $registro['dt_req_br']; ?></td>
                         <td class="n-mobile-cell"><?= $registro['chapa_requisitor'] . ' - ' . $registro['nome_requisitor']; ?></td>
+                        <td class="n-mobile-cell"><?= $registro['chapa_gestor'] . ' - ' . $registro['nome_gestor']; ?></td>
                         <td class="n-mobile-cell"><?= $registro['mescomp'] . '/' . $registro['anocomp']; ?></td>
                         <td class="n-mobile-cell"><?= $registro['per_ponto_br']; ?></td>
                         <td>
@@ -142,7 +147,7 @@
 
                               <?php if ($registro['status'] == 1 || $registro['status'] == 4):  ?>
                                 <a href="<?= base_url('ponto/art61/solicitacao_chapas/' . $registro['id']); ?>" class="dropdown-item"><i class="mdi mdi-pencil"></i> Editar requisição</a>
-                                <button type="button" onclick="enviarAprovacao('<?= $registro['id']; ?>', <?= $registro['status']; ?>)" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
+                                <button type="button" onclick="enviarAprovacao('<?= $registro['id']; ?>', <?= $registro['status']; ?>, <?= $registro['qtde_gestores']; ?>)" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
                                 <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
 
                               <?php else:  ?>
@@ -249,7 +254,7 @@
     }
   }
 
-  const enviarAprovacao = (id_req, status = -1) => {
+  const enviarAprovacao = (id_req, status = -1, qtde_gestores = 0) => {
     //abre modal
     let validas = true;
     console.log(id_req, status, validas);
@@ -294,7 +299,16 @@
     }
     console.log(dados);
 
+    let ini_msg = '';
+    if(qtde_gestores > 1) {
+      ini_msg = '<h5>Requisições que tem mais de um gestor serão desmembradas, ficando uma requisição para cada gestor.<br></h5>'
+    }
+    if(id_req == -1) {
+      ini_msg = '<h5>Requisições vazias ou não processadas, não serão enviadas para aprovação.<br></h5><h5>Requisições que tem mais de um gestor serão desmembradas, ficando uma requisição para cada gestor.<br></h5>'
+    }
     let msg = (selecionados.includes(',')) ? 'Confirma o envio para aprovação das solicitações selecionadas?' : 'Confirma o envio para aprovação das solicitação selecionada?';
+
+    msg = ini_msg + msg;
 
     Swal.fire({
       icon: 'question',
@@ -407,7 +421,6 @@
         var response = JSON.parse(result);
         if (response.tipo != 'success') {
           exibeAlerta(response.tipo, response.msg);
-          s
         } else {
           exibeAlerta(response.tipo, response.msg, 2, '<?= base_url('ponto/art61/solicitacao_chapas'); ?>' + '/' + response.cod);
         }

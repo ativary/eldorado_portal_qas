@@ -40,8 +40,6 @@ class AprovaModel extends Model
   public function aprovaEscala($idEscala, $rh = false)
   {
 
-
-
     $escala = $this->dbportal->query(" SELECT chapa, situacao FROM zcrmportal_escala WHERE id = '{$idEscala}' AND situacao IN (10,2) ");
     $result = ($escala) ? $escala->getResultArray() : null;
 
@@ -103,6 +101,45 @@ class AprovaModel extends Model
           }
         }
 
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // #############################################################################
+  // APROVA DE ART 61
+  // #############################################################################
+  public function aprovaArtigo61($idReq, $rh = false)
+  {
+
+    $art61 = $this->dbportal->query(" SELECT chapa_requisitor, chapa_gestor, status FROM zcrmportal_art61_requisicao WHERE id = '{$idReq}' AND status IN (2,4) ");
+    $result = ($art61) ? $art61->getResultArray() : null;
+
+    if ($result) {
+
+      $status = $result[0]['status'];
+
+      $chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+      if ($chapaUser == $result[0]['chapa_requisitor']) return false;
+
+      if (!$rh) {
+        if (!self::isGestorOrLiderAprovador($chapaUser)) {
+          return false;
+        }
+        $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 2 ";
+
+      } else {
+        if ($status == 4) {
+          $query = " UPDATE zcrmportal_art61_requisicao SET status = 5, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 4 ";
+        } else {
+          $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 2 ";
+        }
+      }
+
+      $this->dbportal->query($query);
+      if ($this->dbportal->affectedRows() > 0) {
         return true;
       }
     }
@@ -458,6 +495,123 @@ class AprovaModel extends Model
   }
 
   // #############################################################################
+  // REPROVA REQUISIÇÃO ART.61
+  // #############################################################################
+  public function reprovaArt61($id_req, $motivo_reprova = "", $rh = false)
+  {
+    $query = "
+      SELECT 
+        FORMAT(r.dt_requisicao, 'dd/MM/yyyy') dtreq_br,
+        r.status,
+        r.chapa_requisitor,
+        b.nome nome_requisitor,
+        u.email email_requisitor,
+        FORMAT(r.dt_ini_ponto, 'dd/MM/yyyy') dtini_br,
+        FORMAT(r.dt_fim_ponto, 'dd/MM/yyyy') dtfim_br,
+        ( SELECT COUNT(DISTINCT c.chapa_colab) AS qtde 
+          FROM zcrmportal_art61_req_chapas c
+          WHERE c.id_req = r.id AND c.status <> 'I'
+        ) as colaboradores,
+        (
+          SELECT 
+          RIGHT('000' + CAST(CAST(h.total AS INT) / 60 AS VARCHAR), 3) + ':' + 
+          RIGHT('00' + CAST(CAST(h.total AS INT) % 60 AS VARCHAR), 2) 
+        FROM (	SELECT SUM(c.valor) AS total
+            FROM zcrmportal_art61_req_chapas c
+            WHERE c.id_req = r.id
+              AND c.status <> 'I' ) h
+        ) as horas,
+          (SELECT SUM(c.valor) AS total
+            FROM zcrmportal_art61_req_chapas c
+            WHERE c.id_req = r.id
+              AND c.status <> 'I' 
+        ) as horas_min
+			FROM zcrmportal_art61_requisicao r
+			LEFT JOIN email_chapa u (NOLOCK) ON u.chapa = r.chapa_requisitor COLLATE Latin1_General_CI_AS and u.codcoligada = r.id_coligada
+			INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = r.id_coligada
+			WHERE r.id = '{$id_req}' 
+		";
+    //echo $query;
+    //die();
+    $art61 = $this->dbportal->query($query);
+    $result = ($art61) ? $art61->getResultArray() : null;
+
+    if ($result) {
+
+      $chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? 'RH';
+      if ($chapaUser == $result[0]['chapa_requisitor']) {
+        notificacao('danger', 'Requisição não pode ser reprovada pelo requisitor.');
+        return false;
+      }
+
+      if (!$rh) {
+        if (!self::isGestorOrLiderAprovador($result[0]['chapa_requisitor'])) {
+          notificacao('danger', 'Requisição não pode ser reprovada.');
+          return false;
+        }
+      }
+
+      if (is_null($result[0]['email_requisitor'])) {
+        notificacao('danger', 'Requisição não pode ser reprovada. Email do requisitor não encontrado');
+        return false;
+      }
+
+      $tipo_solicitacao = 'Artigo 61';
+      $status = $result[0]['status'];
+      $data_solicitacao = $result[0]['dtreq_br'];
+      $nome_solicitante = $result[0]['nome_requisitor'];
+      $email_solicitante = $result[0]['email_requisitor'];
+      $colaboradores = $result[0]['colaboradores'];
+      $horas = $result[0]['horas'];
+      $reprovador = $_SESSION['log_nome'];
+      
+      if ($status == 2) {
+        $query = " UPDATE zcrmportal_art61_requisicao SET status = 9, motivo_recusa = '(" . ((!$rh) ? 'Gestor' : 'RH') . "){$motivo_reprova}', dt_aprovacao = '" . date('Y-m-d H:i:s') . "', chapa_aprov_reprov = '{$chapaUser}' WHERE id = '{$id_req}'";
+
+      } else {
+        $query = " UPDATE zcrmportal_art61_requisicao SET status = 9, motivo_recusa = '(" . ((!$rh) ? 'Gestor' : 'RH') . "){$motivo_reprova}', dt_rh_aprovacao = '" . date('Y-m-d H:i:s') . "', chapa_rh_aprov_reprov = '{$chapaUser}' WHERE id = '{$id_req}' AND status IN (3, 4, 5) ";
+      }
+      $this->dbportal->query($query);
+      
+      if ($this->dbportal->affectedRows() > 0) {
+
+        $mensagem = '
+				Prezado(a) ' . $nome_solicitante . ',<br><br>
+				Sua solicitação no Portal RH - Módulo de Ponto foi <strong>reprovada</strong>.<br><br>
+
+				<strong><u>Detalhes da Solicitação</u></strong><br>
+				<strong>• Tipo: </strong>' . $tipo_solicitacao . '<br>
+				<strong>• Data da Solicitação</strong>: ' . $data_solicitacao . '<br>
+        <strong>• Descrição do Tipo:</strong><br>
+				';
+
+        $mensagem = $mensagem . '
+        <strong>&nbsp&nbsp&nbsp- Colaboradores</strong>: ' . $colaboradores . '<br>
+        <strong>&nbsp&nbsp&nbsp- Horas</strong>: ' . $horas . '<br><br>
+        ';
+       
+        $mensagem = $mensagem . '
+				<strong>Motivo da Reprovação</strong>: ' . $motivo_reprova . '<br>
+				<strong>Usuário que Reprovou</strong>: ' . $reprovador . '<br><br>
+				Caso necessário, você pode realizar um novo envio dentro do período de ponto vigente.<br><br>
+
+				Atenciosamente,<br>
+				<strong>Equipe Processos de RH</strong>
+				';
+        $htmlEmail = templateEmail($mensagem);
+
+        //$email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
+        $email_solicitante = 'alvaro.zaragoza@ativary.com';
+        enviaEmail($email_solicitante, '[Portal RH] Sua Solicitação Foi Reprovada', $htmlEmail);
+
+        return responseJson('success', 'Requisição do Artigo 61 REPROVADA com sucesso');
+      }
+    }
+
+    return false;
+  }
+
+  // #############################################################################
   // REPROVA BATIDA RH
   // #############################################################################
   public function reprovaBatidaRH($idbatida, $tipo, $motivo_reprova = "", $rh = false)
@@ -697,8 +851,10 @@ class AprovaModel extends Model
     $perFim           = $periodo[1];
     $periodo          = " AND A.dtponto BETWEEN '{$periodo[0]}' AND '{$periodo[1]}' ";
     $periodoEscala    = " AND (a.datamudanca BETWEEN '{$perInicio}' AND '{$perFim}' OR a.datamudanca_folga BETWEEN '{$perInicio}' AND '{$perFim}' ) ";
+    $periodoArt61     = " AND r.dt_ini_ponto = '".$perInicio."' ";
 
     $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+    
     if ($codfilial) {
       if ($codfilial != 'all') {
 
@@ -871,27 +1027,41 @@ class AprovaModel extends Model
     if ($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
     if ($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
     $chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+
+    // Monta filtro de chapa_gestor para artigo61
+    if($chapa <> null) {
+      $in_art61 = " AND ( r.chapa_gestor = '".$chapa."' OR g.ger_chapa = '".$chapa."' ) ";
+    }
+    
     if ($this->log_id  != 1) {
       $in_secao = " AND (" . $filtro_secao_lider . " " . $filtro_secao_gestor . ") AND A.CHAPA != '{$chapaFunc}' ";
     } else {
       $in_secao = "";
+      $in_art61 = "";
     }
 
     $filtro_chapa = (strlen(trim($filtroChapa)) <= 0 || $filtroChapa == 'all') ? "" : " AND a.chapa = '{$filtroChapa}' ";
 
-    if ($dados['perfilRH']) $in_secao = "";
+    if ($dados['perfilRH']) {
+        $in_secao = "";
+        $in_art61 = "";
+    }
 
     $filtro_filial = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND B.CODFILIAL = '{$dados['filtro_filial']}' " : '';
     $filtro_legenda = "";
     $filtro_legenda2 = "";
+    $in_leg_art61 = "AND r.status in (2, 3, 4, 5) ";
     if ((strlen(trim($dados['filtro_legenda'])) != 0)) {
       if ($dados['filtro_legenda'] == 10) {
         $filtro_legenda2 = " AND a.situacao = '10' ";
+        $in_leg_art61 = " AND r.status = 2 ";
       }
       if ($dados['filtro_legenda'] == 2) {
         $filtro_legenda = " AND 1 = 2 ";
         $filtro_legenda2 = " AND a.situacao = '2' ";
+        $in_leg_art61 = " AND r.status = 4 ";
       }
+
     }
 
 
@@ -912,6 +1082,11 @@ class AprovaModel extends Model
     }
     */
 
+    $filtro_tipo_art61 = '';
+    if ((strlen(trim($dados['filtro_tipo2'])) != 0)) {
+       if ($dados['filtro_tipo2'] != '61') {$filtro_tipo_art61 = ' and r.id = -1 ';}
+    }
+
     $filtro_tipo_ponto = '';
     if ($dados['filtro_tipo2'] == '1') {$filtro_tipo_ponto = ' and a.movimento = 1 ';}
     if ($dados['filtro_tipo2'] == '2') {$filtro_tipo_ponto = ' and a.movimento = 2 ';}
@@ -922,14 +1097,14 @@ class AprovaModel extends Model
     if ($dados['filtro_tipo2'] == '7') {$filtro_tipo_ponto = ' and a.movimento = 7 ';}
     if ($dados['filtro_tipo2'] == '8') {$filtro_tipo_ponto = ' and a.movimento = 8 ';}
     if ($dados['filtro_tipo2'] == '9') {$filtro_tipo_ponto = ' and a.movimento = 9 ';}
-    if ($dados['filtro_tipo2'] == '21' or $dados['filtro_tipo2'] == '22') {
+    if ($dados['filtro_tipo2'] == '21' or $dados['filtro_tipo2'] == '22' or $dados['filtro_tipo2'] == '61') {
       $filtro_tipo_ponto = ' and a.movimento = -1 ';
     }
 
     $filtro_tipo_escala = '';
     if ($dados['filtro_tipo2'] == '21') {$filtro_tipo_escala = ' and a.tipo = 1 ';}
     if ($dados['filtro_tipo2'] == '22') {$filtro_tipo_escala = ' and a.tipo = 2 ';}
-    if ($dados['filtro_tipo2'] == '1' or $dados['filtro_tipo2'] == '2' or $dados['filtro_tipo2'] == '3' or  $dados['filtro_tipo2'] == '4' or $dados['filtro_tipo2'] == '5' or $dados['filtro_tipo2'] == '6' or $dados['filtro_tipo2'] == '7' or $dados['filtro_tipo2'] == '8' or $dados['filtro_tipo2'] == '9') {
+    if ($dados['filtro_tipo2'] == '1' or $dados['filtro_tipo2'] == '2' or $dados['filtro_tipo2'] == '3' or  $dados['filtro_tipo2'] == '4' or $dados['filtro_tipo2'] == '5' or $dados['filtro_tipo2'] == '6' or $dados['filtro_tipo2'] == '7' or $dados['filtro_tipo2'] == '8' or $dados['filtro_tipo2'] == '9' or $dados['filtro_tipo2'] == '61') {
       $filtro_tipo_escala = ' and a.tipo = -1 ';
     }
 
@@ -1018,7 +1193,10 @@ class AprovaModel extends Model
 					(
 						SELECT max(CAST(BB.descricao AS VARCHAR)) FROM zcrmportal_ponto_justificativa_func AA  (NOLOCK) 
 						INNER JOIN zcrmportal_ponto_motivos BB (NOLOCK) ON AA.justificativa = BB.id AND AA.coligada = BB.codcoligada WHERE AA.coligada = A.coligada AND AA.dtponto = A.dtponto AND AA.chapa = A.chapa
-					) justificativa_excecao
+					) justificativa_excecao,
+          NULL art61_colaboradores,
+          NULL art61_horas,
+	        NULL art61_chapa_gerente
 				FROM
 					zcrmportal_ponto_horas A (NOLOCK)
 					INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
@@ -1028,8 +1206,7 @@ class AprovaModel extends Model
 					" . $FT_STATUS . "
 					AND A.coligada = '{$_SESSION['func_coligada']}'
           AND A.motivo_reprova IS NULL
-          --and a.id > 1441108
-					AND A.usu_delete IS NULL
+          AND A.usu_delete IS NULL
 					{$in_secao}
 					" . $FT_ABONO . "
 					" . $FT_MOVIMENTO . "
@@ -1126,7 +1303,10 @@ class AprovaModel extends Model
 					) CODSITUACAO,
 					B.NOME,
 					a.dtcad data_solicitacao,
-					NULL justificativa_excecao
+					NULL justificativa_excecao,
+          NULL art61_colaboradores,
+          NULL art61_horas,
+	        NULL art61_chapa_gerente
 				FROM
 					zcrmportal_escala a (NOLOCK)
 					INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
@@ -1144,7 +1324,76 @@ class AprovaModel extends Model
 					{$filtro_filial}
 					{$filtro_legenda2}
 					{$filtro_tipo_escala}
-			)X
+
+        UNION ALL
+
+        SELECT 
+          r.id					as id,
+          CAST(r.dt_requisicao AS DATETIME) as dtponto,
+          null					as dtfolga,
+          null					as codindice_folga,
+          61						as movimento,
+          r.chapa_gestor as chapa,
+          null					as batida,
+          null					as motivo,
+          null					as natureza,
+          CAST(r.dt_requisicao AS DATETIME) as data_referencia,
+          null					as abn_dtfim,
+          null					as abn_horaini,
+          null					as abn_horafim,
+          null					as abn_codabono,
+          null					as abn_totalhoras,
+          null					as possui_anexo,
+          r.id_coligada			as coligada,
+          r.status				as status,
+          r.status				as situacao,
+          null					as justificativa_abono_tipo,
+          null					as atitude_dt,
+          null					as atitude_ini,
+          null					as atitude_fim,
+          null					as atitude_tipo,
+          null					as atitude_justificativa,
+          f.nome COLLATE Latin1_General_CI_AS				as nome_solicitante,
+          r.chapa_requisitor COLLATE Latin1_General_CI_AS	as chapa_solicitante,
+          null					as codhorario,
+          null					as horario,
+          null					as codindice,
+          null					as justificativa_escala,
+          e.CPF as CPF,
+          (
+              SELECT TOP 1 HB.DESCRICAO
+              FROM CorporeRMDEV..PFHSTSIT HA (NOLOCK)
+                INNER JOIN CorporeRMDEV..PCODSITUACAO HB (NOLOCK) ON HB.CODCLIENTE = HA.NOVASITUACAO
+              WHERE HA.CODCOLIGADA = f.CODCOLIGADA
+                AND HA.CHAPA = f.CHAPA 
+                AND (HA.DATAMUDANCA <= r.dt_requisicao)
+              ORDER BY DATAMUDANCA DESC
+            ) as CODSITUACAO,
+          u.NOME as NOME,
+          CAST(r.dt_requisicao AS DATETIME)	as data_solicitacao,
+          null					as justificativa_excecao,
+          ( SELECT COUNT(DISTINCT c.chapa_colab) AS qtde 
+            FROM zcrmportal_art61_req_chapas c
+            WHERE c.id_req = r.id AND c.status <> 'I'
+          ) as art61_colaboradores,
+          ( SELECT SUM(c.valor) AS total 
+            FROM zcrmportal_art61_req_chapas c
+            WHERE c.id_req = r.id AND c.status <> 'I'
+          ) as art61_horas,
+	        g.ger_chapa as art61_chapa_gerente
+          FROM zcrmportal_art61_requisicao r
+            LEFT JOIN CorporeRMDEV..PFUNC f ON f.CODCOLIGADA = r.id_coligada
+            AND f.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS
+            LEFT JOIN CorporeRMDEV..PFUNC u ON u.CODCOLIGADA = r.id_coligada
+            AND u.CHAPA = r.chapa_gestor COLLATE Latin1_General_CI_AS
+            INNER JOIN CorporeRMDEV..PPESSOA e (NOLOCK) ON e.CODIGO = f.CODPESSOA
+            LEFT JOIN GESTORES_ABAIXO_GERENTE g ON (g.n1_chapa = r.chapa_gestor or g.n2_chapa = r.chapa_gestor)
+          WHERE r.id is not null 
+          {$in_art61}
+          {$in_leg_art61}
+          {$periodoArt61}
+          {$filtro_tipo_art61}
+ 			)X
 			ORDER BY
 				X.chapa,
 				X.dtponto
@@ -1154,7 +1403,7 @@ class AprovaModel extends Model
     }
 
     //echo $query;
-    //die();
+    // die();
     $result = $this->dbportal->query($query);
     if ($result->getNumRows() > 0) {
       $response = array();
@@ -1298,6 +1547,26 @@ class AprovaModel extends Model
   {
     $query = "SELECT abono_atestado arquivo, anexo_batida FROM zcrmportal_ponto_horas WHERE id = '" . $id_anexo . "'";
 
+    $result = $this->dbportal->query($query);
+    return ($result->getNumRows() > 0)
+      ? $result->getResultArray()
+      : false;
+  }
+
+  public function ListaArt61Anexo($id_req_chapa, $linha)
+  {
+    $query = "
+      with anexos as (
+      select ROW_NUMBER() OVER (ORDER BY id) as linha, * 
+      from zcrmportal_art61_req_chapa_anexo
+      where id_req_chapa = ".$id_req_chapa." 
+      )
+
+      select * from anexos
+      where linha = ".$linha;
+
+    //echo $query;
+    //exit();
     $result = $this->dbportal->query($query);
     return ($result->getNumRows() > 0)
       ? $result->getResultArray()
@@ -2226,6 +2495,82 @@ class AprovaModel extends Model
     }
   }
 
+  // -----------------------------------------------------------------------------
+  // Workflow para verificar aprovações pendentes de Artigo 61
+  // -----------------------------------------------------------------------------
+  public function Workflow_Art61()
+  {
+
+    $query = "
+      SELECT 
+        COUNT( r.chapa_gestor ) as reqs,
+        r.chapa_gestor,
+        b.nome nome_gestor,
+        u.email email_gestor,
+        FORMAT(r.dt_ini_ponto, 'dd/MM/yyyy') dtini_br,
+        FORMAT(r.dt_fim_ponto, 'dd/MM/yyyy') dtfim_br
+      FROM zcrmportal_art61_requisicao r
+        LEFT JOIN email_chapa u (NOLOCK) ON u.chapa = r.chapa_gestor COLLATE Latin1_General_CI_AS
+        and u.codcoligada = r.id_coligada
+        INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = r.chapa_gestor COLLATE Latin1_General_CI_AS
+        AND B.CODCOLIGADA = r.id_coligada
+      WHERE 
+        r.status = 2 AND
+        (r.dt_envio_email IS NULL OR CONVERT(VARCHAR, r.dt_envio_email, 23) < CONVERT(VARCHAR, GETDATE(), 23))
+      GROUP BY r.chapa_gestor, b.nome, u.email, r.dt_ini_ponto, r.dt_fim_ponto
+		";
+    //echo $query;
+    //die();
+    $result = $this->dbportal->query($query);
+    if ($result->getNumRows() > 0) {
+      $resFuncs = $result->getResultArray();
+      foreach ($resFuncs as $key => $Func):
+        $nome = $Func['nome_gestor'];
+        $email = $Func['email_gestor'];
+        $reqs = $Func['reqs'];  
+        $dtini_br = $Func['dtini_br'];
+        $dtfim_br = $Func['dtfim_br'];
+
+        if($reqs > 1) {
+          $itens = '<strong>•	Artigo 61:</strong> ' . $reqs . ' requisições<br>';
+        } else {
+          $itens = '<strong>•	Artigo 61:</strong> ' . $reqs . ' requisição<br>';
+        }
+
+        $assunto = '[Portal RH] Você possui solicitações pendentes de aprovação';
+        $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
+        $mensagem = '
+						Este é um lembrete de que você possui solicitações pendentes de aprovação no <strong>Portal RH - Módulo de Ponto</strong> no período de <strong>' . $dtini_br . ' a ' . $dtfim_br . '</strong>, ou posterior. Abaixo está um resumo das pendências: <br><br>
+						<strong>Resumo de Pendências:</strong><br><br>
+						' . $itens . '<br>
+						Solicitamos que acesse o Portal RH para revisar as solicitações pendentes.<br><br>
+						Segue abaixo link para acesso ao Portal RH <a href="' . base_url() . '" target="_blank">' . base_url() . '</a><br><br>
+						Atenciosamente,<br>
+						<strong>Equipe Processos de RH</strong><br>
+        ';
+
+        $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
+
+        //$email = 'deivison.batista@eldoradobrasil.com.br';
+        $email = 'alvaro.zaragoza@ativary.com';
+        $response = enviaEmail($email, $assunto, $htmlEmail);
+        echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
+
+      endforeach;
+      
+      // atualiza datas de envio
+      $atu = "UPDATE zcrmportal_art61_requisicao SET dt_envio_email = GETDATE() WHERE status = 2";
+      $this->dbportal->query($atu);
+
+      return true;
+
+    } else {
+
+      echo 'Nada a enviar';
+      return false;
+    }
+  }
+
   public function listaCCustoUsuario($codsecao = null, $dados = false)
   {
 
@@ -2322,5 +2667,72 @@ class AprovaModel extends Model
       ? $result->getResultArray()
       : false;
   }
+
+  // -------------------------------------------------------
+  // Calcula a solicitacao do Artigo 61
+  // -------------------------------------------------------
+  public function Calcular_Req($id_req)
+  {
+
+    // Query para calcular e atualizar horas
+    $query = "
+      with calc as (
+        select
+          c.id,
+          c.id_req,
+          c.chapa_colab,
+          c.valor,
+          f.codfilial,
+          c.codevento,
+          z.HEXTRA_DIARIA as extra_normal,
+          e.para_codevento as codevento_art61,
+          (c.valor - z.HEXTRA_DIARIA) as extra_art61
+
+        from zcrmportal_art61_req_chapas c
+        left join zcrmportal_art61_requisicao r on r.id = c.id_req
+        left join " . DBRM_BANCO . "..PFUNC f on f.CODCOLIGADA = r.id_coligada and f.CHAPA = c.chapa_colab COLLATE Latin1_General_CI_AS 
+        left join " . DBRM_BANCO . "..Z_OUTSERV_MELHORIAS3 z on z.CODCOLIGADA = f.CODCOLIGADA and z.CODINDICE = c.indice and z.CODHORARIO = c.codhorario COLLATE Latin1_General_CI_AS
+        left join zcrmportal_art61_codevento e on e.coligada = r.id_coligada and e.codfilial = f.CODFILIAL and e.de_codevento = c.codevento and e.ativo = 'S'
+
+        where r.id_coligada = " . $_SESSION['func_coligada'] . "
+        and   c.status = 'A'
+        and   c.id_req = " . $id_req . "
+      )
+
+      UPDATE
+          r
+      SET
+          r.extra_normal = c.extra_normal,
+          r.codevento_art61 = c.codevento_art61,
+          r.extra_art61 = c.extra_art61
+      FROM
+          zcrmportal_art61_req_chapas as r
+          INNER JOIN calc AS c
+              ON c.id = r.id
+      WHERE
+          r.id_req = " . $id_req . "
+    ";
+
+    $this->dbportal->query($query);
+    /*if ($this->dbportal->affectedRows() == 0) {
+      return responseJson('error', 'Não foi possível calcular. Será necessário processar a requisição novamente. Antes, verifique configurações de eventos do Artigo.61. '.$this->dbportal->affectedRows());
+    }*/
+
+    // Query para calcular e atualizar horas
+    $query = "
+      UPDATE zcrmportal_art61_requisicao
+      SET status = 4
+      WHERE id = " . $id_req . "
+    ";
+    $this->dbportal->query($query);
+    /*
+    if ($this->dbportal->affectedRows() == 0) {
+      return responseJson('error', 'Cálculo finalizado, mas não foi possível atualizar status da requisiçao.');
+    }*/
+
+    $resp = 'Cálculo finalizado com sucesso.';
+    return responseJson('success', $resp);
+  }
+
 
 }

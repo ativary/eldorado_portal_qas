@@ -326,15 +326,23 @@ class Art61 extends BaseController
     return parent::ViewPortal('ponto/art61/solicitacao', $dados);
   }
 
-  public function solicitacao_chapas($id)
+  public function solicitacao_chapas($id, $origem='')
   {
 
     $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
     if (!$dados['rh']) {
-      parent::VerificaPerfil('ART61_SOLICITACAO');
+      if(!parent::VerificaPerfil('PONTO_APROVA', false)) {
+        parent::VerificaPerfil('ART61_SOLICITACAO');
+      }
     }
 
     $dados['_titulo'] = "Detalhes da solicitação";
+    // Busca id da requisição caso receba id da chapa dentro da req
+    $id = ($origem == 'id_req_chapa') ? $this->mArt61->id_req($id) : $id;
+    if (!$id) {
+      redireciona();
+    }
+
     $dados['id_requisicao'] = $id;
     $dados['acessoPermitido'] = true;
     $dados['em_analise'] = ''; //pode ser 'disabled' para evitar o botão processar;

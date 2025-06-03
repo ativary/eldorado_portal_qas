@@ -92,9 +92,9 @@
                         <div class="dropdown">
                           <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                           <div class="dropdown-menu" style="margin-left: -131px;">
-                            <button type="button" onclick="atuJustificativa('<?= $registro['id']; ?>')" class="dropdown-item"><i class="mdi mdi-comment-eye-outline"></i> Justificativa</button>
+                            <button type="button" onclick="atuJustificativa('<?= $registro['id']; ?>')" class="dropdown-item" <?= $pode_editar ? '' : 'disabled' ; ?>><i class="mdi mdi-comment-eye-outline"></i> Justificativa</button>
                             <button type="button" onclick="verAnexos('<?= $registro['id']; ?>',<?= $pode_editar ? 1 : 0 ; ?>)" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Anexos</button>
-                            <button type="button" onclick="apagarColaborador('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Remover Colaborador/Evento</button>
+                            <button type="button" onclick="apagarColaborador('<?= $registro['id']; ?>')" class="dropdown-item text-danger" <?= $pode_editar ? '' : 'disabled' ; ?>><i class="mdi mdi-trash-can-outline"></i> Remover Colaborador/Evento</button>
                           </div>
                         </div>
                       </td>
@@ -668,12 +668,13 @@
       width: 600,
     }).then((result) => {
       if (result.isConfirmed) {
-
+        openLoading();
         $.ajax({
           url: "<?= base_url('ponto/art61/action/processar_req'); ?>",
           type: 'POST',
           data: dados,
           success: function(result) {
+            openLoading(true);
             var response = JSON.parse(result);
             if (response.tipo != 'success') {
               exibeAlerta(response.tipo, response.msg);
