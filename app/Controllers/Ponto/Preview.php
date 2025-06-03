@@ -63,4 +63,23 @@ Class Preview extends BaseController {
 
     }
 
+    public function art61($id_req_chapa){
+        
+        $documento = $this->mAprova->ListaArt61Anexo($id_req_chapa, 1);
+
+        $doc_type = $documento[0]['file_type'];
+        $doc_file = $documento[0]['file_data'];
+
+        if($documento){
+            header("Content-type: {$doc_type}");
+            echo base64_decode($doc_file);
+            exit();
+        }else{
+
+            exit('Documento não localizado.');
+
+        }
+
+  }
+
 }
