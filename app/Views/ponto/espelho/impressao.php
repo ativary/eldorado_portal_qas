@@ -19,7 +19,11 @@
                         <div class="row">
                             <label for="periodo" class="col-sm-2 col-form-label text-right text-left-sm">Período:</label>
                             <div class="col-sm-10">
-                                <select class="select2 custom-select form-control form-control-sm" name="periodo" id="periodo" <?php if($isGestorOrLider): ?>onchange="carregaColaboradores()"<?php endif; ?>>
+                                <?php
+                                    $multiple_class = 'select2-multiple';
+                                    $multiple_attr = 'multiple="multiple"';
+                                ?>
+                                <select class="select2 custom-select <?= $rh ? $multiple_class : ''?> form-control form-control-sm" <?= $rh ? $multiple_attr : ''?> data-placeholder="- Selecione um período -" name="periodo[]" id="periodo" <?php if($isGestorOrLider): ?>onchange="carregaColaboradores()"<?php endif; ?>>
                                     <option value="">- selecione um período -</option>
                                     <?php if ($resPeriodo) : ?>
                                         <?php foreach($resPeriodo as $key => $Periodo): ?>
@@ -74,10 +78,16 @@
 const executar = () => {
 
     var dados = {
-        'periodo' : $("[name=periodo]").val(),
+        'periodo' : $("#periodo").val(),
     }
-
-    if(dados.periodo == ''){exibeAlerta('error', '<b>Período</b> não informado'); return false;}
+    
+    if(dados.periodo instanceof Array)
+    {
+        if(!dados.periodo || dados.periodo.length == 0){exibeAlerta('error', '<b>Período</b> não informado'); return false;}
+    }
+    else {
+        if(!dados.periodo || dados.periodo == ''){exibeAlerta('error', '<b>Período</b> não informado'); return false;}
+    }
     
     $("#form_filtro").submit();
 
@@ -157,11 +167,27 @@ const carregaFuncionariosSecao = (codSecao) => {
 const carregaColaboradores = () => {
 
     openLoading();
-
+    
     var periodo = $("#periodo").val();
-    if(periodo == ''){
-        exibeAlerta('warning', 'Período não selecionado.');
-        return;
+    var periodoMaisAntigo = null;
+
+    if(periodo instanceof Array)
+    {
+        if (!periodo || periodo.length === 0) {
+            exibeAlerta('warning', 'Período não selecionado.');
+            return;
+        }
+
+        periodoMaisAntigo = periodo[periodo.length - 1]; // <-- Aqui pegamos o primeiro item.
+    }
+    else {
+        if(!periodo || periodo == '')
+        {
+            exibeAlerta('warning', 'Período não selecionado.');
+            return;
+        }
+
+        periodoMaisAntigo = periodo;
     }
 
     $("#funcionario").html('<option value="">-- selecione um colaborador --</option>').trigger('change');
@@ -171,7 +197,7 @@ const carregaColaboradores = () => {
         type: 'POST',
         data: {
             'codsecao'    : $("#secao").val() ?? null,
-            'periodo'     : periodo
+            'periodo'     : periodoMaisAntigo
         },
         success: function(result) {
 
