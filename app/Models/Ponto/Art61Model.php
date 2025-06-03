@@ -62,6 +62,21 @@ class Art61Model extends Model
   }
 
   // -------------------------------------------------------
+  // Retorna id da requisição com algum id_req_chapa
+  // -------------------------------------------------------
+  public function id_req($id_req_chapa)
+  {
+    $query = "select id_req from zcrmportal_art61_req_chapas where id = ".$id_req_chapa;
+    $result = $this->dbportal->query($query);
+    $row = $result->getRow();
+    if (isset($row)) {
+      return $row->id_req;
+    } else {
+      return false;
+    }
+  }
+
+  // -------------------------------------------------------
   // Salva configurações do Art.61
   // -------------------------------------------------------
   public function SalvarConfig($dados)
@@ -895,16 +910,25 @@ class Art61Model extends Model
               a.status,
               a.chapa_requisitor,
               f.nome AS nome_requisitor,
+              a.chapa_gestor,
+              u.nome AS nome_gestor,
               a.dt_ini_ponto, 
               a.dt_fim_ponto,
               FORMAT(a.dt_ini_ponto, 'yyyy-MM-dd')+' and '+FORMAT(a.dt_fim_ponto , 'yyyy-MM-dd') AS per_ponto_sql,
               FORMAT(a.dt_ini_ponto, 'dd/MM/yyyy')+' a '+FORMAT(a.dt_fim_ponto, 'dd/MM/yyyy') AS per_ponto_br,
               a.anocomp,
-              a.mescomp
+              a.mescomp,
+              ( SELECT COUNT(DISTINCT c.chapa_gestor) AS qtde
+                FROM zcrmportal_art61_req_chapas c
+                WHERE c.id_req = a.id AND c.status <> 'I'
+              ) as qtde_gestores
           FROM zcrmportal_art61_requisicao a 
           LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON 
               f.codcoligada = '" . $_SESSION['func_coligada'] . "' AND 
               f.chapa = a.chapa_requisitor COLLATE Latin1_General_CI_AS 
+          LEFT JOIN " . DBRM_BANCO . "..PFUNC u ON 
+              u.codcoligada = '" . $_SESSION['func_coligada'] . "' AND 
+              u.chapa = a.chapa_gestor COLLATE Latin1_General_CI_AS 
           WHERE 
               a.id_coligada = '" . $_SESSION['func_coligada'] . "'
           AND a.status > 0
@@ -1460,10 +1484,17 @@ class Art61Model extends Model
         if ($batida->NUMHORAS > $batida->HEXTRA_DIARIA) { // só gera se hora extra do dia maior que o permitido
           $query = " 
             INSERT INTO zcrmportal_art61_req_chapas
-              (id_req, chapa_colab, dt_ponto, codevento, dt_ini_ponto, dt_fim_ponto, valor, chapa_gestor) 
-            VALUES 
-              (" . $id_req . ", '" . $batida->CHAPA . "', '" . $batida->DATA . "', '" . $batida->CODEVE . "', '" . $dt_ini_per . "', '" . $dt_fim_per . "', " . $batida->NUMHORAS . ", '" . $batida->GESTOR_CHAPA . "') ";
+              (id_req, chapa_colab, dt_ponto, codevento, dt_ini_ponto, dt_fim_ponto, valor, chapa_gestor, codhorario, indice) 
+            SELECT 
+              " . $id_req . ", '" . $batida->CHAPA . "', '" . SUBSTR($batida->DATA,0,10) . "', '" . $batida->CODEVE . "', '" . $dt_ini_per . "', '" . $dt_fim_per . "', " . $batida->NUMHORAS . ", '" . $batida->GESTOR_CHAPA . "', '" . $batida->HORARIO . "', " . $batida->INDICE . "
+            WHERE NOT EXISTS
+              (SELECT chapa_colab FROM zcrmportal_art61_req_chapas WHERE
+                status <> 'I' AND chapa_colab = '".$batida->CHAPA."' AND
+                dt_ponto = '".SUBSTR($batida->DATA,0,10)."' AND codevento = '".$batida->CODEVE."')
+            ";
 
+          //echo $query;
+          //exit();
           $this->dbportal->query($query);
 
           if ($this->dbportal->affectedRows() <= 0) {
@@ -1539,18 +1570,106 @@ class Art61Model extends Model
       return responseJson('error', 'A solicitação número '.$regs[0]['ID'].' não possui registros. Processo de envio interrompido.');
     }
 
+    // ROTINA PARA DESMEMBRAR REQS SE NECESSARIO
+    $this->dbportal->transBegin();
+
+    // Cria novas requisições
+    $query = "
+      with reqs1 as (
+        select distinct id_req, chapa_gestor from zcrmportal_art61_req_chapas
+        where id_req in (" . $ids . ")
+      ),
+
+      reqs2 as (
+        select id_req, count(chapa_gestor) as qtde_gestor 
+        from reqs1
+        group by id_req
+      ),
+
+      reqs3 as (
+      select 
+        r0.dt_requisicao,
+        r0.status,
+        r0.chapa_requisitor,
+        r1.chapa_gestor,
+        r0.dt_ini_ponto,
+        r0.dt_fim_ponto,
+        r0.anocomp,
+        r0.mescomp,
+        r0.id_criador,
+        r0.id_coligada,
+        r0.id as id_req_original
+      from reqs2 r2
+      inner join zcrmportal_art61_requisicao r0 on r0.id = r2.id_req
+      left join reqs1 r1 on  r1.id_req = r2.id_req
+      where r2.qtde_gestor > 1
+      )
+
+      insert into zcrmportal_art61_requisicao
+        (dt_requisicao, status, chapa_requisitor, chapa_gestor, dt_ini_ponto, dt_fim_ponto, anocomp, mescomp, id_criador, id_coligada, id_req_original)
+      select 
+        dt_requisicao, status, chapa_requisitor, chapa_gestor, dt_ini_ponto, dt_fim_ponto, anocomp, mescomp, id_criador, id_coligada, id_req_original
+      from reqs3
+    ";
+   
+    $this->dbportal->query($query);
+
+    // Apaga requisições desmembradas
+    $query = "
+      update zcrmportal_art61_requisicao 
+      set status = 0
+      where id in (select id_req_original from zcrmportal_art61_requisicao where id_req_original in (" . $ids . ") )
+    ";
+    $this->dbportal->query($query);
+    
+    // Atualiza chapas com novos id_reqs
+    $query = "
+      update c
+      set c.id_req = r.id
+      from zcrmportal_art61_req_chapas c
+      left join zcrmportal_art61_requisicao r on r.id_req_original = c.id_req and r.chapa_gestor = c.chapa_gestor
+      where 
+        r.id_req_original is not null 
+      and c.id_req in (" . $ids . ")
+    ";
+    $this->dbportal->query($query);
+    
+    // Atualiza chapa de gestor em requisição que não foi desmembrada
+    $query = "
+      update r
+      set r.chapa_gestor = c.chapa_gestor
+      from zcrmportal_art61_requisicao r
+      inner join (select distinct id_req, chapa_gestor from zcrmportal_art61_req_chapas) c on c.id_req = r.id
+      where 
+        r.chapa_gestor is null 
+      and r.id in (" . $ids . ")
+    ";
+    //echo $query;
+    //die();
+    $this->dbportal->query($query);
+
+    if ($this->dbportal->transStatus() === FALSE) {
+      $this->dbportal->transRollback();
+      return responseJson('error', 'Ocorreram erros na atualização dos gestores nas requisições. Processo de envio interrompido.');
+    } else {
+      $this->dbportal->transCommit();
+    }
+
     // ROTINA DE ENVIO DE EMAIL
     $query = "
       SELECT DISTINCT
-        r.chapa_requisitor,
+        r.chapa_gestor,
         e.NOME,
         e.EMAIL,
         FORMAT(r.dt_ini_ponto, 'dd/MM/yyyy') DTINI_BR, 
         FORMAT(r.dt_fim_ponto, 'dd/MM/yyyy') DTFIM_BR
       
       FROM zcrmportal_art61_requisicao r
-      LEFT JOIN EMAIL_CHAPA e ON e.CODCOLIGADA = r.id_coligada AND e.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS
-      WHERE e.EMAIL IS NOT NULL AND r.id IN  (" . $ids . ")
+      LEFT JOIN EMAIL_CHAPA e ON e.CODCOLIGADA = r.id_coligada AND e.CHAPA = r.chapa_gestor COLLATE Latin1_General_CI_AS
+      WHERE 
+        e.EMAIL IS NOT NULL AND 
+        r.status <> 0 AND
+        ( r.id IN  (" . $ids . ") or r.id_req_original IN (" . $ids . ") )
     ";
 
     //echo '<PRE> '.$query;
@@ -1602,7 +1721,7 @@ class Art61Model extends Model
           dt_envio_email = '" . date('Y-m-d H:i:s') . "',
           status = '2'
       WHERE
-          id in ( " . $ids . " )
+          ( id IN  (" . $ids . ") OR id_req_original IN (" . $ids . ") )
       AND status in ('1','4')
     ";
     //echo $query;

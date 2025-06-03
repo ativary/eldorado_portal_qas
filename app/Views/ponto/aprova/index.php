@@ -148,9 +148,7 @@ $(document).ready(function(){
                                 <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Categoria</label></div>
                                 <div class="col-sm-10">
                                     <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_tipo" id="filtro_tipo" class="form-control select2 form-control-sm">
-                                      <option value="">- selecione uma categoria -</option>
-                                      <option <?= ($filtro_tipo == "ponto") ? 'selected' : ''; ?> value="ponto">&bull; Ponto</option>
-                                      <option <?= ($filtro_tipo == "art61") ? 'selected' : ''; ?> value="art61">&bull; Artigo.61</option>
+                                      <option <?= ($filtro_tipo == "ponto") ? 'selected' : ''; ?> value="ponto">Ponto</option>
                                     </select>
                                 </div>
 
@@ -169,6 +167,7 @@ $(document).ready(function(){
                                         <option <?= ($filtro_tipo2 == "9") ? 'selected' : ''; ?> value="9">Falta não remunerada</option>
                                         <option <?= ($filtro_tipo2 == "21") ? 'selected' : ''; ?> value="21">Troca de escala</option>
                                         <option <?= ($filtro_tipo2 == "22") ? 'selected' : ''; ?> value="22">Troca de dia</option>
+                                        <option <?= ($filtro_tipo2 == "61") ? 'selected' : ''; ?> value="61">Artigo.61</option>
                                     </select>
                                 </div>
 
@@ -213,9 +212,10 @@ $(document).ready(function(){
                                     <option value="all">Todos</option>
                                     <?php if ($resFuncionarioSecao) : ?>
                                         <?php foreach ($resFuncionarioSecao as $key => $FuncionarioSecao) : ?>
-                                            <option value="<?= $FuncionarioSecao['CHAPA']; ?>" <?php if ($chapa == $FuncionarioSecao['CHAPA']) {
-                                                                                                    echo ' selected ';
-                                                                                                } ?>><?= $FuncionarioSecao['NOME'] . ' - ' . $FuncionarioSecao['CHAPA']; ?></option>
+                                            <option value="<?= $FuncionarioSecao['CHAPA']; ?>" 
+                                                <?php if ($chapa == $FuncionarioSecao['CHAPA']) {echo ' selected ';} ?>>
+                                                <?= $FuncionarioSecao['NOME'] . ' - ' . $FuncionarioSecao['CHAPA']; ?>
+                                            </option>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </select></div>
@@ -288,26 +288,35 @@ $(document).ready(function(){
                                     <?php if($objListaBatidaApr): ?>
                                         <?php foreach($objListaBatidaApr as $key => $registro): ?>
                                             <tr>
-                                            <td width="20" class="text-center">
-                                                    <?php
+                                              <td width="20" class="text-center">
+                                                  <?php
                                                     if(
                                                         ($perfilRH && $registro['status'] == 2 && ($registro['movimento'] == 21 || $registro['movimento'] == 22)) ||
                                                         (($perfilRH) || (($registro['status'] == 10) && ($registro['movimento'] == 21 || $registro['movimento'] == 22))) ||
-                                                        ($registro['status'] == 1)
+                                                        ($registro['status'] == 1) ||
+                                                        (($perfilRH) || (($registro['status'] == 2) && $registro['movimento'] == 61))
                                                     ):
                                                     ?>
                                                     <input type="checkbox" name="idbatida[]" data-checkbox="<?= $registro['id'].'|'.$registro['movimento']; ?>" data-chapa="<?= $registro['chapa']; ?>" value="<?= $registro['chapa'] . '|' . dtEn($registro['dtponto'], true) . '|' . $registro['id'].'|'.$registro['movimento']; ?>">
-                                                    <?php endif; ?>
+                                                  <?php endif; ?>
                                                 </td>
                                                 <td width="20" class="text-right">
                                                     <?= $registro['id'] ?>
                                                 </td>
-                                                <td class="n-mobile-cell">
+                                                <td class="n-mobile-cell" id="status_<?= $registro['id'].'_'.$registro['movimento']; ?>">
                                                     <?php
                                                         if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
                                                             switch($registro['status']){
                                                                 case 10: echo '<span class="badge badge-warning">Pend/Ação Gestor</span>'; break;
                                                                 case 2: echo '<span class="badge badge-info">Pend/Ação RH</span>'; break;
+                                                                default: echo '';
+                                                            }
+                                                        }elseif ($registro['movimento'] == 61 ) {
+                                                            switch($registro['status']){
+                                                                case 2: echo '<span class="badge badge-warning">Pend/Ação Gestor</span>'; break;
+                                                                case 3: echo '<span class="badge badge-info">Pend/Calc.RH</span>'; break;
+                                                                case 4: echo '<span class="badge badge-info">Pend/Ação RH</span>'; break;
+                                                                case 5: echo '<span class="badge badge-primary">Pend/Sincronização</span>'; break;
                                                                 default: echo '';
                                                             }
                                                         }else{
@@ -330,6 +339,7 @@ $(document).ready(function(){
                                                         case 9: $tipoRequisicao = 'Falta não remunerada'; break;
                                                         case 21: $tipoRequisicao = 'Troca de escala'; break;
                                                         case 22: $tipoRequisicao = 'Troca de dia'; break;
+                                                        case 61: $tipoRequisicao = 'Artigo.61'; break;
                                                     }
 
                                                     if($tipoRequisicao == 'Altera atitude' && $registro['justificativa_excecao'] != ''){
@@ -362,6 +372,10 @@ $(document).ready(function(){
                                                     
                                                     // inclusão de batida
                                                     echo '<div class="row" style="min-width: 290px;">';
+                                                    if ($registro['movimento'] == 61) {
+                                                      echo '<div class="col-6 text-center"><strong>Total H.Extras</strong><br>' . sprintf("%05s", m2h($registro['art61_horas'])) . '</div>';
+                                                      echo '<div class="col-6 text-center"><strong>Colaboradores</strong><br>' . $registro['art61_colaboradores'] . '</div>';
+                                                    }                                                    
                                                     if ($registro['movimento'] == 21) {
                                                         echo '<div class="col-4 text-center"> <strong>Indice</strong><br> ' . $registro['codindice'] . '</div>';
                                                         echo '<div class="col-8 text-center"> <strong>Horário</strong><br> ' . $registro['horario']. '</div>';
@@ -373,7 +387,7 @@ $(document).ready(function(){
                                                         echo '<div class="col-6 text-center"> <strong>Índice Folga</strong><br> ' . ($registro['codindice_folga']) . '</div>';
                                                         echo '<div class="col-12 text-center"> <strong>Horário</strong><br> ' . $registro['horario']. '</div>';
                                                     }
-                                                    if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                                                    if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22 && $registro['movimento'] != 61) {
                                                         echo '<div class="col-12 text-center"><strong>Batida</strong><br> ' . sprintf("%05s", m2h($registro['batida'])) . '</div>';
                                                     }
                                                     // abono
@@ -398,6 +412,11 @@ $(document).ready(function(){
                                                 </td>
                                                 <td class="n-mobile-cell">
                                                 <?php
+                                                    if ($registro['movimento'] == 61) {
+                                                        echo '<div class="col-12 text-center">';
+                                                        echo '<a href="' . base_url('/ponto/art61/solicitacao_chapas/' . $registro['id']) . '" target="_blank" title="Ver requisição" class="btn btn-sm btn-primary"><i class="fa fa-eye" aria-hidden="true"></i> </a>';
+                                                        echo '</div>';
+                                                    }
                                                     if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
                                                         echo $registro['justificativa_escala'];
                                                     }
@@ -423,7 +442,7 @@ $(document).ready(function(){
                                                 <?php
                                                     // inclusão de batida
                                                     echo '<div class="row">';
-                                                    if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22) {
+                                                    if ($registro['movimento'] != 5 && $registro['movimento'] != 6 && $registro['movimento'] != 8 && $registro['movimento'] != 7 && $registro['movimento'] != 9 && $registro['movimento'] != 21 && $registro['movimento'] != 22 && $registro['movimento'] != 61) {
                                                         if (strlen($registro['possui_anexo'] ?? '') > 0) {
                                                             echo '<div class="col-12 text-center">';
                                                             echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
@@ -442,12 +461,24 @@ $(document).ready(function(){
                                                     }
                                                     // altera atitude
                                                     if ($registro['movimento'] == 8 || $registro['movimento'] == 7) {
+                                                      if (strlen($registro['possui_anexo'] ?? '') > 0) {
+                                                          echo '<div class="col-12 text-center">';
+                                                          echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
+                                                          echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                          echo '</div>';
+                                                      }
+                                                    }
+                                                    // altera atitude
+                                                    if ($registro['movimento'] == 61) {
                                                         if (strlen($registro['possui_anexo'] ?? '') > 0) {
                                                             echo '<div class="col-12 text-center">';
-                                                            echo '<button type="button" onclick="carregaVisualizador(' . $registro['id'] . ',\'' . $registro['chapa'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
-                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
+                                                            echo '<button type="button" onclick="carregaVisualizadorArt61(' . $registro['id'] . ',\'' . $registro['solicitante'] . '\')" title="Visualizar" class="btn btn-sm btn-info"><i class="fa fa-search" data-anexo="Sim" aria-hidden="true"></i> </button>';
+                                                            echo '<a href="' . base_url('ponto/aprova/download_anexo_art61/' . $registro['id']) . '" target="_blank" title="Download" class="btn btn-sm btn-primary"><i class="fa fa-download" aria-hidden="true"></i> </a>';
                                                             echo '</div>';
                                                         }
+                                                        echo '<div class="col-12 text-center">';
+                                                        echo '<a href="' . base_url('/ponto/art61/solicitacao_chapas/' . $registro['id']) . '" target="_blank" title="Ver requisição" class="btn btn-sm btn-primary"><i class="fa fa-eye" aria-hidden="true"></i> </a>';
+                                                        echo '</div>';
                                                     }
                                                     // escala
                                                     if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
@@ -470,6 +501,9 @@ $(document).ready(function(){
                                                     <?php
                                                     // inclusão de batida
                                                     echo '<div class="row">';
+                                                    if ($registro['movimento'] == 61) {
+                                                      echo '<div class="col-12 text-center"><strong>Total H.Extras</strong><br>' . sprintf("%05s", m2h($registro['art61_horas'])) . '</div>';
+                                                    }
                                                     if ($registro['movimento'] == 21) {
                                                         echo '<div class="col-4 text-center"><strong>Indice</strong><br>' . $registro['codindice'] . '</div>';
                                                         echo '<div class="col-8 text-center"><strong>Horário</strong><br>' . $registro['horario']. '</div>';
@@ -537,10 +571,10 @@ $(document).ready(function(){
                                                 </td>
                                                 <td>
                                                     <?php
-                                                    if(
+                                                    if( $registro['movimento'] != 61 && (
                                                         ($perfilRH && $registro['status'] == 2 && ($registro['movimento'] == 21 || $registro['movimento'] == 22)) ||
                                                         (($perfilRH) || (($registro['status'] == 10) && ($registro['movimento'] == 21 || $registro['movimento'] == 22))) ||
-                                                        ($registro['status'] == 1)
+                                                        ($registro['status'] == 1) )
                                                     ):
                                                     ?>
                                                     <div class="dropdown">
@@ -551,12 +585,33 @@ $(document).ready(function(){
                                                                 <a target="_blank" href="<?= base_url('ponto/escala/'.(($registro['movimento'] == 21) ? 'editar' : 'editardia').'/'.id($registro['id'])).'/'.id($registro['situacao']); ?>" class="dropdown-item"><i class="mdi mdi-eye-outline"></i> Ver requisição</a>
                                                                 <button type="button" onclick="justificativas('<?= id($registro['id']); ?>')" class="dropdown-item"><i class="mdi mdi-comment-eye-outline"></i> Ver justificativa</button>
                                                                 
-                                                            <?php else: ?>
+                                                              <?php else: ?>
                                                                 <a href="/ponto/espelho/editar/<?= $registro['chapa']; ?>/<?= dtEn($registro['dtponto'], true); ?>" target="_blank" class="dropdown-item"><i class="mdi mdi mdi-account-clock"></i> Ver Espelho</a>
                                                             <?php endif; ?>
 
                                                             <button type="button" onclick="aprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-success"><i class="far fa-thumbs-up"></i> Aprovar</button>
                                                             <button type="button" onclick="reprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-danger"><i class="far fa-thumbs-down"></i> Reprovar</button>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                    <?php
+                                                    if($registro['movimento'] == 61):
+                                                    ?>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
+                                                        <div class="dropdown-menu" style="margin-left: -131px;">
+
+                                                            <a href="/ponto/art61/solicitacao_chapas/<?= $registro['id']; ?>" target="_blank" class="dropdown-item"><i class="mdi mdi mdi-eye"></i> Ver Requisição</a>
+
+                                                            <?php if(($perfilRH && $registro['status'] == 4) || $registro['status'] == 2): ?>
+                                                                <button type="button" onclick="aprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-success"><i class="far fa-thumbs-up"></i> Aprovar <?= ($perfilRH && $registro['status'] == 4) ? 'RH' : '' ?></button>
+                                                            <?php endif; ?>
+                                                            <?php if($perfilRH && $registro['status'] == 3): ?>
+                                                                <button type="button" onclick="CalcularReq('<?= $registro['id']; ?>')" class="dropdown-item text-primary"><i class="fa fa-calculator"></i> Calcular</button>
+                                                            <?php endif; ?>
+                                                            <?php if($perfilRH || $registro['status'] == 2): ?>
+                                                                <button type="button" onclick="reprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-danger"><i class="far fa-thumbs-down"></i> Reprovar</button>
+                                                            <?php endif; ?>
                                                         </div>
                                                     </div>
                                                     <?php endif; ?>
@@ -645,6 +700,24 @@ $(document).ready(function(){
         var hFrame = $(".modal-body").height();
 
         $("#iframe_preview").html('<iframe id="iframe" src="/ponto/preview/escala/' + id + '" frameborder="0" width="100%" height="' + (hFrame - 50) + 'px" allowfullscreen></iframe>');
+
+        var myTimeout = setTimeout(function() {
+            openLoading(true);
+            var wFrame = $("#iframe").width();
+            $('#iframe').contents().find("html").find('img').attr('style', 'max-width:' + wFrame + 'px;');
+            clearTimeout(myTimeout);
+        }, 4000);
+
+    }
+    const carregaVisualizadorArt61 = (id, nome) => {
+        <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
+        $("#titulo_modal").html('Anexo enviado por | ' + nome);
+        $("#conteudo_modal").html('<div class="text-center"><div class="spinner-border thumb-md text-primary" role="status"></div></div>');
+        $(".modal_visualizador").modal('show');
+        openLoading();
+        var hFrame = $(".modal-body").height();
+
+        $("#iframe_preview").html('<iframe id="iframe" src="/ponto/preview/art61/' + id + '" frameborder="0" width="100%" height="' + (hFrame - 50) + 'px" allowfullscreen></iframe>');
 
         var myTimeout = setTimeout(function() {
             openLoading(true);
@@ -967,6 +1040,7 @@ $(document).ready(function(){
         document.getElementById('form1').action="<?= base_url('ponto/aprova/excel'); ?>";
         document.getElementById('form1').submit();
     }
+
     const justificativas = (idEscala) => {
         <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         openLoading();
@@ -996,7 +1070,46 @@ $(document).ready(function(){
         elemento.innerHTML = variavelComHTML;
         return elemento.textContent || elemento.innerText || '';
     }
+
+    const CalcularReq = (id) => {
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Deseja calcular esta <b>Requisição</b>?',
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: `Sim Calcular`,
+      denyButtonText: `Cancelar`,
+      showCancelButton: false,
+      showCloseButton: false,
+      allowOutsideClick: false,
+      width: 600,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          openLoading();
+          let dados = {
+            "id": id
+          };
+
+          $.ajax({
+            url: "<?= base_url('ponto/aprova/action/calcula_req'); ?>",
+            type: 'POST',
+            data: dados,
+            success: function(result) {
+              openLoading(true);
+              var response = JSON.parse(result);
+              if (response.tipo != 'success') {
+                exibeAlerta(response.tipo, response.msg);
+              } else {
+                $(`#status_${id}+"_61`).html('<span class="badge badge-primary">Pend/Sincronização</span>');
+              }
+            },
+          });
+        }
+      });
+    }
 </script>
+
 <style> 
 .dataTables_wrapper .dataTables_paginate .paginate_button {
     padding: 0 !important;

@@ -155,10 +155,12 @@ class Aprova extends BaseController
                             );
                         }
 
-                        if($tipo != 21 && $tipo != 22){
-                            $RESULT = $this->mAprova->aprovaBatidaRH($dados_post[2], $dados['perfilRH']);
-                        }else{
+                        if($tipo == 61){
+                            $RESULT = $this->mAprova->aprovaArtigo61($dados_post[2], $dados['perfilRH']);
+                        }elseif($tipo == 21 or $tipo == 22){
                             $RESULT = $this->mAprova->aprovaEscala($dados_post[2], $dados['perfilRH']);
+                        }else{
+                            $RESULT = $this->mAprova->aprovaBatidaRH($dados_post[2], $dados['perfilRH']);
                         }
                         
 
@@ -170,7 +172,7 @@ class Aprova extends BaseController
                     }
 
                     if($sucesso > 0 && strlen($erro) > 0){
-                        notificacao('warning', 'Registro(s) aprovada(s) com sucesso! Porém, ocorreram falha parcial na aprovação.'.$erro);
+                        notificacao('warning', 'Registro(s) aprovada(s) com sucesso! Porém, ocorreu falha parcial na aprovação.'.$erro);
                     }
 
                     if($sucesso == 0 && strlen($erro) > 0){
@@ -206,10 +208,12 @@ class Aprova extends BaseController
                     $dadosRep = explode('|', $id_batida);
                     $tipo = $dadosRep[3] ?? 0;
 
-                    if($tipo != 21 && $tipo != 22){
-                        $result = $this->mAprova->reprovaBatidaRH($id_batida, 'RH', $motivo_reprova, $dados['perfilRH']);
-                    }else{
+                    if($tipo == 61){
+                        $result = $this->mAprova->reprovaArt61($dadosRep[2], $motivo_reprova, $dados['perfilRH']);
+                    }elseif($tipo == 21 or $tipo == 22){
                         $result = $this->mAprova->reprovaEscala($dadosRep[2], $motivo_reprova, $dados['perfilRH']);
+                    }else{
+                        $result = $this->mAprova->reprovaBatidaRH($id_batida, 'RH', $motivo_reprova, $dados['perfilRH']);
                     }
 
                     if(!$result) $resp = 1;
@@ -365,6 +369,31 @@ class Aprova extends BaseController
     }
 
   }
+  
+  public function download_anexo_art61($id_req_chapa, $linha=1){
+    if(!$id_req_chapa) exit('Parametros invalidos!');
+
+    $documento = $this->mAprova->ListaArt61Anexo($id_req_chapa, 1);
+
+    $doc_name = $documento[0]['file_name'];
+    $doc_type = $documento[0]['file_type'];
+    $doc_file = $documento[0]['file_data'];
+
+    if($documento){
+        $ARQUIVO = base64_decode($doc_file);
+        $TIPO = $doc_type;
+        $NOME = $doc_name;
+
+        header('Content-Type: application/'. $TIPO);
+        header('Content-Disposition: attachment; filename='. $NOME);
+        header('Pragma: no-cache');
+
+        echo $ARQUIVO;
+        exit();
+
+    }
+
+  }
 
   public function excel()
     {
@@ -473,6 +502,7 @@ class Aprova extends BaseController
                     case 9: $tipo = 'Falta não remunerada'; break;
                     case 21:$tipo =  'Troca de escala'; break;
                     case 22: $tipo =  'Troca de dia'; break;
+                    case 61: $tipo =  'Artigo.61'; break;
                 }
                 $sheet->setCellValue('B' . $rows, $tipo);
 
@@ -637,6 +667,15 @@ class Aprova extends BaseController
                 $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
                 exit(json_encode($this->mAprova->ListarFuncionariosSecao($dados['codsecao'], $dados)));
                 break;
+
+            //-------------------------------------
+            // calcula requisição de Art.61
+            case 'calcula_req':
+              exit($this->mAprova->Calcular_Req($dados['id']));
+              break;
+            //-------------------------------------
+
+      
         }        
 
     }
@@ -646,6 +685,14 @@ class Aprova extends BaseController
     //-----------------------------------------------------------
     public function workflow(){
         $this->mAprova->Workflow();
+        exit();
+    }
+
+    //-----------------------------------------------------------
+    // Workflow de envio de emails pendentes de aprovação do Artigo 61
+    //-----------------------------------------------------------
+    public function workflow_art61(){
+        $this->mAprova->Workflow_Art61();
         exit();
     }
 
