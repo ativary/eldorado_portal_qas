@@ -11,3 +11,4 @@ cron/*.txt
 !writable/logs/.keep
 !writable/session/.keep
 !writable/uploads/.keep
+.env
