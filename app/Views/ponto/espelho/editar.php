@@ -1353,8 +1353,10 @@ table th {
 
                 var exibe = <?= ($rh) ? 1 : 0; ?>;
                 if(batidas[x].justificativa_batida != null && (periodo_bloqueado != 1 || exibe == 1)) html += '<tr data-justificativa="'+id_tr+'" data-just="" style="'+((periodo_bloqueado == 1) ? '' : 'display: none;')+'"><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label> <span class="badge badge-primary">'+batidas[x].justificativa_batida.replaceAll('+', ' ')+'</span></td></tr>';
+		        if(batidas[x].obs != null && batidas[x].obs != '' && (exibe == 1)) html += '<tr data-observacao="'+id_tr+'" data-obs=""><td><label>Deseja incluir informações adicionais?</label><textarea class="form-control" value="'+batidas[x].obs+'"></textarea></td></tr>';
 
                 $('.modal_alterar_batida tbody').append(html);
+		        if(batidas[x].obs != null && batidas[x].obs != '') $("[data-observacao='"+id_tr+"'] textarea").val(batidas[x].obs).change().attr('readonly', true);
 
                 natureza_proxima_batida = (batidas[x].natureza != 1) ? 1 : 0;
 
@@ -1364,6 +1366,8 @@ table th {
             $("[data-info]").on('click', function(e) {
                 $("[data-just]").fadeOut(0);
                 $("[data-justificativa='" + $(this).attr('data-info') + "']").fadeIn(0);
+		        $("[data-obs]").fadeOut(0);
+		        $("[data-observacao='" + $(this).attr('data-info') + "']").fadeIn(0)
             });
 
             verificaLimite();
@@ -1540,6 +1544,7 @@ table th {
                     if (tipo == "I") {
                         var just = $("[data-justificativa='" + id + "'] select").val().trim();
                     }
+			        var obs = $("[data-observacao='" + id + "' ] textarea").val();
                     let data = $("[data-info='" + id + "']").find('input,select')[0].value;
                     let data_default = $("[data-info='" + id + "']").find('input,select')[0].getAttribute('data-batida-default');
                     let data_ref = $("[data-info='" + id + "']").find('input,select')[1].value;
@@ -1611,6 +1616,7 @@ table th {
                             'tipo'                : tipo,
                             'id'                  : id,
                             'justificativa'       : (just != undefined) ? just : '',
+				            'obs'				  : (obs != undefined) ? obs : '',
                             'data_ref'            : data_ref,
                             'data_ref_default'    : data_ref_default,
                             'batida'              : batida,
@@ -1748,7 +1754,9 @@ table th {
                 '<td><select class="form-control form-control-sm"><option value="0" ' + (natureza_proxima_batida != 1 ? 'selected' : '') + '>Entrada</option><option value="1" ' + (natureza_proxima_batida == 1 ? 'selected' : '') + '>Saida</option></select></td>' +
                 '<td width="18" class="p-0"><button class="btn btn-danger btn-xxs pr-1 pl-1" data-remove-batida="' + id + '">X</button></td>' +
                 '</tr>' +
-                '<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label><select class="form-control form-control-sm"><option value="">...</option>'+select_justificativa_ajuste+'</td></tr>';
+                '<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label><select class="form-control form-control-sm"><option value="">...</option>'+select_justificativa_ajuste+'</td></tr>' + 
+                '<tr data-observacao="' + id + '" data-obs><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Deseja incluir informações adicionais? </label><textarea class="form-control"></textarea></td></tr>';
+
                 //'<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Justificativa:</label><input type="text" maxlength="50" class="form-control mt-0"></td></tr>';
 
             $('.modal_alterar_batida tbody').append(html);
@@ -1757,12 +1765,15 @@ table th {
             $("[data-info]").on('click', function(e) {
                 $("[data-just]").fadeOut(0);
                 $("[data-justificativa='" + $(this).attr('data-info') + "']").fadeIn(0);
+                $("[data-obs]").fadeOut(0);
+                $("[data-observacao='" + $(this).attr('data-info') + "']").fadeIn(0);
             });
 
             // remove a nova batida
             $("[data-remove-batida]").on('click', function(e) {
                 $("[data-info='" + $(this).attr('data-remove-batida') + "']").remove();
                 $("[data-justificativa='" + $(this).attr('data-remove-batida') + "']").remove();
+                $("[data-observacao='" + $(this).attr('data-remove-batida') + "']").remove();
                 verificaLimite();
                 natureza_proxima_batida = (natureza_proxima_batida != 1) ? 1 : 0;
             });
@@ -2802,6 +2813,10 @@ function m2h(minutos) {
 		border-top-right-radius: 2px;
 		font-size: 16px;
 		text-align: left;
+	}
+    
+	#modalObservacao .modal-title {
+		color: #fff;
 	}
 </style>
 

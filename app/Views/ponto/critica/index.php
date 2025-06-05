@@ -858,6 +858,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b1 = m2h($resBatidasApontadas[$idba]['ent1'],4);
@@ -877,6 +878,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b3 = m2h($resBatidasApontadas[$idba]['ent2'],4);
@@ -896,6 +898,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b5 = m2h($resBatidasApontadas[$idba]['ent3'],4);
@@ -915,6 +918,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b7 = m2h($resBatidasApontadas[$idba]['ent4'],4);
@@ -934,6 +938,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b2 = m2h($resBatidasApontadas[$idba]['sai1'],4);
@@ -953,6 +958,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b4 = m2h($resBatidasApontadas[$idba]['sai2'],4);
@@ -972,6 +978,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b6 = m2h($resBatidasApontadas[$idba]['sai3'],4);
@@ -991,6 +998,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b8 = m2h($resBatidasApontadas[$idba]['sai4'],4);
@@ -2442,6 +2450,7 @@ const incluirNovaBatida = () => {
 	if (!validaDados()) return;
 
 	$("[data-just]").fadeOut(0);
+	$("[data-obs]").fadeOut(0);
 	var id = Math.random();
 
 	var html = '<tr data-p="I" data-info="' + id + '">' +
@@ -2451,20 +2460,24 @@ const incluirNovaBatida = () => {
 		'<td><select class="form-control form-control-sm"><option value="0" ' + (natureza_proxima_batida != 1 ? 'selected' : '') + '>Entrada</option><option value="1" ' + (natureza_proxima_batida == 1 ? 'selected' : '') + '>Saida</option></select></td>' +
 		'<td width="18" class="p-0"><button class="btn btn-danger btn-xxs pr-1 pl-1" data-remove-batida="' + id + '">X</button></td>' +
 		'</tr>' +
-		'<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label><select class="form-control form-control-sm mt-"><option value="">...</option>'+select_justificativa_ajuste+'</td></tr>';
+		'<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label><select class="form-control form-control-sm mt-"><option value="">...</option>'+select_justificativa_ajuste+'</td></tr>'+
+		'<tr data-observacao="' + id + '" data-obs><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Deseja incluir informações adicionais? </label><textarea class="form-control"></textarea></td></tr>';
 
 	$('.modal_alterar_batida tbody').append(html);
 
 	// abre a justificativa da batida ao clicar na linha
 	$("[data-info]").on('click', function(e) {
 		$("[data-just]").fadeOut(0);
+		$("[data-obs]").fadeOut(0);
 		$("[data-justificativa='" + $(this).attr('data-info') + "']").fadeIn(0);
+		$("[data-observacao='" + $(this).attr('data-info') + "']").fadeIn(0);
 	});
 
 	// remove a nova batida
 	$("[data-remove-batida]").on('click', function(e) {
 		$("[data-info='" + $(this).attr('data-remove-batida') + "']").remove();
 		$("[data-justificativa='" + $(this).attr('data-remove-batida') + "']").remove();
+		$("[data-observacao='" + $(this).attr('data-remove-batida') + "']").remove();
 		verificaLimite();
 		natureza_proxima_batida = (natureza_proxima_batida != 1) ? 1 : 0;
 	});
@@ -2609,9 +2622,11 @@ const abrirAlteracaoBatida = (data, data_br, diasemana, batidas, chapa, escala, 
 		html += '</td></tr>';
 
 		var exibe = <?= ($rh) ? 1 : 0; ?>;
+		
         if(batidas[x].justificativa_batida != null && (exibe == 1)) html += '<tr data-justificativa="'+id_tr+'" data-just="" style="display: none;"><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label> <span class="badge badge-primary">'+batidas[x].justificativa_batida.replaceAll('+', ' ')+'</span></td></tr>';
-
+		if(batidas[x].obs != null && batidas[x].obs != '' && (exibe == 1)) html += '<tr data-observacao="'+id_tr+'" data-obs=""><td><label>Deseja incluir informações adicionais?</label><textarea class="form-control" value="'+batidas[x].obs+'"></textarea></td></tr>';
 		$('.modal_alterar_batida tbody').append(html);
+		if(batidas[x].obs != null && batidas[x].obs != '') $("[data-observacao='"+id_tr+"'] textarea").val(batidas[x].obs).change().attr('readonly', true);
 
 		natureza_proxima_batida = (batidas[x].natureza != 1) ? 1 : 0;
 
@@ -2621,6 +2636,8 @@ const abrirAlteracaoBatida = (data, data_br, diasemana, batidas, chapa, escala, 
 	$("[data-info]").on('click', function(e) {
 		$("[data-just]").fadeOut(0);
 		$("[data-justificativa='" + $(this).attr('data-info') + "']").fadeIn(0);
+		$("[data-obs]").fadeOut(0);
+		$("[data-observacao='" + $(this).attr('data-info') + "']").fadeIn(0)
 	});
 
 	verificaLimite();
@@ -2642,6 +2659,7 @@ const alterarBatida = () => {
 			if (tipo == "I") {
 				var just = $("[data-justificativa='" + id + "'] select").val().trim();
 			}
+			var obs = $("[data-observacao='" + id + "' ] textarea").val();
 			let data = $("[data-info='" + id + "']").find('input,select')[0].value;
 			let data_default = $("[data-info='" + id + "']").find('input,select')[0].getAttribute('data-batida-default');
 			let data_ref = $("[data-info='" + id + "']").find('input,select')[1].value;
@@ -2708,6 +2726,7 @@ const alterarBatida = () => {
 				'tipo'                : tipo,
 				'id'                  : id,
 				'justificativa'       : (just != undefined) ? just : '',
+				'obs'				  : (obs != undefined) ? obs : '',
 				'data_ref'            : data_ref,
 				'data_ref_default'    : data_ref_default,
 				'batida'              : batida,

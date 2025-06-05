@@ -612,8 +612,8 @@ class CriticaModel extends Model {
 
     }
 
-      
-    }
+    
+  }
 
     public function listaBatidasApontadaCritica($dados) {
 
@@ -665,7 +665,7 @@ class CriticaModel extends Model {
 
     
     
-      $query = " SELECT id, chapa, dtponto, ent1, ent2, ent3, ent4, ent5, sai1, sai2, sai3, sai4, sai5, status, motivo_reprova, COALESCE(natent1, natent2, natent3, natent4, natent5, natsai1, natsai2, natsai3, natsai4, natsai5) natureza, COALESCE(dtrefent1, dtrefent2, dtrefent3, dtrefent4, dtrefent5, dtrefsai1, dtrefsai2, dtrefsai3, dtrefsai4, dtrefsai5) data_referencia FROM zcrmportal_ponto_horas (NOLOCK) WHERE coligada = '{$this->coligada}' AND status IN ('1','2','3','R') 
+      $query = " SELECT id, chapa, dtponto, ent1, ent2, ent3, ent4, ent5, sai1, sai2, sai3, sai4, sai5, status, motivo_reprova, obs, COALESCE(natent1, natent2, natent3, natent4, natent5, natsai1, natsai2, natsai3, natsai4, natsai5) natureza, COALESCE(dtrefent1, dtrefent2, dtrefent3, dtrefent4, dtrefent5, dtrefsai1, dtrefsai2, dtrefsai3, dtrefsai4, dtrefsai5) data_referencia FROM zcrmportal_ponto_horas (NOLOCK) WHERE coligada = '{$this->coligada}' AND status IN ('1','2','3','R') 
         and dtponto BETWEEN '{$dtini}' AND '{$dtfim}' AND dt_delete IS NULL {$chapa}
         AND EXISTS (SELECT B.CHAPA FROM ".DBRM_BANCO."..PFUNC B (NOLOCK) WHERE /*B.CODSITUACAO NOT IN ('D')*/
         
