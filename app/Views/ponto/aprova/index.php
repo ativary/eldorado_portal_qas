@@ -1101,7 +1101,7 @@ $(document).ready(function(){
               if (response.tipo != 'success') {
                 exibeAlerta(response.tipo, response.msg);
               } else {
-                $(`#status_${id}+"_61`).html('<span class="badge badge-primary">Pend/Sincronização</span>');
+                $(`#status_${id}_61`).html('<span class="badge badge-primary">Pend/Sincronização</span>');
               }
             },
           });

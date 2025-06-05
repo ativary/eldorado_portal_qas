@@ -1007,7 +1007,11 @@ class Art61Model extends Model
               c.nome as desc_ccusto,
               e.area as area,
               a.codevento,
-              p.descricao as desc_evento
+              p.descricao as desc_evento,
+              dbo.[MINTOTIME](a.extra_normal) AS horas_extras_normais,
+              dbo.[MINTOTIME](a.extra_art61) AS horas_extras_art61,
+              a.codevento_art61,
+              v.descricao as desc_evento_art61
               
           FROM zcrmportal_art61_req_chapas a 
           LEFT JOIN zcrmportal_art61_requisicao r ON 
@@ -1030,6 +1034,9 @@ class Art61Model extends Model
           LEFT JOIN " . DBRM_BANCO . "..PEVENTO p ON 
                 p.codcoligada = f.codcoligada AND 
                 p.codigo = a.codevento COLLATE Latin1_General_CI_AS
+          LEFT JOIN " . DBRM_BANCO . "..PEVENTO v ON 
+                v.codcoligada = f.codcoligada AND 
+                v.codigo = a.codevento_art61 COLLATE Latin1_General_CI_AS
           LEFT JOIN zcrmportal_ponto_motivos j ON 
                 j.id = a.id_justificativa
           LEFT JOIN zcrmportal_art61_areas e ON 

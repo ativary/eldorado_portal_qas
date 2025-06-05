@@ -65,6 +65,11 @@
                   <th class="n-mobile-cell"><strong>Quantidade</strong></th>
                   <th class="n-mobile-cell"><strong>Justificativa</strong></th>
                   <th class="n-mobile-cell"><strong>Obs</strong></th>
+                  <?php if ($rh and $calculado): ?>
+                    <th class="n-mobile-cell"><strong>H.E.Normais</strong></th>
+                    <th class="n-mobile-cell"><strong>Evento Art.61</strong></th>
+                    <th class="n-mobile-cell"><strong>H.E.Art.61</strong></th>
+                  <?php endif; ?>
                   <th>Ação</th>
                 </tr>
               </thead>
@@ -85,9 +90,14 @@
                       <td class="n-mobile-cell"><?= $registro['desc_secao'] . ' - ' . $registro['codsecao']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['chapa_gestor'] . ' - ' . $registro['nome_gestor']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['area']; ?></td>
-                      <td class="n-mobile-cell"><?= $registro['valor']; ?></td>
+                      <td class="n-mobile-cell"><?= $registro['valor']; ?></td>                
                       <td class="n-mobile-cell"><?= $registro['id_justificativa'] . ' - ' . $registro['desc_justificativa']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['obs']; ?></td>
+                      <?php if ($rh and $calculado): ?>
+                        <td class="n-mobile-cell"><?= $registro['horas_extras_normais']; ?></td>
+                        <td class="n-mobile-cell"><?= $registro['codevento_art61']. ' - ' . $registro['desc_evento_art61']; ?></td>
+                        <td class="n-mobile-cell"><?= $registro['horas_extras_art61']; ?></td>
+                      <?php endif; ?>
                       <td>
                         <div class="dropdown">
                           <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
@@ -746,7 +756,7 @@
         api.columns().every(function() {
           var column = this;
 
-          if (column[0][0] == 0 || column[0][0] >= (p_linha - 3)) return false;
+          if (column[0][0] == 0 || column[0][0] >= (p_linha - 1)) return false;
 
           var select = $('<select class="form-control form-control-sm filtro_table"><option value="">Todos</option></select>')
             .appendTo($(column.header()))
