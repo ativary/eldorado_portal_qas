@@ -826,7 +826,76 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                     {'value': '[USUÁRIO - RH]', 'name': 'Aprovador RH'},
                 ]
                 
-            break;
+        break;
+        case '40':
+                colunas = [
+                    {'value': '[ID_REQ]', 'name': 'ID da Requisição'},
+                    {'value': '[STATUS_REQ]', 'name': 'Status Requisição'},
+                    {'value': '[CODCOLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[CODFILIAL]', 'name': 'Cód. Filial'},
+                    {'value': '[DATA_REQ]', 'name': 'Data da Requisição'},
+                    {'value': '[ID_REQ_CHAPA]', 'name': 'ID da Chapa na Requisição'},
+                    {'value': '[STATUS_COLAB]', 'name': 'Status do Colaborador na Requisição'},
+                    {'value': '[CHAPA_COLAB]', 'name': 'Chapa do Colaborador'},
+                    {'value': '[NOME_COLAB]', 'name': 'Nome do Colaborador'},
+                    {'value': '[CODSITUACAO_COLAB]', 'name': 'Cód. Situação Colaborador'},
+                    {'value': '[CODFUNCAO_COLAB]', 'name': 'Cód. Função'},
+                    {'value': '[FUNCAO_COLAB]', 'name': 'Função do Colaborador'},
+                    {'value': '[CENTRO_DE_CUSTO]', 'name': 'Centro de Custo'},
+                    {'value': '[DESC_CCUSTO]', 'name': 'Desc. Centro de Custo'},
+                    {'value': '[CODSECAO_COLAB]', 'name': 'Cód. Seção'},
+                    {'value': '[DESC_SECAO]', 'name': 'Seção do Colaborador'},
+                    {'value': '[AREA]', 'name': 'Área'},
+                    {'value': '[DIRETORIA]', 'name': 'Diretoria'},
+                    {'value': '[CHAPA_GESTOR]', 'name': 'Chapa do Gestor'},
+                    {'value': '[NOME_GESTOR]', 'name': 'Nome do Gestor'},
+                    {'value': '[CHAPA_REQUISITOR]', 'name': 'Chapa do Requisitor'},
+                    {'value': '[NOME_REQUISITOR]', 'name': 'Nome do Requisitor'},
+                    {'value': '[ID_JUSTIFICATIVA]', 'name': 'ID Justificativa'},
+                    {'value': '[DESC_JUSTIFICATIVA]', 'name': 'Desc. Justificativa'},
+                    {'value': '[OBSERVACAO]', 'name': 'Observação'},
+                    {'value': '[CHAPA_APROV_REPROV]', 'name': 'Chapa do Aprovador ou Reprovador'},
+                    {'value': '[NOME_APROV_REPROV]', 'name': 'Nome do Aprovador ou Reprovador'},
+                    {'value': '[CHAPA_RH_APROV_REPROV]', 'name': 'Chapa do RH Aprovador ou Reprovador'},
+                    {'value': '[NOME_RH_APROV_REPROV]', 'name': 'Nome do RH Aprovador ou Reprovador'},
+                    {'value': '[DATA_APROV_REPROV]', 'name': 'Data da Aprovação ou Reprovação'},
+                    {'value': '[JUSTIFICATIVA_REPROVACAO]', 'name': 'Justificativa da Reprovação'},
+                    {'value': '[DATA_INICIO_PONTO]', 'name': 'Data Inicial do Ponto'},
+                    {'value': '[DATA_FIM_PONTO]', 'name': 'Data Final do Ponto'},
+                    {'value': '[DATA_PONTO]', 'name': 'Data do Ponto'},
+                    {'value': '[CODHORARIO]', 'name': 'Código do Horario'},
+                    {'value': '[INDICE]', 'name': 'Indíce'},
+                    {'value': '[HORAS_EXTRAS_ORIGINAIS]', 'name': 'Horas Extras Originais'},
+                    {'value': '[CODEVENTO_ORIGINAL]', 'name': 'Código do Evento Original'},
+                    {'value': '[HORAS_EXTRAS_NORMAIS]', 'name': 'Horas Extras Normais'},
+                    {'value': '[CODEVENTO_ART61]', 'name': 'Código do Evento Artigo.61'},
+                    {'value': '[HORAS_EXTRAS_ART61]', 'name': 'Horas Extras Artigo.61'},
+                ]
+                
+        break;
+        case '41':
+                colunas = [
+                    {'value': '[COLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[CHAPA_GESTOR]', 'name': 'Chapa do Gestor'},
+                    {'value': '[NOME_GESTOR]', 'name': 'Nome do Gestor'},
+                    {'value': '[FILIAL_GESTOR]', 'name': 'Filial do Gestor'},
+                    {'value': '[CODFUNCAO_GESTOR]', 'name': 'Código da Função do Gestor'},
+                    {'value': '[FUNCAO_GESTOR]', 'name': 'Função do Gestor'},
+                    {'value': '[CODSECAO_GESTOR]', 'name': 'Código da Seção do Gestor'},
+                    {'value': '[SECAO_GESTOR]', 'name': 'Seção do Gestor'},
+                    {'value': '[CENTRO_DE_CUSTO_GESTOR]', 'name': 'Centro de Custo do Gestor'},
+                    {'value': '[NOME_CCUSTO_GESTOR]', 'name': 'Nome do Centro de Custo do Gestor'},
+                    {'value': '[AREA_GESTOR]', 'name': 'Área do Gestor'},
+                    {'value': '[DIRETORIA_GESTOR]', 'name': 'Diretoria do Gestor'},
+                    {'value': '[CHAPA_SUBSTITUTO]', 'name': 'Chapa do Gestor Substituto'},
+                    {'value': '[NOME_SUBSTITUTO]', 'name': 'Nome do Gestor Substituto'},
+                    {'value': '[DATA_INICIAL]', 'name': 'Data Inicial da Substituição'},
+                    {'value': '[DATA_FINAL]', 'name': 'Data Final da Substituição'},
+                    {'value': '[CODIGOS_MODULOS]', 'name': 'Códigos dos Módulos'},
+                    {'value': '[NOMES_MODULOS]', 'name': 'Nomes do Módulos'},
+                ]
+                
+        break;
 
     }
 
@@ -908,7 +977,7 @@ const gerarRelatorioTabela = () => {
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
     if(relatorio == 11 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
 
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
 

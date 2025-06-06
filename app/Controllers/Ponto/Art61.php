@@ -350,7 +350,8 @@ class Art61 extends BaseController
     $dados['resColab'] = $this->mArt61->ListarColabSolicitacao($dados['rh']);
     $dados['resListaArt61'] = $this->mArt61->ListarArt61('', $id);
 
-    $dados['pode_editar'] = ($dados['resListaArt61'][0]['status'] == 1 or $dados['resListaArt61'][0]['status'] == 4) ? true : false;
+    $dados['pode_editar'] = ($dados['resListaArt61'][0]['status'] == 1 or $dados['resListaArt61'][0]['status'] == 9) ? true : false;
+    $dados['calculado'] = ($dados['resListaArt61'][0]['status'] >= 4 and $dados['resListaArt61'][0]['status'] != 9) ? true : false;
    
     $dados['resReqChapas'] = $this->mArt61->ListarReqChapas($id);
     $dados['resJustificativaArt61'] = $this->mEspelho->ListarJustificativa(6);

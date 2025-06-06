@@ -220,6 +220,13 @@ class RelatorioModel extends Model {
             case 30:
                 return self::relatorioEscalaDia($request);
                 break;
+            case 40:
+                return self::relatorioConfArt61($request);
+                break;
+            case 41:
+                return self::relatorioGestorSubstituto($request);
+                break;
+
         }
     }
     private function relatorioVariaveisCreche($request)
@@ -6199,6 +6206,234 @@ FROM (
             )Y
         ";
         $result = $this->dbportal->query($query);
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+
+    private function relatorioConfArt61($request)
+    {
+       // print_r($request);
+         //exit();
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND f.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND f.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND c.CHAPA_COLAB = '".$request['chapa']."'";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        $query = "
+          SELECT 
+            r.ID AS ID_REQ,
+            CASE 
+              WHEN r.status = '0' THEN 'EXCLUÍDA'
+              WHEN r.status = '2' THEN 'PEND./APROV.GESTOR'
+              WHEN r.status = '3' THEN 'PEND./CALC.RH'
+              WHEN r.status = '4' THEN 'PEND./APROV.RH'
+              WHEN r.status = '5' THEN 'PEND./SINCRONISMO'
+              WHEN r.status = '6' THEN 'SINCRONIZADA'
+              ELSE 'CRIADA'
+            END AS STATUS_REQ,
+            r.id_coligada AS CODCOLIGADA,
+            f.CODFILIAL AS CODFILIAL,
+            FORMAT( r.dt_requisicao, 'dd/MM/yyyy') AS DATA_REQ,
+            c.id AS ID_REQ_CHAPA,
+            CASE 
+              WHEN c.status = 'A' THEN 'ATIVO NA REQ.'
+              ELSE 'EXCLUÍDO DA REQ.'
+            END AS STATUS_COLAB,
+            c.CHAPA_COLAB AS CHAPA_COLAB,
+            f.NOME AS NOME_COLAB,
+            f.CODSITUACAO AS CODSITUACAO_COLAB,
+            f.CODFUNCAO AS CODFUNCAO_COLAB,
+            u.NOME AS FUNCAO_COLAB,
+            s.NROCENCUSTOCONT AS CENTRO_DE_CUSTO,
+            g.NOME AS DESC_CCUSTO,
+            f.CODSECAO AS CODSECAO_COLAB,
+            s.DESCRICAO AS DESC_SECAO,
+            a.area AS AREA,
+            a.diretoria AS DIRETORIA,
+            r.chapa_gestor AS CHAPA_GESTOR,
+            n.NOME AS NOME_GESTOR,
+            r.chapa_requisitor AS CHAPA_REQUISITOR,
+            o.NOME AS NOME_REQUISITOR,
+            c.id_justificativa AS ID_JUSTIFICATIVA,
+            m.descricao AS DESC_JUSTIFICATIVA,
+            c.obs AS OBSERVACAO,
+            r.chapa_aprov_reprov AS CHAPA_APROV_REPROV,
+            j.NOME AS NOME_APROV_REPROV,
+            r.chapa_rh_aprov_reprov AS CHAPA_RH_APROV_REPROV,
+            k.NOME AS NOME_RH_APROV_REPROV,
+            FORMAT( r.dt_aprovacao, 'dd/MM/yyyy') AS DATA_APROV_REPROV,
+            r.motivo_recusa AS JUSTIFICATIVA_REPROVACAO,
+            FORMAT( r.dt_ini_ponto, 'dd/MM/yyyy') AS DATA_INICIO_PONTO,
+            FORMAT( r.dt_fim_ponto, 'dd/MM/yyyy') AS DATA_FIM_PONTO,
+            FORMAT( c.dt_ponto, 'dd/MM/yyyy') AS DATA_PONTO,
+            c.codhorario AS CODHORARIO,
+            c.indice AS INDICE,
+            (
+              RIGHT('00' + CAST(CAST(c.valor AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.valor AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_ORIGINAIS,
+            c.codevento AS CODEVENTO_ORIGINAL,
+            (
+              RIGHT('00' + CAST(CAST(c.extra_normal AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.extra_normal AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_NORMAIS,
+            c.codevento_art61 AS CODEVENTO_ART61,
+            (
+              RIGHT('00' + CAST(CAST(c.extra_art61 AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.extra_art61 AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_ART61
+
+          FROM zcrmportal_art61_req_chapas c
+          LEFT JOIN zcrmportal_art61_requisicao r ON r.id = c.id_req
+          LEFT JOIN ".DBRM_BANCO."..PFUNC f ON f.CODCOLIGADA = r.id_coligada AND f.CHAPA = c.chapa_colab COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA AND u.CODIGO = f.CODFUNCAO
+          LEFT JOIN ".DBRM_BANCO."..PSECAO s ON s.CODCOLIGADA = f.CODCOLIGADA AND s.CODIGO = f.CODSECAO
+          LEFT JOIN ".DBRM_BANCO."..GCCUSTO g ON g.CODCOLIGADA = f.CODCOLIGADA AND g.CODCCUSTO = s.NROCENCUSTOCONT
+          LEFT JOIN ".DBRM_BANCO."..PFUNC n ON n.CODCOLIGADA = r.id_coligada AND n.CHAPA = r.chapa_gestor COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNC o ON o.CODCOLIGADA = r.id_coligada AND o.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNC j ON j.CODCOLIGADA = r.id_coligada AND j.CHAPA = r.chapa_aprov_reprov COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNC k ON k.CODCOLIGADA = r.id_coligada AND k.CHAPA = r.chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS
+          LEFT JOIN zcrmportal_art61_areas a ON a.coligada = r.id_coligada AND a.codcusto = s.NROCENCUSTOCONT COLLATE Latin1_General_CI_AS
+          LEFT JOIN zcrmportal_ponto_motivos m ON m.id = c.id_justificativa
+          
+          WHERE
+            r.id_coligada = ".$this->coligada." 
+            AND c.dt_ponto >= '".$request['dataIni']."' 
+            AND c.dt_ponto <= '".$request['dataFim']."'
+            ".$FiltroSecao."
+            ".$FiltroChapa."
+            ".$FiltroFuncao." 
+        ";
+
+        //echo '<pre>';
+        //echo $query;exit();
+        $result = $this->dbportal->query($query);
+
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+
+    private function relatorioGestorSubstituto($request)
+    {
+       // print_r($request);
+         //exit();
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND f.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND f.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND ( g.CHAPA_GESTOR = '".$request['chapa']."' OR g.CHAPA_SUBSTITUTO = '".$request['chapa']."' )";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        $query = "              
+          SELECT 
+            g.coligada as COLIGADA,
+            g.chapa_gestor AS CHAPA_GESTOR,
+            f.nome AS NOME_GESTOR,
+            f.CODFILIAL AS FILIAL_GESTOR,
+            f.CODFUNCAO AS CODFUNCAO_GESTOR,
+            u.nome AS FUNCAO_GESTOR,
+            f.CODSECAO AS CODSECAO_GESTOR,
+            s.DESCRICAO AS SECAO_GESTOR,
+            s.NROCENCUSTOCONT AS CENTRO_DE_CUSTO_GESTOR,
+            c.NOME AS NOME_CCUSTO_GESTOR,
+            a.area AS AREA_GESTOR,
+            a.diretoria AS DIRETORIA_GESTOR,
+            g.chapa_substituto AS CHAPA_SUBSTITUTO,
+            n.NOME AS NOME_SUBSTITUTO,
+            FORMAT( g.dtini, 'dd/MM/yyyy') as DATA_INICIAL,
+            FORMAT( g.dtfim, 'dd/MM/yyyy') as DATA_FINAL,
+            g.modulos AS CODIGOS_MODULOS,
+            ( SELECT STUFF((
+              SELECT ', ' + m.nome
+              FROM zcrmportal_hierarquia_gestor_substituto_modulos m
+              WHERE id IN (
+                SELECT id
+                FROM EXTRAIR_DADOS_JSON(g.modulos)
+              )
+              FOR XML PATH(''), TYPE
+              ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') 
+            ) AS NOMES_MODULOS
+          FROM zcrmportal_hierarquia_gestor_substituto g
+          LEFT JOIN ".DBRM_BANCO."..PFUNC f ON f.CODCOLIGADA = g.coligada AND f.CHAPA = g.chapa_gestor COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA AND u.CODIGO = f.CODFUNCAO
+          LEFT JOIN ".DBRM_BANCO."..PSECAO s ON s.CODCOLIGADA = f.CODCOLIGADA AND s.CODIGO = f.CODSECAO
+          LEFT JOIN ".DBRM_BANCO."..GCCUSTO c ON c.CODCOLIGADA = s.CODCOLIGADA AND c.CODCCUSTO = s.NROCENCUSTOCONT
+          LEFT JOIN zcrmportal_art61_areas a ON a.coligada = g.coligada AND a.codcusto = c.CODCCUSTO COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNC n ON n.CODCOLIGADA = g.coligada AND n.CHAPA = g.chapa_substituto COLLATE Latin1_General_CI_AS
+          WHERE 
+            g.inativo = 0
+            AND g.coligada = ".$this->coligada." 
+            ".$FiltroSecao."
+            ".$FiltroChapa."
+            ".$FiltroFuncao." 
+        ";
+
+        //echo '<pre>';
+        //echo $query;exit();
+        $result = $this->dbportal->query($query);
+
         return ($result)
             ? array(
                 'dados'     => $result->getResultArray(),
