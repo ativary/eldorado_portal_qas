@@ -247,6 +247,7 @@ class Aprova extends BaseController
         $dados['resMotivoReprova']   = $mEspelho->ListarJustificativa(5);
         $dados['isGestorOrLider']   = $mEspelho->isGestorOrLider($dados);
         $dados['isGestor']          = $mEspelho->isGestor($dados);
+        $dados['resParam'] = $this->mAprova->ListarParam();
 
         unset($objListaBatidaApr,$listaSecaoUsuarioRM,$objSecaoUsu,$resFuncionarioSecao,$chapa);
         
@@ -675,6 +676,13 @@ class Aprova extends BaseController
               break;
             //-------------------------------------
 
+            //-------------------------------------
+            // calcula requisição de Art.61
+            case 'sincArt61RM':
+              exit($this->mAprova->SincArt61RM($dados));
+              break;
+            //-
+            
       
         }        
 
