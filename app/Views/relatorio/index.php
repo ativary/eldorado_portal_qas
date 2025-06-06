@@ -49,6 +49,8 @@
                                     <?php if($rh): ?><option value="26" <?php if($relatorio == 26){ echo 'selected';}?>>Conferência (Prêmios)</option><?php endif; ?>  
                                     <?php if($rh): ?><option value="27" <?php if($relatorio == 27){ echo 'selected';}?>>Relatório de Variação (Prêmios)</option><?php endif; ?>      
                                     <option value="28" <?php if($relatorio == 28){ echo 'selected';}?>>Relatório - Deflatores</option>  
+                                    <?php if($rh): ?><option value="40" <?php if($relatorio == 40){ echo 'selected';}?>>Conferência Artigo.61</option><?php endif; ?> 
+                                    <?php if($rh): ?><option value="41" <?php if($relatorio == 41){ echo 'selected';}?>>Relação Geral - Equipe - Gestor Substituto</option><?php endif; ?> 
                                 </select>
                             </div>
                         </div>
