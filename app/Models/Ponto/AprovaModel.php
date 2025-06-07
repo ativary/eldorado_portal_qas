@@ -128,13 +128,13 @@ class AprovaModel extends Model
         if (!self::isGestorOrLiderAprovador($chapaUser)) {
           return false;
         }
-        $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 2 ";
+        $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}', chapa_aprov_reprov = '{$chapaUser}' WHERE id = '{$idReq}' AND status = 2 ";
 
       } else {
         if ($status == 4) {
-          $query = " UPDATE zcrmportal_art61_requisicao SET status = 5, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 4 ";
+          $query = " UPDATE zcrmportal_art61_requisicao SET status = 5, dt_rh_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}', chapa_rh_aprov_reprov = '{$chapaUser}' WHERE id = '{$idReq}' AND status = 4 ";
         } else {
-          $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 2 ";
+          $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}', chapa_aprov_reprov = '{$chapaUser}' WHERE id = '{$idReq}' AND status = 2 ";
         }
       }
 
