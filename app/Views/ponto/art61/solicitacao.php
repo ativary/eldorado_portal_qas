@@ -145,7 +145,7 @@
                             <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                             <div class="dropdown-menu" style="margin-left: -131px;">
 
-                              <?php if ($registro['status'] == 1 || $registro['status'] == 4):  ?>
+                              <?php if ($registro['status'] == 1 || $registro['status'] == 9):  ?>
                                 <a href="<?= base_url('ponto/art61/solicitacao_chapas/' . $registro['id']); ?>" class="dropdown-item"><i class="mdi mdi-pencil"></i> Editar requisição</a>
                                 <button type="button" onclick="enviarAprovacao('<?= $registro['id']; ?>', <?= $registro['status']; ?>, <?= $registro['qtde_gestores']; ?>)" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
                                 <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>

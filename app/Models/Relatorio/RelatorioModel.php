@@ -5338,7 +5338,7 @@ FROM (
                 --, '0' INFORMACOES_ADICIONAIS
                 , dtcadastro DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5375,15 +5375,15 @@ FROM (
 
                 , CASE 
                     WHEN usu_reprova IS NOT NULL THEN 
-                        ISNULL((SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                        ISNULL((SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usu_reprova AS VARCHAR)
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
-                			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT nome FROM zcrmportal_usuario WHERE ID = usu_reprova))
+                			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT TOP 1 nome FROM zcrmportal_usuario WHERE ID = usu_reprova))
                     
                     WHEN aprgestor_user IS NOT NULL THEN 
-                        ISNULL((SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                        ISNULL((SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = aprgestor_user
@@ -5398,17 +5398,17 @@ FROM (
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = apr_user
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
-                			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT nome FROM zcrmportal_usuario WHERE ID = apr_user))
+                			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT TOP 1 nome FROM zcrmportal_usuario WHERE ID = apr_user))
 
                     WHEN aprrh_user IS NOT NULL THEN 
-                        ISNULL((SELECT 
+                        ISNULL((SELECT TOP 1 
                             X.CHAPA + ' - ' + X.NOME
                         FROM ".DBRM_BANCO."..PFUNC X 
                             INNER JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                             LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                         WHERE Z.id = aprrh_user
                             AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
-                            AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT nome FROM zcrmportal_usuario WHERE ID = aprrh_user))
+                            AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT TOP 1 nome FROM zcrmportal_usuario WHERE ID = aprrh_user))
                 END AS USUARIO_GESTOR,
                 
                 '' USUARIO_RH
@@ -5467,7 +5467,7 @@ FROM (
                 --, dbo.Base64Decode(observacao) INFORMACOES_ADICIONAIS
                 , A.dtcad DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5488,7 +5488,7 @@ FROM (
                     
                     
                     WHEN gestor_usuapr IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(gestor_usuapr AS VARCHAR)
@@ -5501,7 +5501,7 @@ FROM (
                 	CASE 
                     
                     WHEN usu_sinc IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usu_sinc AS VARCHAR)
@@ -5572,7 +5572,7 @@ FROM (
                 --, '0' INFORMACOES_ADICIONAIS
                 , A.dtcad DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5594,14 +5594,14 @@ FROM (
                 , CASE 
                     
                     WHEN usucancelado IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usucancelado AS VARCHAR)
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."'))
                    	WHEN usuapr IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usuapr AS VARCHAR)
@@ -5613,7 +5613,7 @@ FROM (
                 
                 CASE 
                 WHEN usurh IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usurh AS VARCHAR)
@@ -5696,7 +5696,7 @@ FROM (
                 , A.dtcadastro DATA_SOLICITACAO
                 , 
                 COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5715,21 +5715,21 @@ FROM (
                 END AS VARCHAR) AS JUSTIFICATIVA
                 , CASE 
                     WHEN usu_rep IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usu_rep AS VARCHAR)
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."'))
                 	WHEN usucancel IS NOT NULL THEN
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usucancel AS VARCHAR)
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."'))
                     WHEN apr_usugestor IS NOT NULL THEN
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(apr_usugestor AS VARCHAR)
@@ -5740,7 +5740,7 @@ FROM (
                 
                 CASE 
                     WHEN aprrh_user IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(aprrh_user AS VARCHAR)
@@ -5819,15 +5819,15 @@ FROM (
                 , A.dtcad DATA_SOLICITACAO
                 ,
                 COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                         AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')
                         ) COLLATE Latin1_General_CI_AS + ' - ', '') + g.nome USUARIO_SOLICITANTE
 
-                , (SELECT dtcad FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND dtcad = (SELECT max(dtcad) FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND nivel_apr_area NOT IN (0, 8, 9))) DATA_APROVACAO_REPROVACAO
-                , (SELECT observacao FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND dtcad = (SELECT max(dtcad) FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND nivel_apr_area NOT IN (0, 8, 9)))  JUSTIFICATIVA
+                , (SELECT TOP 1 dtcad FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND dtcad = (SELECT max(dtcad) FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND nivel_apr_area NOT IN (0, 8, 9))) DATA_APROVACAO_REPROVACAO
+                , (SELECT TOP 1 observacao FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND dtcad = (SELECT max(dtcad) FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND nivel_apr_area NOT IN (0, 8, 9)))  JUSTIFICATIVA
     
                 ,(SELECT TOP 1 XX.CHAPA + ' - ' + Z.NOME FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(5,2) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_GESTOR
                  
@@ -5890,7 +5890,7 @@ FROM (
                     END AS STATUS
                 , A.dt_requisicao DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5908,7 +5908,7 @@ FROM (
                 
                 , CASE 
                     WHEN chapa_aprov_reprov IS NOT NULL THEN 
-                        COALESCE((SELECT chapa_aprov_reprov COLLATE Latin1_General_CI_AS + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                        COALESCE((SELECT TOP 1 chapa_aprov_reprov COLLATE Latin1_General_CI_AS + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                             WHERE X.chapa = chapa_aprov_reprov COLLATE Latin1_General_CI_AS
                             AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                             AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), chapa_aprov_reprov)
@@ -5918,7 +5918,7 @@ FROM (
                 
                 CASE 
                 WHEN chapa_rh_aprov_reprov IS NOT NULL THEN 
-                        COALESCE((SELECT chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                        COALESCE((SELECT TOP 1 chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                             WHERE X.chapa = chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS
                             AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                             AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), chapa_rh_aprov_reprov)
@@ -5953,6 +5953,58 @@ FROM (
                 AND A.status NOT IN ('I', 'P')
                 AND (dt_rh_aprovacao IS NOT NULL OR dt_aprovacao IS NOT NULL)
             
+            --//-----------------------------------------------------------------
+            --//--- ARTIGO 61
+            --//-----------------------------------------------------------------
+            UNION ALL 
+
+                SELECT 
+                  A.ID, 
+                  A.id_COLIGADA COD_COLIGADA,
+                    B.CODFILIAL COD_FILIAL,
+                    A.chapa_requisitor CHAPA,
+                    B.NOME NOME,
+                    I.DESCRICAO SITUACAO,
+                    B.CODFUNCAO COD_FUNCAO,
+                    F.NOME FUNCAO,
+                    B.CODSECAO COD_SECAO,
+                    E.DESCRICAO SECAO,
+                    E.NROCENCUSTOCONT CODIGO_CENTRO_CUSTO,
+                    G.NOME CENTRO_CUSTO,
+                    'Artigo.61' PRODUTO,
+                    'Artigo.61' PROCESSO,
+                    CASE 
+                    WHEN A.status = 2 THEN 'PENDENTE GESTOR'
+                    WHEN A.status = 3 THEN 'PENDENTE RH CALCULAR'
+                    WHEN A.status = 4 THEN 'PENDENTE RH'
+                    WHEN A.status = 5 THEN 'PENDENTE SINCRONIZAÇÃO'
+                    WHEN A.status = 6 THEN 'CONCLUÍDO'
+                    WHEN A.status = 9 THEN 'REPROVADO'
+                        ELSE NULL
+                    END AS STATUS,
+                  A.dt_requisicao DATA_SOLICITACAO,
+                  A.chapa_requisitor + ' - ' + B.NOME COLLATE Latin1_General_CI_AS USUARIO_SOLICITANTE,
+                  A.dt_aprovacao DATA_APROVACACO_REPROVACAO,
+                  A.motivo_recusa JUSTIFICATIVA,
+                  A.chapa_aprov_reprov + ' - ' + H.NOME COLLATE Latin1_General_CI_AS USUARIO_GESTOR,
+                  A.chapa_rh_aprov_reprov + ' - ' + J.NOME COLLATE Latin1_General_CI_AS USUARIO_RH
+
+                FROM zcrmportal_art61_requisicao A
+                LEFT JOIN " . DBRM_BANCO . "..PFUNC B ON B.CHAPA = A.chapa_requisitor COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..GCOLIGADA C ON C.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..GFILIAL D ON D.CODFILIAL = B.CODFILIAL AND D.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..PSECAO E ON E.CODIGO = B.CODSECAO AND E.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..GCCUSTO G ON G.CODCCUSTO = E.NROCENCUSTOCONT AND E.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..PFUNCAO F ON F.CODIGO = B.CODFUNCAO AND F.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..PFUNC H ON H.CHAPA = A.chapa_aprov_reprov COLLATE Latin1_General_CI_AS AND H.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..PCODSITUACAO I ON I.CODINTERNO = B.CODSITUACAO
+                LEFT JOIN " . DBRM_BANCO . "..PFUNC J ON J.CHAPA = A.chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS AND J.CODCOLIGADA = A.id_COLIGADA
+
+                WHERE 
+                  A.status > 1 AND
+                    A.id_coligada = '{$this->coligada}'
+
+
                 )K
                 
                 WHERE DATA_SOLICITACAO BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'

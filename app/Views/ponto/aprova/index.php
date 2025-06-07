@@ -316,7 +316,8 @@ $(document).ready(function(){
                                                                 case 2: echo '<span class="badge badge-warning">Pend/Ação Gestor</span>'; break;
                                                                 case 3: echo '<span class="badge badge-info">Pend/Calc.RH</span>'; break;
                                                                 case 4: echo '<span class="badge badge-info">Pend/Ação RH</span>'; break;
-                                                                case 5: echo '<span class="badge badge-primary">Pend/Sincronização</span>'; break;
+                                                                case 5: echo '<span class="badge badge-primary">Pend/Sincronização</span>'; break; 
+                                                                case 6: echo '<span class="badge badge-success">Sincronizado</span>'; break;
                                                                 default: echo '';
                                                             }
                                                         }else{
@@ -414,7 +415,7 @@ $(document).ready(function(){
                                                 <?php
                                                     if ($registro['movimento'] == 61) {
                                                         echo '<div class="col-12 text-center">';
-                                                        echo '<a href="' . base_url('/ponto/art61/solicitacao_chapas/' . $registro['id']) . '" target="_blank" title="Ver requisição" class="btn btn-sm btn-primary"><i class="fa fa-eye" aria-hidden="true"></i> </a>';
+                                                        echo '<a href="' . base_url('/ponto/art61/solicitacao_chapas/' . $registro['id']) . '" target="_blank" title="Ver requisição" ><i class="fa fa-list-ul" aria-hidden="true"></i> </a>';
                                                         echo '</div>';
                                                     }
                                                     if ($registro['movimento'] == 21 || $registro['movimento'] == 22) {
@@ -477,7 +478,7 @@ $(document).ready(function(){
                                                             echo '</div>';
                                                         }
                                                         echo '<div class="col-12 text-center">';
-                                                        echo '<a href="' . base_url('/ponto/art61/solicitacao_chapas/' . $registro['id']) . '" target="_blank" title="Ver requisição" class="btn btn-sm btn-primary"><i class="fa fa-eye" aria-hidden="true"></i> </a>';
+                                                        echo '<a href="' . base_url('/ponto/art61/solicitacao_chapas/' . $registro['id']) . '" target="_blank" title="Ver requisição"><i class="fa fa-list-ul" aria-hidden="true"></i> </a>';
                                                         echo '</div>';
                                                     }
                                                     // escala
@@ -608,6 +609,9 @@ $(document).ready(function(){
                                                             <?php endif; ?>
                                                             <?php if($perfilRH && $registro['status'] == 3): ?>
                                                                 <button type="button" onclick="CalcularReq('<?= $registro['id']; ?>')" class="dropdown-item text-primary"><i class="fa fa-calculator"></i> Calcular</button>
+                                                            <?php endif; ?>
+                                                            <?php if($perfilRH && $registro['status'] == 5): ?>
+                                                                <button type="button" onclick="SincRM(<?= $registro['id']; ?>, <?= $resParam[0]['ANOCOMP']; ?>, <?= $resParam[0]['MESCOMP']; ?>,<?= $resParam[0]['PERIODO']; ?>)" class="dropdown-item text-primary"><i class="fa fa-recycle"></i> Sincronizar com RM</button>
                                                             <?php endif; ?>
                                                             <?php if($perfilRH || $registro['status'] == 2): ?>
                                                                 <button type="button" onclick="reprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-danger"><i class="far fa-thumbs-down"></i> Reprovar</button>
@@ -770,6 +774,59 @@ $(document).ready(function(){
 </div><!-- /.modal -->
 <!-- modal upload -->
 
+<!-- modal Sinc RM -->
+<div class="modal" id="modalSincRM" tabindex="1" role="dialog" aria-labelledby="modalSincRM" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title text-center" id="modalAdicionalabel"><span class="oi oi-people"></span> Sincronizar com o RM Folha</h5>
+
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span class="fa fa-times"></span>
+				</button>
+			</div>
+			<div class="modal-body">
+
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<label class="input-group-text" for="mescomp" style="width: 150px;">Mês Competência: </label>
+					</div>
+					<input type="number" id="mescomp" name="mescomp" value="" style="border:1px solid #d6d6d6;" min="1" max="12">
+				</div>
+
+        <div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<label class="input-group-text" for="anocomp" style="width: 150px;">Ano Competência: </label>
+					</div>
+					<input type="number" id="anocomp" name="anocomp" value="" style="border:1px solid #d6d6d6;" min="2024">
+				</div>
+
+				<div class="input-group mb-3">
+					<div class="input-group-prepend">
+						<label class="input-group-text" for="nroperiodo" style="width: 150px;">Período: </label>
+					</div>
+					<select class="custom-select" id="nroperiodo" name="periodo">
+						<option selected value=""></option>
+						<option value="5">Período 5</option>
+						<option value="6">Período 6</option>
+						<option value="9">Período 9</option>
+						<option value="10">Período 10</option>
+					</select>
+				</div>
+
+				<input type="hidden" id="id_req" name="id_req">
+
+			</div>
+			<div class="modal-footer">
+
+				<button type="button" class="btn btn-danger" data-dismiss="modal"> Cancelar </button>
+				<button type="button" class="btn btn-success" onclick="return SincRMProc();"> <i class="fa fa-check"></i> Confirmar </button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- fim modal -->
+
 <style>
     .modal_visualizador {
         padding: 10px !important;
@@ -890,7 +947,6 @@ $(document).ready(function(){
             exibeAlerta('warning', 'Nenhuma registro selecionada.');
             return false;
         }
-
 
         Swal.fire({
             icon: 'info',
@@ -1101,13 +1157,76 @@ $(document).ready(function(){
               if (response.tipo != 'success') {
                 exibeAlerta(response.tipo, response.msg);
               } else {
-                $(`#status_${id}_61`).html('<span class="badge badge-primary">Pend/Sincronização</span>');
+                //$(`#status_${id}_61`).html('<span class="badge badge-primary">Pend/Sincronização</span>');
+                exibeAlerta(response.tipo, response.msg, 3);
+                filtroSecao();
               }
             },
           });
         }
       });
     }
+
+    const SincRM = (id, ano, mes, per) => {
+      //abre modal
+        console.log(ano, mes, per);
+        $("#id_req").val(id);
+        $("#anocomp").val(ano);
+        $("#mescomp").val(mes);
+        $("#nroperiodo").val(per);
+        $("#modalSincRM").modal();
+    }
+
+    const SincRMProc = () => {
+
+        if($("#anocomp").val() == ""){ exibeAlerta("error", "<b>Ano de competência</b> não informado."); return false; }
+        if($("#mescomp").val() == ""){ exibeAlerta("error", "<b>Mês de competência</b> não informado."); return false; }
+        
+        let dados = {
+            "id": $("#id_req").val(),
+            "nroperiodo": $("#nroperiodo").val(),
+            "mescomp": parseInt($("#mescomp").val()),
+            "anocomp": parseInt($("#anocomp").val()),
+        };
+
+        if(dados.id == ""){ exibeAlerta("error", "<b>Requisição</b> não informada."); return false; }
+        if(dados.nroperiodo == ""){ exibeAlerta("error", "<b>Período</b> não informado."); return false; }
+        if(dados.mescomp < 1 || dados.mescomp > 12){ exibeAlerta("error", "<b>Mês de competência</b> inválido."); return false; }
+        if(dados.anocomp < 2024 || dados.anocomp > 3000){ exibeAlerta("error", "<b>Ano de competência</b> inválido."); return false; }
+
+        Swal.fire({
+            icon: 'question',
+            title: 'Confirma a sincronização desta <b>requisição com o RM Folha</b>?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: `Sim Sincronizar`,
+            denyButtonText: `Cancelar`,
+            showCancelButton: false,
+            showCloseButton: false,
+            allowOutsideClick: false,
+            width: 600,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                openLoading();
+
+                console.log(dados);
+
+                $.ajax({
+                    url: "<?= base_url('ponto/aprova/action/sincArt61RM') ?>",
+                    type:'POST',
+                    data:dados,
+                    success:function(result){
+                        var response = JSON.parse(result);
+                        exibeAlerta(response.tipo, response.msg, 3);
+                        filtroSecao();
+                        // ATUALIZAR BADGE
+                    },
+                });
+            }
+        });
+
+    }
+
 </script>
 
 <style> 
