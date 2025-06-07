@@ -128,13 +128,13 @@ class AprovaModel extends Model
         if (!self::isGestorOrLiderAprovador($chapaUser)) {
           return false;
         }
-        $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 2 ";
+        $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}', chapa_aprov_reprov = '{$chapaUser}' WHERE id = '{$idReq}' AND status = 2 ";
 
       } else {
         if ($status == 4) {
-          $query = " UPDATE zcrmportal_art61_requisicao SET status = 5, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 4 ";
+          $query = " UPDATE zcrmportal_art61_requisicao SET status = 5, dt_rh_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}', chapa_rh_aprov_reprov = '{$chapaUser}' WHERE id = '{$idReq}' AND status = 4 ";
         } else {
-          $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}' WHERE id = '{$idReq}' AND status = 2 ";
+          $query = " UPDATE zcrmportal_art61_requisicao SET status = 3, dt_aprovacao = '" . date('Y-m-d H:i:s') . "', id_aprovador = '{$this->log_id}', chapa_aprov_reprov = '{$chapaUser}' WHERE id = '{$idReq}' AND status = 2 ";
         }
       }
 
@@ -1362,8 +1362,8 @@ class AprovaModel extends Model
           e.CPF as CPF,
           (
               SELECT TOP 1 HB.DESCRICAO
-              FROM CorporeRMDEV..PFHSTSIT HA (NOLOCK)
-                INNER JOIN CorporeRMDEV..PCODSITUACAO HB (NOLOCK) ON HB.CODCLIENTE = HA.NOVASITUACAO
+              FROM " . DBRM_BANCO . "..PFHSTSIT HA (NOLOCK)
+                INNER JOIN " . DBRM_BANCO . "..PCODSITUACAO HB (NOLOCK) ON HB.CODCLIENTE = HA.NOVASITUACAO
               WHERE HA.CODCOLIGADA = f.CODCOLIGADA
                 AND HA.CHAPA = f.CHAPA 
                 AND (HA.DATAMUDANCA <= r.dt_requisicao)
@@ -1382,11 +1382,11 @@ class AprovaModel extends Model
           ) as art61_horas,
 	        g.ger_chapa as art61_chapa_gerente
           FROM zcrmportal_art61_requisicao r
-            LEFT JOIN CorporeRMDEV..PFUNC f ON f.CODCOLIGADA = r.id_coligada
+            LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON f.CODCOLIGADA = r.id_coligada
             AND f.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS
-            LEFT JOIN CorporeRMDEV..PFUNC u ON u.CODCOLIGADA = r.id_coligada
+            LEFT JOIN " . DBRM_BANCO . "..PFUNC u ON u.CODCOLIGADA = r.id_coligada
             AND u.CHAPA = r.chapa_gestor COLLATE Latin1_General_CI_AS
-            INNER JOIN CorporeRMDEV..PPESSOA e (NOLOCK) ON e.CODIGO = f.CODPESSOA
+            INNER JOIN " . DBRM_BANCO . "..PPESSOA e (NOLOCK) ON e.CODIGO = f.CODPESSOA
             LEFT JOIN GESTORES_ABAIXO_GERENTE g ON (g.n1_chapa = r.chapa_gestor or g.n2_chapa = r.chapa_gestor)
           WHERE r.id is not null 
           {$in_art61}
@@ -2733,6 +2733,77 @@ class AprovaModel extends Model
     $resp = 'Cálculo finalizado com sucesso.';
     return responseJson('success', $resp);
   }
+
+  //---------------------------------------------
+    // Pega parametros do (RM)
+    //---------------------------------------------
+    public function ListarParam(){
+
+        $where = "CODCOLIGADA = '".$_SESSION['func_coligada']."' ";
+        $query = "
+            SELECT
+                ANOCOMP,
+                MESCOMP,
+                PERIODO
+            FROM
+                PPARAM
+            WHERE
+                {$where}
+        ";
+        $result = $this->dbrm->query($query);
+        return ($result->getNumRows() > 0) 
+                ? $result->getResultArray() 
+                : false;
+
+    }
+
+    // -----------------------------------------------------------------------
+    // Sincronizar Requisição do Artigo 61
+    // ------------------------------------------------------------------------
+
+    public function SincArt61RM($dados){
+        
+        $mescomp = $dados['mescomp'];
+        $anocomp = $dados['anocomp'];
+        $nroperiodo = $dados['nroperiodo'];
+        $coligada = $_SESSION['func_coligada'];
+        $id_usuario = $_SESSION['log_id'];
+
+        $ids = strlen(trim($dados['id'])) > 0 ? "{$dados['id']}" : "NULL";
+        if(substr($ids, -1)==",") { $ids = substr($ids, 0, -1); }
+        
+        $query = "
+            UPDATE zcrmportal_art61_requisicao
+            SET 
+              status = 6,
+              dt_sincronismo = '".date('Y-m-d')."', 
+              periodo_sincronismo = '".$nroperiodo."',
+              user_id_sincronismo = ".$id_usuario."
+            WHERE status = 5 AND id IN ({$ids})";
+        $this->dbportal->query($query);
+        
+        // Atualiza status da requisição
+        $query = "
+          UPDATE zcrmportal_art61_req_chapas
+          SET 
+            anocomp = ".$anocomp.",
+            mescomp = ".$mescomp.",
+            nroperiodo = ".$nroperiodo." 
+          WHERE id_req IN ({$ids})";
+
+        $this->dbportal->query($query);
+
+        if (str_contains($ids, ',')) {
+           $msg = 'Requisições sincronizadas com o RM Folha';
+        } else {
+           $msg = 'Requisição sincronizada com o RM Folha';
+        }
+        
+        return ($this->dbportal->affectedRows() > 0) 
+            ? responseJson('success', $msg)
+            : responseJson('error', 'Falha ao sincronizar requisição');
+
+    }
 
 
 }

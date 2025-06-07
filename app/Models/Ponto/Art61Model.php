@@ -958,7 +958,7 @@ class Art61Model extends Model
           FROM zcrmportal_art61_req_chapas a 
           LEFT JOIN zcrmportal_art61_requisicao r ON 
                 r.id = a.id_req
-          LEFT JOIN CorporeRMDEV..PFUNC f ON 
+          LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON 
                 f.codcoligada = r.id_coligada AND 
                 f.chapa = a.chapa_colab COLLATE Latin1_General_CI_AS   
           WHERE a.status <> 'I' 
