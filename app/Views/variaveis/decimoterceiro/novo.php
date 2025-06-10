@@ -201,6 +201,7 @@ const salvaDados = () => {
     formData.append("tipo", '9');
     formData.append("id", '');
   
+    <?php if($isGestor or $isLider) {?>
     if (!$("input[name='para_quem']:checked").val()) {
         // Exibe o alerta se nenhum radio estiver marcado
         Swal.fire({
@@ -211,7 +212,7 @@ const salvaDados = () => {
         });
         return false; // Impede o envio do formulário ou execução de outra ação
     }
-
+    <?php }?>
 
     if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
     

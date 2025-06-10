@@ -52,14 +52,15 @@ Class Decimoterceiro extends BaseController {
         $coligada = (session()->get('func_coligada') ?? null);
         $chapa = (util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null);
 
-        if(!$dados['rh']){
-            $gestor  = $this->mParam->funcGestor($chapa);
-            $mHierarquia = Model('HierarquiaModel');
-		        $dados['isGestor'] = $mHierarquia->isGestor($chapa, $coligada);
-            $dados['isLider'] = $mHierarquia->isLider($chapa, $coligada);
+        $mHierarquia = Model('HierarquiaModel');
+		    $dados['isGestor'] = $mHierarquia->isGestor($chapa, $coligada);
+        $dados['isLider'] = $mHierarquia->isLider($chapa, $coligada);
          
+        if(!$dados['rh']){
+            $gestor  = $this->mParam->funcGestor($chapa);   
             $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados,false,$gestor[0]['CHAPA']);
         }else{
+            $dados['isGestor'] = true;
             $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
         }
        
