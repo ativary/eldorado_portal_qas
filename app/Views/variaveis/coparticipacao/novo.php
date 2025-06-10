@@ -208,8 +208,9 @@ function verificaData() {
 
     const reader = new FileReader();
     const extension = file.name.split('.').pop().toLowerCase();
- // Reseta a tabela ao carregar um novo arquivo
- const tableBody = $('#dependentesTable tbody');
+
+    // Reseta a tabela ao carregar um novo arquivo
+    const tableBody = $('#dependentesTable tbody');
     $('#dependentesTableContainer').show();
     tableBody.empty();  // Limpa o corpo da tabela
 
@@ -217,7 +218,7 @@ function verificaData() {
     if ($.fn.DataTable.isDataTable('#dependentesTable')) {
             $('#dependentesTable').DataTable().clear().destroy();
         }
-    reader.onload = function (e) {
+        reader.onload = function (e) {
         let workbook;
 
         if (extension === 'xls') {
@@ -237,24 +238,63 @@ function verificaData() {
         const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
         const chapaValorList = [];
 
+        // Variáveis para validar se começa com valor arquivo da Unimed
+        let optionValue = $('#tipoReq').val();  // 1 Bradesco,  2 Unimed
+        let arqInvalido = false;
+
+        console.log('inicio de validação de linhas');
         $.each(rows, function (index, row) {
-            if (index === 0) return; // Pular a primeira linha (cabeçalho)
-
-            const chapa = String(row[0]).replace(/\D/g, '').padStart(9, '0'); 
-            let valor = row[1];
-
-            // Verificar e tratar o valor
-            if (valor === '-' || valor === undefined || valor === null) {
-                valor = 0; // Substituir por zero
+            console.log(index, row[0], arqInvalido)
+            if (index == 0) {
+                if (  (/matr/i.test(row[0]) && optionValue == 1) || // Verifica se na coluna 1 tem a string MATR de Matricula e é Bradesco
+                      (/matr/i.test(row[1]) && optionValue == 2) ) { // Verifica se na coluna 2 tem a string MATR de Matricula e é Unimed
+                    arqInvalido = false;
+                    return;
+                } else { 
+                    arqInvalido = true;
+                    return false;
+                }
             }
-          
-              // Garantir que seja numérico
-            valor = parseFloat(valor) || 0;
 
-            if (chapa && valor !== undefined) {
-                chapaValorList.push({ chapa: chapa, valor: valor });
-            }
+            if (optionValue == 1) { // Bradesco
+                let chapa = String(row[0]).replace(/\D/g, '').padStart(9, '0'); 
+                let valor = row[1];
+
+                // Verificar e tratar o valor
+                if (valor === '-' || valor === undefined || valor === null) {
+                    valor = 0; // Substituir por zero
+                }
+              
+                  // Garantir que seja numérico
+                valor = parseFloat(valor) || 0;
+
+                if (chapa && valor !== undefined) {
+                    chapaValorList.push({ chapa: chapa, valor: valor });
+                }
+
+              } else { // Unimed
+
+                let chapa = String(row[1]).replace(/\D/g, '').padStart(9, '0'); 
+                let valor = row[0];
+
+                // Verificar e tratar o valor
+                if (valor === '-' || valor === undefined || valor === null) {
+                    valor = 0; // Substituir por zero
+                }
+              
+                  // Garantir que seja numérico
+                valor = parseFloat(valor) || 0;
+
+                if (chapa && valor !== undefined) {
+                    chapaValorList.push({ chapa: chapa, valor: valor });
+                }
+              }
         });
+
+        if (arqInvalido) {
+            Swal.fire('Erro', 'Estrutura de arquivo inválida. BRADESCO deve ter a MATRÍCULA na primeira coluna. UNIMED deve ter a MATRÍCULA na segunda coluna.', 'error');
+            return;
+        }
 
         if (chapaValorList.length > 0) {
             Swal.fire({

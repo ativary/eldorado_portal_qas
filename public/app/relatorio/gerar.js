@@ -109,7 +109,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'AD_NOTURNO_40', 'name': 'Ad. Noturno 40%'},
                 {'value':'DEBITO_BH', 'name': 'Debito BH'},
                 {'value':'SALDO_BH_COM_ACRESCIMO', 'name': 'Saldo BH c/ Acréscimo'},
-                {'value':'JUSTIFICATIVA_EXTRA', 'name': 'Justificativas de Horas Extras'}
+                {'value':'JUSTIFICATIVA_EXTRA', 'name': 'Justificativas de Horas Extras'},
+                {'value':'OBS', 'name': 'Observação'}
 
             ];
         break;
@@ -294,6 +295,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'REGISTRO', 'name': 'Registro'},
                 {'value':'STATUS', 'name': 'Status'},
                 {'value':'JUSTIFICATIVA', 'name': 'Justificativa do Registro'},
+                {'value':'OBS', 'name': 'Observação'},
                 {'value':'DATA_REGISTRO', 'name': 'Data Registro'},
                 {'value':'HORA_REGISTRO', 'name': 'Hora Registro'},
                 {'value':'USUARIO', 'name': 'Usuário'},

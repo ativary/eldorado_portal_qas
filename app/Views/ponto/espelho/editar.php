@@ -2993,7 +2993,7 @@ function m2h(minutos) {
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="return justificarExtra()">Salvar Justificativa <i class="fas fa-check"></i></button>
+                <button type="button" class="btn btn-success" onclick="return justificarExtra()">Salvar<i class="fas fa-check"></i></button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

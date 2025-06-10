@@ -1753,6 +1753,15 @@ class RelatorioModel extends Model {
                     AND aa.coligada = A.CODCOLIGADA
                     AND aa.dtponto = A.DATA
                 ) JUSTIFICATIVA_EXTRA
+                ,(SELECT
+                    top 1 aa.OBS
+                FROM
+                    ".DBPORTAL_BANCO."..zcrmportal_ponto_justificativa_func aa
+                WHERE
+                    aa.chapa = A.CHAPA COLLATE Latin1_General_CI_AS
+                    AND aa.coligada = A.CODCOLIGADA
+                    AND aa.dtponto = A.DATA
+                ) OBS
                 ,(CASE WHEN DATEPART(WEEKDAY,A.DATA) = 1 THEN 'Domingo'
                 WHEN DATEPART(WEEKDAY,A.DATA) = 2 THEN 'Segunda' 
                 WHEN DATEPART(WEEKDAY,A.DATA) = 3 THEN 'Terça'
@@ -4277,6 +4286,7 @@ FROM (
                     BATIDA AS REGISTRO, 
                     STATUS, 
                     (CASE WHEN STATUS <> 'C' THEN JUSTIFICATIVA ELSE '' END) JUSTIFICATIVA,
+                    OBS,
                     CONVERT(VARCHAR, DATA_REGISTRO, 103) DATA_REGISTRO,
                     CONVERT(VARCHAR, DATA_REGISTRO, 108) HORA_REGISTRO,
                     DATA_APROVADOR,
@@ -4322,6 +4332,19 @@ FROM (
                         AND pa.status = 'S'
                         AND COALESCE(pa.ent1, pa.ent2, pa.ent3, pa.ent4, pa.ent5, pa.sai1, pa.sai2, pa.sai3, pa.sai4, pa.sai5) = A.BATIDA
                     ) JUSTIFICATIVA,
+                    (
+                        SELECT
+                            top 1 pa.obs
+                        FROM
+                            ".DBPORTAL_BANCO."..zcrmportal_ponto_horas pa
+                        WHERE
+                                pa.chapa = A.CHAPA COLLATE Latin1_General_CI_AS
+                            AND pa.coligada = A.CODCOLIGADA
+                            AND pa.dtponto = A.DATA
+                            AND pa.movimento = 1
+                            AND pa.status = 'S'
+                            AND COALESCE(pa.ent1, pa.ent2, pa.ent3, pa.ent4, pa.ent5, pa.sai1, pa.sai2, pa.sai3, pa.sai4, pa.sai5) = A.BATIDA
+                    ) OBS,
                     (
                         SELECT
                             MAX(pa.dtcadastro)
@@ -4438,6 +4461,7 @@ FROM (
                         DBO.MINTOTIME(A.BATIDA) BATIDA,
                         A.STATUS,
                         G.JUSTIFICA COLLATE Latin1_General_CI_AS JUSTIFICATIVA,
+                        NULL OBS,
                         A.RECCREATEDON DATA_REGISTRO,
                         NULL DATA_APROVADOR,
                         NULL DATA_APROVADOR,

@@ -26,7 +26,10 @@
                     </ul>
                 <div class="tab-content">
                         <!-- auxilio moradia -->
+                        
                         <div class="tab-pane active p-3" id="auxilio_moradia" role="tabpanel">
+
+                            <?php if($isGestor or $isLider) {?>
                             <div class="form-group row mb-2">
                                 <label class="col-sm-2 col-form-label text-right text-left-sm"><span class="text-danger">*</span>Aplicar para:</label>
                                 <div class="col-sm-10">
@@ -59,7 +62,27 @@
                                     </select>
                                 </div>
                             </div>
-
+                            <?php } else {?>
+                            <div class="form-group row mb-2" id="funcionario-div" style="display: none;">
+                                <label for="funcionario" class="col-sm-2 col-form-label text-right text-left-sm">
+                                    <span class="text-danger">*</span>Funcionário:
+                                </label>
+                                <div class="col-sm-10">
+                                    <select onchange="selecionaFuncionario(this.value)" class="select2 custom-select form-control form-control-sm" name="funcionario" id="funcionario">
+                                        <option value="">...</option>
+                                        <?php if ($resFuncionarioSecao) : ?>
+                                            <?php foreach ($resFuncionarioSecao as $key => $DadosFunc) : ?>
+                                                <option value="<?= $DadosFunc['CHAPA'] ?>" <?= ($funcionario == $DadosFunc['CHAPA']) ? " selected " : ""; ?>>
+                                                    <?= $DadosFunc['CHAPA'] ?> - <?= $DadosFunc['NOME'] ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <option value="<?= $chapaFunc ?>"><?= $log_nome ?></option>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <?php }?>
 
                             <div class="form-group row mb-2">
                                 <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm"> <span class="text-danger">*</span>Justificativa:</label>
@@ -121,11 +144,12 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 
 
 <script>
-       var fora_periodo=0 ;
-$(document).ready(function(){
- 
-   
-});
+  var fora_periodo=0 ;
+  $(document).ready(function(){
+    <?php if(!$isGestor and !$isLider) {?>
+      Funcionario('min');
+    <?php }?>
+  });
 
 
 const salvaDados = () => {
@@ -177,6 +201,7 @@ const salvaDados = () => {
     formData.append("tipo", '9');
     formData.append("id", '');
   
+    <?php if($isGestor or $isLider) {?>
     if (!$("input[name='para_quem']:checked").val()) {
         // Exibe o alerta se nenhum radio estiver marcado
         Swal.fire({
@@ -187,7 +212,7 @@ const salvaDados = () => {
         });
         return false; // Impede o envio do formulário ou execução de outra ação
     }
-
+    <?php }?>
 
     if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
     
@@ -302,5 +327,6 @@ const selecionaFuncionario = (chapa) => {
 
     
 }    
+
 </script>
 <?php loadPlugin(['select2','maskmoney']); ?>
