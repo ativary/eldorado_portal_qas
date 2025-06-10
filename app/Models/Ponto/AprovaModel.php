@@ -1196,7 +1196,15 @@ class AprovaModel extends Model
 					) justificativa_excecao,
           NULL art61_colaboradores,
           NULL art61_horas,
-	        NULL art61_chapa_gerente
+	        NULL art61_chapa_gerente,
+          A.obs	obs,
+          (
+              SELECT TOP 1 AA.obs
+              FROM zcrmportal_ponto_justificativa_func AA (NOLOCK)
+              WHERE AA.coligada = A.coligada
+                AND AA.dtponto = A.dtponto
+                AND AA.chapa = A.chapa
+            ) obs_just
 				FROM
 					zcrmportal_ponto_horas A (NOLOCK)
 					INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
@@ -1306,7 +1314,9 @@ class AprovaModel extends Model
 					NULL justificativa_excecao,
           NULL art61_colaboradores,
           NULL art61_horas,
-	        NULL art61_chapa_gerente
+	        NULL art61_chapa_gerente,
+	        NULL obs,
+	        NULL just_obs
 				FROM
 					zcrmportal_escala a (NOLOCK)
 					INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
@@ -1380,7 +1390,9 @@ class AprovaModel extends Model
             FROM zcrmportal_art61_req_chapas c
             WHERE c.id_req = r.id AND c.status <> 'I'
           ) as art61_horas,
-	        g.ger_chapa as art61_chapa_gerente
+	        g.ger_chapa as art61_chapa_gerente,
+	        NULL obs,
+	        NULL just_obs
           FROM zcrmportal_art61_requisicao r
             LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON f.CODCOLIGADA = r.id_coligada
             AND f.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS
@@ -1403,7 +1415,7 @@ class AprovaModel extends Model
     }
 
     //echo $query;
-    // die();
+    //die();
     $result = $this->dbportal->query($query);
     if ($result->getNumRows() > 0) {
       $response = array();

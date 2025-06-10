@@ -590,6 +590,10 @@ $(document).ready(function(){
                                                                 <a href="/ponto/espelho/editar/<?= $registro['chapa']; ?>/<?= dtEn($registro['dtponto'], true); ?>" target="_blank" class="dropdown-item"><i class="mdi mdi mdi-account-clock"></i> Ver Espelho</a>
                                                             <?php endif; ?>
 
+                                                            <?php if($registro['obs'] != '' || $registro['obs_just'] != ''): ?>
+                                                                <button type="button" onclick="obs('<?= $registro['obs']; ?>','<?= $registro['obs_just']; ?>')" class="dropdown-item"><i class="mdi mdi-comment-eye-outline"></i> Ver Observações</button>
+                                                            <?php endif; ?>
+
                                                             <button type="button" onclick="aprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-success"><i class="far fa-thumbs-up"></i> Aprovar</button>
                                                             <button type="button" onclick="reprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-danger"><i class="far fa-thumbs-down"></i> Reprovar</button>
                                                         </div>
@@ -765,6 +769,24 @@ $(document).ready(function(){
                 <button type="button" class="close text-dark" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
             </div>
             <div class="modal-body" style="background: #ffffff;" id="justificativas">
+
+                
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- modal upload -->
+
+<!-- modal obs -->
+<div class="modal modal_obs" tabindex="-1" role="dialog" data-animation="blur" aria-labelledby="modal_justificativa" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-full">
+            <div class="modal-header text-dark pt-3 pb-2" style="background: #ffffff;">
+                <h5 class="modal-title mt-0">Observações</h5>
+                <button type="button" class="close text-dark" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
+            </div>
+            <div class="modal-body" style="background: #ffffff;" id="obss">
 
                 
 
@@ -1121,6 +1143,14 @@ $(document).ready(function(){
         });
 
     }
+
+    const obs = (obs, obs_just) => {
+        console.log(obs, obs_just);
+        sep = (obs != '' && obs_just != '') ? '<BR>' : '';
+        $("#obss").html(obs+sep+obs_just);
+        $(".modal_obs").modal('show');
+    }
+    
     function removerHTML(variavelComHTML) {
         const elemento = document.createElement('div');
         elemento.innerHTML = variavelComHTML;
