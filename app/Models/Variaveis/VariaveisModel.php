@@ -92,6 +92,9 @@ class VariaveisModel extends Model {
 		if($filtro_secao_lider == "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
 		if($filtro_secao_lider != "" && $filtro_secao_gestor != "") $filtro_secao_gestor = rtrim($filtro_secao_gestor, "OR ");
 
+    // Para tratar não gestores e não lideres
+    if($filtro_secao_lider == "" && $filtro_secao_gestor == "") $filtro_secao_gestor = " A.CHAPA = 'NÃO-GESTOR' ";
+		
 		$chapaFunc = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 		if($aprovacao){
 			$qr_secao = " AND (".$filtro_secao_lider." ".$filtro_secao_gestor.")  AND A.CHAPA != '{$chapaFunc}' ";
@@ -138,7 +141,7 @@ class VariaveisModel extends Model {
 				AND A.CODSECAO = B.CODIGO
 				{$qr_func}
 				{$qr_secao}
-                {$filtro_secao}
+        {$filtro_secao}
 				
 
 			GROUP BY
@@ -149,7 +152,7 @@ class VariaveisModel extends Model {
 			ORDER BY
 				A.NOME
 		";
-		// exit('<pre>'.print_r($query,1));
+		//exit('<pre>'.print_r($query,1));
         $result = $this->dbrm->query($query);
         if(!$result) return false;
         return ($result->getNumRows() > 0) 
