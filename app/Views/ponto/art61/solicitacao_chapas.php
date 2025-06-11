@@ -31,7 +31,35 @@
           </div>
           <div class="row">
             <h6 class="col-2 text-right mb-1 mt-1">Período de Ponto:</h6>
-            <h5 class="col-5 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['per_ponto_br']; ?></h5>
+            <h5 class="col-5 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['per_ponto_br']; ?>&nbsp;&nbsp;&nbsp;
+                      <?php
+                          switch ($resListaArt61[0]['status']) {
+                            case 1:
+                              echo '<span class="badge badge-dark">Criada</span>';
+                              break;
+                            case 2:
+                              echo '<span class="badge badge-warning">Pend/Ação Gestor</span>';
+                              break;
+                            case 3:
+                              echo '<span class="badge badge-info">Pend/Calc.RH</span>';
+                              break;
+                            case 4:
+                              echo '<span class="badge badge-info">Pend/Ação RH</span>';
+                              break;
+                            case 5:
+                              echo '<span class="badge badge-primary">Pend/Sincronização</span>';
+                              break;
+                            case 6:
+                              echo '<span class="badge badge-success">Sincronizada</span>';
+                              break;
+                            case 9:
+                              echo '<span class="badge badge-danger">Reprovada</span>';
+                              break;
+                            default:
+                              echo '';
+                          }
+                          ?>
+            </h5>
             <div class="col-5 mb-1 mt-1 text-right">
               <?php if ($pode_editar) { ?>
                 <button style="margin-left: 20px;" id="btnJust" name="btnJust" class="btnpeq btn-sm btn-success" type="button" onclick="return Justificar()"><i class="fa fa-plus"></i> Justificar Selecionados</button>
@@ -56,15 +84,15 @@
                   <th class="n-mobile-cell"><strong>Filial</strong></th>
                   <th class="n-mobile-cell"><strong>Data</strong></th>
                   <th class="n-mobile-cell"><strong>Colaborador</strong></th>
-                  <th class="n-mobile-cell"><strong>Evento</strong></th>
                   <th class="n-mobile-cell"><strong>Função</strong></th>
                   <th class="n-mobile-cell"><strong>Centro de Custo</strong></th>
                   <th class="n-mobile-cell"><strong>Seção</strong></th>
                   <th class="n-mobile-cell"><strong>Gestor</strong></th>
                   <th class="n-mobile-cell"><strong>Área</strong></th>
-                  <th class="n-mobile-cell"><strong>Quantidade</strong></th>
                   <th class="n-mobile-cell"><strong>Justificativa</strong></th>
                   <th class="n-mobile-cell"><strong>Obs</strong></th>
+                  <th class="n-mobile-cell"><strong>Quantidade</strong></th>
+                  <th class="n-mobile-cell"><strong>Evento</strong></th>
                   <?php if ($rh and $calculado): ?>
                     <th class="n-mobile-cell"><strong>H.E.Normais</strong></th>
                     <th class="n-mobile-cell"><strong>Evento Art.61</strong></th>
@@ -84,17 +112,21 @@
                       <td class="n-mobile-cell"><?= $registro['codfilial']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['dt_ponto_br'] ?></td>
                       <td class="n-mobile-cell"><?= $registro['chapa_colab'] . ' - ' . $registro['nome_colab']; ?></td>
-                      <td class="n-mobile-cell"><?= $registro['codevento'] . ' - ' . $registro['desc_evento']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['desc_funcao'] . ' - ' . $registro['codfuncao']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['desc_ccusto'] . ' - ' . $registro['cod_ccusto']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['desc_secao'] . ' - ' . $registro['codsecao']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['chapa_gestor'] . ' - ' . $registro['nome_gestor']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['area']; ?></td>
-                      <td class="n-mobile-cell"><?= $registro['valor']; ?></td>                
                       <td class="n-mobile-cell"><?= $registro['id_justificativa'] . ' - ' . $registro['desc_justificativa']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['obs']; ?></td>
+                      <td class="n-mobile-cell"><?= $registro['valor']; ?></td>                
+                      <td class="n-mobile-cell"><?= $registro['codevento'] . ' - ' . $registro['desc_evento']; ?></td>
                       <?php if ($rh and $calculado): ?>
-                        <td class="n-mobile-cell"><?= $registro['horas_extras_normais']; ?></td>
+                        <?php if (strlen(trim($registro['horas_extras_normais'])) == 0) { ?>
+                          <td class="n-mobile-cell">00:00</td>
+                        <?php } else { ?>
+                          <td class="n-mobile-cell"><?= $registro['horas_extras_normais']; ?></td>
+                        <?php } ?>
                         <td class="n-mobile-cell"><?= $registro['codevento_art61']. ' - ' . $registro['desc_evento_art61']; ?></td>
                         <td class="n-mobile-cell"><?= $registro['horas_extras_art61']; ?></td>
                       <?php endif; ?>

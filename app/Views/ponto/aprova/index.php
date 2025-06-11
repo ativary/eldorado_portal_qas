@@ -611,11 +611,14 @@ $(document).ready(function(){
                                                             <?php if(($perfilRH && $registro['status'] == 4) || $registro['status'] == 2): ?>
                                                                 <button type="button" onclick="aprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-success"><i class="far fa-thumbs-up"></i> Aprovar <?= ($perfilRH && $registro['status'] == 4) ? 'RH' : '' ?></button>
                                                             <?php endif; ?>
-                                                            <?php if($perfilRH && $registro['status'] == 3): ?>
+                                                            <?php if($perfilRH && ($registro['status'] == 3 || $registro['status'] == 4 || $registro['status'] == 5)): ?>
                                                                 <button type="button" onclick="CalcularReq('<?= $registro['id']; ?>')" class="dropdown-item text-primary"><i class="fa fa-calculator"></i> Calcular</button>
                                                             <?php endif; ?>
                                                             <?php if($perfilRH && $registro['status'] == 5): ?>
                                                                 <button type="button" onclick="SincRM(<?= $registro['id']; ?>, <?= $resParam[0]['ANOCOMP']; ?>, <?= $resParam[0]['MESCOMP']; ?>,<?= $resParam[0]['PERIODO']; ?>)" class="dropdown-item text-primary"><i class="fa fa-recycle"></i> Sincronizar com RM</button>
+                                                            <?php endif; ?>
+                                                            <?php if($perfilRH && $registro['status'] == 6): ?>
+                                                                <button type="button" onclick="CancSincRM(<?= $registro['id']; ?>, <?= $resParam[0]['ANOCOMP']; ?>, <?= $resParam[0]['MESCOMP']; ?>,<?= $resParam[0]['PERIODO']; ?>)" class="dropdown-item text-primary"><i class="fa fa-recycle"></i> Cancelar Sincronismo</button>
                                                             <?php endif; ?>
                                                             <?php if($perfilRH || $registro['status'] == 2): ?>
                                                                 <button type="button" onclick="reprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-danger"><i class="far fa-thumbs-down"></i> Reprovar</button>
@@ -1248,6 +1251,45 @@ $(document).ready(function(){
                     success:function(result){
                         var response = JSON.parse(result);
                         exibeAlerta(response.tipo, response.msg, 3);
+                        filtroSecao();
+                        // ATUALIZAR BADGE
+                    },
+                });
+            }
+        });
+
+    }
+
+    const CancSincRM = (id) => {
+
+        let dados = {
+            "id": id
+        };
+
+        Swal.fire({
+            icon: 'question',
+            title: 'Confirma o cancelamento da sincronização desta <b>requisição com o RM Folha</b>?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: `Sim, Cancelar`,
+            denyButtonText: `Não, Voltar`,
+            showCancelButton: false,
+            showCloseButton: false,
+            allowOutsideClick: false,
+            width: 600,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                openLoading();
+
+                console.log(dados);
+
+                $.ajax({
+                    url: "<?= base_url('ponto/aprova/action/cancSincArt61RM') ?>",
+                    type:'POST',
+                    data:dados,
+                    success:function(result){
+                        var response = JSON.parse(result);
+                        exibeAlerta(response.tipo, response.msg, 5);
                         filtroSecao();
                         // ATUALIZAR BADGE
                     },
