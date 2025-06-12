@@ -219,7 +219,7 @@
 
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <label class="input-group-text" for="chapa" style="width: 150px;">Solicitante: </label>
+            <label class="input-group-text" for="chapa" style="width: 150px;">Colaborador: </label>
           </div>
           <select class="custom-select" id="chapa" name="chapa">
             <option value="">...</option>
