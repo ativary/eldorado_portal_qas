@@ -132,9 +132,9 @@ $(document).ready(function(){
                         <form action="" method="POST" name="form_secao" id="form_secao">
                             <div class="form-group row">
 
-                                <div class="col-sm-2 text-right"><label for="opt_periodo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Período</label></div>
+                                <div class="col-sm-1 text-right"><label for="opt_periodo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Período</label></div>
 
-                                <div class="col-sm-10">
+                                <div class="col-sm-5">
                                 <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> class="select2  form-control form-control-sm " name="periodo" id="periodo" onchange="return carregaColaboradores()">
                                     <option value="">- selecione um período -</option>
                                     <?php if ($resPeriodo) : ?>
@@ -145,15 +145,39 @@ $(document).ready(function(){
                                 </select>
                                 </div>
 
-                                <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Categoria</label></div>
-                                <div class="col-sm-10">
+                                <div class="col-sm-1 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Filial</label></div>
+                                <div class="col-sm-5">
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_filial" id="filtro_filial" class="form-control select2 form-control-sm">
+                                        <option value="">Todas as filiais</option>
+                                        <?php if($resFilial): ?>
+                                                <?php foreach($resFilial as $key => $Filial): ?>
+                                                    <option value="<?= $Filial['CODFILIAL']; ?>" <?= (($filtro_filial ?? "") == $Filial['CODFILIAL']) ? " selected " : ""; ?>><?= $Filial['CODFILIAL'].' - '.$Filial['NOMEFILIAL']; ?></option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-1 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm"><span class="text-danger">*</span> Categoria</label></div>
+                                <div class="col-sm-5">
                                     <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_tipo" id="filtro_tipo" class="form-control select2 form-control-sm">
                                       <option <?= ($filtro_tipo == "ponto") ? 'selected' : ''; ?> value="ponto">Ponto</option>
                                     </select>
                                 </div>
 
-                                <div class="col-sm-2 text-right"><label for="filtro_tipo2" class=" col-form-label text-right text-left-sm">Tipo</label></div>
-                                <div class="col-sm-10">
+                                <div class="col-sm-1 text-right"><label for="secao" class="col-form-label text-right text-left-sm">Seção:</label></div>
+                                <div class="col-sm-5 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="secao" id="secao" class="form-control select2  form-control-sm " onchange="return carregaColaboradores()">
+                                    <option value="all">Todas as seções</option>
+                                    <?php
+                                    if ($listaSecaoUsuarioRM) {
+                                        foreach ($listaSecaoUsuarioRM as $key => $Secao) {
+                                            echo '<option value="' . $Secao['CODIGO'] . '" ' . (($codsecao == $Secao['CODIGO']) ? ' selected ' : '') . '>' . $Secao['DESCRICAO'] . ' - ' . $Secao['CODIGO'] . '</option>';
+                                        }
+                                    }
+                                    ?>
+                                </select></div>
+
+                                <div class="col-sm-1 text-right"><label for="filtro_tipo2" class=" col-form-label text-right text-left-sm">Tipo</label></div>
+                                <div class="col-sm-5">
                                     <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_tipo2" id="filtro_tipo2" class="form-control select2 form-control-sm">
                                         <option value="">Todos os tipos</option>
                                         <option <?= ($filtro_tipo2 == "1") ? 'selected' : ''; ?> value="1">Inclusão de batida</option>
@@ -171,32 +195,8 @@ $(document).ready(function(){
                                     </select>
                                 </div>
 
-                                <div class="col-sm-2 text-right"><label for="opt_tipo" class=" col-form-label text-right text-left-sm">Filial</label></div>
-                                <div class="col-sm-10">
-                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_filial" id="filtro_filial" class="form-control select2 form-control-sm">
-                                        <option value="">Todas as filiais</option>
-                                        <?php if($resFilial): ?>
-                                                <?php foreach($resFilial as $key => $Filial): ?>
-                                                    <option value="<?= $Filial['CODFILIAL']; ?>" <?= (($filtro_filial ?? "") == $Filial['CODFILIAL']) ? " selected " : ""; ?>><?= $Filial['CODFILIAL'].' - '.$Filial['NOMEFILIAL']; ?></option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                    </select>
-                                </div>
-
-                                <div class="col-sm-2 text-right"><label for="secao" class="col-form-label text-right text-left-sm">Seção:</label></div>
-                                <div class="col-sm-10 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="secao" id="secao" class="form-control select2  form-control-sm " onchange="return carregaColaboradores()">
-                                    <option value="all">Todas as seções</option>
-                                    <?php
-                                    if ($listaSecaoUsuarioRM) {
-                                        foreach ($listaSecaoUsuarioRM as $key => $Secao) {
-                                            echo '<option value="' . $Secao['CODIGO'] . '" ' . (($codsecao == $Secao['CODIGO']) ? ' selected ' : '') . '>' . $Secao['DESCRICAO'] . ' - ' . $Secao['CODIGO'] . '</option>';
-                                        }
-                                    }
-                                    ?>
-                                </select></div>
-
-                                <div class="col-sm-2 text-right"><label for="ccusto" class="col-form-label text-right text-left-sm">Centro de Custo:</label></div>
-                                <div class="col-sm-10 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="ccusto" id="ccusto" class="form-control select2  form-control-sm " onchange="return carregaColaboradores()">
+                                <div class="col-sm-1 text-right"><label for="ccusto" class="col-form-label text-right text-left-sm">Centro/Custo:</label></div>
+                                <div class="col-sm-5 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="ccusto" id="ccusto" class="form-control select2  form-control-sm " onchange="return carregaColaboradores()">
                                     <option value="all">Todos os centros de custo</option>
                                     <?php
                                     if ($listaCCustoUsuarioRM) {
@@ -207,8 +207,17 @@ $(document).ready(function(){
                                     ?>
                                 </select></div>
 
-                                <div class="col-sm-2 text-right"><label for="funcionario" class=" col-form-label text-right text-left-sm">Colaborador:</label></div>
-                                <div class="col-sm-10 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="funcionario" id="funcionario" class="form-control select2 form-control-sm ">
+                                <div class="col-sm-1 text-right"><label for="filtro_legenda" class=" col-form-label text-right text-left-sm">Legenda</label></div>
+                                <div class="col-sm-5">
+                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_legenda" id="filtro_legenda" class="form-control select2 form-control-sm">
+                                        <option value="">Todas as legendas</option>
+                                        <option <?= ($filtro_legenda == "10") ? 'selected' : ''; ?> value="10">Pend/Ação Gestor</option>
+                                        <option <?= ($filtro_legenda == "2") ? 'selected' : ''; ?> value="2">Pend/Ação RH</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-1 text-right"><label for="funcionario" class=" col-form-label text-right text-left-sm">Colaborador:</label></div>
+                                <div class="col-sm-5 "><select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="funcionario" id="funcionario" class="form-control select2 form-control-sm ">
                                     <option value="all">Todos</option>
                                     <?php if ($resFuncionarioSecao) : ?>
                                         <?php foreach ($resFuncionarioSecao as $key => $FuncionarioSecao) : ?>
@@ -220,16 +229,7 @@ $(document).ready(function(){
                                     <?php endif; ?>
                                 </select></div>
 
-                                <div class="col-sm-2 text-right"><label for="filtro_legenda" class=" col-form-label text-right text-left-sm">Legenda</label></div>
-                                <div class="col-sm-10">
-                                    <select <?= (!$acessoPermitido) ? 'disabled' : ''; ?> name="filtro_legenda" id="filtro_legenda" class="form-control select2 form-control-sm">
-                                        <option value="">Todas as legendas</option>
-                                        <option <?= ($filtro_legenda == "10") ? 'selected' : ''; ?> value="10">Pend/Ação Gestor</option>
-                                        <option <?= ($filtro_legenda == "2") ? 'selected' : ''; ?> value="2">Pend/Ação RH</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-sm-12 text-center">
+                                <div class="col-sm-12 text-center mt-2">
                                     <button <?= (!$acessoPermitido) ? 'disabled' : ''; ?> style="margin-left: 20px;" class="btnpeq btn-sm btn-success bteldorado_1" type="button" onclick="return filtroSecao()"><i class="fa fa-filter"></i> Filtrar</button>
                                     <button <?= (!$acessoPermitido) ? 'disabled' : ''; ?> style="margin-left: 20px;" class="btnpeq btn-sm btn-danger bteldorado_2" type="button" onclick="return limpaFiltro()"> Limpar</button>
                                 </div>
@@ -611,11 +611,14 @@ $(document).ready(function(){
                                                             <?php if(($perfilRH && $registro['status'] == 4) || $registro['status'] == 2): ?>
                                                                 <button type="button" onclick="aprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-success"><i class="far fa-thumbs-up"></i> Aprovar <?= ($perfilRH && $registro['status'] == 4) ? 'RH' : '' ?></button>
                                                             <?php endif; ?>
-                                                            <?php if($perfilRH && $registro['status'] == 3): ?>
+                                                            <?php if($perfilRH && ($registro['status'] == 3 || $registro['status'] == 4 || $registro['status'] == 5)): ?>
                                                                 <button type="button" onclick="CalcularReq('<?= $registro['id']; ?>')" class="dropdown-item text-primary"><i class="fa fa-calculator"></i> Calcular</button>
                                                             <?php endif; ?>
                                                             <?php if($perfilRH && $registro['status'] == 5): ?>
                                                                 <button type="button" onclick="SincRM(<?= $registro['id']; ?>, <?= $resParam[0]['ANOCOMP']; ?>, <?= $resParam[0]['MESCOMP']; ?>,<?= $resParam[0]['PERIODO']; ?>)" class="dropdown-item text-primary"><i class="fa fa-recycle"></i> Sincronizar com RM</button>
+                                                            <?php endif; ?>
+                                                            <?php if($perfilRH && $registro['status'] == 6): ?>
+                                                                <button type="button" onclick="CancSincRM(<?= $registro['id']; ?>, <?= $resParam[0]['ANOCOMP']; ?>, <?= $resParam[0]['MESCOMP']; ?>,<?= $resParam[0]['PERIODO']; ?>)" class="dropdown-item text-primary"><i class="fa fa-recycle"></i> Cancelar Sincronismo</button>
                                                             <?php endif; ?>
                                                             <?php if($perfilRH || $registro['status'] == 2): ?>
                                                                 <button type="button" onclick="reprovarIndividual('<?= $registro['id'].'|'.$registro['movimento']; ?>')" class="dropdown-item text-danger"><i class="far fa-thumbs-down"></i> Reprovar</button>
@@ -1248,6 +1251,45 @@ $(document).ready(function(){
                     success:function(result){
                         var response = JSON.parse(result);
                         exibeAlerta(response.tipo, response.msg, 3);
+                        filtroSecao();
+                        // ATUALIZAR BADGE
+                    },
+                });
+            }
+        });
+
+    }
+
+    const CancSincRM = (id) => {
+
+        let dados = {
+            "id": id
+        };
+
+        Swal.fire({
+            icon: 'question',
+            title: 'Confirma o cancelamento da sincronização desta <b>requisição com o RM Folha</b>?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: `Sim, Cancelar`,
+            denyButtonText: `Não, Voltar`,
+            showCancelButton: false,
+            showCloseButton: false,
+            allowOutsideClick: false,
+            width: 600,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                openLoading();
+
+                console.log(dados);
+
+                $.ajax({
+                    url: "<?= base_url('ponto/aprova/action/cancSincArt61RM') ?>",
+                    type:'POST',
+                    data:dados,
+                    success:function(result){
+                        var response = JSON.parse(result);
+                        exibeAlerta(response.tipo, response.msg, 5);
                         filtroSecao();
                         // ATUALIZAR BADGE
                     },

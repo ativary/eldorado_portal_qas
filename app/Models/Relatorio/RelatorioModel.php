@@ -226,6 +226,9 @@ class RelatorioModel extends Model {
             case 41:
                 return self::relatorioGestorSubstituto($request);
                 break;
+            case 42:
+                return self::relatorioMudancaHorario($request);
+                break;
 
         }
     }
@@ -6504,6 +6507,125 @@ FROM (
             ".$FiltroSecao."
             ".$FiltroChapa."
             ".$FiltroFuncao." 
+        ";
+
+        //echo '<pre>';
+        //echo $query;exit();
+        $result = $this->dbportal->query($query);
+
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+
+    private function relatorioMudancaHorario($request)
+    {
+       // print_r($request);
+         //exit();
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND f.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND f.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND ( g.CHAPA = '".$request['chapa']."' )";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        $query = "              
+          WITH LISTA AS (
+          SELECT 
+            g.CODCOLIGADA as COLIGADA,
+            g.CHAPA AS CHAPA,
+            f.nome AS NOME,
+            f.CODFILIAL AS FILIAL,
+            f.CODFUNCAO AS CODFUNCAO,
+            u.nome AS FUNCAO,
+            f.CODSECAO AS CODSECAO,
+            s.DESCRICAO AS SECAO,
+            s.NROCENCUSTOCONT AS CENTRO_DE_CUSTO,
+            c.NOME AS NOME_CCUSTO,
+            a.area AS AREA,
+            a.diretoria AS DIRETORIA,
+            FORMAT( g.DTMUDANCA, 'dd/MM/yyyy') as DATA_ALTERACAO,
+            ( SELECT TOP 1 CODHORARIO FROM CorporeRMDEV..PFHSTHOR h 
+              WHERE h.CHAPA = g.CHAPA AND h.CODCOLIGADA = g.CODCOLIGADA
+              AND  h.DTMUDANCA < g.DTMUDANCA AND h.CODHORARIO <> g.CODHORARIO
+              ORDER BY h.DTMUDANCA DESC
+            ) AS CODHORARIO_ANTERIOR,
+            '' AS HORARIO_ANTERIOR,
+            g.CODHORARIO AS CODHORARIO_ATUAL,
+            '' AS HORARIO_ATUAL,
+            f.CODSINDICATO AS CODSINDICATO
+            
+          FROM CorporeRMDEV..PFHSTHOR g
+          LEFT JOIN CorporeRMDEV..PFUNC f ON f.CODCOLIGADA = g.CODCOLIGADA AND f.CHAPA = g.CHAPA 
+          LEFT JOIN CorporeRMDEV..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA AND u.CODIGO = f.CODFUNCAO
+          LEFT JOIN CorporeRMDEV..PSECAO s ON s.CODCOLIGADA = f.CODCOLIGADA AND s.CODIGO = f.CODSECAO
+          LEFT JOIN CorporeRMDEV..GCCUSTO c ON c.CODCOLIGADA = s.CODCOLIGADA AND c.CODCCUSTO = s.NROCENCUSTOCONT
+          LEFT JOIN zcrmportal_art61_areas a ON a.coligada = g.CODCOLIGADA AND a.codcusto = c.CODCCUSTO COLLATE Latin1_General_CI_AS
+          
+          WHERE 
+                g.CODCOLIGADA = ".$this->coligada." 
+            AND g.DTMUDANCA >= '".$request['dataIni']."' 
+            AND g.DTMUDANCA <= '".$request['dataFim']."'
+            ".$FiltroSecao."
+            ".$FiltroChapa."
+            ".$FiltroFuncao." 
+
+          )
+
+          SELECT DISTINCT
+            l.COLIGADA,
+            l.CHAPA,
+            l.NOME,
+            l.FILIAL,
+            l.CODFUNCAO,
+            l.FUNCAO,
+            l.CODSECAO,
+            l.SECAO,
+            l.CENTRO_DE_CUSTO,
+            l.NOME_CCUSTO,
+            l.AREA,
+            l.DIRETORIA,
+            l.DATA_ALTERACAO,
+            l.CODHORARIO_ANTERIOR,
+            a.DESCRICAO AS HORARIO_ANTERIOR,
+            l.CODHORARIO_ATUAL,
+            b.DESCRICAO AS HORARIO_ATUAL,
+            l.CODSINDICATO AS COD_SINDICATO_ATUAL,
+            c.NOME AS SINDICATO_ATUAL
+
+          FROM LISTA l
+          LEFT JOIN CorporeRMDEV..AHORARIO a ON a.CODCOLIGADA = l.COLIGADA AND a.CODIGO = l.CODHORARIO_ANTERIOR
+          LEFT JOIN CorporeRMDEV..AHORARIO b ON b.CODCOLIGADA = l.COLIGADA AND b.CODIGO = l.CODHORARIO_ATUAL
+          LEFT JOIN CorporeRMDEV..PSINDIC c ON c.CODCOLIGADA = l.COLIGADA AND c.CODIGO = l.CODSINDICATO
         ";
 
         //echo '<pre>';

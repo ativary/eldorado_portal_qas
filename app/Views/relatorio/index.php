@@ -51,6 +51,7 @@
                                     <option value="28" <?php if($relatorio == 28){ echo 'selected';}?>>Relatório - Deflatores</option>  
                                     <?php if($rh): ?><option value="40" <?php if($relatorio == 40){ echo 'selected';}?>>Conferência Artigo.61</option><?php endif; ?> 
                                     <?php if($rh): ?><option value="41" <?php if($relatorio == 41){ echo 'selected';}?>>Relação Geral - Equipe - Gestor Substituto</option><?php endif; ?> 
+                                    <?php if($rh): ?><option value="42" <?php if($relatorio == 42){ echo 'selected';}?>>Relação de Mudanças de Horário</option><?php endif; ?> 
                                 </select>
                             </div>
                         </div>
