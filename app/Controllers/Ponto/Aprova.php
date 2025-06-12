@@ -677,12 +677,19 @@ class Aprova extends BaseController
             //-------------------------------------
 
             //-------------------------------------
-            // calcula requisição de Art.61
+            // sincroniza requisição de Art.61
             case 'sincArt61RM':
               exit($this->mAprova->SincArt61RM($dados));
               break;
             //-
             
+            //-------------------------------------
+            // cancela sincronismo requisição de Art.61
+            case 'cancSincArt61RM':
+              exit($this->mAprova->CancSincArt61RM($dados));
+              break;
+            //-
+   
       
         }        
 

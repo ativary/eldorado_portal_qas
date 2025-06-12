@@ -898,6 +898,30 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 ]
                 
         break;
+        case '42':
+                colunas = [
+                    {'value': '[COLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[CHAPA]', 'name': 'Chapa do Colaborador'},
+                    {'value': '[NOME]', 'name': 'Nome'},
+                    {'value': '[FILIAL]', 'name': 'Filial'},
+                    {'value': '[CODFUNCAO]', 'name': 'Código da Função'},
+                    {'value': '[FUNCAO]', 'name': 'Função'},
+                    {'value': '[CODSECAO]', 'name': 'Código da Seção'},
+                    {'value': '[SECAO]', 'name': 'Seção'},
+                    {'value': '[CENTRO_DE_CUSTO]', 'name': 'Centro de Custo'},
+                    {'value': '[NOME_CCUSTO]', 'name': 'Nome do Centro de Custo'},
+                    {'value': '[AREA]', 'name': 'Área'},
+                    {'value': '[DIRETORIA]', 'name': 'Diretoria'},
+                    {'value': '[DATA_ALTERACAO]', 'name': 'Data da Mudança'},
+                    {'value': '[CODHORARIO_ANTERIOR]', 'name': 'Código do Horário Anterior'},
+                    {'value': '[HORARIO_ANTERIOR]', 'name': 'Horário Anterior'},
+                    {'value': '[CODHORARIO_ATUAL]', 'name': 'Código do Horário Atual'},
+                    {'value': '[HORARIO_ATUAL]', 'name': 'Horário Atual'},
+                    {'value': '[COD_SINDICATO_ATUAL]', 'name': 'Código do Sindicato Atual'},
+                    {'value': '[SINDICATO_ATUAL]', 'name': 'Sindicato Atual'},
+                ]
+                
+        break;
 
     }
 
@@ -979,7 +1003,7 @@ const gerarRelatorioTabela = () => {
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
     if(relatorio == 11 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
 
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
 
@@ -991,6 +1015,7 @@ const gerarRelatorioTabela = () => {
     $("#form_filtro").attr('action',base_url + '/relatorio/gerar').attr('target', '_self');
     $("#form_filtro").submit();
 }
+
 const gerarExcel = () => {
 
     let relatorio = $('#relatorio').val();
@@ -1005,7 +1030,7 @@ const gerarExcel = () => {
     if(relatorio == 8 && dataI == "" || relatorio == 8 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
   
@@ -1028,7 +1053,7 @@ const gerarPDF = () => {
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
     if(relatorio == 11 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
 
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
 

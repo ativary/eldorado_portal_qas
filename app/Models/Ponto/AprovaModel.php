@@ -1050,7 +1050,7 @@ class AprovaModel extends Model
     $filtro_filial = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND B.CODFILIAL = '{$dados['filtro_filial']}' " : '';
     $filtro_legenda = "";
     $filtro_legenda2 = "";
-    $in_leg_art61 = "AND r.status in (2, 3, 4, 5) ";
+    $in_leg_art61 = "AND r.status in (2, 3, 4, 5, 6) ";
     if ((strlen(trim($dados['filtro_legenda'])) != 0)) {
       if ($dados['filtro_legenda'] == 10) {
         $filtro_legenda2 = " AND a.situacao = '10' ";
@@ -2817,5 +2817,49 @@ class AprovaModel extends Model
 
     }
 
+    // -----------------------------------------------------------------------
+    // Cancelar Sincronizar Requisição do Artigo 61
+    // ------------------------------------------------------------------------
+
+    public function CancSincArt61RM($dados){
+        
+        $coligada = $_SESSION['func_coligada'];
+        $id_usuario = $_SESSION['log_id'];
+
+        $ids = strlen(trim($dados['id'])) > 0 ? "{$dados['id']}" : "NULL";
+        if(substr($ids, -1)==",") { $ids = substr($ids, 0, -1); }
+        
+        $query = "
+            UPDATE zcrmportal_art61_requisicao
+            SET 
+              status = 5,
+              dt_sincronismo = null, 
+              periodo_sincronismo = null,
+              user_id_sincronismo = ".$id_usuario."
+            WHERE status = 6 AND id IN ({$ids})";
+        $this->dbportal->query($query);
+        
+        // Atualiza status da requisição
+        $query = "
+          UPDATE zcrmportal_art61_req_chapas
+          SET 
+            anocomp = null,
+            mescomp = null,
+            nroperiodo = null 
+          WHERE id_req IN ({$ids})";
+
+        $this->dbportal->query($query);
+
+        if (str_contains($ids, ',')) {
+           $msg = 'Sincronismos cancelados. Os envelopes devem ser recalculados no RM Folha.';
+        } else {
+           $msg = 'Sincronismo cancelado. Os envelopes devem ser recalculados no RM Folha.';
+        }
+        
+        return ($this->dbportal->affectedRows() > 0) 
+            ? responseJson('success', $msg)
+            : responseJson('error', 'Falha ao cancelar sincronismo.');
+
+    }
 
 }
