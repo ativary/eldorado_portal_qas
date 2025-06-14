@@ -306,7 +306,7 @@ class Art61 extends BaseController
 
     $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
     if (!$dados['rh']) {
-      parent::VerificaPerfil('ART61_SOLICITACAO');
+      parent::VerificaPerfil('ART61_MENU');
     }
 
     $dados['_titulo'] = "Histórico de solicitação";
@@ -332,7 +332,7 @@ class Art61 extends BaseController
     $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
     if (!$dados['rh']) {
       if(!parent::VerificaPerfil('PONTO_APROVA', false)) {
-        parent::VerificaPerfil('ART61_SOLICITACAO');
+        parent::VerificaPerfil('ART61_MENU');
       }
     }
 

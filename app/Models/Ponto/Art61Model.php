@@ -902,6 +902,48 @@ class Art61Model extends Model
     $filtro .= ($id == 0) ? '' : " AND a.id = " . $id;
     $filtro = ($id == 0 and $periodo == '') ? ' AND a.id < 0' : $filtro;  // criado para não listar nada
 
+    $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
+
+    //-----------------------------------------
+    // filtro das chapas que o lider pode ver
+    //-----------------------------------------
+    $mHierarquia = Model('HierarquiaModel');
+    $objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
+    $isLider = $mHierarquia->isLider();
+
+    $filtro_lider = "";
+    if ($isLider) {
+      $chapas_lider = "";
+      foreach ($objFuncLider as $idx => $value) {
+        $chapas_lider .= "'" . $objFuncLider[$idx]['chapa'] . "',";
+      }
+      if($chapas_lider!='') {
+        $filtro_lider = " ( a.chapa_gestor IN (" . substr($chapas_lider, 0, -1) . ") OR a.chapa_requisitor IN (" . substr($chapas_lider, 0, -1) . ") ) ";
+      }
+    }
+
+    $filtro_gestor = "";
+    $mPortal  = model('PortalModel');
+
+    $secaoGestor = $mPortal->listaFuncionarioSecao();
+    if ($secaoGestor) {
+      $filtro_gestor = "";
+      foreach ($secaoGestor as $key => $DadosFunc) {
+        $filtro_gestor .= "'{$DadosFunc['CHAPA']}',";
+      }
+      if($filtro_gestor!='') {
+        $filtro_gestor = " ( a.chapa_gestor IN (" . rtrim($filtro_gestor, ',') . ") OR a.chapa_requisitor IN (" . rtrim($filtro_gestor, ',') . ") ) ";
+      }
+    }
+
+    $filtro_chapa = "";
+    if($_SESSION['rh_master']!='S') {
+      $filtro_chapa = " AND ( a.chapa_gestor = '". $chapa ."' OR a.chapa_requisitor = '". $chapa ."' ";
+      $filtro_chapa .= $filtro_lider=='' ? "" : " OR ".$filtro_lider;
+      $filtro_chapa .= $filtro_gestor=='' ? "" : " OR ".$filtro_gestor;
+      $filtro_chapa .= " )";
+    }
+
     $queryConfig = " 
           SELECT
               a.id,
@@ -933,7 +975,12 @@ class Art61Model extends Model
               a.id_coligada = '" . $_SESSION['func_coligada'] . "'
           AND a.status > 0
           " . $filtro . " 
+          " . $filtro_chapa . " 
+          
       ";
+
+    //echo $queryConfig;
+    //die();
 
     $result = $this->dbportal->query($queryConfig);
     if ($result->getNumRows() > 0) {
