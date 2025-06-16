@@ -1776,7 +1776,7 @@ class Art61Model extends Model
           status = '2'
       WHERE
           ( id IN  (" . $ids . ") OR id_req_original IN (" . $ids . ") )
-      AND status in ('1','4')
+      AND status in ('1','9')
     ";
     //echo $query;
     //die();
