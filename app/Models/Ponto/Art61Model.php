@@ -361,7 +361,7 @@ class Art61Model extends Model
 	            e1.codigo = a.de_codevento COLLATE Latin1_General_CI_AS 
             LEFT JOIN " . DBRM_BANCO . "..PEVENTO e2 ON 
                 e2.codcoligada = a.coligada AND 
-	            e2.codigo = a.de_codevento COLLATE Latin1_General_CI_AS 
+	            e2.codigo = a.para_codevento COLLATE Latin1_General_CI_AS 
             WHERE a.coligada = '" . $_SESSION['func_coligada'] . "' AND
                 a.ativo = 'S'
         ";

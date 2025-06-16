@@ -19,9 +19,6 @@
                             <a data-tab="2" class="nav-link <?php echo ($tab == '2' ? 'active' : ''); ?>" data-toggle="tab" href="#areas" role="tab">Áreas e Diretoria</a>
                         </li>
                         <li class="nav-item">
-                            <a data-tab="3" class="nav-link <?php echo ($tab == '3' ? 'active' : ''); ?>" data-toggle="tab" href="#prorroga" role="tab">Prorrogações</a>
-                        </li>
-                        <li class="nav-item">
                             <a data-tab="4" class="nav-link <?php echo ($tab == '4' ? 'active' : ''); ?>" data-toggle="tab" href="#colab" role="tab">Exceção Hierarquia</a>
                         </li>
                         <li class="nav-item">
@@ -90,6 +87,61 @@
                                     </div><!-- end main -->
 
                                 </div>
+                                <div class="row">
+
+                                    <!-- main -->
+                                    <div class="col-12">
+                                        <div class="card">
+
+                                            <div class="card-header mt-0">
+                                                <div class="row">
+                                                    <h5 class="col-6 mb-1 mt-1"> </h5>
+                                                    <div class="col-6 text-right">
+                                                        <div class="button-items">
+                                                            <a href="javascript:void(0);" onclick="return Prorroga(0, '', '')" class="btn btn-primary btn-xxs mb-0"><i class="fas fa-plus-circle"></i> Nova Prorrogação</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-body">
+                                                <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-center" width="20">ID</th>
+                                                            <th>Colaborador</th>
+                                                            <th>Data</th>
+                                                            <th class="text-center" width="180">Ações</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php if ($resProrroga): ?>
+                                                            <?php foreach ($resProrroga as $key => $Prorroga): ?>
+                                                                <tr data-linhap="<?= $Prorroga['id'] ?>">
+                                                                    <td class="text-left"><?= $Prorroga['id'] ?></td>
+                                                                    <td class="text-left"><?= $Prorroga['chapa'] . ' - ' . $Prorroga['nome']; ?></td>
+                                                                    <td class="text-left"><?= $Prorroga['dt_extendida_br'] ?></td>
+                                                                    <td class="text-center" width="180">
+                                                                        <div class="btn-group" aria-label="acao" role="group">
+                                                                            <a href="javascript:void(0);" onclick="return DeletaProrroga(<?= $Prorroga['id']; ?>)" class="btn btn-soft-pink waves-effect waves-light btn-xxs"><i class="fa fa-times"></i> Excluir</a>
+                                                                            <a href="javascript:void(0);" onclick="return Prorroga(<?= $Prorroga['id'] ?>, '<?= $Prorroga['chapa'] ?>', '<?= $Prorroga['dt_extendida'] ?>')" class="btn btn-soft-primary waves-effect waves-light btn-xxs"><i class="mdi mdi-pencil-outline"></i> Editar</a>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div class="card-footer text-center">
+                                            </div>
+
+
+                                        </div>
+                                    </div><!-- end main -->
+
+                                </div>
                             </div><!-- container -->
 
 
@@ -139,67 +191,6 @@
                                                                         <div class="btn-group" aria-label="acao" role="group">
                                                                             <a href="javascript:void(0);" onclick="return DeletaCCustoArea(<?= $Area['id']; ?>)" class="btn btn-soft-pink waves-effect waves-light btn-xxs"><i class="fa fa-times"></i> Excluir</a>
                                                                             <a href="javascript:void(0);" onclick="return LigaCCustoArea(<?= $Area['id'] ?>, <?= $Area['codcusto'] ?>, '<?= $Area['diretoria'] ?>', '<?= $Area['area'] ?>')" class="btn btn-soft-primary waves-effect waves-light btn-xxs"><i class="mdi mdi-pencil-outline"></i> Editar</a>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php endforeach; ?>
-                                                        <?php endif; ?>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                            <div class="card-footer text-center">
-                                            </div>
-
-
-                                        </div>
-                                    </div><!-- end main -->
-
-                                </div>
-                            </div><!-- container -->
-
-                        </div>
-
-                        <div class="tab-pane <?php echo ($tab == '3' ? 'active' : ''); ?> p-3" id="prorroga" role="tabpanel">
-                            <div class="container-fluid">
-                                <div class="row">
-
-                                    <!-- main -->
-                                    <div class="col-12">
-                                        <div class="card">
-
-                                            <div class="card-header mt-0">
-                                                <div class="row">
-                                                    <h5 class="col-6 mb-1 mt-1"> </h5>
-                                                    <div class="col-6 text-right">
-                                                        <div class="button-items">
-                                                            <a href="javascript:void(0);" onclick="return Prorroga(0, '', '')" class="btn btn-primary btn-xxs mb-0"><i class="fas fa-plus-circle"></i> Nova Prorrogação</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="card-body">
-                                                <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="text-center" width="20">ID</th>
-                                                            <th>Colaborador</th>
-                                                            <th>Data</th>
-                                                            <th class="text-center" width="180">Ações</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <?php if ($resProrroga): ?>
-                                                            <?php foreach ($resProrroga as $key => $Prorroga): ?>
-                                                                <tr data-linhap="<?= $Prorroga['id'] ?>">
-                                                                    <td class="text-left"><?= $Prorroga['id'] ?></td>
-                                                                    <td class="text-left"><?= $Prorroga['chapa'] . ' - ' . $Prorroga['nome']; ?></td>
-                                                                    <td class="text-left"><?= $Prorroga['dt_extendida_br'] ?></td>
-                                                                    <td class="text-center" width="180">
-                                                                        <div class="btn-group" aria-label="acao" role="group">
-                                                                            <a href="javascript:void(0);" onclick="return DeletaProrroga(<?= $Prorroga['id']; ?>)" class="btn btn-soft-pink waves-effect waves-light btn-xxs"><i class="fa fa-times"></i> Excluir</a>
-                                                                            <a href="javascript:void(0);" onclick="return Prorroga(<?= $Prorroga['id'] ?>, '<?= $Prorroga['chapa'] ?>', '<?= $Prorroga['dt_extendida'] ?>')" class="btn btn-soft-primary waves-effect waves-light btn-xxs"><i class="mdi mdi-pencil-outline"></i> Editar</a>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -357,7 +348,7 @@
 </div><!-- container -->
 
 <!-- modal -->
-<div class="modal" id="modalArea" tabindex="1" role="dialog" aria-labelledby="modalArea" aria-hidden="true">
+<div class="modal" id="modalArea" style="width: 100%;" role="dialog" aria-labelledby="modalArea" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -370,10 +361,8 @@
             <div class="modal-body">
 
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="ccusto" style="width: 150px;">C.Custo: </label>
-                    </div>
-                    <select class="custom-select" id="ccusto" name="ccusto">
+                    <label for="chapa">Centro de Custo: </label>
+                    <select class="select2 custom-select" id="ccusto" name="ccusto">
                         <option value="">...</option>
                         <?php foreach ($resCentroCusto as $key => $CentroCusto): ?>
                             <option value="<?= $CentroCusto['CODCCUSTO']; ?>"><?= $CentroCusto['NOME'] . ' - ' . $CentroCusto['CODCCUSTO']; ?></option>
@@ -411,7 +400,7 @@
 <!-- modal -->
 
 <!-- modal -->
-<div class="modal" id="modalProrroga" tabindex="1" role="dialog" aria-labelledby="modalProrroga" aria-hidden="true">
+<div class="modal" id="modalProrroga" style="width: 100%;" role="dialog" aria-labelledby="modalProrroga" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -424,17 +413,15 @@
             <div class="modal-body">
 
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="chapa" style="width: 150px;">Chapa: </label>
-                    </div>
-                    <select class="custom-select" id="chapa" name="chapa">
+                    <label for="chapa">Selecione o Colaborador: </label>
+                    <select class="select2 custom-select" id="chapa" name="chapa">
                         <option value="">...</option>
                         <?php foreach ($resColab as $key => $Colab): ?>
                             <option value="<?= $Colab['CHAPA']; ?>"><?= $Colab['NOME'] . ' - ' . $Colab['CHAPA']; ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-
+                
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <label class="input-group-text" style="width: 150px;" for="dt_extendida">Data Extendida: </label>
@@ -457,7 +444,7 @@
 <!-- modal -->
 
 <!-- modal -->
-<div class="modal" id="modalExcecao" tabindex="1" role="dialog" aria-labelledby="modalExcecao" aria-hidden="true">
+<div class="modal" id="modalExcecao" style="width: 100%;" role="dialog" aria-labelledby="modalExcecao" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -470,10 +457,8 @@
             <div class="modal-body">
 
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="chapa_pai" style="width: 150px;">Chapa Acima: </label>
-                    </div>
-                    <select class="custom-select" id="chapa_pai" name="chapa_pai">
+                    <label for="chapa">Selecione o Colaborador Acima: </label>
+                    <select class="select2 custom-select" id="chapa_pai" name="chapa_pai">
                         <option value="">...</option>
                         <?php foreach ($resColab as $key => $Colab): ?>
                             <option value="<?= $Colab['CHAPA']; ?>"><?= $Colab['NOME'] . ' - ' . $Colab['CHAPA']; ?></option>
@@ -482,10 +467,8 @@
                 </div>
 
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="chapa_filho" style="width: 150px;">Chapa Abaixo: </label>
-                    </div>
-                    <select class="custom-select" id="chapa_filho" name="chapa_filho">
+                    <label for="chapa">Selecione o Colaborador Abaixo: </label>
+                    <select class="select2 custom-select" id="chapa_filho" name="chapa_filho">
                         <option value="">...</option>
                         <?php foreach ($resColab as $key => $Colab): ?>
                             <option value="<?= $Colab['CHAPA']; ?>"><?= $Colab['NOME'] . ' - ' . $Colab['CHAPA']; ?></option>
@@ -515,7 +498,7 @@
 <!-- modal -->
 
 <!-- modal -->
-<div class="modal" id="modalEvento" tabindex="1" role="dialog" aria-labelledby="modalEvento" aria-hidden="true">
+<div class="modal" id="modalEvento" style="width: 100%;" role="dialog" aria-labelledby="modalEvento" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -528,10 +511,8 @@
             <div class="modal-body">
 
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="codfilial" style="width: 150px;">Filial: </label>
-                    </div>
-                    <select class="custom-select" id="codfilial" name="codfilial">
+                    <label for="chapa">Filial: </label>
+                    <select class="select2 custom-select" id="codfilial" name="codfilial">
                         <option value="">...</option>
                         <?php foreach ($resFiliais as $key => $Filial): ?>
                             <option value="<?= $Filial['CODFILIAL']; ?>"><?= $Filial['CODFILIAL'] . ' - ' . $Filial['NOMEFANTASIA']; ?></option>
@@ -540,10 +521,8 @@
                 </div>
 
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="de_codevento" style="width: 150px;">Do Evento: </label>
-                    </div>
-                    <select class="custom-select" id="de_codevento" name="de_codevento">
+                    <label for="chapa">Do Evento: </label>
+                    <select class="select2 custom-select" id="de_codevento" name="de_codevento">
                         <option value="">...</option>
                         <?php foreach ($resEventos as $key => $Evento): ?>
                             <option value="<?= $Evento['CODIGO']; ?>"><?= $Evento['CODIGO'] . ' - ' . $Evento['DESCRICAO']; ?></option>
@@ -552,10 +531,8 @@
                 </div>
 
                 <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="para_codevento" style="width: 150px;">Para Evento: </label>
-                    </div>
-                    <select class="custom-select" id="para_codevento" name="para_codevento">
+                    <label for="chapa">Para o Evento: </label>
+                    <select class="select2 custom-select" id="para_codevento" name="para_codevento">
                         <option value="">...</option>
                         <?php foreach ($resEventos as $key => $Evento): ?>
                             <option value="<?= $Evento['CODIGO']; ?>"><?= $Evento['CODIGO'] . ' - ' . $Evento['DESCRICAO']; ?></option>
@@ -624,6 +601,7 @@
                 [2, "asc"]
             ]
         });
+
     });
 
     const salvaDados = () => {
@@ -779,7 +757,7 @@
                 if (response.tipo != 'success') {
                     exibeAlerta(response.tipo, response.msg, 2);
                 } else {
-                    exibeAlerta(response.tipo, response.msg, 2, '<?= base_url('ponto/art61/config/3'); ?>');
+                    exibeAlerta(response.tipo, response.msg, 2, '<?= base_url('ponto/art61/config/1'); ?>');
                 }
             },
         });
