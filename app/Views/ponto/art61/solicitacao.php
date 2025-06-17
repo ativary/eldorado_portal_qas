@@ -173,7 +173,7 @@
 </div>
 
 <!-- modal -->
-<div class="modal" id="modalNova" tabindex="1" role="dialog" aria-labelledby="modalNova" aria-hidden="true">
+<div class="modal" id="modalNova" style="width:100%;" role="dialog" aria-labelledby="modalNova" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -186,10 +186,8 @@
       <div class="modal-body">
 
         <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <label class="input-group-text" for="chapa" style="width: 150px;">Solicitante: </label>
-          </div>
-          <select class="custom-select" id="chapa" name="chapa">
+          <label for="chapa">Solicitante: </label>
+          <select class="select2 custom-select" id="chapa" name="chapa">
             <option value="">...</option>
             <?php foreach ($resColab as $key => $Colab): ?>
               <option value="<?= $Colab['CHAPA']; ?>"><?= $Colab['NOME'] . ' - ' . $Colab['CHAPA']; ?></option>

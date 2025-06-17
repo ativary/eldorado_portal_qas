@@ -413,7 +413,7 @@
             <div class="modal-body">
 
                 <div class="input-group mb-3">
-                    <label for="chapa">Selecione o Colaborador: </label>
+                    <label for="chapa">Colaborador: </label>
                     <select class="select2 custom-select" id="chapa" name="chapa">
                         <option value="">...</option>
                         <?php foreach ($resColab as $key => $Colab): ?>
@@ -457,7 +457,7 @@
             <div class="modal-body">
 
                 <div class="input-group mb-3">
-                    <label for="chapa">Selecione o Colaborador Acima: </label>
+                    <label for="chapa">Colaborador Acima: </label>
                     <select class="select2 custom-select" id="chapa_pai" name="chapa_pai">
                         <option value="">...</option>
                         <?php foreach ($resColab as $key => $Colab): ?>
@@ -467,7 +467,7 @@
                 </div>
 
                 <div class="input-group mb-3">
-                    <label for="chapa">Selecione o Colaborador Abaixo: </label>
+                    <label for="chapa">Colaborador Abaixo: </label>
                     <select class="select2 custom-select" id="chapa_filho" name="chapa_filho">
                         <option value="">...</option>
                         <?php foreach ($resColab as $key => $Colab): ?>
