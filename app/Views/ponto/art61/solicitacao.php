@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="col-sm-7 text-right">
-                  <button style="margin-left: 20px;" id="btnJust" name="btnJust" class="btnpeq btn-sm btn-success" type="button" onclick="return enviarLoteAprovacao()"><i class="far fa-paper-plane"></i> Enviar para aprovação</button>
+                  <button style="margin-left: 20px;" id="btnEnvia" name="btnEnvia" class="btnpeq btn-sm btn-success" type="button" onclick="return enviarLoteAprovacao()"><i class="far fa-paper-plane"></i> Enviar para aprovação</button>
 
                   <button style="margin-left: 20px; display: none;" id="btnNova" name="btnNova" class="btnpeq btn-sm btn-primary" type="button" onclick="return novaSolicitacao()"><i class="fa fa-plus"></i> Nova Solicitação</button>
                 </div>
@@ -93,6 +93,7 @@
                     <th class="n-mobile-cell"><strong>Data Solicitação</strong></th>
                     <th class="n-mobile-cell" style="min-width: 290px;"><strong>Solicitante</strong></th>
                     <th class="n-mobile-cell" style="min-width: 290px;"><strong>Gestor</strong></th>
+                    <th class="n-mobile-cell"><strong>Justificados</strong></th>
                     <th class="n-mobile-cell"><strong>Competência</strong></th>
                     <th class="n-mobile-cell"><strong>Período do Ponto</strong></th>
                     <th>Ação</th>
@@ -138,6 +139,7 @@
                         <td class="n-mobile-cell"><?= $registro['dt_req_br']; ?></td>
                         <td class="n-mobile-cell"><?= $registro['chapa_requisitor'] . ' - ' . $registro['nome_requisitor']; ?></td>
                         <td class="n-mobile-cell"><?= $registro['chapa_gestor'] . ' - ' . $registro['nome_gestor']; ?></td>
+                        <td class="n-mobile-cell"><?= $registro['justificados'] . ' / ' . $registro['registros']; ?></td>
                         <td class="n-mobile-cell"><?= $registro['mescomp'] . '/' . $registro['anocomp']; ?></td>
                         <td class="n-mobile-cell"><?= $registro['per_ponto_br']; ?></td>
                         <td>
@@ -147,11 +149,14 @@
 
                               <?php if ($registro['status'] == 1 || $registro['status'] == 9):  ?>
                                 <a href="<?= base_url('ponto/art61/solicitacao_chapas/' . $registro['id']); ?>" class="dropdown-item"><i class="mdi mdi-pencil"></i> Editar requisição</a>
-                                <button type="button" onclick="enviarAprovacao('<?= $registro['id']; ?>', <?= $registro['status']; ?>, <?= $registro['qtde_gestores']; ?>)" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
+                                <button type="button" onclick="enviarAprovacao('<?= $registro['id']; ?>', <?= $registro['status']; ?>, <?= $registro['qtde_gestores']; ?>, <?= $registro['justificados']; ?>, <?= $registro['registros']; ?>)" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
                                 <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
 
                               <?php else:  ?>
                                 <a href="/ponto/art61/solicitacao_chapas/<?= $registro['id']; ?>" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Ver Solicitação</a>
+                                <?php if ($rh):  ?>
+                                   <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
+                                <?php endif;  ?>
                               <?php endif;  ?>
                               
                             </div>
@@ -246,15 +251,16 @@
   function VerificaCheck() {
     console.log($("[data-checkbox]:checked").length);
     if ($("[data-checkbox]:checked").length <= 0) {
-      $("#btnJust").hide();
+      //$("#btnEnvia").hide();
     } else {
-      $("#btnJust").show();
+      //$("#btnEnvia").show();
     }
   }
 
-  const enviarAprovacao = (id_req, status = -1, qtde_gestores = 0) => {
+  const enviarAprovacao = (id_req, status = -1, qtde_gestores = 0, justificados = 0, registros = 0) => {
     //abre modal
     let validas = true;
+    let todosJust = true;
     console.log(id_req, status, validas);
 
     // Get all checkboxes with name="idart61[]"
@@ -269,9 +275,15 @@
           const cells = row.querySelectorAll('td');
           // Check if the third <td> exists and log its text
           if (cells.length >= 3) {
-            console.log(cells[2].innerText.trim());
+            //console.log(cells[2].innerText.trim());
             if (cells[2].innerText.trim() != 'Criada' && cells[2].innerText.trim() != 'Reprovada') {
               validas = false;
+            }
+            let justReg = cells[6].innerText.trim().split(" / ");
+            //console.log(justReg[0]);
+            //console.log(justReg[1]);
+            if (justReg[0] != justReg[1] || justReg[1] == 0 ) {
+              todosJust = false;
             }
           }
         }
@@ -280,10 +292,17 @@
       if (status != 1 && status != 9) {
         validas = false;
       }
+      if (justificados != registros || registros == 0 ) {
+        todosJust = false;
+      }
     };
 
     if (!validas) {
       exibeAlerta('warning', 'Somente solicitações criadas ou reprovadas podem ser enviadas para aprovação.')
+      return;
+    }
+    if (!todosJust) {
+      exibeAlerta('warning', 'Somente solicitações com todos os registros justificados podem ser enviadas para aprovação.')
       return;
     }
     var selecionados = $('input[name="idart61[]"]:checked')
@@ -652,7 +671,7 @@
         api.columns().every(function() {
           var column = this;
 
-          if (column[0][0] <= 1 || column[0][0] >= (p_linha - 3)) return false;
+          if (column[0][0] <= 1 || column[0][0] >= (p_linha - 4)) return false;
 
           var select = $('<select class="form-control form-control-sm filtro_table"><option value="">Todos</option></select>')
             .appendTo($(column.header()))

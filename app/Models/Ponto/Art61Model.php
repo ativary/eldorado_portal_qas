@@ -969,8 +969,14 @@ class Art61Model extends Model
                 FROM zcrmportal_art61_req_chapas c
                 WHERE c.id_req = a.id
                   AND c.status <> 'I'
-                AND c.id_justificativa IS NULL
-              ) as nao_justificado
+                AND c.id_justificativa IS NOT NULL
+              ) as justificados,
+              (
+                SELECT COUNT(id) AS qtde
+                FROM zcrmportal_art61_req_chapas c
+                WHERE c.id_req = a.id
+                  AND c.status <> 'I'
+              ) as registros
           FROM zcrmportal_art61_requisicao a 
           LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON 
               f.codcoligada = '" . $_SESSION['func_coligada'] . "' AND 
