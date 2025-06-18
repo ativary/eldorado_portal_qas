@@ -6331,8 +6331,11 @@ FROM (
         }
 
         $query = "
-          SELECT 
+          WITH LISTA AS (
+		  
+		      SELECT 
             r.ID AS ID_REQ,
+            r.ID_REQ_ORIGINAL AS ID_REQ_ORIGINAL,
             CASE 
               WHEN r.status = '0' THEN 'EXCLUÍDA'
               WHEN r.status = '2' THEN 'PEND./APROV.GESTOR'
@@ -6374,6 +6377,8 @@ FROM (
             k.NOME AS NOME_RH_APROV_REPROV,
             FORMAT( r.dt_aprovacao, 'dd/MM/yyyy') AS DATA_APROV_REPROV,
             r.motivo_recusa AS JUSTIFICATIVA_REPROVACAO,
+            r.dt_ini_ponto AS DT_INICIO_PONTO,
+            r.dt_fim_ponto AS DT_FIM_PONTO,
             FORMAT( r.dt_ini_ponto, 'dd/MM/yyyy') AS DATA_INICIO_PONTO,
             FORMAT( r.dt_fim_ponto, 'dd/MM/yyyy') AS DATA_FIM_PONTO,
             FORMAT( c.dt_ponto, 'dd/MM/yyyy') AS DATA_PONTO,
@@ -6414,6 +6419,46 @@ FROM (
             ".$FiltroSecao."
             ".$FiltroChapa."
             ".$FiltroFuncao." 
+          ),
+
+          FILTRO AS (
+          SELECT DISTINCT CODCOLIGADA, CHAPA_COLAB, DT_INICIO_PONTO, DT_FIM_PONTO, CODEVENTO_ORIGINAL FROM LISTA
+          ),
+
+          MOVFUNDIA AS (
+          SELECT F.DT_FIM_PONTO, A.* 
+          FROM FILTRO F
+          LEFT JOIN ".DBRM_BANCO."..AMOVFUNDIA A ON 
+          F.CODCOLIGADA = A.CODCOLIGADA AND 
+          F.CHAPA_COLAB = A.CHAPA COLLATE Latin1_General_CI_AS AND 
+          A.DATA >= F.DT_INICIO_PONTO AND 
+          A.DATA <= F.DT_FIM_PONTO AND 
+          F.CODEVENTO_ORIGINAL = A.CODEVE COLLATE Latin1_General_CI_AS
+          ),
+
+          MOVFUN AS (
+          SELECT 
+          CODCOLIGADA,
+          CHAPA,
+          DT_FIM_PONTO,
+          CODEVE,
+          SUM(NUMHORAS) AS TOTEVE
+          FROM MOVFUNDIA
+          GROUP BY CODCOLIGADA, CHAPA, DT_FIM_PONTO, CODEVE
+              )
+
+          SELECT 
+          L.*,
+                (
+                  RIGHT('00' + CAST(CAST(M.TOTEVE AS INT) / 60 AS VARCHAR), 2) + ':' + 
+                  RIGHT('00' + CAST(CAST(M.TOTEVE AS INT) % 60 AS VARCHAR), 2) 
+                ) AS TOT_EVENTO_PERIODO
+          FROM LISTA L
+          LEFT JOIN MOVFUN M ON
+          M.CODCOLIGADA = L.CODCOLIGADA AND
+          M.CHAPA = L.CHAPA_COLAB COLLATE Latin1_General_CI_AS AND
+          M.DT_FIM_PONTO = L.DT_FIM_PONTO AND
+          M.CODEVE = L.CODEVENTO_ORIGINAL COLLATE Latin1_General_CI_AS 
         ";
 
         //echo '<pre>';

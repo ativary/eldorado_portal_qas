@@ -832,6 +832,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
         case '40':
                 colunas = [
                     {'value': '[ID_REQ]', 'name': 'ID da Requisição'},
+                    {'value': '[ID_REQ_ORIGINAL]', 'name': 'ID Original da Requisição'},
                     {'value': '[STATUS_REQ]', 'name': 'Status Requisição'},
                     {'value': '[CODCOLIGADA]', 'name': 'Cód. Coligada'},
                     {'value': '[CODFILIAL]', 'name': 'Cód. Filial'},
@@ -872,6 +873,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                     {'value': '[HORAS_EXTRAS_NORMAIS]', 'name': 'Horas Extras Normais'},
                     {'value': '[CODEVENTO_ART61]', 'name': 'Código do Evento Artigo.61'},
                     {'value': '[HORAS_EXTRAS_ART61]', 'name': 'Horas Extras Artigo.61'},
+                    {'value': '[TOT_EVENTO_PERIODO]', 'name': 'Total de Horas do Evento no Período'},
                 ]
                 
         break;
