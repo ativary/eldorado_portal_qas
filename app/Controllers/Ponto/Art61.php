@@ -487,7 +487,7 @@ class Art61 extends BaseController
   {
 
       $request    = $this->request->getPost();
-      $result     = $this->mArt61->DeleteReqAnexo($request['id']);
+      $result     = $this->mArt61->DeleteReqAnexo($request['id'], $request['ids_req_chapa']);
    
       if($result){
           exit(responseJson('success', 'Anexo excluído com sucesso.'));

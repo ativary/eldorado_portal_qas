@@ -24,14 +24,14 @@
         </div>
         <div class="card-header mt-0">
           <div class="row">
-            <h6 class="col-2 text-right mb-1 mt-1">Solicitante:</h6>
-            <h5 class="col-5 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['nome_requisitor'] . ' (' . $resListaArt61[0]['chapa_requisitor'] . ')'; ?></h5>
-            <h6 class="col-2 text-right mb-1 mt-1">Data Requisição:</h6>
-            <h5 class="col-3 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['dt_req_br']; ?></h5>
+            <h6 class="col-1 text-right mb-1 mt-1">Solicitante:</h6>
+            <h5 class="col-4 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['nome_requisitor'] . ' (' . $resListaArt61[0]['chapa_requisitor'] . ')'; ?></h5>
+            <h6 class="col-1 text-right mb-1 mt-1">Data Requisição:</h6>
+            <h5 class="col-6 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['dt_req_br']; ?></h5>
           </div>
           <div class="row">
-            <h6 class="col-2 text-right mb-1 mt-1">Período de Ponto:</h6>
-            <h5 class="col-5 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['per_ponto_br']; ?>&nbsp;&nbsp;&nbsp;
+            <h6 class="col-1 text-right mb-1 mt-1">Período Ponto:</h6>
+            <h5 class="col-4 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['per_ponto_br']; ?>&nbsp;&nbsp;&nbsp;
                       <?php
                           switch ($resListaArt61[0]['status']) {
                             case 1:
@@ -60,9 +60,15 @@
                           }
                           ?>
             </h5>
-            <div class="col-5 mb-1 mt-1 text-right">
+            <div class="col-7 mb-1 mt-1 text-right">
               <?php if ($pode_editar) { ?>
                 <button style="margin-left: 20px;" id="btnJust" name="btnJust" class="btnpeq btn-sm btn-success" type="button" onclick="return Justificar()"><i class="fa fa-plus"></i> Justificar Selecionados</button>
+              <?php } ?>
+              <?php if ($pode_editar) { ?>
+                <button style="margin-left: 20px;" id="btnRemover" name="btnRemover" class="btnpeq btn-sm btn-danger" type="button" onclick="return apagarColaborador(-1)"><i class="fa fa-trash"></i> Remover Selecionados</button>
+              <?php } ?>
+              <?php if ($pode_editar) { ?>
+                <button style="margin-left: 20px;" id="btnAnexos" name="btnAnexos" class="btnpeq btn-sm btn-info" type="button" onclick="return verAnexos(-1, 1)"><i class="fa fa-eye"></i> Anexos</button>
               <?php } ?>
               <?php if ($rh and $pode_editar) { ?>
                 <button style="margin-left: 20px;" id="btnNovo" name="btnNovo" class="btnpeq btn-sm btn-primary" type="button" onclick="return novoColaborador()"><i class="fa fa-plus"></i> Novo Colaborador</button>
@@ -135,7 +141,7 @@
                           <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                           <div class="dropdown-menu" style="margin-left: -131px;">
                             <button type="button" onclick="atuJustificativa('<?= $registro['id']; ?>')" class="dropdown-item" <?= $pode_editar ? '' : 'disabled' ; ?>><i class="mdi mdi-comment-eye-outline"></i> Justificativa</button>
-                            <button type="button" onclick="verAnexos('<?= $registro['id']; ?>',<?= $pode_editar ? 1 : 0 ; ?>)" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Anexos</button>
+                            <button type="button" onclick="verAnexos('#<?= $registro['id']; ?>',<?= $pode_editar ? 1 : 0 ; ?>)" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Anexos</button>
                             <button type="button" onclick="apagarColaborador('<?= $registro['id']; ?>')" class="dropdown-item text-danger" <?= $pode_editar ? '' : 'disabled' ; ?>><i class="mdi mdi-trash-can-outline"></i> Remover Colaborador/Evento</button>
                           </div>
                         </div>
@@ -205,7 +211,7 @@
 <!-- modal -->
 
 <!-- modal -->
-<div class="modal" id="modalNovo" tabindex="1" role="dialog" aria-labelledby="modalNovo" aria-hidden="true">
+<div class="modal" id="modalNovo" style="width:100%;" role="dialog" aria-labelledby="modalNovo" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -218,10 +224,8 @@
       <div class="modal-body">
 
         <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <label class="input-group-text" for="chapa" style="width: 150px;">Colaborador: </label>
-          </div>
-          <select class="custom-select" id="chapa" name="chapa">
+          <label for="chapa">Colaborador: </label>
+          <select class="select2 custom-select" id="chapa" name="chapa">
             <option value="">...</option>
             <?php foreach ($resColab as $key => $Colab): ?>
               <option value="<?= $Colab['CHAPA']; ?>"><?= $Colab['NOME'] . ' - ' . $Colab['CHAPA']; ?></option>
@@ -368,6 +372,17 @@
   }
 
   const verAnexos = (id, status=1) => {
+    var selecionados = $('input[name="idart61[]"]:checked')
+      .map(function() {
+        return this.value;
+      }).get().join(',#');
+
+    if (id == -1) {
+      id = `#${selecionados}`;
+    }
+
+    console.log(id);
+
     $("#modalAnexos").modal();
     const novoTitulo = `Anexos - ${id}`; // Exemplo de como construir o novo título
     $("#modalAnexos .modal-title").text(novoTitulo);
@@ -399,7 +414,7 @@
                                 <td style="width: 80%;"><a href="data:${anexo.file_type};base64,${anexo.file_data}" download="${anexo.file_name}">
                                 ${anexoCounter}: ${anexo.file_name}
                                 </a></td>
-                                <td><button type="button" class="btn btn-danger btn-sm" ${disableDelete} onclick="excluirAnexo(${anexo.id})"><i class="mdi mdi-delete"></i> Excluir</button></td>
+                                <td><button type="button" class="btn btn-danger btn-sm" ${disableDelete} onclick="excluirAnexo(${anexo.id}, '${id}')"><i class="mdi mdi-delete"></i> Excluir</button></td>
                             </tr>
                         `;
             console.log(row);
@@ -492,18 +507,18 @@
     return false; // Prevenir o recarregamento da página
   }
 
-  const excluirAnexo = (id) => {
+  const excluirAnexo = (id, ids_req_chapa) => {
     let totalLinhas = $('#modalAnexos tbody tr').length;
 
-    if (totalLinhas <= 1) {
-      Swal.fire('Erro', 'Você não pode excluir o único anexo restante.', 'error');
-      return false;
-    }
+    //if (totalLinhas <= 1) {
+    //  Swal.fire('Erro', 'Você não pode excluir o único anexo restante.', 'error');
+    //  return false;
+    //}
 
     // Perguntar ao usuário se deseja excluir usando Swal
     Swal.fire({
       icon: 'question',
-      title: 'Deseja excluír esse Anexo?',
+      title: `Deseja excluír esse Anexo do(s) ID(s): ${ids_req_chapa} ?`,
       showDenyButton: true,
       showCancelButton: false,
       confirmButtonText: 'Sim, confirmar',
@@ -515,6 +530,7 @@
       if (result.isConfirmed) {
         let dados = {
           "id": id,
+          "ids_req_chapa": ids_req_chapa,
         }
 
         $.ajax({
@@ -618,8 +634,12 @@
     console.log($("[data-checkbox]:checked").length);
     if ($("[data-checkbox]:checked").length <= 0) {
       $("#btnJust").hide();
+      $("#btnRemover").hide();
+      $("#btnAnexos").hide();
     } else {
       $("#btnJust").show();
+      $("#btnRemover").show();
+      $("#btnAnexos").show();
     }
   }
 
@@ -652,9 +672,21 @@
 
   const apagarColaborador = (id) => {
 
+    var selecionados = $('input[name="idart61[]"]:checked')
+      .map(function() {
+        return this.value;
+      }).get().join(', ');
+
+    let dados = {
+      "id": id,
+      "sel_ids": selecionados,
+    }
+    let msg = (id==-1) ? 'Deseja realmente remover <b>selecionados</b>?' : 'Deseja realmente remover este <b>Colaborador/Evento</b>?';
+    console.log(dados);
+
     Swal.fire({
       icon: 'question',
-      title: 'Deseja realmente excluir este <b>Colaborador/Evento</b>?',
+      title: msg,
       showDenyButton: true,
       showCancelButton: true,
       confirmButtonText: `Sim Excluir`,
@@ -666,18 +698,15 @@
     }).then((result) => {
       if (result.isConfirmed) {
 
-        let dados = {
-          "id": id
-        };
-
         $.ajax({
           url: "<?= base_url('ponto/art61/action/apaga_colaborador') ?>",
           type: 'POST',
           data: dados,
           success: function(result) {
             var response = JSON.parse(result);
-            exibeAlerta(response.tipo, response.msg);
-            if (response.tipo == "success") $("[data-linha='" + id + "']").remove();
+            //exibeAlerta(response.tipo, response.msg);
+            //if (response.tipo == "success") $("[data-linha='" + id + "']").remove();
+            exibeAlerta(response.tipo, response.msg, 2, '<?= base_url('ponto/art61/solicitacao_chapas'); ?>' + '/' + <?= $id_requisicao; ?>);
           },
         });
 

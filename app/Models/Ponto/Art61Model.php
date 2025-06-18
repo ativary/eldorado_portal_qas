@@ -361,7 +361,7 @@ class Art61Model extends Model
 	            e1.codigo = a.de_codevento COLLATE Latin1_General_CI_AS 
             LEFT JOIN " . DBRM_BANCO . "..PEVENTO e2 ON 
                 e2.codcoligada = a.coligada AND 
-	            e2.codigo = a.de_codevento COLLATE Latin1_General_CI_AS 
+	            e2.codigo = a.para_codevento COLLATE Latin1_General_CI_AS 
             WHERE a.coligada = '" . $_SESSION['func_coligada'] . "' AND
                 a.ativo = 'S'
         ";
@@ -963,7 +963,20 @@ class Art61Model extends Model
               ( SELECT COUNT(DISTINCT c.chapa_gestor) AS qtde
                 FROM zcrmportal_art61_req_chapas c
                 WHERE c.id_req = a.id AND c.status <> 'I'
-              ) as qtde_gestores
+              ) as qtde_gestores,
+              (
+                SELECT COUNT(id) AS qtde
+                FROM zcrmportal_art61_req_chapas c
+                WHERE c.id_req = a.id
+                  AND c.status <> 'I'
+                AND c.id_justificativa IS NOT NULL
+              ) as justificados,
+              (
+                SELECT COUNT(id) AS qtde
+                FROM zcrmportal_art61_req_chapas c
+                WHERE c.id_req = a.id
+                  AND c.status <> 'I'
+              ) as registros
           FROM zcrmportal_art61_requisicao a 
           LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON 
               f.codcoligada = '" . $_SESSION['func_coligada'] . "' AND 
@@ -1121,12 +1134,20 @@ class Art61Model extends Model
     return $anexo;
   }
 
-  public function getAnexos($id)
+  public function getAnexos($id_list)
   {
+    $ids = explode(",", $id_list);
+    $filtro = "";
 
-    $query = " SELECT * FROM zcrmportal_art61_req_chapa_anexo WHERE id_req_chapa = '" . $id . "' order by id";
+    foreach ($ids as $id) {
+      $filtro = ( $filtro == "" ) ? "" : $filtro . " OR ";
+      $filtro = $filtro . " id_req_chapa LIKE '%" . $id . "%'";
+    }
+
+    $query = " SELECT * FROM zcrmportal_art61_req_chapa_anexo WHERE " . $filtro . " order by id";
     //echo $query;
     //die();
+    //exit();
 
     $result = $this->dbportal->query($query);
     if (!$result) return false;
@@ -1135,11 +1156,21 @@ class Art61Model extends Model
       : false;
   }
 
-  public function DeleteReqAnexo($id)
+  public function DeleteReqAnexo($id, $ids_req_chapa)
   {
+    $ids = explode(",", $ids_req_chapa);
+
+    foreach ($ids as $idr) {
+      $query = " 
+        update zcrmportal_art61_req_chapa_anexo 
+        set id_req_chapa = replace(replace(id_req_chapa, '".$idr.",', ''),'".$idr."','') 
+        where id = '" . $id . "'
+        ";
+      $this->dbportal->query($query);
+    }
     $query = " 
-        DELETE FROM zcrmportal_art61_req_chapa_anexo
-            WHERE id = '" . $id . "'
+        delete from zcrmportal_art61_req_chapa_anexo 
+        where ltrim(rtrim(id_req_chapa)) = ''
         ";
     // exit('<pre>'.print_r($query,1));
     return $this->dbportal->query($query);
@@ -1347,7 +1378,8 @@ class Art61Model extends Model
   public function Apaga_Colaborador($dados)
   {
 
-    $id = $dados['id'];
+    $id = ( $dados['id'] == -1 ) ? $dados['sel_ids'] : $dados['id'];
+    $msg = ( $dados['id'] == -1 ) ? 'Registros removidos com sucesso.' : 'Registro removido com sucesso.';
 
     $query = "
             UPDATE
@@ -1355,7 +1387,7 @@ class Art61Model extends Model
             SET
                status = 'I'
             WHERE
-               id = " . $id . "
+               id in (" . $id . ")
         ";
 
     $this->dbportal->query($query);
@@ -1363,9 +1395,9 @@ class Art61Model extends Model
     //die();
 
     if ($this->dbportal->affectedRows() > 0) {
-      return responseJson('success', 'Colaborador/Evento excluído com sucesso.');
+      return responseJson('success', $msg);
     } else {
-      return responseJson('error', 'Falha ao excluir Colaborador/Evento.');
+      return responseJson('error', 'Falha ao remover registro(s).');
     }
   }
 
