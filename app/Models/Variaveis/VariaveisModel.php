@@ -521,9 +521,9 @@ class VariaveisModel extends Model {
                     break; 
                 }
             }
-            $regraIdade ='AND DATEDIFF(YEAR, B.DTNASCIMENTO, GETDATE()) - 
+            $regraIdade ='AND DATEDIFF(MONTH, B.DTNASCIMENTO, GETDATE()) - 
             CASE 
-                WHEN DATEADD(YEAR, DATEDIFF(YEAR, B.DTNASCIMENTO, GETDATE()), B.DTNASCIMENTO) > GETDATE() 
+                WHEN DATEADD(MONTH, DATEDIFF(MONTH, B.DTNASCIMENTO, GETDATE()), B.DTNASCIMENTO) > GETDATE() 
                 THEN 1 
                 ELSE 0 
             END <= '.$idade.'';
@@ -559,7 +559,7 @@ class VariaveisModel extends Model {
 
     ";
    
-  
+    //echo '<textarea>'.$query.'</textarea>';exit;
     $result = $this->dbrm->query($query);
     if(!$result) return false;
     return ($result->getNumRows() > 0) 
