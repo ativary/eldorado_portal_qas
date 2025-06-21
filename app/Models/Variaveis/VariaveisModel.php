@@ -890,6 +890,10 @@ class VariaveisModel extends Model {
         if($tipo == '4'){
             $lancamento ='32';
             $param4        = self::getParametros(4);
+            $dia_limite    = $param4->dia_limite_compl4;
+            $dia_atual     = date('d');
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite) $complementar = false;
 
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
 
@@ -910,7 +914,7 @@ class VariaveisModel extends Model {
                 $ref = $valores->valor_total;
                 $val = 0;
             }
-            if($dadosReq[0]->tiporeq == '2'){
+            if($dadosReq[0]->tiporeq == '2' and $complementar){
                 $lancamento ='34';
              }
 
@@ -951,6 +955,11 @@ class VariaveisModel extends Model {
         }elseif($tipo == '6'){
             $lancamento ='31';
             $param6        = self::getParametros(6);
+            $dia_limite    = $param6->dia_limite_compl6;
+            $dia_atual     = date('d');
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite) $complementar = false;
+
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
             // Substituir o ponto de milhar por nada e a vírgula decimal por um ponto
@@ -975,7 +984,7 @@ class VariaveisModel extends Model {
                 $val = 0;
             }
 
-            if($dadosReq[0]->tiporeq == '2'){
+            if($dadosReq[0]->tiporeq == '2' and $complementar){
                $lancamento ='33';
             }
            
@@ -1017,6 +1026,10 @@ class VariaveisModel extends Model {
         }elseif($tipo == '2'){
             $lancamento ='35';
             $param2        = self::getParametros(2);
+            $dia_limite    = $param2->dia_limite_compl2;
+            $dia_atual     = date('d');
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite) $complementar = false;
 
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
@@ -1035,7 +1048,7 @@ class VariaveisModel extends Model {
                 $ref = $valores->valor_total;
                 $val = 0;
             }
-            if($dadosReq[0]->tiporeq == '2'){
+            if($dadosReq[0]->tiporeq == '2' and $complementar){
                 $lancamento ='36';
              }
 
@@ -1319,13 +1332,18 @@ class VariaveisModel extends Model {
         }elseif($tipo == '3'){
             $lancamento ='38';
             $param3        = self::getParametros(3);
+            $dia_limite    = $param3->dia_limite_compl3;
+            $dia_atual     = date('d');
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite) $complementar = false;
+            
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
             // Substituir o ponto de milhar por nada e a vírgula decimal por um ponto
            
 
             // Converter para float
-            if($dadosReq[0]->tiporeq == '2'){
+            if($dadosReq[0]->tiporeq == '2' and $complementar){
                 $lancamento ='28';
             }
             $valor_numerico = (float)$dadosFunc[0]['SALARIO'];
@@ -1590,6 +1608,7 @@ class VariaveisModel extends Model {
     {
         $dadosReq = self::getReqDadosCanc($id);
         $valores = json_decode($dadosReq[0]['valores']) ;
+        $dia_sinc = $dadosReq[0]['dia'];
         $mes_sinc = $dadosReq[0]['mes'];
         $ano_sinc = $dadosReq[0]['ano'];
         $chapa_sinc = $dadosReq[0]['chapa'];
@@ -1601,6 +1620,10 @@ class VariaveisModel extends Model {
         if($tipo == '4'){
             $lancamento ='32';
             $param4  = self::getParametros(4);
+            $dia_limite    = $param4->dia_limite_compl4;
+            $dia_atual     = $dia_sinc;
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite) $complementar = false;
             
             $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$param4->reembolso_cpd_evento."' AND CODCOLIGADA ='". $this->coligada."'";
             $result = $this->dbrm->query($query);
@@ -1613,7 +1636,7 @@ class VariaveisModel extends Model {
                 $ref = $valores->valor_total;
                 $val = 0;
             }
-            if($tiporeq_sinc == '2'){
+            if($tiporeq_sinc == '2' and $complementar){
                 $lancamento ='34';
             }
 
@@ -1630,9 +1653,11 @@ class VariaveisModel extends Model {
                    
             $result = $this->dbrm->query($del_query);
             
+            // apesar de ter a variavel $complementar calculada estamos validando TIPOLANC in (32,34) 
+            // pois a data limite pode ser alterada pelo usuario e comprometer o DELETE
             $del_query = "
                 DELETE FROM PFMOVTEMP 
-                WHERE TIPOLANCAMENTO = '".$lancamento."' AND
+                WHERE TIPOLANCAMENTO in (34,32) AND
                       CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
                       CHAPA = '".$chapa_sinc."' AND
                       ANOCOMP = '".$ano_sinc."' AND 
@@ -1680,7 +1705,7 @@ class VariaveisModel extends Model {
             
             $del_query = "
                 DELETE FROM PFMOVTEMP 
-                WHERE TIPOLANCAMENTO = '".$lancamento."' AND
+                WHERE TIPOLANCAMENTO IN (31,33) AND
                       CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
                       CHAPA = '".$chapa_sinc."' AND
                       ANOCOMP = '".$ano_sinc."' AND 
@@ -1727,7 +1752,7 @@ class VariaveisModel extends Model {
             
             $del_query = "
                 DELETE FROM PFMOVTEMP 
-                WHERE TIPOLANCAMENTO = '".$lancamento."' AND
+                WHERE TIPOLANCAMENTO IN (35,36) AND
                       CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
                       CHAPA = '".$chapa_sinc."' AND
                       ANOCOMP = '".$ano_sinc."' AND 
@@ -1943,6 +1968,10 @@ class VariaveisModel extends Model {
                 $ref =  $valores->valor;
             }
 
+            if($dadosReq[0]->tiporeq == '2'){
+                $lancamento ='28';
+            }
+
             $del_query = "
                 DELETE FROM PFFINANC 
                 WHERE 
@@ -1958,7 +1987,7 @@ class VariaveisModel extends Model {
                 
             $del_query = "
                 DELETE FROM PFMOVTEMP 
-                WHERE TIPOLANCAMENTO = '".$lancamento."' AND
+                WHERE TIPOLANCAMENTO IN (38,28) AND
                       CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
                       CHAPA = '".$chapa_sinc."' AND
                       ANOCOMP = '".$ano_sinc."' AND 
@@ -2531,6 +2560,7 @@ class VariaveisModel extends Model {
               with aprov as (
                 select top 1 
                   id_requisicao,
+                  format(dtcad,'dd') as dia,
                   month(dtcad) as mes,
                   year(dtcad)  as ano
                 from zcrmportal_variaveis_aprovacao 
@@ -2541,6 +2571,7 @@ class VariaveisModel extends Model {
                 )
 
                 select 
+                  isnull(a.dia,'00') as dia, 
                   isnull(a.mes,0) as mes, 
                   isnull(a.ano,0) as ano,
                   r.* 
