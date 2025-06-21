@@ -1053,13 +1053,13 @@
                          
 
                             <div class="form-group row mb-2">
-                                    <label for="CargoAluguel" class="col-sm-2 col-form-label text-right text-primary text-left-sm">Grupo de Cargo:</label>
+                                    <label for="CargoAluguel" class="col-sm-2 col-form-label text-right text-primary text-left-sm">Valores por Filial:</label>
                                     <div class="col-sm-8">
                                         <select  class="select2 custom-select form-control form-control-sm" name="CargoAluguel" id="CargoAluguel">
                                             <option value=""> ... </option>
-                                            <?php if ($listaCargos) : ?>
-                                                <?php foreach ($listaCargos as $key2 => $filial) : ?>
-                                                    <option value='<?= $filial->CODIGO ?>' ><?= $filial->NOME ?></option>
+                                            <?php if ($listaFiliais) : ?>
+                                                <?php foreach ($listaFiliais as $key2 => $filial) : ?>
+                                                    <option value='<?= $filial->CODFILIAL ?>' ><?= $filial->CODFILIAL ?></option>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </select>
@@ -1077,8 +1077,7 @@
                                     <table class="table table-bordered" id="dependentesAluguelTable">
                                         <thead>
                                             <tr>
-                                                <th>Codigo Cargo</th>
-                                                <th>Cargo</th>
+                                                <th>Filial</th>
                                                 <th>Valor Minimo</th> <!-- Nova coluna para o valor -->
                                                 <th>Valor Maximo</th> <!-- Nova coluna para o valor -->
                                                 <th>Ação</th>
@@ -1089,7 +1088,6 @@
                                         <?php foreach ($param7->dependentes as $key2 => $dados3) : ?>
                                             <tr>
                                                 <td class="n-mobile-cell"><?= $dados3->codigo ?></td>
-                                                <td class="n-mobile-cell"><?= $dados3->nome ?></td>
                                                 <td class="n-mobile-cell" ><input type="text" data-money class=" form-control form-control-sm valorDependenteAluguel" value="<?= $dados3->valor_min ?>" placeholder="Valor"></td>
                                                 <td class="n-mobile-cell" ><input type="text" data-money class=" form-control form-control-sm valorDependenteAluguel" value="<?= $dados3->valor_max ?>" placeholder="Valor"></td>
                                                 <td class="n-mobile-cell"><button class="btn btn-danger btn-sm" onclick="RemoveAluguelDepend(this)">Remover</button></td>
@@ -1806,15 +1804,13 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             var cell2 = newRow.insertCell(1);
             var cell3 = newRow.insertCell(2);
             var cell4 = newRow.insertCell(3);
-            var cell5 = newRow.insertCell(4);
            
             cell1.innerHTML = dependenteValue;  // Nome do dependente
-            cell2.innerHTML = dependenteText;  // Nome do dependente 
+            cell2.innerHTML = '<input type="text" data-money class=" form-control form-control-sm valorDependente" placeholder="Valor">';  // Input para valor
             cell3.innerHTML = '<input type="text" data-money class=" form-control form-control-sm valorDependente" placeholder="Valor">';  // Input para valor
-            cell4.innerHTML = '<input type="text" data-money class=" form-control form-control-sm valorDependente" placeholder="Valor">';  // Input para valor
-            cell5.innerHTML = '<button class="btn btn-danger btn-sm" onclick="RemoveAluguelDepend(this)">Remover</button>';
+            cell4.innerHTML = '<button class="btn btn-danger btn-sm" onclick="RemoveAluguelDepend(this)">Remover</button>';
         
-            $(cell3).find('input[data-money]').maskMoney({
+            $(cell2).find('input[data-money]').maskMoney({
                 prefix: '',
                 allowNegative: false,
                 allowZero: true,
@@ -1822,7 +1818,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
                 decimal: ',',
                 affixesStay: false
             });
-            $(cell4).find('input[data-money]').maskMoney({
+            $(cell3).find('input[data-money]').maskMoney({
                 prefix: '',
                 allowNegative: false,
                 allowZero: true,
@@ -2527,9 +2523,8 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     $("#dependentesAluguelTable tbody tr").each(function() {
         let dependente = {
             "codigo": $(this).find("td:eq(0)").text(),
-            "nome": $(this).find("td:eq(1)").text(),
-            "valor_min": $(this).find("td:eq(2) input").val(), // Captura o valor do input
-            "valor_max": $(this).find("td:eq(3) input").val() // Captura o valor do input
+            "valor_min": $(this).find("td:eq(1) input").val(), // Captura o valor do input
+            "valor_max": $(this).find("td:eq(2) input").val() // Captura o valor do input
         };
         dados.dependentes.push(dependente);
     });
