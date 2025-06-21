@@ -824,7 +824,7 @@
                                     <input type="number" id="idade_creche"   name="idade_creche" class="form-control" placeholder="00" value="<?= $param2->idade_creche ?? ''; ?>">
 
                                         <div class="input-group-append">
-                                            <span class="input-group-text"><strong>Anos</strong></span>
+                                            <span class="input-group-text"><strong>Meses</strong></span>
                                         </div>
                                     </div> 
                                 </div>
@@ -872,7 +872,7 @@
                                             <tr>
                                                 <th>Filial</th>
                                                 <th>Valor</th> <!-- Nova coluna para o valor -->
-                                                <th>Idade Maximo</th> <!-- Nova coluna para o valor -->
+                                                <th>Idade Máxima em Meses</th> <!-- Nova coluna para o valor -->
                                                 <th>Ação</th>
                                             </tr>
                                         </thead>
