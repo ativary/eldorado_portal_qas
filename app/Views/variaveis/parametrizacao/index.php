@@ -86,7 +86,8 @@
                                 </select>
                             </div>
                             <div class="form-group row">
-                                <label for="periodo_moradia" class="col-sm-12 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_moradia" class="col-sm-7 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-5 text-primary">Complementar no Mês:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
                                     <div class="input-group">
                                     <input type="number"  onchange="validateField(this)" id="periodo_moradia" name="periodo_moradia" class="form-control" placeholder="00" value="<?= $param6->periodo_moradia ?? ''; ?>">
@@ -98,7 +99,12 @@
                                     <label for="auxilio_moradia_porcentagem" class="col-sm-8 pt-2 col-form-label text-left">Periodo permitido para abertura no mês atual.</label>
                                     </div> 
                                 </div>
-                               
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
+                                    <input type="number" id="dia_limite_compl6"  onchange="validateField(this)" name="dia_limite_compl6" class="form-control" placeholder="00" value="<?= $param6->dia_limite_compl6 ?? ''; ?>">
+                                    <label for="dia_limite_compl6" class="col-sm-10 pt-2 col-form-label text-left">Dia limite para complementar entrar na folha do mês.</label>
+                                    </div> 
+                                </div>
                             </div>
                             <div class="form-group row mb-2">
                                     <label for="gestor_pcd" class="col-sm-2 col-form-label text-right text-primary text-left-sm">Exceção Gestor:</label>
@@ -190,7 +196,8 @@
                             
                             </div>
                             <div class="form-group row">
-                                <label for="periodo_sobreaviso" class="col-sm-12 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_sobreaviso" class="col-sm-7 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-5 text-primary">Complementar no Mês:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
                                     <div class="input-group">
                                     <input type="number"  onchange="validateField(this)" id="periodo_sobreaviso" name="periodo_sobreaviso" class="form-control" placeholder="00" value="<?= $param3->periodo_sobreaviso ?? ''; ?>">
@@ -200,6 +207,12 @@
                                         </div>
                                     <input type="number"  onchange="validateField(this)" id="periodo_sobreaviso_fim" name="periodo_sobreaviso_fim" class="form-control" placeholder="00" value="<?= $param3->periodo_sobreaviso_fim ?? ''; ?>">
                                     <label for="sobreaviso_porcentagem" class="col-sm-8 pt-2 col-form-label text-left">Periodo permitido para abertura no mês atual.</label>
+                                    </div> 
+                                </div>
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
+                                    <input type="number" id="dia_limite_compl3"  onchange="validateField(this)" name="dia_limite_compl3" class="form-control" placeholder="00" value="<?= $param3->dia_limite_compl3 ?? ''; ?>">
+                                    <label for="dia_limite_compl3" class="col-sm-10 pt-2 col-form-label text-left">Dia limite para complementar entrar na folha do mês.</label>
                                     </div> 
                                 </div>
                             
@@ -638,7 +651,8 @@
                                 </select>
                             </div>
                             <div class="form-group row">
-                                <label for="periodo_pcd" class="col-sm-12 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_pcd" class="col-sm-7 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-5 text-primary">Complementar no Mês:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
                                     <div class="input-group">
                                     <input type="number" id="periodo_pcd"  onchange="validateField(this)" name="periodo_pcd" class="form-control" placeholder="00" value="<?= $param4->periodo_pcd ?? ''; ?>">
@@ -650,7 +664,12 @@
                                     <label for="periodo_pcd_fim" class="col-sm-8 pt-2 col-form-label text-left">Periodo permitido para abertura no mês atual.</label>
                                     </div> 
                                 </div>
-                               
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
+                                    <input type="number" id="dia_limite_compl4"  onchange="validateField(this)" name="dia_limite_compl4" class="form-control" placeholder="00" value="<?= $param4->dia_limite_compl4 ?? ''; ?>">
+                                    <label for="dia_limite_compl4" class="col-sm-10 pt-2 col-form-label text-left">Dia limite para complementar entrar na folha do mês.</label>
+                                    </div> 
+                                </div>
                             </div>
 
                             <div class="form-group "> 
@@ -803,7 +822,8 @@
           
                             
                             <div class="form-group row">
-                                <label for="periodo_creche" class="col-sm-12 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-7 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-5 text-primary">Complementar no Mês:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
                                     <div class="input-group">
                                     <input type="number" id="periodo_creche"  onchange="validateField(this)" name="periodo_creche" class="form-control" placeholder="00" value="<?= $param2->periodo_creche ?? ''; ?>">
@@ -813,6 +833,12 @@
                                         </div>
                                     <input type="number" onchange="validateField(this)" id="periodo_creche_fim" name="periodo_creche_fim" class="form-control" placeholder="00" value="<?= $param2->periodo_creche_fim ?? ''; ?>">
                                     <label for="periodo_creche_fim" class="col-sm-8 pt-2 col-form-label text-left">Periodo permitido para abertura no mês atual.</label>
+                                    </div> 
+                                </div>
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
+                                    <input type="number" id="dia_limite_compl2"  onchange="validateField(this)" name="dia_limite_compl2" class="form-control" placeholder="00" value="<?= $param2->dia_limite_compl2 ?? ''; ?>">
+                                    <label for="dia_limite_compl2" class="col-sm-10 pt-2 col-form-label text-left">Dia limite para complementar entrar na folha do mês.</label>
                                     </div> 
                                 </div>
                                
@@ -2401,6 +2427,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             'reembolso_cpd_parente': $('#reembolso_cpd_parente').val(),
             'periodo_pcd_fim': $('#periodo_pcd_fim').val(),
             'periodo_pcd': $('#periodo_pcd').val(),
+            'dia_limite_compl4': $('#dia_limite_compl4').val(),
             "dependentes": [], // Adicionando o array de dependentes
             "gestor": [] // Adicionando o array de dependentes
         }
@@ -2440,6 +2467,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             'reembolso_creche_parente': $('#reembolso_creche_parente').val(),
             'periodo_creche_fim': $('#periodo_creche_fim').val(),
             'periodo_creche': $('#periodo_creche').val(),
+            'dia_limite_compl2': $('#dia_limite_compl2').val(),
             'idade_creche': $('#idade_creche').val(),
             "dependentes": [], // Adicionando o array de dependentes
             "gestor": [] // Adicionando o array de dependentes
@@ -2742,6 +2770,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             'auxilio_moradia_porcentagem': $('#auxilio_moradia_porcentagem').val(),
             'periodo_moradia_fim': $('#periodo_moradia_fim').val(),
             'periodo_moradia': $('#periodo_moradia').val(),
+            'dia_limite_compl6': $('#dia_limite_compl6').val(),
             'auxilio_moradia_evento': $('#auxilio_moradia_evento').val(),
             "gestor": [], // Adicionando o array de dependentes
         }
@@ -2770,6 +2799,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
           
             'periodo_sobreaviso_fim': $('#periodo_sobreaviso_fim').val(),
             'periodo_sobreaviso': $('#periodo_sobreaviso').val(),
+            'dia_limite_compl3': $('#dia_limite_compl3').val(),
             'limite_sobreaviso': $('#limite_sobreaviso').val(),
             'sobreaviso_evento': $('#sobreaviso_evento').val(),
             "gestor": [], // Adicionando o array de dependentes
