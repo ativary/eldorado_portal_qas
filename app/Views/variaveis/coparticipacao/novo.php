@@ -137,8 +137,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     var fora_periodo=0 ;
 $(document).ready(function(){
     verificaData();
-   
-   
+    if (fora_periodo == 1) { 
+        exibeAlerta("error", "Atenção! Fora do período de abertura para novas requisições."); 
+    }
 });
 
 

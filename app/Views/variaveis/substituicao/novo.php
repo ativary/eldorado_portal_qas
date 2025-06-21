@@ -187,7 +187,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
         
             verificaData();
            
-
+            if (fora_periodo == 1) { 
+                exibeAlerta("error", "Atenção! Fora do período de abertura para novas requisições."); 
+            }
             // Definir a data mínima para o campo "data_inicio" como a data atual
             const today = new Date();
           
