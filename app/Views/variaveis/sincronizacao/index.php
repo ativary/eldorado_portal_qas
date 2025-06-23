@@ -275,6 +275,10 @@
                                                                     <a  href="<?= base_url('variaveis/moradia/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?> ">Editar requisição</a>
                                                                 
                                                                     <button onclick="reprovarReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
+
+                                                                    <?php if ($rh and $dados->status == '4'): ?>
+                                                                      <button onclick="CancSincReq('<?= $dados->id; ?>', 6,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -432,6 +436,10 @@
                                                                 <a  href="<?= base_url('variaveis/pcd/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?> ">Editar requisição</a>
                                                             
                                                                 <button onclick="reprovarReq('<?= $dados->id; ?>', 4,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
+
+                                                                <?php if ($rh and $dados->status == '4'): ?>
+                                                                  <button onclick="CancSincReq('<?= $dados->id; ?>', 4,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -589,6 +597,10 @@
                                                                 <a  href="<?= base_url('variaveis/creche/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?> ">Editar requisição</a>
                                                             
                                                                 <button onclick="reprovarReq('<?= $dados->id; ?>', 2,'<?= $dados->status; ?>')" class="dropdown-item  <?= ($dados->status == '0') ? 'disabled' : ''; ?> " style="color: red;">Reprovar</button>
+
+                                                                <?php if ($rh and $dados->status == '4'): ?>
+                                                                  <button onclick="CancSincReq('<?= $dados->id; ?>', 2,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -746,6 +758,10 @@
                                                                 <a  href="<?= base_url('variaveis/coparticipacao/editar/'.base64_encode($dados->id)); ?>"  class=" dropdown-item  <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                             
                                                                 <button onclick="reprovarReq('<?= $dados->id; ?>', 8,'<?= $dados->status; ?>')" class="dropdown-item  <?= ($dados->status == '0') ? 'disabled' : ''; ?> " style="color: red;">Reprovar</button>
+
+                                                                <?php if ($rh and $dados->status == '4'): ?>
+                                                                  <button onclick="CancSincReq('<?= $dados->id; ?>', 8,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -917,6 +933,10 @@
                                                                     <a  href="<?= base_url('variaveis/desconto/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '9' || $dados->status == '0') ? 'disabled' : ''; ?> ">Editar requisição</a>
                                                                      
                                                                     <button onclick="reprovarReq('<?= $dados->id; ?>', 5,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
+
+                                                                    <?php if ($rh and $dados->status == '4'): ?>
+                                                                      <button onclick="CancSincReq('<?= $dados->id; ?>', 5,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1065,6 +1085,10 @@
                                                                     <a  href="<?= base_url('variaveis/sobreaviso/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                                 
                                                                     <button onclick="reprovarReq('<?= $dados->id; ?>', 3,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
+
+                                                                    <?php if ($rh and $dados->status == '4'): ?>
+                                                                      <button onclick="CancSincReq('<?= $dados->id; ?>', 3,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1220,6 +1244,10 @@
                                                                     <a  href="<?= base_url('variaveis/substituicao/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                                 
                                                                     <button onclick="reprovarReq('<?= $dados->id; ?>', 1,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
+
+                                                                    <?php if ($rh and $dados->status == '4'): ?>
+                                                                      <button onclick="CancSincReq('<?= $dados->id; ?>', 1,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1366,6 +1394,10 @@
                                                                     <a  href="<?= base_url('variaveis/decimoterceiro/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                                 
                                                                     <button onclick="reprovarReq('<?= $dados->id; ?>', 9,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
+
+                                                                    <?php if ($rh and $dados->status == '4'): ?>
+                                                                      <button onclick="CancSincReq('<?= $dados->id; ?>', 9,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1516,6 +1548,10 @@
                                                                     <a  href="<?= base_url('variaveis/aluguel/editar/'.base64_encode($dados->id)); ?>"   class=" dropdown-item <?= ($dados->status == '2' || $dados->status == '0') ? 'disabled' : ''; ?>">Editar requisição</a>
                                                                 
                                                                     <button onclick="reprovarReq('<?= $dados->id; ?>', 7,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: red;">Reprovar</button>
+
+                                                                    <?php if ($rh and $dados->status == '4'): ?>
+                                                                      <button onclick="CancSincReq('<?= $dados->id; ?>', 7,'<?= $dados->status; ?>')" class="dropdown-item <?= ($dados->status == '0') ? 'disabled' : ''; ?>" style="color: DarkRed;">Cancelar Sincronismo</button>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -2623,11 +2659,67 @@ $.ajax({
                         if (response.tipo != 'success') {
                             exibeAlerta(response.tipo, response.msg, 2);
                         } else {
-                            exibeAlerta(response.tipo, response.msg, 3, '<?= base_url('variaveis/sincronizacao'); ?>');
+                            Filtro();
+                            //exibeAlerta(response.tipo, response.msg, 3, '<?= base_url('variaveis/sincronizacao'); ?>');
                         }
                     },
                     error: function(xhr, status, error) {
                         exibeAlerta('error', 'Ocorreu um erro ao tentar aprovar a requisição.', 2);
+                    }
+                });
+            }
+        });
+    };
+
+    const CancSincReq = (id, tipo, status) => {
+        // Perguntar ao usuário se deseja aprovar usando Swal, incluindo um campo de texto para a justificativa
+        Swal.fire({
+            icon: 'question',
+            title: 'Deseja Cancelar o Sincronismo da Requisição?',
+            input: 'textarea', // Tipo de input como textarea para a justificativa
+            inputLabel: '',
+            inputPlaceholder: 'Insira sua justificativa aqui...',
+            inputAttributes: {
+                'aria-label': 'Insira sua justificativa aqui'
+            },
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Sim, cancelar',
+            denyButtonText: 'Não',
+            showCloseButton: false,
+            allowOutsideClick: false,
+            width: 600,
+            preConfirm: (justificativa) => {
+                return justificativa;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let dados = {
+                    "idStatus": [{
+                        id: id,
+                        status: status
+                    }],
+                    "tipo": tipo,
+                    "justificativa": result.value // Envia a justificativa junto com o ID e status
+                };
+                openLoading();
+                $.ajax({
+                    url: "<?= base_url('variaveis/sincronizacao/cancelaSincronismo'); ?>",
+                    type: 'POST',
+                    data: dados,
+                    success: function(result) {
+                        console.log(result);
+                        var response = JSON.parse(result);
+
+                        if (response.tipo != 'success') {
+                            exibeAlerta(response.tipo, response.msg, 2);
+                        } else {
+                            Filtro();
+                            //exibeAlerta(response.tipo, response.msg, 3, '<?= base_url('variaveis/sincronizacao'); ?>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        exibeAlerta('error', 'Ocorreu um erro ao tentar cancelar sincronismo.', 2);
                     }
                 });
             }

@@ -28,7 +28,10 @@ Class Sincronizacao extends BaseController {
        
         $dados['data_inicio']         = $this->request->getPost('data_inicio');
         $dados['data_fim']            = $this->request->getPost('data_fim');
-       
+
+        if (is_null($dados['data_inicio'])) $dados['data_inicio'] = date('Y-m-d');
+        if (is_null($dados['data_fim'])) $dados['data_fim'] = $dados['data_inicio']; 
+
         $dados['situacao']            = $this->request->getPost('situacao');
         if($dados['rh']){
             $dados['historico']  = $this->mParam->historico2($dados['situacao'] );
@@ -155,7 +158,42 @@ Class Sincronizacao extends BaseController {
         }
     }
 
-    
+    public function cancelaSincronismo()
+    {
+        $request = $this->request->getPost();
+        $naoSincronizados = [];
+
+        if (isset($request['idStatus']) && is_array($request['idStatus'])) {
+            foreach ($request['idStatus'] as $idStatus) {
+                $id = $idStatus['id'];
+                $status = $idStatus['status'];
+
+              
+                if ($status == 4) {
+                   
+                    $result = $this->mParam->CancelaSincReq($id, $request['tipo'], $request['justificativa']);
+                } else {
+                    
+                    $naoSincronizados[] = $id;
+                }
+            }
+        } else {
+            exit(responseJson('error', 'Erro ao cancelar sincronismo da requisição.'));
+        }
+
+        if (!empty($naoSincronizados)) {
+            $idsNaoSincronizados = implode(', ', $naoSincronizados);
+            $mensagem = "Os seguintes IDs não foram cancelados devido ao status: $idsNaoSincronizados.";
+            exit(responseJson('warning', $mensagem));
+        } else {
+            if($result){
+                exit(responseJson('success', 'Cancelado o Sincronismo da Requisição.'));
+            }else{
+                exit(responseJson('error', 'Erro ao Cancelar o Sincronismo da Requisição.'));
+            }
+           
+        }
+    }
 
     public function reprovaRH()
     {

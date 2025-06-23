@@ -521,9 +521,9 @@ class VariaveisModel extends Model {
                     break; 
                 }
             }
-            $regraIdade ='AND DATEDIFF(YEAR, B.DTNASCIMENTO, GETDATE()) - 
+            $regraIdade ='AND DATEDIFF(MONTH, B.DTNASCIMENTO, GETDATE()) - 
             CASE 
-                WHEN DATEADD(YEAR, DATEDIFF(YEAR, B.DTNASCIMENTO, GETDATE()), B.DTNASCIMENTO) > GETDATE() 
+                WHEN DATEADD(MONTH, DATEDIFF(MONTH, B.DTNASCIMENTO, GETDATE()), B.DTNASCIMENTO) > GETDATE() 
                 THEN 1 
                 ELSE 0 
             END <= '.$idade.'';
@@ -559,7 +559,7 @@ class VariaveisModel extends Model {
 
     ";
    
-  
+    //echo '<textarea>'.$query.'</textarea>';exit;
     $result = $this->dbrm->query($query);
     if(!$result) return false;
     return ($result->getNumRows() > 0) 
@@ -890,6 +890,10 @@ class VariaveisModel extends Model {
         if($tipo == '4'){
             $lancamento ='32';
             $param4        = self::getParametros(4);
+            $dia_limite    = $param4->dia_limite_compl4;
+            $dia_atual     = date('d');
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param4->periodo_pcd_fim) $complementar = false;
 
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
 
@@ -910,7 +914,7 @@ class VariaveisModel extends Model {
                 $ref = $valores->valor_total;
                 $val = 0;
             }
-            if($dadosReq[0]->tiporeq == '2'){
+            if($dadosReq[0]->tiporeq == '2' and $complementar){
                 $lancamento ='34';
              }
 
@@ -951,6 +955,11 @@ class VariaveisModel extends Model {
         }elseif($tipo == '6'){
             $lancamento ='31';
             $param6        = self::getParametros(6);
+            $dia_limite    = $param6->dia_limite_compl6;
+            $dia_atual     = date('d');
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param6->periodo_moradia_fim) $complementar = false;
+
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
             // Substituir o ponto de milhar por nada e a vírgula decimal por um ponto
@@ -975,7 +984,7 @@ class VariaveisModel extends Model {
                 $val = 0;
             }
 
-            if($dadosReq[0]->tiporeq == '2'){
+            if($dadosReq[0]->tiporeq == '2' and $complementar){
                $lancamento ='33';
             }
            
@@ -1017,6 +1026,10 @@ class VariaveisModel extends Model {
         }elseif($tipo == '2'){
             $lancamento ='35';
             $param2        = self::getParametros(2);
+            $dia_limite    = $param2->dia_limite_compl2;
+            $dia_atual     = date('d');
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param2->periodo_creche_fim) $complementar = false;
 
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
@@ -1035,7 +1048,7 @@ class VariaveisModel extends Model {
                 $ref = $valores->valor_total;
                 $val = 0;
             }
-            if($dadosReq[0]->tiporeq == '2'){
+            if($dadosReq[0]->tiporeq == '2' and $complementar){
                 $lancamento ='36';
              }
 
@@ -1319,13 +1332,18 @@ class VariaveisModel extends Model {
         }elseif($tipo == '3'){
             $lancamento ='38';
             $param3        = self::getParametros(3);
+            $dia_limite    = $param3->dia_limite_compl3;
+            $dia_atual     = date('d');
+            $complementar  = true;
+            if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param3->periodo_sobreaviso_fim) $complementar = false;
+            
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
             // Substituir o ponto de milhar por nada e a vírgula decimal por um ponto
            
 
             // Converter para float
-            if($dadosReq[0]->tiporeq == '2'){
+            if($dadosReq[0]->tiporeq == '2' and $complementar){
                 $lancamento ='28';
             }
             $valor_numerico = (float)$dadosFunc[0]['SALARIO'];
@@ -1586,6 +1604,493 @@ class VariaveisModel extends Model {
 
     }
 
+    public function CancelaSincReq($id, $tipo, $justificativa)
+    {
+        $dadosReq = self::getReqDadosCanc($id);
+        $valores = json_decode($dadosReq[0]['valores']) ;
+        $dia_sinc = $dadosReq[0]['dia'];
+        $mes_sinc = $dadosReq[0]['mes'];
+        $ano_sinc = $dadosReq[0]['ano'];
+        $chapa_sinc = $dadosReq[0]['chapa'];
+        $tiporeq_sinc = $dadosReq[0]['tiporeq'];
+
+        // nao localizada aprovacao de sincronismo
+        if($mes_sinc==0 or $ano_sinc==0) return false;
+
+        if($tipo == '4'){
+            $lancamento ='32';
+            $param4  = self::getParametros(4);
+                        
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$param4->reembolso_cpd_evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+                      
+            if($result[0]['VALHORDIAREF'] == 'V'){
+                $val = $valores->valor_total;
+                $ref = 0;
+            }else{
+                $ref = $valores->valor_total;
+                $val = 0;
+            }
+            if($tiporeq_sinc == '2'){
+                $lancamento ='34';
+            }
+
+            $del_query = "
+                DELETE FROM PFFINANC 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param4->reembolso_cpd_evento."' AND 
+                      VALOR = '".$val."'
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+            
+            // apesar de ter a variavel $complementar calculada estamos validando TIPOLANC in (32,34) 
+            // pois a data limite pode ser alterada pelo usuario e comprometer o DELETE
+            $del_query = "
+                DELETE FROM PFMOVTEMP 
+                WHERE TIPOLANCAMENTO in (34,32) AND
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param4->reembolso_cpd_evento."' AND 
+                      VALOR = '".$val."' AND  
+                      REF = '".$ref."' 
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+            
+        }elseif($tipo == '6'){
+            $lancamento ='31';
+            $param6        = self::getParametros(6);
+            
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$param6->auxilio_moradia_evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+                       
+            if($result[0]['VALHORDIAREF'] == 'V'){
+                $val = $param6->auxilio_moradia_porcentagem;
+                $ref = 0;
+            }else{
+                $ref = $param6->auxilio_moradia_porcentagem;
+                $val = 0;
+            }
+
+            if($tiporeq_sinc == '2'){
+               $lancamento ='33';
+            }
+            
+            $del_query = "
+                DELETE FROM PFFINANC 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param6->auxilio_moradia_evento."' AND 
+                      VALOR = '".$val."'
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+            
+            $del_query = "
+                DELETE FROM PFMOVTEMP 
+                WHERE TIPOLANCAMENTO IN (31,33) AND
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param6->auxilio_moradia_evento."' AND 
+                      VALOR = '".$val."' AND  
+                      REF = '".$ref."'
+            ";
+                     
+            $result = $this->dbrm->query($del_query);
+
+        }elseif($tipo == '2'){
+            $lancamento ='35';
+            $param2        = self::getParametros(2);
+            
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$param2->reembolso_creche_evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+                      
+            if($result[0]['VALHORDIAREF'] == 'V'){
+                $val = $valores->valor_total;
+                $ref = 0;
+            }else{
+                $ref = $valores->valor_total;
+                $val = 0;
+            }
+
+            if($tiporeq_sinc == '2'){
+                $lancamento ='36';
+            }
+
+            $del_query = "
+                DELETE FROM PFFINANC 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param2->reembolso_creche_evento."' AND 
+                      VALOR = '".$val."'
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+            
+            $del_query = "
+                DELETE FROM PFMOVTEMP 
+                WHERE TIPOLANCAMENTO IN (35,36) AND
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param2->reembolso_creche_evento."' AND 
+                      VALOR = '".$val."' AND  
+                      REF = '".$ref."'
+            ";
+                     
+            $result = $this->dbrm->query($del_query);
+
+            
+        }elseif($tipo == '7'){
+            $lancamento ='37';
+            $param7        = self::getParametros(7);
+
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$param7->reembolso_aluguel_evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+                              
+            $val = str_replace('.', '', $valores->valor); // Remove o ponto
+            $val = str_replace(',', '.', $val); // Substitui a vírgula por ponto
+
+            $del_query = "
+                DELETE FROM PFFINANC 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param7->reembolso_aluguel_evento."' AND 
+                      VALOR = '".$val."'
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+                
+            $del_query = "
+                DELETE FROM PFEVENTOSPROG 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOINIC = '".$ano_sinc."' AND 
+                      MESINIC = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param7->reembolso_aluguel_evento."' AND 
+                      VALOR = '".$val."' 
+            ";
+                     
+            $result = $this->dbrm->query($del_query);
+                
+
+        }elseif($tipo == '8'){
+            $lancamento ='39';
+            $param8        = self::getParametros(8);
+            if($tiporeq_sinc == '2'){          
+                $evento = $param8->auxilio_coparticipacao_evento;
+            }else{
+                $evento = $param8->auxilio_coparticipacao2_evento;
+            }
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+           
+            if (isset($valores->dependentes) ){ 
+                $dependentes = json_decode($valores->dependentes);
+            
+                foreach($dependentes as $key2 => $dados2){
+
+                    $dadosFunc     = self::dadosFunc($dados2->chapa);
+                    if($dadosFunc[0]['CODSITUACAO'] != 'D'  && $dadosFunc[0]['CODTIPO'] != 'T' ){
+                        $val = str_replace('.', '', $dados2->valor);
+                        $val =  str_replace(',', '.',   $val);
+                        $ref = 0;
+
+                        $del_query = "
+                            DELETE FROM PFFINANC 
+                            WHERE 
+                                  CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                                  CHAPA = '".$chapa_sinc."' AND
+                                  ANOCOMP = '".$ano_sinc."' AND 
+                                  MESCOMP = '".$mes_sinc."' AND 
+                                  CODEVENTO = '".$evento."' AND 
+                                  VALOR = '".$val."'
+                        ";
+                              
+                        $result = $this->dbrm->query($del_query);
+                        
+                        $del_query = "
+                            DELETE FROM PFMOVTEMP 
+                            WHERE TIPOLANCAMENTO = '".$lancamento."' AND
+                                  CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                                  CHAPA = '".$dados2->chapa."' AND
+                                  ANOCOMP = '".$ano_sinc."' AND 
+                                  MESCOMP = '".$mes_sinc."' AND 
+                                  CODEVENTO = '".$evento."' AND 
+                                  VALOR = '".$val."' 
+                        ";
+                                
+                        $result = $this->dbrm->query($del_query);
+
+                    }
+                }
+            }
+
+        }
+
+
+        elseif($tipo == '9'){
+            $lancamento ='29';
+            $param9        = self::getParametros(9);
+            $dadosFunc     = self::dadosFunc($chapa_sinc);
+
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$param9->auxilio_13salario_evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+                       
+            if($result[0]['VALHORDIAREF'] == 'V'){
+                $val = $param9->auxilio_13salario_porcentagem;
+                $ref = 0;
+            }else{
+                $ref = $param9->auxilio_13salario_porcentagem;
+                $val = 0;
+            }
+           
+            $del_query = "
+                DELETE FROM PFFINANC 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param9->auxilio_13salario_evento."' AND 
+                      VALOR = '".$val."'
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+                
+            $del_query = "
+                DELETE FROM PFMOVTEMP 
+                WHERE TIPOLANCAMENTO = '".$lancamento."' AND
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param9->auxilio_13salario_evento."' AND 
+                      VALOR = '".$val."'  AND 
+                      REF = '".$ref."' 
+            ";
+                    
+            $result = $this->dbrm->query($del_query);
+            
+            
+        }elseif($tipo == '5'){
+            $lancamento ='37';
+            $param5        = self::getParametros(5);
+
+            if($tiporeq_sinc == '1'){       
+                $evento = $param5->reembolso_desconto_evento;
+            }elseif($tiporeq_sinc == '2'){
+                $evento = $param5->reembolso_desconto_evento2;
+            }else{
+                $evento = $param5->reembolso_desconto_evento3;
+            }
+                
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+                
+            $val =  $valores->valor_desconto/$valores->quantMes;
+
+            $val = str_replace('.', '', $val); // Remove o ponto
+            $val = str_replace(',', '.', $val); // Substitui a vírgula por ponto
+            
+            $del_query = "
+                DELETE FROM PFFINANC 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$evento."' AND 
+                      VALOR = '".$val."'
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+                
+            $del_query = "
+                DELETE FROM PFEVENTOSPROG 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOINIC = '".$ano_sinc."' AND 
+                      MESINIC = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$evento."' AND 
+                      VALOR = '".$val."' 
+            ";
+                     
+            $result = $this->dbrm->query($del_query);
+            
+
+        }elseif($tipo == '3'){
+            $lancamento ='38';
+            $param3        = self::getParametros(3);
+            
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$param3->sobreaviso_evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+                       
+            if($result[0]['VALHORDIAREF'] == 'V'){
+                $val =  0;
+                $ref = $valores->valor;
+            }else{
+                $val =  0;
+                $ref =  $valores->valor;
+            }
+
+            if($dadosReq[0]->tiporeq == '2'){
+                $lancamento ='28';
+            }
+
+            $del_query = "
+                DELETE FROM PFFINANC 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param3->sobreaviso_evento."' AND 
+                      VALOR = '".$val."'
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+                
+            $del_query = "
+                DELETE FROM PFMOVTEMP 
+                WHERE TIPOLANCAMENTO IN (38,28) AND
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param3->sobreaviso_evento."' AND 
+                      VALOR = '".$val."'  AND 
+                      REF = '".$ref."' 
+            ";
+                    
+            $result = $this->dbrm->query($del_query);
+
+            
+        }elseif($tipo == '1'){
+            $lancamento ='37';
+            $param1        = self::getParametros(1);
+            $dadosFunc     = self::dadosFunc($chapa_sinc);
+            $dadosFuncSub     = self::dadosFunc($valores->funcionario_sub);
+            
+            $SalarioFunc = $dadosFunc[0]['SALARIO'];
+            $SalarioFuncSub = $dadosFuncSub[0]['SALARIO'];
+        
+            $query = "SELECT VALHORDIAREF FROM PEVENTO WHERE codigo ='".$param1->substituicao_evento."' AND CODCOLIGADA ='". $this->coligada."'";
+            $result = $this->dbrm->query($query);
+            $result = ($result->getNumRows() > 0) ? $result->getResultArray() : false;
+
+            // pega deflatores
+            $deflatores = 0;
+            $faltasFolha     = self::DeflatoresFaltasPonto($valores->data_inicio_referencia, $valores->data_fim_referencia, $chapa_sinc);
+            
+            $ferias     = self::DeflatoresFerias($valores->data_inicio_referencia, $valores->data_fim_referencia, $chapa_sinc);
+            if( $ferias){
+                $deflatores = $deflatores + $ferias[0]['QUANTIDADE_DIAS'];
+            }
+            if( $faltasFolha){
+                $deflatores = $deflatores + $faltasFolha[0]['FALTAS'];
+            }
+
+            $atestado     = self::DeflatoresAtestado($valores->data_inicio_referencia, $valores->data_fim_referencia, $chapa_sinc);
+            if( $atestado){
+                $deflatores = $deflatores + $atestado[0]['QUANTIDADE_DIAS'];
+            }
+
+            if($SalarioFuncSub == $SalarioFunc){
+                $val =  ($SalarioFunc) / 30 * ($valores->dias_referencia - $deflatores) ;
+                $val = abs($val);
+                $val = number_format($val, 2, '.', '');
+
+            }else{
+                $val =  ($SalarioFuncSub - $SalarioFunc) / 30 * ($valores->dias_referencia - $deflatores) ;
+                $val = abs($val);
+                $val = number_format($val, 2, '.', '');
+            }
+              
+            $del_query = "
+                DELETE FROM PFFINANC 
+                WHERE 
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param1->substituicao_evento."' AND 
+                      VALOR = '".$val."'
+            ";
+                   
+            $result = $this->dbrm->query($del_query);
+                
+            $del_query = "
+                DELETE FROM PFMOVTEMP 
+                WHERE TIPOLANCAMENTO = '".$lancamento."' AND
+                      CODCOLIGADA = '".$_SESSION['func_coligada']."' AND
+                      CHAPA = '".$chapa_sinc."' AND
+                      ANOCOMP = '".$ano_sinc."' AND 
+                      MESCOMP = '".$mes_sinc."' AND 
+                      CODEVENTO = '".$param1->substituicao_evento."' AND 
+                      VALOR = '".$val."' 
+            ";
+                    
+            $result = $this->dbrm->query($del_query);
+            
+        }
+
+        if($result){
+
+            $table = $this->dbportal->table('zcrmportal_variaveis_aprovacao');
+            $data = [
+                'id_user' => $this->logId,
+                'id_hierarquia' => '', 
+                'dtcad' => $this->now, 
+                'tipo' => $tipo,
+                'nivel_apr_area' => '7',
+                'observacao' => 'CANCELADO SINCRONISMO. '.$justificativa,
+                'id_requisicao' => $id  
+            ];
+    
+            $table->insert($data);
+
+            $query = " 
+                UPDATE dbo.zcrmportal_variaveis_req
+                SET status = 7
+                WHERE id = '".$id."'
+            ";
+            // exit('<pre>'.print_r($query,1));
+            return $this->dbportal->query($query);
+        }
+        return false;
+
+    }
 
     public function logCalculo($id)
     {
@@ -1999,7 +2504,7 @@ class VariaveisModel extends Model {
                 ->where('aprovador', $_SESSION['log_login']);
                 if($aprovacao == '2'){
                 
-                    $builder->orWhereIn('status', [1,3,7,8]); 
+                    $builder->orWhereIn('status', [1,3,4,7,8]); 
                 }
                 $builder->groupEnd(); 
             }else{
@@ -2023,6 +2528,7 @@ class VariaveisModel extends Model {
             return [];
         }
     }
+
     public function getReqDados($id)
     {
         try {
@@ -2043,8 +2549,46 @@ class VariaveisModel extends Model {
         }
     }
     
-    
-    
+    public function getReqDadosCanc($id)
+    {
+        try {
+            $query = " 
+              with aprov as (
+                select top 1 
+                  id_requisicao,
+                  format(dtcad,'dd') as dia,
+                  month(dtcad) as mes,
+                  year(dtcad)  as ano
+                from zcrmportal_variaveis_aprovacao 
+                where 
+                  nivel_apr_area = 3 and
+                  id_requisicao = ".$id."
+                order by dtcad desc
+                )
+
+                select 
+                  isnull(a.dia,'00') as dia, 
+                  isnull(a.mes,0) as mes, 
+                  isnull(a.ano,0) as ano,
+                  r.* 
+                from zcrmportal_variaveis_req r
+                left join aprov a on a.id_requisicao = r.id 
+                where r.id = ".$id."
+          ";
+        
+          //exit('<pre>'.print_r($query,1));
+          $result = $this->dbportal->query($query);
+          if(!$result) return false;
+          return ($result->getNumRows() > 0) 
+                  ? $result->getResultArray() 
+                  : false;
+                    
+        } catch (\Exception $e) {
+            // Log the error or handle it as needed
+            log_message('error', $e->getMessage());
+            return false;
+        }
+    }
 
     public function getParametros(int $tipo)
     {
