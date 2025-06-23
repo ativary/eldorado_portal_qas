@@ -135,8 +135,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     $(document).ready(function() {
         $("[data-money]").maskMoney({prefix:'', allowNegative: false, allowZero:false, thousands:'.', decimal:',', affixesStay: false});
         verificaData();
-
-           
+        if (fora_periodo == 1) { 
+            exibeAlerta("error", "Atenção! Fora do período de abertura para novas requisições."); 
+        }       
     });
 
 

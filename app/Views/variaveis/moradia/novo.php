@@ -121,6 +121,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 $(document).ready(function(){
  
     verificaData();
+    if (fora_periodo == 1) { 
+        exibeAlerta("error", "Atenção! Fora do período de abertura para novas requisições."); 
+    }
 });
 function verificaData() {
     const regra = <?= $param6 ?>; // Certifique-se de que $param6 seja um JSON válido.
@@ -199,6 +202,12 @@ const salvaDados = () => {
     if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
     if($("#tipoReq").val() == ""){ exibeAlerta("error", "<b>Tipo obrigatório </b> ."); return false; }
     if($("#justificativa").val().trim() == ""){ exibeAlerta("error", "<b>Justificativa</b> obrigatório."); return false; }
+
+    if (fora_periodo == 1) { 
+        exibeAlerta("error", "Fora do Período de abertura."); 
+        return false; 
+    }
+
     if($("#tipoReq").val() == "2" && fora_periodo == 2){ 
         fora_periodo = 1;
 
