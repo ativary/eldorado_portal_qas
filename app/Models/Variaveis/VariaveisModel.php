@@ -123,6 +123,19 @@ class VariaveisModel extends Model {
 		}
        
         $qr_func = "AND A.CODSITUACAO NOT IN ('D')";
+
+    // tratamento para filtrar apenas func com cargo = empregados 
+    // para salario substituição :  tipo = 1
+    $filtro_sub = '';
+    $where_sub = '';
+    if($tipo == '1'){
+      $filtro_sub = '
+        INNER JOIN PFUNCAO FCO ON ( FCO.CODCOLIGADA = A.CODCOLIGADA AND FCO.CODIGO = A.CODFUNCAO )
+        LEFT OUTER JOIN PCARGO CAR ON ( CAR.CODCOLIGADA = FCO.CODCOLIGADA AND CAR.CODIGO = FCO.CARGO )';
+      $where_sub = "
+        AND CAR.NOME <> 'Empregados' 
+      ";
+    }
         
 		$query = " 
 			SELECT 
@@ -131,9 +144,10 @@ class VariaveisModel extends Model {
 				A.NOME
 				
 			FROM 
-				PFUNC A,
-				PSECAO B
-				
+				PFUNC A 
+				LEFT JOIN PSECAO B ON B.CODCOLIGADA = A.CODCOLIGADA AND B.CODIGO = A.CODSECAO 
+				{$filtro_sub}
+
 			WHERE 
 				    A.CODCOLIGADA = '{$this->coligada}'
 				AND A.CODCOLIGADA = B.CODCOLIGADA
@@ -142,7 +156,7 @@ class VariaveisModel extends Model {
 				{$qr_func}
 				{$qr_secao}
         {$filtro_secao}
-				
+				{$where_sub}
 
 			GROUP BY
 				A.CHAPA,
