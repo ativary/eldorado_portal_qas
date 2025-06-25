@@ -1382,11 +1382,9 @@ class VariaveisModel extends Model {
 
           
            
-            if ($valores->fora_periodo == '1') {
-                // $novoMes = date('m', strtotime('+1 month'));
-                // $novoAno = date('Y', strtotime('+1 month'));
-                $novoMes = date('m');
-                $novoAno = date('Y');
+            if ($valores->tipoPer == '2') {
+                $novoMes = date('m', strtotime('+1 month'));
+                $novoAno = date('Y', strtotime('+1 month'));
             } else {
                 $novoMes = date('m');
                 $novoAno = date('Y');

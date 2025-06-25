@@ -45,7 +45,19 @@ Class Sobreaviso extends BaseController {
     }
 
     public function novo(){
+
         parent::VerificaPerfil('VARIAVEIS_SOBREAVISO');
+
+        $mesanterior = date('Y-m', strtotime('-1 month'));
+        $mesatual = date('Y-m');
+        $mesfuturo = date('Y-m', strtotime('+1 month'));
+        $param3 = $this->mParam->getParametros(3);
+
+        $dados['per_ini_atual'] = $mesanterior.'-'.$param3->dia_ponto_ini;
+        $dados['per_fim_atual'] = $mesatual.'-'.$param3->dia_ponto_fim;
+        $dados['per_ini_futuro'] = $mesatual.'-'.$param3->dia_ponto_ini;
+        $dados['per_fim_futuro'] = $mesfuturo.'-'.$param3->dia_ponto_fim;
+
         $dados['_titulo'] = "Novo Sobreaviso";
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
         $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
@@ -53,6 +65,7 @@ Class Sobreaviso extends BaseController {
         $dados['funcionario'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 
         $dados['param6']   = json_encode($this->mParam->getParametros(3));
+        
         $this->_breadcrumb->add('Novo Sobreaviso');
 
         return parent::ViewPortal('variaveis/sobreaviso/novo', $dados);
@@ -61,6 +74,16 @@ Class Sobreaviso extends BaseController {
     public function editar($id){
         $id = base64_decode($id);
      
+        $mesanterior = date('Y-m', strtotime('-1 month'));
+        $mesatual = date('Y-m');
+        $mesfuturo = date('Y-m', strtotime('+1 month'));
+        $param3 = $this->mParam->getParametros(3);
+
+        $dados['per_ini_atual'] = $mesanterior.'-'.$param3->dia_ponto_ini;
+        $dados['per_fim_atual'] = $mesatual.'-'.$param3->dia_ponto_fim;
+        $dados['per_ini_futuro'] = $mesatual.'-'.$param3->dia_ponto_ini;
+        $dados['per_fim_futuro'] = $mesfuturo.'-'.$param3->dia_ponto_fim;
+        
         $dados['_titulo'] = "Editar Sobreaviso";
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
         

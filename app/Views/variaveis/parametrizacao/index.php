@@ -188,10 +188,24 @@
                                 </select>
                             </div>
                             <div class="form-group row">
-                                <label for="limite_sobreaviso" class="col-sm-12 text-primary">Limite de Horas:</label>
+                                <label for="dias_ponto" class="col-sm-7 text-primary">Dias de Ponto:</label>
+                                <label for="limite_sobreaviso" class="col-sm-5 text-primary">Limite de Horas:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
-                                    
+                                    <div class="input-group">
+                                    <input type="number"  onchange="validateField(this)" id="dia_ponto_ini" name="dia_ponto_ini" class="form-control" placeholder="00" value="<?= $param3->dia_ponto_ini ?? ''; ?>">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><strong>Até</strong></span>
+                                        </div>
+                                    <input type="number"  onchange="validateField(this)" id="dia_ponto_fim" name="dia_ponto_fim" class="form-control" placeholder="00" value="<?= $param3->dia_ponto_fim ?? ''; ?>">
+                                    <label for="dia_ponto_aviso" class="col-sm-8 pt-2 col-form-label text-left">Dias de início e fim do ponto.</label>
+                                    </div> 
+                                </div>
+
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
                                     <input type="number"  id="limite_sobreaviso" name="limite_sobreaviso" class="form-control" placeholder="00" value="<?= $param3->limite_sobreaviso ?? ''; ?>">
+                                    <label for="dia_limite_compl3" class="col-sm-10 pt-2 col-form-label text-left">Limite de horas de sobreaviso no mês</label>
+                                    </div>
                                 </div>
                             
                             </div>
@@ -2799,6 +2813,8 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
           
             'periodo_sobreaviso_fim': $('#periodo_sobreaviso_fim').val(),
             'periodo_sobreaviso': $('#periodo_sobreaviso').val(),
+            'dia_ponto_ini': $('#dia_ponto_ini').val(),
+            'dia_ponto_fim': $('#dia_ponto_fim').val(),
             'dia_limite_compl3': $('#dia_limite_compl3').val(),
             'limite_sobreaviso': $('#limite_sobreaviso').val(),
             'sobreaviso_evento': $('#sobreaviso_evento').val(),
