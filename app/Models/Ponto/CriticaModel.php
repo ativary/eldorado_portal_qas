@@ -750,10 +750,10 @@ class CriticaModel extends Model {
           WHEN ident2 IS NOT NULL THEN ident2
           WHEN ident3 IS NOT NULL THEN ident3
           WHEN ident4 IS NOT NULL THEN ident4
-          WHEN idsai1 IS NOT NULL THEN idsai2
-          WHEN idsai2 IS NOT NULL THEN idsai3
-          WHEN idsai3 IS NOT NULL THEN idsai4
-          WHEN idsai4 IS NOT NULL THEN idsai5
+          WHEN idsai1 IS NOT NULL THEN idsai1
+          WHEN idsai2 IS NOT NULL THEN idsai2
+          WHEN idsai3 IS NOT NULL THEN idsai3
+          WHEN idsai4 IS NOT NULL THEN idsai4
         END idbatida,
         CASE 
           WHEN dtrefent1 IS NOT NULL THEN dtrefent1
