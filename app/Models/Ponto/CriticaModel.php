@@ -507,7 +507,7 @@ class CriticaModel extends Model {
             ) JUSTIFICATIVA,
 
             (
-              SELECT top 1 AA.obs FROM PortalRHDEV..zcrmportal_ponto_justificativa_func AA  (NOLOCK) 
+              SELECT top 1 AA.obs FROM ".DBPORTAL_BANCO."..zcrmportal_ponto_justificativa_func AA  (NOLOCK) 
 		        WHERE AA.coligada = A.CODCOLIGADA AND AA.dtponto = A.DATA AND AA.chapa = A.CHAPA Collate Database_Default
             ) OBS,
 
