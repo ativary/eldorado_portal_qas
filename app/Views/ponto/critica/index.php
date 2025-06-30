@@ -246,6 +246,8 @@ $(document).ready(function(){
 								<td class="n-mobile-cell" data-orderable="false">Sai2</td>
 								<td class="n-mobile-cell" data-orderable="false">Ent3</td>
 								<td class="n-mobile-cell" data-orderable="false">Sai3</td>
+								<td class="n-mobile-cell" data-ordetable="false">Ent4</td>
+								<td class="n-mobile-cell" data-ordetable="false">Sai4</td>
 
 
 								<?php if ($ck_semPar) { ?><td class="n-mobile-cell" data-orderable="false">S/ Par.<br> Corresp.</td><?php } ?>
@@ -731,7 +733,7 @@ $(document).ready(function(){
 																'status_bat'          => $resBatidas[$idb]['STATUS'],
 																'justificativa_batida'	=> $resBatidas[$idb]['JUSTIFICATIVA_BATIDA'],
 																'motivo_reprova'          => '',
-																'campo'            => 'sai2',
+																'campo'            => 'sai3',
 																'idaafdt'         => (int)$bat_idaafdt
 															);
 															// $b4 = '<span id="d' . $idbData . '" style="cursor: pointer;" ondblclick="abreModalAltera(\'\',\'' . sprintf("%05s", m2h($bat_batida)) . '\',\'' . $resData[$i]['CHAPA'] . '\', \'' . date('d/m/Y', strtotime($resData[$i]['DATA'])) . '\', \'d' . $idbData . '\', \'' . $bat_idaafdt . '\', \'' . $bat_natureza . '\',\'' . $bat_data2 . '\')">' . sprintf("%05s", m2h($bat_batida)) . '</span>';
@@ -858,6 +860,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b1 = m2h($resBatidasApontadas[$idba]['ent1'],4);
@@ -877,6 +880,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b3 = m2h($resBatidasApontadas[$idba]['ent2'],4);
@@ -896,6 +900,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b5 = m2h($resBatidasApontadas[$idba]['ent3'],4);
@@ -915,6 +920,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b7 = m2h($resBatidasApontadas[$idba]['ent4'],4);
@@ -934,6 +940,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b2 = m2h($resBatidasApontadas[$idba]['sai1'],4);
@@ -953,6 +960,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b4 = m2h($resBatidasApontadas[$idba]['sai2'],4);
@@ -972,6 +980,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b6 = m2h($resBatidasApontadas[$idba]['sai3'],4);
@@ -991,6 +1000,7 @@ $(document).ready(function(){
 														'idaafdt'         => $resBatidasApontadas[$idba]['id'],
 														'status_bat'         => $resBatidasApontadas[$idba]['status'],
 														'motivo_reprova'         => $resBatidasApontadas[$idba]['motivo_reprova'],
+														'obs'				=> $resBatidasApontadas[$idba]['obs'],
 														'justificativa_batida'	=> '' // não existe na SQL $resBatidasApontadas[$idba]['JUSTIFICATIVA_BATIDA']
 													);
 													$b8 = m2h($resBatidasApontadas[$idba]['sai4'],4);
@@ -1041,18 +1051,50 @@ $(document).ready(function(){
 												// echo 'Coluna:'.$coluna.'<br>';
 											}
 											
-											if($NovaBatida['natureza'] == 0){
-
-												if($b6 == '' && $b3 != '' && $b1 != ''){$b3 = $NovaBatida['batida']; $status_6 = $NovaBatida['status_bat']; $motivo_reprova_6 = $NovaBatida['motivo_reprova'];}
-												if($b3 == '' && $b1 != ''){$b3 = $NovaBatida['batida']; $status_3 = $NovaBatida['status_bat']; $motivo_reprova_3 = $NovaBatida['motivo_reprova'];}
-												if($b1 == ''){$b1 = $NovaBatida['batida']; $status_1 = $NovaBatida['status_bat']; $motivo_reprova_1 = $NovaBatida['motivo_reprova'];}
-			
-											}else{
-
-												if($b6 == '' && $b4 != '' && $b2 != ''){$b6 = $NovaBatida['batida']; $status_6 = $NovaBatida['status_bat']; $motivo_reprova_6 = $NovaBatida['motivo_reprova'];}
-												if($b4 == '' && $b2 != ''){$b4 = $NovaBatida['batida']; $status_4 = $NovaBatida['status_bat']; $motivo_reprova_4 = $NovaBatida['motivo_reprova'];}
-												if($b2 == ''){$b2 = $NovaBatida['batida']; $status_2 = $NovaBatida['status_bat']; $motivo_reprova_2 = $NovaBatida['motivo_reprova'];}
-							
+											if ($NovaBatida['natureza'] == 0) {
+												// Natureza 0 (b1, b3, b5, b7)
+												if ($b7 == '' && $b5 != '' && $b3 != '' && $b1 != '') {
+													$b7 = $NovaBatida['batida'];
+													$status_7 = $NovaBatida['status_bat'];
+													$motivo_reprova_7 = $NovaBatida['motivo_reprova'];
+												}
+												if ($b5 == '' && $b3 != '' && $b1 != '') {
+													$b5 = $NovaBatida['batida'];
+													$status_5 = $NovaBatida['status_bat'];
+													$motivo_reprova_5 = $NovaBatida['motivo_reprova'];
+												}
+												if ($b3 == '' && $b1 != '') {
+													$b3 = $NovaBatida['batida'];
+													$status_3 = $NovaBatida['status_bat'];
+													$motivo_reprova_3 = $NovaBatida['motivo_reprova'];
+												}
+												if ($b1 == '') {
+													$b1 = $NovaBatida['batida'];
+													$status_1 = $NovaBatida['status_bat'];
+													$motivo_reprova_1 = $NovaBatida['motivo_reprova'];
+												}
+											} else {
+												// Natureza 1 (b2, b4, b6, b8)
+												if ($b8 == '' && $b6 != '' && $b4 != '' && $b2 != '') {
+													$b8 = $NovaBatida['batida'];
+													$status_8 = $NovaBatida['status_bat'];
+													$motivo_reprova_8 = $NovaBatida['motivo_reprova'];
+												}
+												if ($b6 == '' && $b4 != '' && $b2 != '') {
+													$b6 = $NovaBatida['batida'];
+													$status_6 = $NovaBatida['status_bat'];
+													$motivo_reprova_6 = $NovaBatida['motivo_reprova'];
+												}
+												if ($b4 == '' && $b2 != '') {
+													$b4 = $NovaBatida['batida'];
+													$status_4 = $NovaBatida['status_bat'];
+													$motivo_reprova_4 = $NovaBatida['motivo_reprova'];
+												}
+												if ($b2 == '') {
+													$b2 = $NovaBatida['batida'];
+													$status_2 = $NovaBatida['status_bat'];
+													$motivo_reprova_2 = $NovaBatida['motivo_reprova'];
+												}
 											}
 										}
 									}
@@ -1115,6 +1157,8 @@ $(document).ready(function(){
 									$b4_tipo = (strlen(trim($b4)) > 0) ? 'D' : '';
 									$b5_tipo = (strlen(trim($b5)) > 0) ? 'D' : '';
 									$b6_tipo = (strlen(trim($b6)) > 0) ? 'D' : '';
+									$b7_tipo = (strlen(trim($b7)) > 0) ? 'D' : '';
+									$b8_tipo = (strlen(trim($b8)) > 0) ? 'D' : '';
 
 									$html .= '<td '.(($status_1 == 1 || $status_1 == 2) ? ' style="background: #feca07;" ' : '').' '.(($status_1 == 3) ? ' style="background: #f4811f;" title="'.$motivo_reprova_1.'" ' : '').' '.(($status_1 == 'T') ? ' style="background: #dbdcdd;" title="Aguardando Aprovação RH" ' : '').' class="n-mobile-cell" align="center">' . $b1 . ' <span class="badge badge-light">'.(($status_1 != 'C') ? $b1_tipo : 'C').'</span></td>';
 									$html .= '<td '.(($status_2 == 1 || $status_2 == 2) ? ' style="background: #feca07;" ' : '').' '.(($status_2 == 3) ? ' style="background: #f4811f;" title="'.$motivo_reprova_2.'" ' : '').' '.(($status_2 == 'T') ? ' style="background: #dbdcdd;" title="Aguardando Aprovação RH" ' : '').' class="n-mobile-cell" align="center">' . $b2 . ' <span class="badge badge-light">'.(($status_2 != 'C') ? $b2_tipo : 'C').'</span></td>';
@@ -1122,6 +1166,8 @@ $(document).ready(function(){
 									$html .= '<td '.(($status_4 == 1 || $status_4 == 2) ? ' style="background: #feca07;" ' : '').' '.(($status_4 == 3) ? ' style="background: #f4811f;" title="'.$motivo_reprova_4.'" ' : '').' '.(($status_4 == 'T') ? ' style="background: #dbdcdd;" title="Aguardando Aprovação RH" ' : '').' class="n-mobile-cell" align="center">' . $b4 . ' <span class="badge badge-light">'.(($status_4 != 'C') ? $b4_tipo : 'C').'</span></td>';
 									$html .= '<td '.(($status_5 == 1 || $status_5 == 2) ? ' style="background: #feca07;" ' : '').' '.(($status_5 == 3) ? ' style="background: #f4811f;" title="'.$motivo_reprova_5.'" ' : '').' '.(($status_5 == 'T') ? ' style="background: #dbdcdd;" title="Aguardando Aprovação RH" ' : '').' class="n-mobile-cell" align="center">' . $b5 . ' <span class="badge badge-light">'.(($status_5 != 'C') ? $b5_tipo : 'C').'</span></td>';
 									$html .= '<td '.(($status_6 == 1 || $status_6 == 2) ? ' style="background: #feca07;" ' : '').' '.(($status_6 == 3) ? ' style="background: #f4811f;" title="'.$motivo_reprova_6.'" ' : '').' '.(($status_6 == 'T') ? ' style="background: #dbdcdd;" title="Aguardando Aprovação RH" ' : '').' class="n-mobile-cell" align="center">' . $b6 . ' <span class="badge badge-light">'.(($status_6 != 'C') ? $b6_tipo : 'C').'</span></td>';
+									$html .= '<td '.(($status_7 == 1 || $status_7 == 2) ? ' style="background: #feca07;" ' : '').' '.(($status_7 == 3) ? ' style="background: #f4811f;" title="'.$motivo_reprova_7.'" ' : '').' '.(($status_7 == 'T') ? ' style="background: #dbdcdd;" title="Aguardando Aprovação RH" ' : '').' class="n-mobile-cell" align="center">' . $b7 . ' <span class="badge badge-light">'.(($status_7 != 'C') ? $b7_tipo : 'C').'</span></td>';
+									$html .= '<td '.(($status_8 == 1 || $status_8 == 2) ? ' style="background: #feca07;" ' : '').' '.(($status_8 == 3) ? ' style="background: #f4811f;" title="'.$motivo_reprova_8.'" ' : '').' '.(($status_8 == 'T') ? ' style="background: #dbdcdd;" title="Aguardando Aprovação RH" ' : '').' class="n-mobile-cell" align="center">' . $b8 . ' <span class="badge badge-light">'.(($status_8 != 'C') ? $b8_tipo : 'C').'</span></td>';
 									
 									
 									unset($b1,$b2,$b3,$b4,$b5,$b6,$b7,$b8);
@@ -2442,6 +2488,7 @@ const incluirNovaBatida = () => {
 	if (!validaDados()) return;
 
 	$("[data-just]").fadeOut(0);
+	$("[data-obs]").fadeOut(0);
 	var id = Math.random();
 
 	var html = '<tr data-p="I" data-info="' + id + '">' +
@@ -2451,20 +2498,24 @@ const incluirNovaBatida = () => {
 		'<td><select class="form-control form-control-sm"><option value="0" ' + (natureza_proxima_batida != 1 ? 'selected' : '') + '>Entrada</option><option value="1" ' + (natureza_proxima_batida == 1 ? 'selected' : '') + '>Saida</option></select></td>' +
 		'<td width="18" class="p-0"><button class="btn btn-danger btn-xxs pr-1 pl-1" data-remove-batida="' + id + '">X</button></td>' +
 		'</tr>' +
-		'<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label><select class="form-control form-control-sm mt-"><option value="">...</option>'+select_justificativa_ajuste+'</td></tr>';
+		'<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label><select class="form-control form-control-sm mt-"><option value="">...</option>'+select_justificativa_ajuste+'</td></tr>'+
+		'<tr data-observacao="' + id + '" data-obs><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Deseja incluir informações adicionais? </label><textarea class="form-control"></textarea></td></tr>';
 
 	$('.modal_alterar_batida tbody').append(html);
 
 	// abre a justificativa da batida ao clicar na linha
 	$("[data-info]").on('click', function(e) {
 		$("[data-just]").fadeOut(0);
+		$("[data-obs]").fadeOut(0);
 		$("[data-justificativa='" + $(this).attr('data-info') + "']").fadeIn(0);
+		$("[data-observacao='" + $(this).attr('data-info') + "']").fadeIn(0);
 	});
 
 	// remove a nova batida
 	$("[data-remove-batida]").on('click', function(e) {
 		$("[data-info='" + $(this).attr('data-remove-batida') + "']").remove();
 		$("[data-justificativa='" + $(this).attr('data-remove-batida') + "']").remove();
+		$("[data-observacao='" + $(this).attr('data-remove-batida') + "']").remove();
 		verificaLimite();
 		natureza_proxima_batida = (natureza_proxima_batida != 1) ? 1 : 0;
 	});
@@ -2478,7 +2529,13 @@ const incluirNovaBatida = () => {
 //-----------------------------------------------------------
 const validaDados = () => {
 
+    msg_aviso_batida = '';
 	msg_aviso_datas = '';
+
+	// Array to store all batidas for duplicate checking
+	const allBatidas = [];
+	
+	let hasDuplicate = false;
 
 	$("[data-p]").each(function(e) {
 		let tipo = $(this).attr('data-p');
@@ -2493,6 +2550,17 @@ const validaDados = () => {
 			let batida = $("[data-info='" + id + "']").find('input,select')[2].value;
 			let batida_default = $("[data-info='" + id + "']").find('input,select')[2].getAttribute('data-default');
 			let natureza = $("[data-info='" + id + "']").find('input,select')[3].value;
+
+			// Check for duplicate batidas
+			if (batida) {
+				const batidaKey = `${data_ref}_${batida}`;
+				if (allBatidas.includes(batidaKey)) {
+					hasDuplicate = true;
+					$("[data-info='" + id + "']").find('input,select')[2].setAttribute('class', 'form-control form-control-sm parsley-error text-danger');
+				} else {
+					allBatidas.push(batidaKey);
+				}
+			}
 
 			$("[data-info='" + id + "']").find('input,select')[0].setAttribute('class', 'form-control form-control-sm');
 			$("[data-info='" + id + "']").find('input,select')[1].setAttribute('class', 'form-control form-control-sm');
@@ -2538,8 +2606,13 @@ const validaDados = () => {
 				}
 			}
 		}
-
 	});
+
+
+	if(hasDuplicate) {
+		exibeAlerta('error', 'Não é permitido cadastrar duas batidas com o mesmo horário.');
+		return false;
+	}
 
 	if(msg_aviso_datas != ''){
 		exibeAlerta('error', msg_aviso_datas);
@@ -2551,7 +2624,7 @@ const validaDados = () => {
 // verifica a qtde maxima de batida permitida
 const verificaLimite = () => {
 	let qtde = $(".modal_alterar_batida [type=time]").length;
-	if (qtde >= 6) {
+	if (qtde >= 8) {
 		$('[data-btn-add]').fadeOut(0);
 	} else {
 		$('[data-btn-add]').fadeIn(0);
@@ -2579,6 +2652,7 @@ const abrirAlteracaoBatida = (data, data_br, diasemana, batidas, chapa, escala, 
 	$(".modal_alterar_batida [data-h-batidas]").html('Registros existentes: ');
 
 	var batidas = JSON.parse(decodeURIComponent(batidas));
+	console.log(batidas);
 	
 	$('.modal_alterar_batida tbody').html('');
 
@@ -2609,9 +2683,11 @@ const abrirAlteracaoBatida = (data, data_br, diasemana, batidas, chapa, escala, 
 		html += '</td></tr>';
 
 		var exibe = <?= ($rh) ? 1 : 0; ?>;
+		
         if(batidas[x].justificativa_batida != null && (exibe == 1)) html += '<tr data-justificativa="'+id_tr+'" data-just="" style="display: none;"><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label> <span class="badge badge-primary">'+batidas[x].justificativa_batida.replaceAll('+', ' ')+'</span></td></tr>';
-
+		if(batidas[x].obs != null && batidas[x].obs != '' && (exibe == 1)) html += '<tr data-observacao="'+id_tr+'" data-obs=""><td><label>Deseja incluir informações adicionais?</label><textarea class="form-control" value="'+batidas[x].obs+'"></textarea></td></tr>';
 		$('.modal_alterar_batida tbody').append(html);
+		if(batidas[x].obs != null && batidas[x].obs != '') $("[data-observacao='"+id_tr+"'] textarea").val(batidas[x].obs).change().attr('readonly', true);
 
 		natureza_proxima_batida = (batidas[x].natureza != 1) ? 1 : 0;
 
@@ -2621,6 +2697,8 @@ const abrirAlteracaoBatida = (data, data_br, diasemana, batidas, chapa, escala, 
 	$("[data-info]").on('click', function(e) {
 		$("[data-just]").fadeOut(0);
 		$("[data-justificativa='" + $(this).attr('data-info') + "']").fadeIn(0);
+		$("[data-obs]").fadeOut(0);
+		$("[data-observacao='" + $(this).attr('data-info') + "']").fadeIn(0)
 	});
 
 	verificaLimite();
@@ -2642,6 +2720,7 @@ const alterarBatida = () => {
 			if (tipo == "I") {
 				var just = $("[data-justificativa='" + id + "'] select").val().trim();
 			}
+			var obs = $("[data-observacao='" + id + "' ] textarea").val();
 			let data = $("[data-info='" + id + "']").find('input,select')[0].value;
 			let data_default = $("[data-info='" + id + "']").find('input,select')[0].getAttribute('data-batida-default');
 			let data_ref = $("[data-info='" + id + "']").find('input,select')[1].value;
@@ -2708,6 +2787,7 @@ const alterarBatida = () => {
 				'tipo'                : tipo,
 				'id'                  : id,
 				'justificativa'       : (just != undefined) ? just : '',
+				'obs'				  : (obs != undefined) ? obs : '',
 				'data_ref'            : data_ref,
 				'data_ref_default'    : data_ref_default,
 				'batida'              : batida,
@@ -3571,53 +3651,74 @@ const abrirJustificativaExtra = (data, data_br, diasemana, codigoJustificativa, 
 	$("#justificativa_extra").val(codigoJustificativa);
 
 }
-const justificarExtra = () => {
+function justificarExtra() {
+    try {
+        let dados = {
+            "justificativa" : $("#justificativa_extra").val(),
+            "chapa"         : chapaFunc,
+            "data"          : data_nova_batida
+        }
 
-	try {
+        if(dados.justificativa == ""){exibeAlerta('error', '<b>Justificativa de Extra</b> não informado.'); return false; }
 
-		let dados = {
-			"justificativa" : $("#justificativa_extra").val(),
-			"chapa"         : chapaFunc,
-			"data"          : data_nova_batida
-		}
+        // Pergunta se quer adicionar observação
+        Swal.fire({
+            title: 'Deseja incluir informações adicionais?',
+            showDenyButton: true,
+            confirmButtonText: 'Sim',
+            denyButtonText: 'Não',
+			customClass: {
+				title: 'swal2-title'
+			}
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Limpa o campo antes de mostrar
+                $("#campoObservacaoExtra").val('');
+                // Abre o modal de observação
+                $("#modalObservacaoExtra").modal('show');
 
-		if(dados.justificativa == ""){exibeAlerta('error', '<b>Justificativa de Extra</b> não informado.'); return false; }
+                // Ao clicar em salvar no modal de observação
+                $("#btnSalvarObservacaoExtra").off('click').on('click', function() {
+                    dados.obs = $("#campoObservacaoExtra").val();
+                    $("#modalObservacaoExtra").modal('hide');
+                    enviarJustificativaExtra(dados);
+                });
+            } else if (result.isDenied) {
+                // Se não, segue fluxo normal
+                enviarJustificativaExtra(dados);
+            }
+        });
 
-		openLoading();
+    } catch (e) {
+        exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+    }
+}
 
-		$.ajax({
-			url: "<?= base_url('ponto/espelho/action/cadastrar_justificativa_extra') ?>",
-			type: 'POST',
-			data: dados,
-			success: function(result) {
-
-				openLoading(true);
-
-				try {
-					var response = JSON.parse(result);
-
-					if (response.tipo != 'success') {
-						exibeAlerta(response.tipo, response.msg);
-					} else {
-						exibeAlerta(response.tipo, response.msg, 3);
-						var myTimeout = setTimeout(function() {
-							Filtro();
-							clearTimeout(myTimeout);
-						}, 2000);
-					}
-
-				} catch (e) {
-					exibeAlerta('error', '<b>Erro interno:</b> ' + e);
-				}
-
-
-			},
-		});
-
-	} catch (e) {
-		exibeAlerta('error', '<b>Erro interno:</b> ' + e);
-	}
-
+// NOVA função auxiliar para envio AJAX
+function enviarJustificativaExtra(dados) {
+    openLoading();
+    $.ajax({
+        url: "<?= base_url('ponto/espelho/action/cadastrar_justificativa_extra') ?>",
+        type: 'POST',
+        data: dados,
+        success: function(result) {
+            openLoading(true);
+            try {
+                var response = JSON.parse(result);
+                if (response.tipo != 'success') {
+                    exibeAlerta(response.tipo, response.msg);
+                } else {
+                    exibeAlerta(response.tipo, response.msg, 3);
+                    var myTimeout = setTimeout(function() {
+                        Filtro();
+                        clearTimeout(myTimeout);
+                    }, 2000);
+                }
+            } catch (e) {
+                exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+            }
+        },
+    });
 }
 //-----------------------------------------------------------
 // altera atitude
@@ -4095,6 +4196,26 @@ $.ajax({
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <!-- modal modal_macro -->
+ <!-- Modal Observação -->
+<div class="modal" id="modalObservacaoExtra" tabindex="-1" role="dialog" aria-labelledby="modalObservacaoExtraLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-success">
+        <h5 class="modal-title" id="modalObservacaoExtraLabel">Observação</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span class="fa fa-times"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea id="campoObservacaoExtra" class="form-control" rows="4" placeholder="Digite sua observação aqui..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" id="btnSalvarObservacaoExtra">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Observação -->
 <script>
 $(function() {
 	$(".modal").draggable();
@@ -4243,6 +4364,16 @@ function getNextAndPreviousDates(dateString) {
         min-height: 100%;
         border-radius: 0;
     }
+
+	.swal2-popup .swal2-title {
+		background: #1ecab8; /* ou a cor do seu header, ex: var(--success) */
+		color: #fff;
+		padding: 12px 24px;
+		border-top-left-radius: 2px;
+		border-top-right-radius: 2px;
+		font-size: 16px;
+		text-align: left;
+	}
 </style>
 <style>
     @media (max-width: 500px){

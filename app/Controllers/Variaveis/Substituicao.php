@@ -32,7 +32,7 @@ Class Substituicao extends BaseController {
         $dados['funcionario']         = $this->request->getPost('funcionario');
         $dados['situacao']            = $this->request->getPost('situacao');
 
-        $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
+        $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados, false, false, 1);
         $dados['listaEventos']  = $this->mParam->listaEventos();
       
         $dados['listaReqs']     = $this->mParam->getReq(1, $dados['data_inicio'],$dados['data_fim'],$dados['funcionario'],false, $dados['situacao'] );
@@ -49,12 +49,12 @@ Class Substituicao extends BaseController {
         $dados['_titulo'] = "Novo Salário Substituição";
      
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
-        $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
+        $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados, false, false, 1);
         $dados['chapaFunc'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
         $dados['funcionario'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 
         $dados['chapaFunc'] = ''.$dados['chapaFunc'].'';
-        $dados['resFuncionarioSub']  = $this->mParam->ListarFuncionariosSecao('all', $dados, false, false,1);
+        $dados['resFuncionarioSub']  = $this->mParam->ListarFuncionariosSecao('all', $dados, false, false, 1);
 
        
         $dados['param6']   = json_encode($this->mParam->getParametros(1));
@@ -121,7 +121,7 @@ Class Substituicao extends BaseController {
         
         $dados['listaSecao']    = $this->mParam->listaSecaoGestor( $dados['rh']);
        
-        $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
+        $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados, false, false, 1);
     
         $dados['req']     = $this->mParam->getReqDados($id);
         $dados['chapaFunc'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;

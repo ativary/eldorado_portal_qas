@@ -650,22 +650,22 @@ table th {
                                                 $idaafdt_sai[$indice_sai] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['idaafdt']);
                                                 $indice_sai++;
                                             } else {
-                                                $ent[$indice_ent] = $concat . m2h($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['batida'], 4);
-                                                $ent_portal[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['portal'] == 1 && $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] != 'T') ? '<i title="Aguardando Aprovação Gestor" class="mdi mdi-square" style="font-size:20px; color: #feca07;"></i>' : '';
+                                                $sai[$indice_sai] = $concat . m2h($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['batida'], 4);
+                                                $sai_portal[$indice_sai] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['portal'] == 1 && $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] != 'T') ? '<i title="Aguardando Aprovação Gestor" class="mdi mdi-square" style="font-size:20px; color: #feca07;"></i>' : '';
 
-                                                if($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] == 'T') $ent_portal[$indice_ent] = '<i title="Pendente Aprovação RH" class="mdi mdi-square" style="font-size:20px; color: #dbdcdd;"></i>';
+                                                if($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] == 'T') $sai_portal[$indice_sai] = '<i title="Pendente Aprovação RH" class="mdi mdi-square" style="font-size:20px; color: #dbdcdd;"></i>';
 
-                                                $ent_motivo_reprova[$indice_ent] = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['motivo_reprova'];
-                                                $ent_justificativa_batida[$indice_ent] = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['justificativa_batida'];
-                                                $status_ent[$indice_ent] = isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status']) ? $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] : 'D';
-                                                $dataref_forcado_ent[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['forcado'] == 1) ? 1 : 0;
-                                                $dataref_ent[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['datareferencia']);
-                                                $data_ent[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['data']);
-                                                $idaafdt_ent[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['idaafdt']);
-                                                $indice_ent++;
+                                                $sai_motivo_reprova[$indice_sai] = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['motivo_reprova'];
+                                                $sai_justificativa_batida[$indice_sai] = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['justificativa_batida'];
+                                                $status_sai[$indice_sai] = isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status']) ? $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] : 'D';
+                                                $dataref_forcado_sai[$indice_sai] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['forcado'] == 1) ? 1 : 0;
+                                                $dataref_sai[$indice_sai] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['datareferencia']);
+                                                $data_sai[$indice_sai] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['data']);
+                                                $idaafdt_sai[$indice_sai] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['idaafdt']);
+                                                $indice_sai++;
                                             }
                                         }
-
+                                        
                                         $bglinha = "";
                                         if (diaSemana($DiasEspelho['DATA'], true) == "Dom" || diaSemana($DiasEspelho['DATA'], true) == "Sáb") $bglinha = ' style="background-color: #f9f9f9;" ';
 
@@ -760,6 +760,7 @@ table th {
                                                 'batida'          => str_replace($array_caracteres, '', $ent[4]),
                                                 'natureza'        => 0,
                                                 'pendente'        => (strlen(trim($ent_portal[4])) > 0 ? 1 : 0),
+                                                'data_ponto'      => dtEn($data_ent[4], true),
                                                 'data_referencia' => dtEn($dataref_ent[4], true),
                                                 'status'          => $status_ent[4],
                                                 'reprova'         => $ent_motivo_reprova[4],
@@ -1173,7 +1174,7 @@ table th {
         // inclusão de nova batida
         //------------------------------------------------------
         const abrirInclusaoBatida = (data, numero_batida, proxima_batida) => {
-
+            
             try {
 
                 $(".modal_incluir_batida").modal('show');
@@ -1252,36 +1253,50 @@ table th {
                     return false;
                 }
 
-                openLoading();
+                // openLoading();
 
-                $.ajax({
-                    url: "<?= base_url('ponto/espelho/action/cadastrar_batida') ?>",
-                    type: 'POST',
-                    data: dados,
-                    success: function(result) {
-
-                        openLoading(true);
-
-                        try {
-                            var response = JSON.parse(result);
-
-                            if (response.tipo != 'success') {
-                                exibeAlerta(response.tipo, response.msg);
-                            } else {
-                                exibeAlerta(response.tipo, response.msg, 3);
-                                var myTimeout = setTimeout(function() {
-                                    consultarEspelho();
-                                    clearTimeout(myTimeout);
-                                }, 2000);
-                            }
-
-                        } catch (e) {
-                            exibeAlerta('error', '<b>Erro interno:</b> ' + e);
-                        }
-
-                    },
+                // Pergunta se quer adicionar observação
+                Swal.fire({
+                    title: 'Deseja incluir informações adicionais?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sim',
+                    cancelButtonText: 'Não',
+                    customClass: {
+                        title: 'swal2-title'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        abrirModalObservacao(dados, enviarBatidaComObservacao);
+                    } else {
+                        enviarBatidaComObservacao(dados);
+                    }
                 });
 
+                function enviarBatidaComObservacao(dados) {
+                    openLoading();
+                    $.ajax({
+                        url: "<?= base_url('ponto/espelho/action/cadastrar_batida') ?>",
+                        type: 'POST',
+                        data: dados,
+                        success: function(result) {
+                            openLoading(true);
+                            try {
+                                var response = JSON.parse(result);
+                                if (response.tipo != 'success') {
+                                    exibeAlerta(response.tipo, response.msg);
+                                } else {
+                                    exibeAlerta(response.tipo, response.msg, 3);
+                                    setTimeout(function() {
+                                        consultarEspelho();
+                                    }, 2000);
+                                }
+                            } catch (e) {
+                                exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+                            }
+                        },
+                    });
+                }
             } catch (e) {
                 exibeAlerta('error', '<b>Erro interno:</b> ' + e);
             }
@@ -1292,6 +1307,7 @@ table th {
         // alteração de batidas
         //------------------------------------------------------
         const abrirAlteracaoBatida = (data, batidas, diaSemana, escala, data_br, periodo_bloqueado, inicioEscala, terminoEscala) => {
+            
             $(".modal_alterar_batida").modal('show');
 
             inicio_escala = inicioEscala;
@@ -1339,8 +1355,10 @@ table th {
 
                 var exibe = <?= ($rh) ? 1 : 0; ?>;
                 if(batidas[x].justificativa_batida != null && (periodo_bloqueado != 1 || exibe == 1)) html += '<tr data-justificativa="'+id_tr+'" data-just="" style="'+((periodo_bloqueado == 1) ? '' : 'display: none;')+'"><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label> <span class="badge badge-primary">'+batidas[x].justificativa_batida.replaceAll('+', ' ')+'</span></td></tr>';
+		        if(batidas[x].obs != null && batidas[x].obs != '' && (exibe == 1)) html += '<tr data-observacao="'+id_tr+'" data-obs=""><td><label>Deseja incluir informações adicionais?</label><textarea class="form-control" value="'+batidas[x].obs+'"></textarea></td></tr>';
 
                 $('.modal_alterar_batida tbody').append(html);
+		        if(batidas[x].obs != null && batidas[x].obs != '') $("[data-observacao='"+id_tr+"'] textarea").val(batidas[x].obs).change().attr('readonly', true);
 
                 natureza_proxima_batida = (batidas[x].natureza != 1) ? 1 : 0;
 
@@ -1350,6 +1368,8 @@ table th {
             $("[data-info]").on('click', function(e) {
                 $("[data-just]").fadeOut(0);
                 $("[data-justificativa='" + $(this).attr('data-info') + "']").fadeIn(0);
+		        $("[data-obs]").fadeOut(0);
+		        $("[data-observacao='" + $(this).attr('data-info') + "']").fadeIn(0)
             });
 
             verificaLimite();
@@ -1526,6 +1546,7 @@ table th {
                     if (tipo == "I") {
                         var just = $("[data-justificativa='" + id + "'] select").val().trim();
                     }
+			        var obs = $("[data-observacao='" + id + "' ] textarea").val();
                     let data = $("[data-info='" + id + "']").find('input,select')[0].value;
                     let data_default = $("[data-info='" + id + "']").find('input,select')[0].getAttribute('data-batida-default');
                     let data_ref = $("[data-info='" + id + "']").find('input,select')[1].value;
@@ -1533,7 +1554,7 @@ table th {
                     let batida = $("[data-info='" + id + "']").find('input,select')[2].value;
                     let batida_default = $("[data-info='" + id + "']").find('input,select')[2].getAttribute('data-default');
                     let natureza = $("[data-info='" + id + "']").find('input,select')[3].value;
-
+                    
                     if (data_ref == "") {
                         $("[data-info='" + id + "']").find('input,select')[1].setAttribute('class', 'form-control form-control-sm parsley-error text-danger');
                     } else {
@@ -1592,15 +1613,16 @@ table th {
                         var dados = [];
 
                         dados.push({
-                            'data_default'        : data_default,
+                            'data_default'        : data_default ?? data,
                             'data'                : data,
                             'tipo'                : tipo,
                             'id'                  : id,
                             'justificativa'       : (just != undefined) ? just : '',
+				            'obs'				  : (obs != undefined) ? obs : '',
                             'data_ref'            : data_ref,
-                            'data_ref_default'    : data_ref_default,
+                            'data_ref_default'    : data_ref_default ?? data_ref,
                             'batida'              : batida,
-                            'batida_default'      : batida_default,
+                            'batida_default'      : batida_default ?? batida,
                             'natureza'            : natureza,
                             "codfilial"           : '<?= ($resFuncionario[0]['CODFILIAL'] ?? 1) ?>',
                             "chapa"               : '<?= $chapa ?>',
@@ -1622,7 +1644,6 @@ table th {
             });
 
             if(msg_aviso_batida != ''){
-
                 Swal.fire({
                     icon: 'question',
                     title: msg_aviso_batida,
@@ -1683,7 +1704,6 @@ table th {
             }else{
 
                 openLoading();
-			   
 
                 $.ajax({
                     url: "<?= base_url('ponto/espelho/action/alterar_batida') ?>",
@@ -1721,7 +1741,7 @@ table th {
         }
         // cria nova linha para inclusão de nova batida
         const incluirNovaBatida = () => {
-            
+
             if (!validaDados()) return;
 
             $("[data-just]").fadeOut(0);
@@ -1734,7 +1754,9 @@ table th {
                 '<td><select class="form-control form-control-sm"><option value="0" ' + (natureza_proxima_batida != 1 ? 'selected' : '') + '>Entrada</option><option value="1" ' + (natureza_proxima_batida == 1 ? 'selected' : '') + '>Saida</option></select></td>' +
                 '<td width="18" class="p-0"><button class="btn btn-danger btn-xxs pr-1 pl-1" data-remove-batida="' + id + '">X</button></td>' +
                 '</tr>' +
-                '<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label><select class="form-control form-control-sm"><option value="">...</option>'+select_justificativa_ajuste+'</td></tr>';
+                '<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Motivo do ajuste:</label><select class="form-control form-control-sm"><option value="">...</option>'+select_justificativa_ajuste+'</td></tr>' + 
+                '<tr data-observacao="' + id + '" data-obs><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Deseja incluir informações adicionais? </label><textarea class="form-control"></textarea></td></tr>';
+
                 //'<tr data-justificativa="' + id + '" data-just><td colspan="3" style="border-top: none;" class="pb-3"><label><i class="mdi mdi-arrow-up-bold"></i> Justificativa:</label><input type="text" maxlength="50" class="form-control mt-0"></td></tr>';
 
             $('.modal_alterar_batida tbody').append(html);
@@ -1743,12 +1765,15 @@ table th {
             $("[data-info]").on('click', function(e) {
                 $("[data-just]").fadeOut(0);
                 $("[data-justificativa='" + $(this).attr('data-info') + "']").fadeIn(0);
+                $("[data-obs]").fadeOut(0);
+                $("[data-observacao='" + $(this).attr('data-info') + "']").fadeIn(0);
             });
 
             // remove a nova batida
             $("[data-remove-batida]").on('click', function(e) {
                 $("[data-info='" + $(this).attr('data-remove-batida') + "']").remove();
                 $("[data-justificativa='" + $(this).attr('data-remove-batida') + "']").remove();
+                $("[data-observacao='" + $(this).attr('data-remove-batida') + "']").remove();
                 verificaLimite();
                 natureza_proxima_batida = (natureza_proxima_batida != 1) ? 1 : 0;
             });
@@ -1757,13 +1782,14 @@ table th {
             natureza_proxima_batida = (natureza_proxima_batida != 1) ? 1 : 0;
 
         }
-        //-----------------------------------------------------------
-        // valida se todos os dados da batida nova foram preenchidos
-        //-----------------------------------------------------------
         const validaDados = () => {
-
             msg_aviso_batida = '';
             msg_aviso_datas = '';
+            
+            // Array to store all batidas for duplicate checking
+            const allBatidas = [];
+            
+            let hasDuplicate = false;
 
             $("[data-p]").each(function(e) {
                 let tipo = $(this).attr('data-p');
@@ -1776,8 +1802,18 @@ table th {
                     let data = $("[data-info='" + id + "']").find('input,select')[0].value;
                     let data_ref = $("[data-info='" + id + "']").find('input,select')[1].value;
                     let batida = $("[data-info='" + id + "']").find('input,select')[2].value;
-                    let batida_default = $("[data-info='" + id + "']").find('input,select')[2].getAttribute('data-default');
                     let natureza = $("[data-info='" + id + "']").find('input,select')[3].value;
+
+                    // Check for duplicate batidas
+                    if (batida) {
+                        const batidaKey = `${data_ref}_${batida}`;
+                        if (allBatidas.includes(batidaKey)) {
+                            hasDuplicate = true;
+                            $("[data-info='" + id + "']").find('input,select')[2].setAttribute('class', 'form-control form-control-sm parsley-error text-danger');
+                        } else {
+                            allBatidas.push(batidaKey);
+                        }
+                    }
 
                     $("[data-info='" + id + "']").find('input,select')[0].setAttribute('class', 'form-control form-control-sm');
                     $("[data-info='" + id + "']").find('input,select')[1].setAttribute('class', 'form-control form-control-sm');
@@ -1800,10 +1836,9 @@ table th {
                     }
 
                     if (tipo == "I") {
-
                         let Vinicio_escala  = parseInt(inicio_escala.replace(':', ''));
                         let Vtermino_escala = parseInt(termino_escala.replace(':', ''));
-
+                        
                         if(Vinicio_escala > Vtermino_escala) Vtermino_escala = Vtermino_escala + 2400;
 
                         let batidaInformada = parseInt(batida.replace(':', ''));
@@ -1816,7 +1851,7 @@ table th {
                             msg_aviso_batida = '<b>Registro</b> está fora de sua jornada.';
                         }
                         if(batidaInformadaCheck > Vtermino_escala){
-                            msg_aviso_batida = '<b>Registro</b> está fora de sua jornada.';
+                            msg_aviso_batida = '<b>Registro</b> está fora de sua jornada. 2';
                         }
 
                         if (just != undefined) {
@@ -1828,8 +1863,12 @@ table th {
                         }
                     }
                 }
-
             });
+
+            if(hasDuplicate) {
+                exibeAlerta('error', 'Não é permitido cadastrar duas batidas com o mesmo horário.');
+                return false;
+            }
 
             if(msg_aviso_datas != ''){
                 exibeAlerta('error', msg_aviso_datas);
@@ -1853,7 +1892,7 @@ table th {
         // verifica a qtde maxima de batida permitida
         const verificaLimite = () => {
             let qtde = $(".modal_alterar_batida [type=time]").length;
-            if (qtde >= 6) {
+            if (qtde >= 8) {
                 $('[data-btn-add]').fadeOut(0);
             } else {
                 $('[data-btn-add]').fadeIn(0);
@@ -2657,42 +2696,76 @@ table th {
 
                 if(dados.justificativa == ""){exibeAlerta('error', '<b>Justificativa de Extra</b> não informado.'); return false; }
 
-                openLoading();
+                // openLoading();
 
-                $.ajax({
-                    url: "<?= base_url('ponto/espelho/action/cadastrar_justificativa_extra') ?>",
-                    type: 'POST',
-                    data: dados,
-                    success: function(result) {
-
-                        openLoading(true);
-
-                        try {
-                            var response = JSON.parse(result);
-
-                            if (response.tipo != 'success') {
-                                exibeAlerta(response.tipo, response.msg);
-                            } else {
-                                exibeAlerta(response.tipo, response.msg, 3);
-                                var myTimeout = setTimeout(function() {
-                                    consultarEspelho();
-                                    clearTimeout(myTimeout);
-                                }, 2000);
-                            }
-
-                        } catch (e) {
-                            exibeAlerta('error', '<b>Erro interno:</b> ' + e);
-                        }
-
-
-                    },
+                // Pergunta se quer adicionar observação
+                Swal.fire({
+                    title: 'Deseja incluir informações adicionais?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sim',
+                    cancelButtonText: 'Não',
+                    customClass: {
+                        title: 'swal2-title'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        abrirModalObservacao(dados, enviarJustificativaExtraComObservacao);
+                    } else {
+                        enviarJustificativaExtraComObservacao(dados);
+                    }
                 });
+
+                function enviarJustificativaExtraComObservacao(dados) {
+                    openLoading();
+                    $.ajax({
+                        url: "<?= base_url('ponto/espelho/action/cadastrar_justificativa_extra') ?>",
+                        type: 'POST',
+                        data: dados,
+                        success: function(result) {
+                            openLoading(true);
+                            try {
+                                var response = JSON.parse(result);
+                                if (response.tipo != 'success') {
+                                    exibeAlerta(response.tipo, response.msg);
+                                } else {
+                                    exibeAlerta(response.tipo, response.msg, 3);
+                                    setTimeout(function() {
+                                        consultarEspelho();
+                                    }, 2000);
+                                }
+                            } catch (e) {
+                                exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+                            }
+                        },
+                    });
+                }
 
             } catch (e) {
                 exibeAlerta('error', '<b>Erro interno:</b> ' + e);
             }
 
         }
+
+        let dadosObservacao = null;
+        let callbackObservacao = null;
+
+        function abrirModalObservacao(dados, callback) {
+            dadosObservacao = dados;
+            callbackObservacao = callback;
+            $("#campoObservacao").val('');
+            $("#modalObservacao").modal('show');
+        }
+
+        // Ao clicar em salvar no modal
+        $("#btnSalvarObservacao").off('click').on('click', function() {
+            if (callbackObservacao) {
+                dadosObservacao.obs = $("#campoObservacao").val();
+                $("#modalObservacao").modal('hide');
+                callbackObservacao(dadosObservacao);
+            }
+        });
+
         <?php endif; // if(!$periodo_bloqueado || $rh || 1==1): ?>
 
     <?php endif; //if($resDiasEspelho && $chapa): 
@@ -2745,6 +2818,20 @@ function m2h(minutos) {
         min-height: 100%;
         border-radius: 0;
     }
+
+	.swal2-popup .swal2-title {
+		background: #1ecab8; /* ou a cor do seu header, ex: var(--success) */
+		color: #fff;
+		padding: 12px 24px;
+		border-top-left-radius: 2px;
+		border-top-right-radius: 2px;
+		font-size: 16px;
+		text-align: left;
+	}
+    
+	#modalObservacao .modal-title {
+		color: #fff;
+	}
 </style>
 
 <!-- modal modal_incluir_batida -->
@@ -3055,7 +3142,27 @@ function m2h(minutos) {
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <!-- modal modal_macro -->
-
+<!-- Modal Observação -->
+<div class="modal fade" id="modalObservacao" tabindex="-1" role="dialog" aria-labelledby="modalObservacaoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalObservacaoLabel">Adicionar Observação</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea id="campoObservacao" class="form-control" rows="4" placeholder="Digite sua observação aqui..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="btnSalvarObservacao">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Observação -->
 <script>
     $(function() {
         $(".modal").draggable();

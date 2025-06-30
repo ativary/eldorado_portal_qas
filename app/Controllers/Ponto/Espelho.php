@@ -73,7 +73,7 @@ class Espelho extends BaseController {
         $h_mes_negativo             = 0;
         $SaldoTotal                 = 0;
         $colaboradores              = [];
-        $dados['resFuncionario']    = $this->mPortal->ListarDadosFuncionario(false, $dados['chapa'], false);
+        $dados['resFuncionario']    = $this->mPortal->ListarDadosFuncionario(false, $dados['chapa'], false, $dados['periodo']);
         //$dados['resDiasEspelho']    = $this->mEspelho->ListarEspelhoDias($dados['periodo'], $dados['chapa'], $dados['isMotorista']);
         $dados['resDiasEspelho']    = $this->mEspelho->ListarEspelhoDias($dados['periodo'], $dados['chapa']);
         
@@ -182,7 +182,7 @@ class Espelho extends BaseController {
             $dados['chapa'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
         }
 
-        $dados['DadosFuncionario'] = $this->mPortal->ListarDadosFuncionario(false,$dados['chapa']);
+        $dados['DadosFuncionario'] = $this->mPortal->ListarDadosFuncionario(false,$dados['chapa'], true, $dados['periodo']);
         $dados['resDiasEspelho']    = $this->mEspelho->ListarEspelhoDias($dados['periodo'], $dados['chapa']);
         $dados['resBatidasEspelho'] = $this->mEspelho->ListarEspelhoBatidas($dados['periodo'], $dados['chapa']);
         $dados['resMovimentos']     = $this->mEspelho->ListarEspelhoMovimento($dados['periodo'], $dados['chapa']);
@@ -373,7 +373,7 @@ class Espelho extends BaseController {
         $dados['h_mes_negativo']  = $h_mes_negativo;
         $dados['SaldoTotal']      = $SaldoTotal;
         
-        $dados['resFuncionario'] = $this->mPortal->ListarDadosFuncionario(false, $dados['chapa'], false);
+        $dados['resFuncionario'] = $this->mPortal->ListarDadosFuncionario(false, $dados['chapa'], false, $dados['periodo']);
         if(!$dados['resFuncionario']) return false;
         
         $dados['isMotorista'] = self::checkMotorista($dados['resFuncionario']);
@@ -454,7 +454,7 @@ class Espelho extends BaseController {
         $dados['h_mes_negativo']  = $h_mes_negativo;
         $dados['SaldoTotal']      = $SaldoTotal;
         
-        $dados['resFuncionario'] = $this->mPortal->ListarDadosFuncionario(false, $dados['chapa']);
+        $dados['resFuncionario'] = $this->mPortal->ListarDadosFuncionario(false, $dados['chapa'], true, $dados['periodo']);
         if(!$dados['resFuncionario']) return false;
 
         $dados['isMotorista'] = false;

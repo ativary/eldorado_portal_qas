@@ -18,13 +18,56 @@ class PortalModel extends Model {
     //---------------------------------------------
     // Lista dados do funcionário
     //---------------------------------------------
-    public function ListarDadosFuncionario($cpf = false, $chapa = false, $filtra_situacao = true){
+    public function ListarDadosFuncionario($cpf = false, $chapa = false, $filtra_situacao = true, $data_referencia = false){
 
         $where = ($filtra_situacao) ? " A.CODSITUACAO <> 'D' " : " A.CODSITUACAO IS NOT NULL ";
         $where .= ($cpf) ? " AND B.CPF = '{$cpf}' " : " AND A.CHAPA = '{$chapa}' AND A.CODCOLIGADA = '".session()->get('func_coligada')."' ";
 
-        if(!$cpf && !$chapa) return false;        
-
+        if(!$cpf && !$chapa) return false;
+        
+       if($data_referencia) {
+            $dataFim = dtEn(substr($data_referencia, 10, 10));
+            
+            $fcoJoin = "
+                LEFT JOIN (
+                    SELECT 
+                        F1.CODCOLIGADA,
+                        F1.CHAPA,
+                        F1.CODFUNCAO,
+                        F1.DTMUDANCA
+                    FROM PFHSTFCO F1
+                    INNER JOIN (
+                        SELECT 
+                            CODCOLIGADA, 
+                            CHAPA, 
+                            MIN(DTMUDANCA) AS DTMUDANCA
+                        FROM PFHSTFCO
+                        WHERE DTMUDANCA > '{$dataFim}'
+                        GROUP BY CODCOLIGADA, CHAPA
+                    ) F2 ON F1.CODCOLIGADA = F2.CODCOLIGADA 
+                        AND F1.CHAPA = F2.CHAPA 
+                        AND F1.DTMUDANCA = F2.DTMUDANCA
+                ) FCO ON FCO.CODCOLIGADA = A.CODCOLIGADA 
+                    AND FCO.CHAPA = A.CHAPA
+                
+                LEFT JOIN PFUNCAO J ON J.CODCOLIGADA = A.CODCOLIGADA AND J.CODIGO = FCO.CODFUNCAO
+            ";
+            
+            $funcaoSelect = "
+                CASE
+                    WHEN FCO.CODFUNCAO IS NOT NULL THEN FCO.CODFUNCAO
+                    ELSE A.CODFUNCAO
+                END AS CODFUNCAO,
+                CASE
+                    WHEN FCO.CODFUNCAO IS NOT NULL THEN J.NOME
+                    ELSE D.NOME
+                END AS NOMEFUNCAO";
+        } else {
+            $fcoJoin = "";
+            $funcaoSelect = "
+                A.CODFUNCAO,
+                D.NOME AS NOMEFUNCAO";
+        }
         $query = "
             SELECT 
                 A.CODCOLIGADA,
@@ -37,8 +80,7 @@ class PortalModel extends Model {
                 A.DATADEMISSAO,
                 A.CODSECAO,
                 C.DESCRICAO NOMESECAO,
-                A.CODFUNCAO,
-                D.NOME NOMEFUNCAO,
+                 {$funcaoSelect},
                 E.NOME NOMECOLIGADA,
                 E.NOMEFANTASIA NOMEFANTASIACOLIGADA,
                 E.CGC CNPJ,
@@ -97,6 +139,7 @@ class PortalModel extends Model {
                 PFUNC A
                     INNER JOIN PPESSOA B ON B.CODIGO = A.CODPESSOA
                     INNER JOIN PSECAO C ON C.CODCOLIGADA = A.CODCOLIGADA AND C.CODIGO = A.CODSECAO
+                    {$fcoJoin}
                     INNER JOIN PFUNCAO D ON D.CODCOLIGADA = A.CODCOLIGADA AND D.CODIGO = A.CODFUNCAO
                     INNER JOIN GCOLIGADA E ON E.CODCOLIGADA = A.CODCOLIGADA
                     LEFT JOIN GBANCO F ON F.NUMBANCO = A.CODBANCOPAGTO

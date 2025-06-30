@@ -1045,6 +1045,7 @@ class EspelhoModel extends Model {
                 }
             }
             
+            $obs = !empty($dados['obs']) ? "'".$dados['obs']."'" : "NULL";
             $query = " INSERT INTO zcrmportal_ponto_horas 
                 (
                     dtponto,
@@ -1060,7 +1061,8 @@ class EspelhoModel extends Model {
                     status,
                     codfilial,
                     anexo_batida,
-                    possui_anexo
+                    possui_anexo,
+                    obs
                 ) VALUES (
                     '{$dados['data_batida']}',
                     '1',
@@ -1075,7 +1077,8 @@ class EspelhoModel extends Model {
                     '1',
                     {$codfilial},
                     {$anexo_batida},
-                    {$possui_anexo}
+                    {$possui_anexo},
+                    {$obs}
                 )
             ";
             // echo $query;exit();
@@ -1127,7 +1130,7 @@ class EspelhoModel extends Model {
                         AND chapa = '{$Dados['chapa']}'
                     ";
                     $result = $this->dbportal->query($query);
-                    
+                    $obs = !empty($Dados['obs']) ? "'".$Dados['obs']."'" : "NULL";
                     $query = "
                         UPDATE 
                             zcrmportal_ponto_horas
@@ -1150,6 +1153,7 @@ class EspelhoModel extends Model {
                             natsai3 = CASE WHEN natsai3 IS NOT NULL THEN ".(int)$Dados['natureza']." ELSE NULL END,
                             natsai4 = CASE WHEN natsai4 IS NOT NULL THEN ".(int)$Dados['natureza']." ELSE NULL END,
                             dtponto = '".dtEn($Dados['data'], true)."',
+                            obs = $obs,
                             dtrefent1 = CASE WHEN dtrefent1 IS NOT NULL THEN '".dtEn($Dados['data_ref'], true)."' ELSE NULL END,
                             dtrefent2 = CASE WHEN dtrefent2 IS NOT NULL THEN '".dtEn($Dados['data_ref'], true)."' ELSE NULL END,
                             dtrefent3 = CASE WHEN dtrefent3 IS NOT NULL THEN '".dtEn($Dados['data_ref'], true)."' ELSE NULL END,
@@ -1180,8 +1184,7 @@ class EspelhoModel extends Model {
                     }
                     // echo $query;
 
-                }else
-                if($Dados['tipo'] == "I"){
+                }else if($Dados['tipo'] == "I"){
                     
                     // pega o numero da proxima batida
                     $query = "
@@ -1210,6 +1213,7 @@ class EspelhoModel extends Model {
                         $dados_nova_batida['horario_batida']       = $Dados['batida'];
                         $dados_nova_batida['codfilial']            = $Dados['codfilial'];
                         $dados_nova_batida['chapa']                = $Dados['chapa'];
+                        $dados_nova_batida['obs']                  = $Dados['obs'];
                        
                         self::CadastrarBatida($dados_nova_batida, $arquivos, $Dados['tem_anexo']);
                         
@@ -1217,8 +1221,7 @@ class EspelhoModel extends Model {
 
                     
 
-                }else
-                if($Dados['tipo'] == "RM"){
+                }else if($Dados['tipo'] == "RM"){
                     
                     // altera data referencia e natureza da batida no RM
                     if(strlen(trim($Dados['data_ref'])) <= 0) continue;
@@ -2859,14 +2862,16 @@ class EspelhoModel extends Model {
                     coligada,
                     justificativa,
                     usucad,
-                    tipo
+                    tipo,
+                    obs
                 ) VALUES (
                     '".dtEn($dados['data'], true)."',
                     '{$dados['chapa']}',
                     '{$this->coligada}',
                     '{$dados['justificativa']}',
                     '{$this->log_id}',
-                    3
+                    3,
+                    '{$dados['obs']}'
                 )
             ";
             $this->dbportal->query($query);

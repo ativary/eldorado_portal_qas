@@ -3,6 +3,7 @@
 namespace App\Models\Ponto;
 
 use SimpleXMLElement;
+use DateTime;
 
 use CodeIgniter\Model;
 
@@ -2861,5 +2862,566 @@ class AprovaModel extends Model
             : responseJson('error', 'Falha ao cancelar sincronismo.');
 
     }
+
+
+  // -----------------------------------------------------------------------------
+  // Workflow de envio de emails para gestores aprovarem envio de 
+  // aviso para colaboradores com mais de 10 faltas consecutivas
+  // -----------------------------------------------------------------------------
+
+  public function Workflow_Faltas()
+  {
+   
+    $data = date('Y-m-d');
+
+    // DATA USADA PARA TESTES EM HOMOLOGAÇÃO
+    // REMOVER EM PRODUÇÃO
+    $data = '2025-05-15';
+
+    $query = "
+      DECLARE @DATA_FIM DATE = '".$data."';
+      DECLARE @DATA_INI DATE = DATEADD(DAY, -20, @DATA_FIM);
+
+      WITH EVE_FALTAS AS (
+        SELECT CODIGO FROM PEVENTO WHERE CODIGOCALCULO = 8 AND VALHORDIAREF = 'D' 
+      ),
+
+      PRESDIR AS (
+        SELECT 
+          DISTINCT C.COLIGADA, C.CHAPA 
+        FROM " . DBPORTAL_BANCO . "..ZCRMPORTAL_HIERARQUIA A
+        LEFT JOIN " . DBPORTAL_BANCO . "..ZCRMPORTAL_HIERARQUIA_GRUPOCARGO B ON B.ID = A.ID_GRUPOCARGO
+        LEFT JOIN " . DBPORTAL_BANCO . "..ZCRMPORTAL_HIERARQUIA_CHAPA C ON C.ID_HIERARQUIA = A.ID
+        WHERE 
+          (B.DESCRICAO = '01 - DIRETOR' OR B.DESCRICAO = '00 - PRESIDENTE') AND
+          A.INATIVO IS NULL AND
+          C.CHAPA IS NOT NULL
+      ),
+
+      SUB AS (
+        SELECT 
+          S.COLIGADA,
+          S.CHAPA_GESTOR,
+          S.CHAPA_SUBSTITUTO,
+          U.NOME,
+          U.EMAIL
+        FROM " . DBPORTAL_BANCO . "..ZCRMPORTAL_HIERARQUIA_GESTOR_SUBSTITUTO S
+        INNER JOIN " . DBPORTAL_BANCO . "..ZCRMPORTAL_USUARIO U ON U.ID = S.ID_SUBSTITUTO
+        WHERE 
+          --S.MODULOS LIKE '%\"6\"%' AND 
+          S.DTFIM >= GETDATE() AND S.INATIVO = 0
+      ),
+
+      EML AS (
+        SELECT 
+          DISTINCT
+          A.CHAPA,
+          A.NOME,
+          A.CODCOLIGADA,
+          C.EMAIL EMAIL
+        FROM
+          PFUNC A,
+          PPESSOA B,
+          " . DBPORTAL_BANCO . "..ZCRMPORTAL_USUARIO C
+        WHERE
+          A.CODPESSOA = B.CODIGO
+          AND C.LOGIN = B.CPF COLLATE LATIN1_GENERAL_CI_AS
+          AND A.CODSITUACAO <> 'D'
+      ),
+
+      PAR AS (
+      SELECT 
+        CODCOLIGADA,
+        DIAS_FALTAS,
+        DIAS_DE_ESPERA,
+        DIAS_PARA_ESCALAR
+      FROM " . DBPORTAL_BANCO . "..ZCRMPORTAL_WORKFLOW_FALTAS_CONFIG
+      ),
+
+      LISTA AS (
+        SELECT A.CODCOLIGADA, A.CHAPA, COUNT(CONVERT(DATE,A.DATA)) AS FALTAS, MIN(CONVERT(DATE,A.DATA)) AS PRIM_FALTA, MAX(CONVERT(DATE,A.DATA)) AS ULT_FALTA 
+        FROM AMOVFUNDIA A
+        LEFT JOIN PAR P ON P.CODCOLIGADA = A.CODCOLIGADA
+        WHERE 
+          A.CODEVE IN (SELECT CODIGO FROM EVE_FALTAS)
+        AND A.DATA >= @DATA_INI AND A.DATA <= @DATA_FIM 
+
+        GROUP BY A.CODCOLIGADA, A.CHAPA, P.DIAS_FALTAS
+        HAVING COUNT(A.DATA) >= ISNULL(P.DIAS_FALTAS,10)
+      ),
+
+      EVE_OUTROS AS (
+        SELECT CODCOLIGADA, CHAPA, MIN(CONVERT(DATE,DATA)) AS PRIM_NAO_FALTA, MAX(CONVERT(DATE,DATA)) AS ULT_NAO_FALTA FROM AMOVFUNDIA
+        WHERE 
+          CODEVE NOT IN (SELECT CODIGO FROM EVE_FALTAS)
+        AND DATA >= @DATA_INI AND DATA <= @DATA_FIM
+
+        GROUP BY CODCOLIGADA, CHAPA
+      ),
+
+      LISTA_UNI AS (
+        SELECT L.*, O.PRIM_NAO_FALTA, O.ULT_NAO_FALTA
+        FROM LISTA L
+        LEFT JOIN EVE_OUTROS O ON O.CODCOLIGADA = L.CODCOLIGADA AND O.CHAPA = L.CHAPA 
+      ),
+
+      TEM_OUTROS_EVE AS (
+        SELECT A.CODCOLIGADA, A.CHAPA, COUNT(CONVERT(DATE,A.DATA)) AS FALTAS 
+        FROM AMOVFUNDIA A
+        INNER JOIN LISTA_UNI L ON L.CODCOLIGADA = A.CODCOLIGADA AND L.CHAPA = A.CHAPA AND L.ULT_NAO_FALTA IS NOT NULL
+        WHERE 
+          CODEVE IN (SELECT CODIGO FROM EVE_FALTAS)
+        AND DATA >= L.ULT_NAO_FALTA AND DATA <= @DATA_FIM 
+
+        GROUP BY A.CODCOLIGADA, A.CHAPA
+      ),
+
+      LISTA_CALC AS (
+      SELECT 
+        L.*,
+        F.CODSITUACAO,
+        O.FALTAS  FALTAS_AJUSTADAS,
+        CASE 
+          WHEN L.ULT_NAO_FALTA > L.ULT_FALTA THEN 0
+          ELSE ISNULL(O.FALTAS, L.FALTAS) 
+        END FALTAS_FINAIS
+      FROM LISTA_UNI L
+      LEFT JOIN PFUNC F ON F.CODCOLIGADA = L.CODCOLIGADA AND F.CHAPA = L.CHAPA
+      LEFT JOIN TEM_OUTROS_EVE O ON O.CODCOLIGADA = L.CODCOLIGADA AND O.CHAPA = L.CHAPA
+      WHERE F.CODSITUACAO IN ('A')
+      ),
+
+      LISTA_G1 AS (
+      SELECT 
+        L.CODCOLIGADA,
+        L.CHAPA,
+        L.PRIM_FALTA,
+        L.FALTAS_FINAIS,
+        G.CHAPA_GESTOR_IMEDIATO,
+        CASE 
+          WHEN P.CHAPA IS NOT NULL THEN 'S'
+          ELSE 'N'
+        END PRESDIR1
+      FROM LISTA_CALC L
+      LEFT JOIN PAR R ON R.CODCOLIGADA = L.CODCOLIGADA
+      LEFT JOIN CRM_HIERARQUIA3 G ON G.CODCOLIGADA = L.CODCOLIGADA AND G.CHAPA = L.CHAPA
+      LEFT JOIN PRESDIR P ON P.COLIGADA = L.CODCOLIGADA AND P.CHAPA = G.CHAPA_GESTOR_IMEDIATO COLLATE LATIN1_GENERAL_CI_AS
+      WHERE L.FALTAS_FINAIS >= ISNULL(R.DIAS_FALTAS, 10)
+      ),
+
+      LISTA_G2 AS (
+      SELECT 
+        L.CODCOLIGADA,
+        L.CHAPA,
+        L.PRIM_FALTA,
+        L.FALTAS_FINAIS,
+        L.CHAPA_GESTOR_IMEDIATO AS CHAPA_GESTOR1,
+        L.PRESDIR1,
+        G.CHAPA_GESTOR_IMEDIATO AS CHAPA_GESTOR2,
+        CASE 
+          WHEN P.CHAPA IS NOT NULL THEN 'S'
+          ELSE 'N'
+        END PRESDIR2
+      FROM LISTA_G1 L
+      LEFT JOIN CRM_HIERARQUIA3 G ON G.CODCOLIGADA = L.CODCOLIGADA AND G.CHAPA = L.CHAPA_GESTOR_IMEDIATO COLLATE LATIN1_GENERAL_CI_AS
+      LEFT JOIN PRESDIR P ON P.COLIGADA = L.CODCOLIGADA AND P.CHAPA = G.CHAPA_GESTOR_IMEDIATO COLLATE LATIN1_GENERAL_CI_AS
+      )
+
+      SELECT 
+        L.CODCOLIGADA,
+        L.CHAPA				AS CHAPA_COLAB,
+        F0.NOME				AS NOME_COLAB,
+	      U.NOME				AS FUNCAO_COLAB,
+        L.PRIM_FALTA,
+        L.FALTAS_FINAIS,
+        L.CHAPA_GESTOR1,
+        E1.NOME				AS NOME_GESTOR1,
+	      E1.EMAIL			AS EMAIL_GESTOR1,
+        L.PRESDIR1,
+        S1.CHAPA_SUBSTITUTO AS GESTOR_SUB1,
+        S1.NOME				AS NOME_SUB1,
+        S1.EMAIL			AS EMAIL_SUB1,
+        L.CHAPA_GESTOR2,
+        E2.NOME				AS NOME_GESTOR2,
+	      E2.EMAIL			AS EMAIL_GESTOR2,
+        L.PRESDIR2,
+        S2.CHAPA_SUBSTITUTO AS GESTOR_SUB2,
+        S2.NOME				AS NOME_SUB2,
+        S2.EMAIL			AS EMAIL_SUB2
+        
+      FROM LISTA_G2 L
+      LEFT JOIN SUB S1 ON S1.COLIGADA = L.CODCOLIGADA AND S1.CHAPA_GESTOR = L.CHAPA_GESTOR1 COLLATE LATIN1_GENERAL_CI_AS
+      LEFT JOIN SUB S2 ON S2.COLIGADA = L.CODCOLIGADA AND S2.CHAPA_GESTOR = L.CHAPA_GESTOR2 COLLATE LATIN1_GENERAL_CI_AS
+      LEFT JOIN EML E1 ON E1.CODCOLIGADA = L.CODCOLIGADA AND E1.CHAPA = L.CHAPA_GESTOR1 COLLATE LATIN1_GENERAL_CI_AS
+      LEFT JOIN EML E2 ON E2.CODCOLIGADA = L.CODCOLIGADA AND E2.CHAPA = L.CHAPA_GESTOR2 COLLATE LATIN1_GENERAL_CI_AS
+      LEFT JOIN PFUNC F0 ON F0.CODCOLIGADA = L.CODCOLIGADA AND F0.CHAPA = L.CHAPA COLLATE LATIN1_GENERAL_CI_AS
+      LEFT JOIN PFUNCAO U ON U.CODCOLIGADA = F0.CODCOLIGADA AND U.CODIGO = F0.CODFUNCAO
+
+		";
+    //echo $query;
+    //die();
+    $result = $this->dbrm->query($query);
+    if ($result->getNumRows() > 0) {
+      $resFuncs = $result->getResultArray();
+      foreach ($resFuncs as $key => $Func):
+        $codcoligada = $Func['CODCOLIGADA'];
+        $chapa_colab = $Func['CHAPA_COLAB'];
+        $nome_colab = $Func['NOME_COLAB'];
+        $funcao_colab = $Func['FUNCAO_COLAB'];
+        $prim_falta = $Func['PRIM_FALTA'];
+        $faltas_finais = $Func['FALTAS_FINAIS'];
+        $chapa_gestor1 = $Func['CHAPA_GESTOR1'];
+        $nome_gestor1 = $Func['NOME_GESTOR1'];
+        $email_gestor1 = $Func['EMAIL_GESTOR1'];
+        $presdir1 = $Func['PRESDIR1'];
+        $gestor_sub1 = $Func['GESTOR_SUB1'];  
+        $nome_sub1 = $Func['NOME_SUB1'];  
+        $email_sub1 = $Func['EMAIL_SUB1'];  
+        $chapa_gestor2 = $Func['CHAPA_GESTOR2'];
+        $nome_gestor2 = $Func['NOME_GESTOR2'];
+        $email_gestor2 = $Func['EMAIL_GESTOR2'];
+        $presdir2 = $Func['PRESDIR2'];
+        $gestor_sub2 = $Func['GESTOR_SUB2'];  
+        $nome_sub2 = $Func['NOME_SUB2'];  
+        $email_sub2 = $Func['EMAIL_SUB2'];
+
+        $enviar = 0; // 0: Não envia email, 1: Envia para gestor 1 e 2: Envia para gestor 2
+
+        $reg_config = $this->reg_faltas_config($codcoligada);  
+        $reg = $this->reg_workflow_faltas($codcoligada, $chapa_colab);      
+
+        if(!$reg) {
+          // insere registro
+          $query = " 
+            INSERT INTO zcrmportal_workflow_faltas
+              (codcoligada, chapa_colab, nome_colab, prim_falta , faltas_finais, chapa_gestor1, nome_gestor1, email_gestor1, presdir1, gestor_sub1, nome_sub1, email_sub1, chapa_gestor2, nome_gestor2, email_gestor2, presdir2, gestor_sub2, nome_sub2, email_sub2, status, dtenvio1, dtcad, usucad, dtalt, usualt) 
+            VALUES 
+              (" . $codcoligada . ", '" . $chapa_colab . "', '" . $nome_colab . "', '" . $prim_falta . "', " . $faltas_finais . ", '" . $chapa_gestor1. "', '" . $nome_gestor1. "', '" . $email_gestor1. "', '" . $presdir1. "', '" . $gestor_sub1. "', '" . $nome_sub1. "', '" . $email_sub1. "', '" . $chapa_gestor2. "', '" . $nome_gestor2. "', '" . $email_gestor2. "', '" . $presdir2. "', '" . $gestor_sub2. "', '" . $nome_sub2. "', '" . $email_sub2. "', 'ENVIADO GESTOR 1', '" . $data. "', '" . $data. "', " . $_SESSION['log_id']. ", '" . $data. "', " . $_SESSION['log_id'] . ") ";
+
+          $this->dbportal->query($query);
+
+          if ($this->dbportal->affectedRows() > 0) {
+            $id_reg = $this->dbportal->insertId();
+            echo 'Registro de abandono de emprego criado com sucesso para coligada-chapa: '.$codcoligada.'-'.$chapa_colab;
+          } else {
+            echo 'Falha ao criar registro de abandono de emprego para chapa: '.$codcoligada.'-'.$chapa_colab;
+          }
+          $enviar = 1;
+
+        } else {
+          $id_reg = $reg->id;
+          $data_atu = DateTime::createFromFormat('Y-m-d', $data);
+          $data_env1 = DateTime::createFromFormat('Y-m-d', $reg->dtenvio1 ?? $data);
+          $data_recu = DateTime::createFromFormat('Y-m-d', $reg->dtrecusado ?? $data);
+          
+          if(substr($reg->status, -16) == 'ENVIADO GESTOR 1') {
+            if(date_diff($data_env1, $data_atu)->d >= $reg_config->dias_para_escalar) {
+              $enviar = 2;
+            } else {
+              if(date_diff($data_env1, $data_atu)->d >= 1) {
+                $enviar = 1;
+              }
+            }
+
+          } elseif($reg->status == 'ENVIADO GESTOR 2') {
+            // nenhuma ação
+            $enviar = 4;  
+
+          } elseif($reg->status == 'RECUSADO') {
+            if(date_diff($data_recu, $data_atu)->d >= $reg_config->dias_de_espera) {
+              $enviar = 3;
+            }  
+          }
+
+          $query = " 
+            UPDATE zcrmportal_workflow_faltas
+              set prim_falta = '" . $prim_falta . "', 
+              faltas_finais = " . $faltas_finais . ", 
+              chapa_gestor1 = '" . $chapa_gestor1. "', 
+              nome_gestor1 = '" . $nome_gestor1. "', 
+              email_gestor1 = '" . $email_gestor1. "', 
+              presdir1 = '" . $presdir1. "', 
+              gestor_sub1 = '" . $gestor_sub1. "', 
+              nome_sub1 = '" . $nome_sub1. "', 
+              email_sub1 = '" . $email_sub1. "', 
+              chapa_gestor2 = '" . $chapa_gestor2. "', 
+              nome_gestor2 = '" . $nome_gestor2. "', 
+              email_gestor2 = '" . $email_gestor2. "', 
+              presdir2 = '" . $presdir2. "', 
+              gestor_sub2 = '" . $gestor_sub2. "', 
+              nome_sub2 = '" . $nome_sub2. "', 
+              email_sub2 = '" . $email_sub2. "',";
+
+          if($enviar == 2) {
+            $query .= " 
+              status = 'ENVIADO GESTOR 2',
+              dtenvio2 = '" . $data. "', ";
+          } elseif($enviar == 3) {
+            $query .= "
+              status = 'REENVIADO GESTOR 1',
+              dtenvio1 = '" . $data. "', ";
+          }
+
+          $query .= " 
+              dtalt = '" . $data. "', 
+              usualt = " . $_SESSION['log_id']. "
+            WHERE 
+              id = " . $id_reg;
+
+          //echo $query;
+          //exit();
+          $this->dbportal->query($query);
+
+          if ($this->dbportal->affectedRows() > 0) {
+            echo 'Registro de abandono de emprego atualizado com sucesso para coligada-chapa: '.$codcoligada.'-'.$chapa_colab.'<br>';
+          } else {
+            echo 'Falha ao atualizar registro de abandono de emprego para chapa: '.$codcoligada.'-'.$chapa_colab.'<br>';
+          }
+
+        }
+  
+        // Apenas para complementar a URL
+        $random = rtrim(strtr(base64_encode(random_bytes(12)), '+/', '-_'), '=');
+
+        if($enviar > 0) {
+          $assunto = '[Portal RH] Faltas Consecutivas';
+          $mensagem = '
+						O(a) colaborador(a) <strong>' . $nome_colab . '</strong>, de chapa <strong>' . $chapa_colab . '</strong> e função <strong>' . $funcao_colab . '</strong>, está com ' . $faltas_finais . ' faltas consecutivas desde ' . date( 'd/m/Y' , strtotime( $prim_falta ) ) . '.
+
+						Solicitamos que acesse o Portal RH para confirmar o envio do 1° Telegrama, ou justificar o motivo de aguardar mais alguns dias.<br><br>
+						Segue abaixo link para acesso ao Portal RH <a href="' . base_url() . '/ponto/aprova/telegrama/' . $id_reg . '" target="_blank">' . base_url() .'/ponto/aprova/telegrama/' . $id_reg . '/' . $random . '</a><br><br>
+						Atenciosamente,<br>
+						<strong>Equipe Processos de RH</strong><br>
+          ';
+
+          if($enviar > 0 and $presdir1 == 'N') {
+            $nome = $nome_gestor1;
+            $email = $email_gestor1;
+            $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
+            $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
+            //$email = 'deivison.batista@eldoradobrasil.com.br';
+            $email = 'alvaro.zaragoza@ativary.com';
+            $response = enviaEmail($email, $assunto, $htmlEmail);
+            echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
+          }
+
+          if($enviar > 0 and $email_sub1 <> '') {
+            $nome = $nome_sub1;
+            $email = $email_sub1;
+            $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
+            $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
+            //$email = 'deivison.batista@eldoradobrasil.com.br';
+            $email = 'alvaro.zaragoza@ativary.com';
+            $response = enviaEmail($email, $assunto, $htmlEmail);
+            echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
+          }
+
+          if(($enviar == 2 or $enviar == 4) and $presdir2 == 'N') {
+            $nome = $nome_gestor2;
+            $email = $email_gestor2;
+            $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
+            $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
+            //$email = 'deivison.batista@eldoradobrasil.com.br';
+            $email = 'alvaro.zaragoza@ativary.com';
+            $response = enviaEmail($email, $assunto, $htmlEmail);
+            echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
+          }
+
+          if(($enviar == 2 or $enviar == 4) and $email_sub2 <> '') {
+            $nome = $nome_sub2;
+            $email = $email_sub2;
+            $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
+            $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
+            //$email = 'deivison.batista@eldoradobrasil.com.br';
+            $email = 'alvaro.zaragoza@ativary.com';
+            $response = enviaEmail($email, $assunto, $htmlEmail);
+            echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
+          }
+        }
+
+      endforeach;
+      
+      // atualiza datas de envio
+      //$atu = "UPDATE zcrmportal_art61_requisicao SET dt_envio_email = GETDATE() WHERE status = 2";
+      //$this->dbportal->query($atu);
+
+      return true;
+
+    } else {
+
+      echo 'Nada a enviar';
+      return false;
+    }
+  }
+
+  // -------------------------------------------------------
+  // Retorna o registro no workflow de faltas
+  // -------------------------------------------------------
+  public function reg_workflow_faltas($codcoligada, $chapa, $id = 0)
+  {
+    if($id == 0) {
+      $where = "
+      where codcoligada = ".$codcoligada." 
+        and chapa_colab = '".$chapa."'
+        and status <> 'FINALIZADO'
+      ";
+    } else {
+      $where = "
+      where id = ".$id;
+    }
+
+    $query = "
+      select * 
+      from zcrmportal_workflow_faltas 
+      ".$where;
+
+    $result = $this->dbportal->query($query);
+    $row = $result->getRow();
+    if (isset($row)) {
+      return $row;
+    } else {
+      return false;
+    }
+  }
+
+  // -------------------------------------------------------
+  // Retorna o registro de parametros do workflow de faltas
+  // -------------------------------------------------------
+  public function reg_faltas_config($codcoligada)
+  {
+    $query = "
+      select * 
+      from zcrmportal_workflow_faltas_config
+      where codcoligada = ".$codcoligada." 
+    ";
+    $result = $this->dbportal->query($query);
+    $row = $result->getRow();
+    if (isset($row)) {
+      return $row;
+    } else {
+      return false;
+    }
+  }
+
+  //---------------------------------------------
+    // Pega parametros do (RM)
+    //---------------------------------------------
+    public function ListarFaltas($id){
+
+        $query = "
+          SELECT 
+            w.codcoligada,
+            w.chapa_colab,
+            w.nome_colab,
+            w.prim_falta,
+            w.faltas_finais, 
+            w.status, 
+            u.NOME as funcao_colab
+          FROM zcrmportal_workflow_faltas w
+          LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON f.CODCOLIGADA = w.codcoligada and f.CHAPA = w.chapa_colab COLLATE Latin1_General_CI_AS 
+          LEFT JOIN " . DBRM_BANCO . "..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA and u.CODIGO = f.CODFUNCAO
+          WHERE w.id = ".$id;
+        $result = $this->dbportal->query($query);
+        return ($result->getNumRows() > 0) 
+                ? $result->getResultArray() 
+                : false;
+
+    }
+
+  // -----------------------------------------------------------------------------
+  // Finaliza registro de faltas e envia email para RH MASTER
+  // -----------------------------------------------------------------------------
+
+  public function EnviaTelegrama($id)
+  {
+    $data = date('Y-m-d');
+    $reg_config = $this->reg_faltas_config($_SESSION['func_coligada']);  
+    $reg = $this->reg_workflow_faltas(0,'0',$id);      
+    $chapa_aprovou = util_chapa(session()->get('func_chapa'))['CHAPA'];
+    $nome_aprovou = $_SESSION['log_nome'];
+
+    $query = " 
+        UPDATE zcrmportal_workflow_faltas
+        SET status = 'FINALIZADO',
+            dtaprovado = '" . $data. "', 
+            chapa_aprovou = '" . $chapa_aprovou. "', 
+            dtalt = '" . $data. "', 
+            usualt = " . $_SESSION['log_id']. "
+        WHERE 
+          id = " . $id;
+    $this->dbportal->query($query);
+
+    if ($this->dbportal->affectedRows() > 0) {
+    } else {
+      return responseJson('error', 'Não foi possivel confirmar o envio do telegrama');
+    }
+
+    $assunto = '[Portal RH] Confirmação para envio de Telegrama';
+    $mensagem = '
+      Confirmo o envio de telegrama de abandono de emprego para o colaborador:<br>
+      Nome: <strong>' . $reg->nome_colab . '</strong><br>
+      Chapa: <strong>' . $reg->chapa_colab . '</strong><br>
+      Que esta com <strong>' . $reg->faltas_finais . '</strong> faltas consecutivas desde <strong>' . date( 'd/m/Y' , strtotime( $reg->prim_falta ) ) . '</strong>.<br><br>
+      Atenciosamente,<br>
+      <strong>' . $nome_aprovou . ' - ' . $chapa_aprovou . ' </strong><br>
+      ' . date( 'd/m/Y' ) . ' <br>
+    ';
+
+    $email = $reg_config->email_rh;
+    $msg_nome = 'Prezado(a) RH Master,<br><br>';
+    $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
+    $response = enviaEmail($email, $assunto, $htmlEmail);
+    
+    return responseJson('success', 'Envio do telegrama confirmado.');
+  }
+
+  // -----------------------------------------------------------------------------
+  // Recusa o envio do Telegrama
+  // -----------------------------------------------------------------------------
+
+  public function RecusaTelegrama($id, $motivo)
+  {
+    $data = date('Y-m-d');
+    $reg_config = $this->reg_faltas_config($_SESSION['func_coligada']);  
+    $reg = $this->reg_workflow_faltas(0,'0',$id);      
+    $chapa_reprovou = util_chapa(session()->get('func_chapa'))['CHAPA'];
+    $nome_reprovou = $_SESSION['log_nome'];
+
+    $query = " 
+        UPDATE zcrmportal_workflow_faltas
+        SET status = 'RECUSADO',
+            dtrecusado = '" . $data. "', 
+            chapa_recusou = '" . $chapa_reprovou. "', 
+            motivo_recusa = '" . $motivo. "', 
+            dtalt = '" . $data. "', 
+            usualt = " . $_SESSION['log_id']. "
+        WHERE 
+          id = " . $id;
+    $this->dbportal->query($query);
+
+    if ($this->dbportal->affectedRows() > 0) {
+    } else {
+      return responseJson('error', 'Não foi possivel recusar o envio do telegrama');
+    }
+
+    $assunto = '[Portal RH] Recusado o envio de Telegrama';
+    $mensagem = '
+      O envio de telegrama de abandono de emprego para o colaborador:<br>
+      Nome: <strong>' . $reg->nome_colab . '</strong><br>
+      Chapa: <strong>' . $reg->chapa_colab . '</strong><br>
+      Que esta com <strong>' . $reg->faltas_finais . '</strong> faltas consecutivas desde <strong>' . date( 'd/m/Y' , strtotime( $reg->prim_falta ) ) . '</strong>.<br><br>
+      <strong>Foi RECUSADO</strong> pelo motivo: <strong>' . $motivo . '</strong>.<br><br>
+      Atenciosamente,<br>
+      <strong>' . $nome_reprovou . ' - ' . $chapa_reprovou . ' </strong><br>
+      ' . date( 'd/m/Y' ) . ' <br>
+    ';
+
+    $email = $reg_config->email_rh;
+    $msg_nome = 'Prezado(a) RH Master,<br><br>';
+    $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
+    $response = enviaEmail($email, $assunto, $htmlEmail);
+    
+    return responseJson('success', 'Envio do telegrama recusado.');
+  }
 
 }
