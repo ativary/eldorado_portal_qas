@@ -924,6 +924,39 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 ]
                 
         break;
+        case '43':
+                colunas = [
+                    {'value': '[CODCOLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[CHAPA]', 'name': 'Chapa do Colaborador'},
+                    {'value': '[NOME]', 'name': 'Nome'},
+                    {'value': '[FILIAL]', 'name': 'Filial'},
+                    {'value': '[CODFUNCAO]', 'name': 'Código da Função'},
+                    {'value': '[FUNCAO]', 'name': 'Função'},
+                    {'value': '[CODSECAO]', 'name': 'Código da Seção'},
+                    {'value': '[SECAO]', 'name': 'Seção'},
+                    {'value': '[CENTRO_DE_CUSTO]', 'name': 'Centro de Custo'},
+                    {'value': '[NOME_CCUSTO]', 'name': 'Nome do Centro de Custo'},
+                    {'value': '[INICIO_FALTAS]', 'name': 'Data de Início das Faltas'},
+                    {'value': '[FALTAS_CONSECUTIVAS]', 'name': 'Faltas Consecutivas'},
+                    {'value': '[STATUS]', 'name': 'Status do Workflow'},
+                    {'value': '[DATA_ENVIO_GESTOR1]', 'name': 'Envio para Gestor 1'},
+                    {'value': '[CHAPA_GESTOR1]', 'name': 'Chapa do Gestor 1'},
+                    {'value': '[NOME_GESTOR1]', 'name': 'Nome do Gestor 1'},
+                    {'value': '[CHAPA_SUB_GESTOR1]', 'name': 'Chapa do Substituto do Gestor 1'},
+                    {'value': '[NOME_SUB_GESTOR1]', 'name': 'Nome do Substituto do Gestor 1'},
+                    {'value': '[DATA_ENVIO_GESTOR2]', 'name': 'Envio para Gestor 2'},
+                    {'value': '[CHAPA_GESTOR2]', 'name': 'Chapa do Gestor 2'},
+                    {'value': '[NOME_GESTOR2]', 'name': 'Nome do Gestor 2'},
+                    {'value': '[CHAPA_SUB_GESTOR2]', 'name': 'Chapa do Substituto do Gestor 2'},
+                    {'value': '[NOME_SUB_GESTOR2]', 'name': 'Nome do Substituto do Gestor 2'},
+                    {'value': '[DATA_CONFIRMACAO]', 'name': 'Data que foi Confirmado o Envio'},
+                    {'value': '[CHAPA_CONFIRMOU]', 'name': 'Chapa que Confirmou o Envio'},
+                    {'value': '[DATA_RECUSA]', 'name': 'Data que foi Recusado o Envio'},
+                    {'value': '[CHAPA_RECUSOU]', 'name': 'Chapa que Recusou o Envio'},
+                    {'value': '[MOTIVO_RECUSA]', 'name': 'Motivo que foi Recusado o Envio'}
+                ]
+                
+        break;
 
     }
 
@@ -1005,7 +1038,7 @@ const gerarRelatorioTabela = () => {
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
     if(relatorio == 11 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42 || relatorio == 43) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
 
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
 
@@ -1032,7 +1065,7 @@ const gerarExcel = () => {
     if(relatorio == 8 && dataI == "" || relatorio == 8 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42 || relatorio == 43) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
   
@@ -1055,7 +1088,7 @@ const gerarPDF = () => {
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
     if(relatorio == 11 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42 || relatorio == 43) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
 
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
 

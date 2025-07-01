@@ -229,6 +229,9 @@ class RelatorioModel extends Model {
             case 42:
                 return self::relatorioMudancaHorario($request);
                 break;
+            case 43:
+                return self::relatorioWorkflowFaltas($request);
+                break;
 
         }
     }
@@ -6671,6 +6674,105 @@ FROM (
           LEFT JOIN " . DBRM_BANCO . "..AHORARIO a ON a.CODCOLIGADA = l.COLIGADA AND a.CODIGO = l.CODHORARIO_ANTERIOR
           LEFT JOIN " . DBRM_BANCO . "..AHORARIO b ON b.CODCOLIGADA = l.COLIGADA AND b.CODIGO = l.CODHORARIO_ATUAL
           LEFT JOIN " . DBRM_BANCO . "..PSINDIC c ON c.CODCOLIGADA = l.COLIGADA AND c.CODIGO = l.CODSINDICATO
+        ";
+
+        //echo '<pre>';
+        //echo $query;exit();
+        $result = $this->dbportal->query($query);
+
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+
+
+    private function relatorioWorkflowFaltas($request)
+    {
+       // print_r($request);
+         //exit();
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND f.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND f.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND ( w.chapa_colab = '".$request['chapa']."' )";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        $query = "              
+          SELECT 
+            w.codcoligada	    AS CODCOLIGADA,
+            w.chapa_colab	    AS CHAPA,
+            w.nome_colab	    AS NOME,
+            f.codfilial		    AS FILIAL,
+            f.codfuncao		    AS CODFUNCAO,
+            u.nome			      AS FUNCAO,
+            f.codsecao		    AS CODSECAO,
+            s.DESCRICAO		    AS SECAO, 
+            s.NROCENCUSTOCONT AS CENTRO_DE_CUSTO,
+            c.NOME			      AS NOME_CCUSTO,
+            w.prim_falta	    AS INICIO_FALTAS,
+            w.faltas_finais   AS FALTAS_CONSECUTIVAS, 
+            w.status		      AS STATUS,
+            w.dtenvio1		    AS DATA_ENVIO_GESTOR1,
+            w.chapa_gestor1   AS CHAPA_GESTOR1,
+            w.nome_gestor1	  AS NOME_GESTOR1,
+            w.gestor_sub1	    AS CHAPA_SUB_GESTOR1,
+            w.nome_sub1		    AS NOME_SUB_GESTOR1,
+            w.dtenvio2		    AS DATA_ENVIO_GESTOR2,
+            w.chapa_gestor2   AS CHAPA_GESTOR2,
+            w.nome_gestor2    AS NOME_GESTOR2,
+            w.gestor_sub2	    AS CHAPA_SUB_GESTOR2,
+            w.nome_sub2		    AS NOME_SUB_GESTOR2,
+            w.dtaprovado	    AS DATA_CONFIRMACAO,
+            w.chapa_aprovou   AS CHAPA_CONFIRMOU,
+            w.dtrecusado	    AS DATA_RECUSA,
+            w.chapa_recusou   AS CHAPA_RECUSOU,
+            w.motivo_recusa   AS MOTIVO_RECUSA
+          FROM zcrmportal_workflow_faltas w
+          LEFT JOIN CorporeRMDEV..PFUNC f ON f.CODCOLIGADA = w.codcoligada and f.CHAPA = w.chapa_colab COLLATE Latin1_General_CI_AS
+          LEFT JOIN CorporeRMDEV..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA and u.CODIGO = f.CODFUNCAO
+          LEFT JOIN CorporeRMDEV..PSECAO s ON s.CODCOLIGADA = f.CODCOLIGADA and s.CODIGO = f.CODSECAO
+          LEFT JOIN CorporeRMDEV..GCCUSTO c ON c.CODCOLIGADA = s.CODCOLIGADA and c.CODCCUSTO = s.NROCENCUSTOCONT
+
+          WHERE 
+                w.CODCOLIGADA = ".$this->coligada." 
+            AND ( ( w.dtcad >= '".$request['dataIni']."' AND w.dtcad <= '".$request['dataFim']."' ) OR
+                  ( w.dtenvio1 >= '".$request['dataIni']."' AND w.dtenvio1 <= '".$request['dataFim']."' ) OR
+                  ( w.dtenvio2 >= '".$request['dataIni']."' AND w.dtenvio2 <= '".$request['dataFim']."' ) OR
+                  ( w.dtaprovado >= '".$request['dataIni']."' AND w.dtaprovado <= '".$request['dataFim']."' ) OR
+                  ( w.dtrecusado >= '".$request['dataIni']."' AND w.dtrecusado <= '".$request['dataFim']."' ) ) 
+            ".$FiltroSecao."
+            ".$FiltroChapa."
+            ".$FiltroFuncao." 
+
         ";
 
         //echo '<pre>';

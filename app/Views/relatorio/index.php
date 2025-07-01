@@ -52,6 +52,7 @@
                                     <?php if($rh): ?><option value="40" <?php if($relatorio == 40){ echo 'selected';}?>>Conferência Artigo.61</option><?php endif; ?> 
                                     <?php if($rh): ?><option value="41" <?php if($relatorio == 41){ echo 'selected';}?>>Relação Geral - Equipe - Gestor Substituto</option><?php endif; ?> 
                                     <?php if($rh): ?><option value="42" <?php if($relatorio == 42){ echo 'selected';}?>>Relação de Mudanças de Horário</option><?php endif; ?> 
+                                    <?php if($rh): ?><option value="43" <?php if($relatorio == 43){ echo 'selected';}?>>Conferência Workflow Abandono de Emprego</option><?php endif; ?> 
                                 </select>
                             </div>
                         </div>
