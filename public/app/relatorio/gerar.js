@@ -398,6 +398,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'EVENTO', 'name': 'Evento'},
              
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -426,6 +427,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'JUSTIFICATIVA_APROV', 'name': 'Justificativa Aprovação'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -455,6 +457,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'EVENTO', 'name': 'Evento'},
                 
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -483,7 +486,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
-               
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
             ];
         break;
         case '21':
@@ -528,6 +531,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
             
@@ -558,7 +562,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
-               
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
             ];
         break;
         case '23':
@@ -588,6 +592,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -616,6 +621,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -644,7 +650,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
-               
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
             ];
         break;
 

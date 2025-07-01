@@ -2520,7 +2520,7 @@ class VariaveisModel extends Model {
                 }
                 $builder->groupEnd(); 
             }else{
-                $builder->where('usucad', $this->logId);
+                if($_SESSION['rh_master']<>'S') { $builder->where('usucad', $this->logId); }
             }
     
             $builder->orderBy('zcrmportal_variaveis_req.id', 'ASC');
