@@ -742,7 +742,7 @@ class EspelhoModel extends Model {
 
         if($batidasPortal){
             foreach($batidasPortal as $key => $BatidaPortal){
-                $BATIDAS_PORTAL .= " UNION ALL SELECT '{$chapa}' CHAPA, '{$BatidaPortal['DATA']}' DATA, '{$BatidaPortal['DATAREFERENCIA']}' DATAREFERENCIA, {$BatidaPortal['BATIDA']} BATIDA, 'D' STATUS, {$BatidaPortal['NATUREZA']} NATUREZA, '{$BatidaPortal['DATAINSERCAO']}' DATAINSERCAO, '{$BatidaPortal['DATABATIDA']}' DATABATIDA, {$BatidaPortal['BATIDA_NOTURNA']} BATIDA_NOTURNA, 1 PORTAL, 0 IDAAFDT, '{$BatidaPortal['MOTIVO_REPROVA']}' MOTIVO_REPROVA, '{$BatidaPortal['JUSTIFICATIVA_BATIDA']}' JUSTIFICATIVA_BATIDA {$from_dual} ";
+                $BATIDAS_PORTAL .= " UNION ALL SELECT '{$chapa}' CHAPA, '{$BatidaPortal['DATA']}' DATA, '{$BatidaPortal['DATAREFERENCIA']}' DATAREFERENCIA, {$BatidaPortal['BATIDA']} BATIDA, 'D' STATUS, {$BatidaPortal['NATUREZA']} NATUREZA, '{$BatidaPortal['DATAINSERCAO']}' DATAINSERCAO, '{$BatidaPortal['DATABATIDA']}' DATABATIDA, {$BatidaPortal['BATIDA_NOTURNA']} BATIDA_NOTURNA, 1 PORTAL, 0 IDAAFDT, '{$BatidaPortal['MOTIVO_REPROVA']}' MOTIVO_REPROVA, '{$BatidaPortal['JUSTIFICATIVA_BATIDA']}' JUSTIFICATIVA_BATIDA, '{$BatidaPortal['DESC_ABONO']}' DESC_ABONO {$from_dual} ";
                 unset($BatidaPortal, $batidasPortal[$key], $key);
             }
         }
@@ -775,9 +775,9 @@ class EspelhoModel extends Model {
                         AND A.coligada = CODCOLIGADA
                         AND COALESCE(A.ent1,A.ent2,A.ent3,A.ent4,A.sai1,A.sai2,A.sai3,A.sai4) = BATIDA
                 
-                ) JUSTIFICATIVA_BATIDA
+                ) JUSTIFICATIVA_BATIDA,
+                NULL DESC_ABONO
 
-                
             FROM 
                 ABATFUN 
             WHERE 
@@ -812,7 +812,8 @@ class EspelhoModel extends Model {
                         AND A.coligada = CODCOLIGADA
                         AND COALESCE(A.ent1,A.ent2,A.ent3,A.ent4,A.sai1,A.sai2,A.sai3,A.sai4) = BATIDA
                 
-                ) JUSTIFICATIVA_BATIDA
+                ) JUSTIFICATIVA_BATIDA,
+                NULL DESC_ABONO
             FROM 
                 ABATFUNAM
             WHERE 
@@ -856,6 +857,7 @@ class EspelhoModel extends Model {
                 $dados[$chapa][$data]['batidas'][$linha]['idaafdt']                 = $dadosBatidas['IDAAFDT'];
                 $dados[$chapa][$data]['batidas'][$linha]['motivo_reprova']          = $dadosBatidas['MOTIVO_REPROVA'];
                 $dados[$chapa][$data]['batidas'][$linha]['justificativa_batida']    = $dadosBatidas['JUSTIFICATIVA_BATIDA'];
+                $dados[$chapa][$data]['batidas'][$linha]['desc_abono']              = $dadosBatidas['DESC_ABONO'];
                 $linha++;
 
                 unset($dadosBatidas, $batidas[$key], $key);
@@ -875,58 +877,60 @@ class EspelhoModel extends Model {
         $coligada = session()->get("func_coligada");
 
         switch(DBPORTAL_TIPO){
-            case    'mysql': $dtponto   = " STR_TO_DATE(dtponto, '%Y-%m-%d') "; break;
-            case    'oracle': $dtponto  = " TO_DATE(dtponto, 'YYYY-MM-DD') "; break;
-            case    'postgre': $dtponto = " CAST(dtponto AS DATE) "; break;
-            default: $dtponto           = " CAST(dtponto AS DATETIME) "; break;
+            case    'mysql': $dtponto   = " STR_TO_DATE(z.dtponto, '%Y-%m-%d') "; break;
+            case    'oracle': $dtponto  = " TO_DATE(z.dtponto, 'YYYY-MM-DD') "; break;
+            case    'postgre': $dtponto = " CAST(z.dtponto AS DATE) "; break;
+            default: $dtponto           = " CAST(z.dtponto AS DATETIME) "; break;
         }
 
         $filtroData = "
             AND (
                 {$dtponto} BETWEEN '{$dataInicio}' AND '{$dataFim}'
                     OR
-                COALESCE(dtrefent1, dtrefent2, dtrefent3, dtrefent4, dtrefent5, dtrefsai1, dtrefsai2, dtrefsai3, dtrefsai4, dtrefsai5) BETWEEN '{$dataInicio}' AND '{$dataFim}'
+                COALESCE(z.dtrefent1, z.dtrefent2, z.dtrefent3, z.dtrefent4, z.dtrefent5, z.dtrefsai1, z.dtrefsai2, z.dtrefsai3, z.dtrefsai4, z.dtrefsai5) BETWEEN '{$dataInicio}' AND '{$dataFim}'
             )
         ";
         if($insert){
             $filtroData = "
                 AND (
-                        COALESCE(dtrefent1, dtrefent2, dtrefent3, dtrefent4, dtrefent5, dtrefsai1, dtrefsai2, dtrefsai3, dtrefsai4, dtrefsai5) BETWEEN '{$dataInicio}' AND '{$dataFim}'
+                        COALESCE(z.dtrefent1, z.dtrefent2, z.dtrefent3, z.dtrefent4, z.dtrefent5, z.dtrefsai1, z.dtrefsai2, dtrefsai3, z.dtrefsai4, z.dtrefsai5) BETWEEN '{$dataInicio}' AND '{$dataFim}'
                     )
             ";
         }
 
         $query = "
             SELECT
-                chapa CHAPA,
+                z.chapa CHAPA,
                 {$dtponto} DATA,
-                COALESCE(dtrefent1, dtrefent2, dtrefent3, dtrefent4, dtrefent5, dtrefsai1, dtrefsai2, dtrefsai3, dtrefsai4, dtrefsai5) DATAREFERENCIA,
-                COALESCE(ent1, ent2, ent3, ent4, ent5, sai1, sai2, sai3, sai4, sai5) BATIDA,
+                COALESCE(z.dtrefent1, z.dtrefent2, z.dtrefent3, z.dtrefent4, z.dtrefent5, z.dtrefsai1, z.dtrefsai2, z.dtrefsai3, z.dtrefsai4, z.dtrefsai5) DATAREFERENCIA,
+                COALESCE(z.ent1, z.ent2, z.ent3, z.ent4, z.ent5, z.sai1, z.sai2, z.sai3, z.sai4, z.sai5) BATIDA,
                 'D' STATUS,
-                COALESCE(natent1, natent2, natent3, natent4, natent5, natsai1, natsai2, natsai3, natsai4, natsai5) NATUREZA,
-                dtcadastro DATAINSERCAO,
+                COALESCE(z.natent1, z.natent2, z.natent3, z.natent4, z.natent5, z.natsai1, z.natsai2, z.natsai3, z.natsai4, z.natsai5) NATUREZA,
+                z.dtcadastro DATAINSERCAO,
                 CASE
                     WHEN 
-                        COALESCE(dtrefent1, dtrefent2, dtrefent3, dtrefent4, dtrefent5, dtrefsai1, dtrefsai2, dtrefsai3, dtrefsai4, dtrefsai5) IS NULL
+                        COALESCE(z.dtrefent1, z.dtrefent2, z.dtrefent3, z.dtrefent4, z.dtrefent5, z.dtrefsai1, z.dtrefsai2, z.dtrefsai3, z.dtrefsai4, z.dtrefsai5) IS NULL
                     THEN {$dtponto}
                     ELSE
-                        COALESCE(dtrefent1, dtrefent2, dtrefent3, dtrefent4, dtrefent5, dtrefsai1, dtrefsai2, dtrefsai3, dtrefsai4, dtrefsai5)
+                        COALESCE(z.dtrefent1, z.dtrefent2, z.dtrefent3, z.dtrefent4, z.dtrefent5, z.dtrefsai1, z.dtrefsai2, dtrefsai3, z.dtrefsai4, z.dtrefsai5)
                 END DATABATIDA,
                 CASE
                     WHEN
-                        COALESCE(dtrefent1, dtrefent2, dtrefent3, dtrefent4, dtrefent5, dtrefsai1, dtrefsai2, dtrefsai3, dtrefsai4, dtrefsai5) < {$dtponto}
+                        COALESCE(z.dtrefent1, z.dtrefent2, z.dtrefent3, z.dtrefent4, z.dtrefent5, z.dtrefsai1, z.dtrefsai2, z.dtrefsai3, z.dtrefsai4, z.dtrefsai5) < {$dtponto}
                     THEN 1
                     ELSE 0
                 END BATIDA_NOTURNA,
-                motivo_reprova MOTIVO_REPROVA,
-                COALESCE(justent1,justent2,justent3,justent4,justsai1,justsai2,justsai3,justsai4) JUSTIFICATIVA_BATIDA
+                z.motivo_reprova MOTIVO_REPROVA,
+                COALESCE(z.justent1,z.justent2,z.justent3,z.justent4,z.justsai1,z.justsai2,z.justsai3,z.justsai4) JUSTIFICATIVA_BATIDA,
+                a.DESCRICAO DESC_ABONO
             FROM
-                zcrmportal_ponto_horas
+                zcrmportal_ponto_horas z
+            LEFT JOIN " . DBRM_BANCO . "..AABONO a ON a.CODCOLIGADA = z.coligada and a.CODIGO = z.abn_codabono COLLATE Latin1_General_CI_AS
             WHERE
-                    chapa = '{$chapa}'
-                AND coligada = '{$coligada}'
-                AND status IN ('1', '3')
-                AND movimento = '1'
+                    z.chapa = '{$chapa}'
+                AND z.coligada = '{$coligada}'
+                AND z.status IN ('1', '3')
+                AND z.movimento = '1'
                 {$filtroData}
         ";
         // echo '<pre>';
