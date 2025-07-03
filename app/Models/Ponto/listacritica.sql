@@ -1,7 +1,11 @@
 USE [CorporeRMDEV]
 GO
 
-/****** Object:  UserDefinedFunction [dbo].[AY_CRITICAS]    Script Date: 21/05/2025 10:14:42 ******/
+/****** Object:  UserDefinedFunction [dbo].[AY_CRITICAS]    Script Date: 03/07/2025 17:20:42 ******/
+DROP FUNCTION [dbo].[AY_CRITICAS]
+GO
+
+/****** Object:  UserDefinedFunction [dbo].[AY_CRITICAS]    Script Date: 03/07/2025 17:20:42 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -139,7 +143,7 @@ FROM (
         WHERE A.CODCOLIGADA = C.CODCOLIGADA
           AND A.CHAPA = C.CHAPA
           AND A.DATA = C.DATAREFERENCIA
-          AND CODAVISO = '11'
+          AND CODAVISO = '2' AND RIGHT(DESCRICAO,5) >= '12:00'
       ) JORNADA_MAIOR_12HORAS,
       'Registro sem par correspondente' SEM_PAR_CORRESPONDENTE_DESC,
       CASE
@@ -175,7 +179,7 @@ FROM (
         WHERE A.CODCOLIGADA = C.CODCOLIGADA
           AND A.CHAPA = C.CHAPA
           AND A.DATA = C.DATAREFERENCIA
-          AND CODAVISO = '11'
+          AND CODAVISO = '2' AND RIGHT(DESCRICAO,5) >= '12:00'
       ) JORNADA_MAIOR_12HORAS_DESC,
       (
         SELECT COUNT(*)

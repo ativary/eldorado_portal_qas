@@ -1,12 +1,17 @@
 USE [CorporeRMDEV]
 GO
 
-/****** Object:  UserDefinedFunction [dbo].[AY_CRITICAS_BATIDAS]    Script Date: 21/05/2025 10:15:35 ******/
+/****** Object:  UserDefinedFunction [dbo].[AY_CRITICAS_BATIDAS]    Script Date: 03/07/2025 17:21:46 ******/
+DROP FUNCTION [dbo].[AY_CRITICAS_BATIDAS]
+GO
+
+/****** Object:  UserDefinedFunction [dbo].[AY_CRITICAS_BATIDAS]    Script Date: 03/07/2025 17:21:46 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 CREATE FUNCTION [dbo].[AY_CRITICAS_BATIDAS](@CODCOLIGADA INT, @DATAINIC DATE, @DATAFIM DATE)
 RETURNS TABLE AS
@@ -140,7 +145,7 @@ FROM (
         WHERE A.CODCOLIGADA = C.CODCOLIGADA
           AND A.CHAPA = C.CHAPA
           AND A.DATA = C.DATAREFERENCIA
-          AND CODAVISO = '11'
+          AND CODAVISO = '2' AND RIGHT(DESCRICAO,5) >= '12:00'
       ) JORNADA_MAIOR_12HORAS,
       CASE
         (
@@ -175,7 +180,7 @@ FROM (
         WHERE A.CODCOLIGADA = C.CODCOLIGADA
           AND A.CHAPA = C.CHAPA
           AND A.DATA = C.DATAREFERENCIA
-          AND CODAVISO = '11'
+          AND CODAVISO = '2' AND RIGHT(DESCRICAO,5) >= '12:00'
       ) JORNADA_MAIOR_12HORAS_DESC,
       (
         CASE
