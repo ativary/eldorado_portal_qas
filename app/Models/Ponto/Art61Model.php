@@ -1784,7 +1784,7 @@ class Art61Model extends Model
         $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
 
         //$email = 'deivison.batista@eldoradobrasil.com.br';
-        $email = 'alvaro.zaragoza@ativary.com';
+        //$email = 'alvaro.zaragoza@ativary.com';
         $response = enviaEmail($email, $assunto, $htmlEmail);
 
       /* EMAIL PARA SUBSTITUTO
