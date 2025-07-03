@@ -1102,16 +1102,21 @@ $(document).ready(function(){
 
 									$abono_pendente_rh = $resData[$i]['ABONO_PENDENTE_RH'];
 
-									$motivo_justificativa = (strlen(trim($resData[$i]['JUSTIFICATIVA'])) > 0) ? $resData[$i]['JUSTIFICATIVA'] : 'Não justificado';
+                  $motivo_justificativa = 'Não justificado';
+
+                  if($resData[$i]['USABANCOHORAS'] == 1) {
+                    $motivo_justificativa = 'Banco de Horas';
+                  }
+
+                  if(strlen(trim($resData[$i]['JUSTIFICATIVA'])) > 0) {
+									  $motivo_justificativa = $resData[$i]['JUSTIFICATIVA'];
+                  }
 
 									$status_atitude = '';
 									if(strlen(trim($resData[$i]['JUSTIFICATIVA_ATITUDE'])) > 0){
 										$status_atitude = substr($resData[$i]['JUSTIFICATIVA_ATITUDE'],-1);
 										$motivo_justificativa = substr($resData[$i]['JUSTIFICATIVA_ATITUDE'],0, -1);
-									}
-
-
-
+									}     
 
 									$html = '<tr class="tbadmlistalin">';
 
