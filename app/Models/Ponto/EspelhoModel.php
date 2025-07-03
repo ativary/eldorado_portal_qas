@@ -458,11 +458,14 @@ class EspelhoModel extends Model {
                     (SELECT R.REALIZADO FROM REFEICAO R WHERE R.COL = A.CODCOLIGADA AND R.CHAPA = A.CHAPA AND R.DATA = A.DATA) total_refeicao, 
                     --ISNULL(total_direcao,0) total_direcao, 
                     --ISNULL(total_espera,0) total_espera, 
-                    ISNULL(adicional_noturno,0) adicional_noturno
+                    ISNULL(adicional_noturno,0) adicional_noturno,
+                    ISNULL(P.USABANCOHORAS, 0 ) USABANCOHORAS
             FROM 
                 AAFHTFUN A
                 LEFT JOIN APARFUN AS B ON B.CODCOLIGADA = A.CODCOLIGADA AND B.CHAPA = A.CHAPA
                 LEFT JOIN ".DBPORTAL_BANCO."..zcrmportal_ponto_motorista C ON C.coligada = A.CODCOLIGADA AND C.chapa = A.CHAPA COLLATE Latin1_General_CI_AS AND C.dtponto = A.DATA
+                LEFT JOIN PFUNC F ON F.CODCOLIGADA = A.CODCOLIGADA AND F.CHAPA = A.CHAPA
+                LEFT JOIN APARCOL P ON P.CODCOLIGADA = F.CODCOLIGADA AND P.CODIGO = F.CODSINDICATO
                 
             WHERE 
                     A.CODCOLIGADA = {$coligada}
@@ -643,12 +646,15 @@ class EspelhoModel extends Model {
                     (SELECT R.REALIZADO FROM REFEICAO R WHERE R.COL = A.CODCOLIGADA AND R.CHAPA = A.CHAPA AND R.DATA = A.DATA) total_refeicao, 
                      --ISNULL(total_direcao,0) total_direcao, 
                      --ISNULL(total_espera,0) total_espera, 
-                     ISNULL(adicional_noturno,0) adicional_noturno
+                     ISNULL(adicional_noturno,0) adicional_noturno,
+                    ISNULL(P.USABANCOHORAS, 0 ) USABANCOHORAS
                     
             FROM 
                 AAFHTFUNAM A
                 LEFT JOIN APARFUN AS B ON B.CODCOLIGADA = A.CODCOLIGADA AND B.CHAPA = A.CHAPA
                 LEFT JOIN ".DBPORTAL_BANCO."..zcrmportal_ponto_motorista C ON C.coligada = A.CODCOLIGADA AND C.chapa = A.CHAPA COLLATE Latin1_General_CI_AS AND C.dtponto = A.DATA
+                LEFT JOIN PFUNC F ON F.CODCOLIGADA = A.CODCOLIGADA AND F.CHAPA = A.CHAPA
+                LEFT JOIN APARCOL P ON P.CODCOLIGADA = F.CODCOLIGADA AND P.CODIGO = F.CODSINDICATO
                 
             WHERE 
                     A.CODCOLIGADA = {$coligada}

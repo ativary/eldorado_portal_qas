@@ -601,9 +601,9 @@ class CriticaModel extends Model {
         ORDER BY NOME, DATA
       ";
 
-// if($_SESSION['log_id'] == 3021){
-//   echo '<pre>'.$query.'</pre>';exit();
-// }
+ //if($_SESSION['log_id'] == 3021){
+ //  echo '<pre>'.$query.'</pre>';exit();
+ //}
       // exit();
       $result = $this->dbrm->query($query);
       if(!$result) return false;
@@ -1748,19 +1748,20 @@ class CriticaModel extends Model {
                   if($request['atitude'] == 0){
                     // falta confirmada
                     $this->dbportal->query(" DELETE FROM zcrmportal_ponto_justificativa_func WHERE chapa = '{$request['chapa']}' AND dtponto = '{$request['data']}' AND coligada = '{$this->coligada}' AND justificativa = (SELECT id FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = 'BANCO DE HORAS' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}') ");
-
-                    $this->dbportal->query(" INSERT INTO zcrmportal_ponto_justificativa_func 
-                      SELECT '{$request['data']}', '{$request['chapa']}', codcoligada, null, null, id, '{$this->log_id}', tipo FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = '{$descricao}' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}'
-                    ");
+                    $query = " INSERT INTO zcrmportal_ponto_justificativa_func 
+                      SELECT '{$request['data']}', '{$request['chapa']}', codcoligada, null, null, id, '{$this->log_id}', tipo, null FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = '{$descricao}' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}'
+                    ";
+                    $this->dbportal->query($query);
 
                   }
 
                   if($request['atitude'] == 1){
                     // banco de horas
                     $this->dbportal->query(" DELETE FROM zcrmportal_ponto_justificativa_func WHERE chapa = '{$request['chapa']}' AND dtponto = '{$request['data']}' AND coligada = '{$this->coligada}' AND justificativa = (SELECT id FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = '{$descricao}' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}') ");
-                    $this->dbportal->query(" INSERT INTO zcrmportal_ponto_justificativa_func 
-                      SELECT '{$request['data']}', '{$request['chapa']}', codcoligada, null, null, id, '{$this->log_id}', tipo FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = 'BANCO DE HORAS' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}'
-                    ");
+                    $query = " INSERT INTO zcrmportal_ponto_justificativa_func 
+                      SELECT '{$request['data']}', '{$request['chapa']}', codcoligada, null, null, id, '{$this->log_id}', tipo, null FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = 'BANCO DE HORAS' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}'
+                    ";
+                    $this->dbportal->query($query);
 
                   }
 

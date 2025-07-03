@@ -410,10 +410,14 @@ table th {
                                         if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][8]['desc_abono'])) {
                                           $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][8]['desc_abono'];
                                         }
+                                        if(isset($DiasEspelho['USABANCOHORAS']) and $DiasEspelho['USABANCOHORAS'] = 1 and 
+                                            ($DiasEspelho['FALTA'] > 0 or $DiasEspelho['ATRASO'] > 0) ) {
+                                          $desc_abono = 'BANCO DE HORAS';
+                                        }
                                         if(isset($DiasEspelho['ABONOS'])) {
                                           $desc_abono = $DiasEspelho['ABONOS'];
                                         }
-
+                                        
                                         // ent 1
                                         if (isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][0]['batida'])) {
                                             $concat = false;
