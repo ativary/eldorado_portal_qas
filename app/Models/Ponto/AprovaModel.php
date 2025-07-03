@@ -602,7 +602,7 @@ class AprovaModel extends Model
         $htmlEmail = templateEmail($mensagem);
 
         //$email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
-        $email_solicitante = 'alvaro.zaragoza@ativary.com';
+        //$email_solicitante = 'alvaro.zaragoza@ativary.com';
         enviaEmail($email_solicitante, '[Portal RH] Sua Solicitação Foi Reprovada', $htmlEmail);
 
         return responseJson('success', 'Requisição do Artigo 61 REPROVADA com sucesso');
@@ -2565,7 +2565,7 @@ class AprovaModel extends Model
         $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
 
         //$email = 'deivison.batista@eldoradobrasil.com.br';
-        $email = 'alvaro.zaragoza@ativary.com';
+        //$email = 'alvaro.zaragoza@ativary.com';
         $response = enviaEmail($email, $assunto, $htmlEmail);
         echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
 
@@ -3200,7 +3200,7 @@ class AprovaModel extends Model
             $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
             $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
             //$email = 'deivison.batista@eldoradobrasil.com.br';
-            $email = 'alvaro.zaragoza@ativary.com';
+            //$email = 'alvaro.zaragoza@ativary.com';
             $response = enviaEmail($email, $assunto, $htmlEmail);
             echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
           }
@@ -3211,7 +3211,7 @@ class AprovaModel extends Model
             $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
             $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
             //$email = 'deivison.batista@eldoradobrasil.com.br';
-            $email = 'alvaro.zaragoza@ativary.com';
+            //$email = 'alvaro.zaragoza@ativary.com';
             $response = enviaEmail($email, $assunto, $htmlEmail);
             echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
           }
@@ -3222,7 +3222,7 @@ class AprovaModel extends Model
             $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
             $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
             //$email = 'deivison.batista@eldoradobrasil.com.br';
-            $email = 'alvaro.zaragoza@ativary.com';
+            //$email = 'alvaro.zaragoza@ativary.com';
             $response = enviaEmail($email, $assunto, $htmlEmail);
             echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
           }
@@ -3233,7 +3233,7 @@ class AprovaModel extends Model
             $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
             $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
             //$email = 'deivison.batista@eldoradobrasil.com.br';
-            $email = 'alvaro.zaragoza@ativary.com';
+            //$email = 'alvaro.zaragoza@ativary.com';
             $response = enviaEmail($email, $assunto, $htmlEmail);
             echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
           }
