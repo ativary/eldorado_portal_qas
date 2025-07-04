@@ -274,6 +274,7 @@ table th {
                                         <th class="text-center n-mobile-cell" width="<?= ($impressao) ? '50' : ''; ?>">Ent</th>
                                         <th class="text-center n-mobile-cell" width="<?= ($impressao) ? '50' : ''; ?>">Sai</th>
                                         <th class="text-center n-mobile-cell">Hr. Trab.</th>
+                                        <th class="text-center n-mobile-cell">Extra Executado</th>
                                         <th class="text-center n-mobile-cell">Extra 1° faixa</th>
                                         <th class="text-center n-mobile-cell">Extra 2° faixa</th>
                                         <th class="text-center n-mobile-cell">Extra 100%</th>
@@ -912,6 +913,7 @@ table th {
                                                 <?php endif; ?>
 														   
                                             <td <?= $bglinha; ?> class="n-mobile-cell text-center text-primary"><?= ((int)$DiasEspelho['HTRAB'] > 0) ? m2h($DiasEspelho['HTRAB']) : ""; ?></td>
+                                            <td <?= $bglinha; ?> class="n-mobile-cell text-center text-primary"><?= ((int)$DiasEspelho['EXTRAEXECUTADO'] > 0) ? m2h($DiasEspelho['EXTRAEXECUTADO']) : ""; ?></td>
                                             <td <?= $bglinha; ?> class="n-mobile-cell text-center text-danger"><?= ((int)$DiasEspelho['EXTRA_1AFAIXA'] > 0) ? m2h($DiasEspelho['EXTRA_1AFAIXA']) : ""; ?></td>
                                             <td <?= $bglinha; ?> class="n-mobile-cell text-center text-danger"><?= ((int)$DiasEspelho['EXTRA_2AFAIXA'] > 0) ? m2h($DiasEspelho['EXTRA_2AFAIXA']) : ""; ?></td>
                                             <td <?= $bglinha; ?> class="n-mobile-cell text-center text-danger"><?= ((int)$DiasEspelho['EXTRA_100'] > 0) ? m2h($DiasEspelho['EXTRA_100']) : ""; ?></td>
