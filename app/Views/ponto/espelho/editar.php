@@ -69,17 +69,11 @@ table th {
         <td align="left">
             Cartão de Ponto<br>
             <?= $resFuncionario[0]['NOMECOLIGADA']; ?><br>
-            Emissão: <?= meses(date('m')) ?>/<?= date('Y'); ?><br>
-            <br>
-            <?= $resFuncionario[0]['RUA']; ?>, <?= $resFuncionario[0]['NUMERO']; ?><br>
             CNPJ: <?= $resFuncionario[0]['CNPJ']; ?>
         </td>
         <td align="right">
-            <div style="text-align: left;">
-                <strong>Seção: </strong> <?php echo $resFuncionario[0]['CODSECAO'] . ' - ' . $resFuncionario[0]['NOMESECAO'] ?>
-            </div>
-            <br>
             <div style="text-align: rigth;">
+                <b>Emissão:</b> <?= meses(date('m')) ?>/<?= date('Y'); ?><br>
                 <b>Data:</b> <?= date('d/m/Y'); ?><br>
                 <span><b>Período:</b> <?= substr($periodo, 0, 10); ?> à <?= substr($periodo, -10); ?></span>
             </div>
@@ -101,8 +95,7 @@ table th {
                 <tr>
                     <td style="padding: 0px;" width="150">Carteira de Trabalho<br><?= $resFuncionario[0]['CARTEIRATRAB'].' - '.$resFuncionario[0]['SERIECARTTRAB']; ?></td>
                     <td style="padding: 0px;">Função<br><?= $resFuncionario[0]['NOMEFUNCAO']; ?></td>
-                    <td style="padding: 0px;" width="150">Cargo<br><?= $resFuncionario[0]['CARGO']; ?></td>
-                    <td style="padding: 0px;" width="150" align="center"></td>
+                    <td colspan="2" width="300" style="padding: 0px;">Seção<br><?php echo $resFuncionario[0]['CODSECAO'] . ' - ' . $resFuncionario[0]['NOMESECAO'] ?></td>
                 </tr>
             </table><br>
             <table width="100%" style="margin:0;">
@@ -886,12 +879,12 @@ table th {
                                         }
 
                                         $possui_extra = ((int)$DiasEspelho['EXTRAEXECUTADO'] > 0) ? true : false;
-                                        if($possui_extra and $justificativa_extra == "" ){
+                                        if($possui_extra and $justificativa_extra == "" and !$impressao){
                                             $bglinha = ' style="background-color: #c8c02d;" ';
                                         }
 
                                         $possui_falta_atraso = ((int)$DiasEspelho['FALTA'] > 0 || (int)$DiasEspelho['ATRASO'] > 0) ? true : false;
-                                        if($possui_falta_atraso){
+                                        if($possui_falta_atraso and !$impressao){
                                             $bglinha = ' style="background-color: #f3dab0;" ';
                                         }
 
@@ -928,30 +921,36 @@ table th {
 																																																			   
 																					
 																																												   
-														 
-                                                <td <?php if($idaafdt_ent[1] > 0 && $status_ent[1] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($ent_motivo_reprova[1])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[1].'"';}elseif(strlen(trim($ent_portal[1])) > 0 && $status_ent[1] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[1] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[1])) > 0): ?><?= $ent[1].' <span class="badge badge-light">'.(($status_ent[1] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if($idaafdt_sai[1] > 0 && $status_sai[1] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($sai_motivo_reprova[1])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[1].'"';}elseif(strlen(trim($sai_portal[1])) > 0 && $status_sai[1] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[1] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[1])) > 0): ?><?= $sai[1].' <span class="badge badge-light">'.(($status_sai[1] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if($idaafdt_ent[2] > 0 && $status_ent[2] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($ent_motivo_reprova[2])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[2].'"';}elseif(strlen(trim($ent_portal[2])) > 0 && $status_ent[2] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[2] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[2])) > 0): ?><?= $ent[2].' <span class="badge badge-light">'.(($status_ent[2] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if($idaafdt_sai[2] > 0 && $status_sai[2] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($sai_motivo_reprova[2])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[2].'"';}elseif(strlen(trim($sai_portal[2])) > 0 && $status_sai[2] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[2] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[2])) > 0): ?><?= $sai[2].' <span class="badge badge-light">'.(($status_sai[2] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if($idaafdt_ent[3] > 0 && $status_ent[3] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($ent_motivo_reprova[3])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[3].'"';}elseif(strlen(trim($ent_portal[3])) > 0 && $status_ent[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[3])) > 0): ?><?= $ent[3].' <span class="badge badge-light">'.(($status_ent[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <td <?php if($idaafdt_sai[3] > 0 && $status_sai[1] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($sai_motivo_reprova[3])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[3].'"';}elseif(strlen(trim($sai_portal[3])) > 0 && $status_sai[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[3])) > 0): ?><?= $sai[3].' <span class="badge badge-light">'.(($status_sai[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
-                                                <?php if(strlen(trim($resFuncionario[0]['DATADEMISSAO'])) > 0 && $DiasEspelho['DATA'] >= $resFuncionario[0]['DATADEMISSAO']): ?>
-                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-dark  txtpdf" style="background: #004d95 !important;">Demitido - Não Utiliza Ponto</span></td>
-                                                <?php elseif($desc_abono <> ''): ?>
-                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: #004d95 !important;"><?= $desc_abono; ?></span></td>
-                                                <?php elseif($DiasEspelho['AFASTAMENTO'] > 0): ?>
-                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: #004d95 !important;"><?= $DiasEspelho['AFASTAMENTO']; ?></span></td>
-                                                <?php elseif($DiasEspelho['FERIADO'] > 0): ?>
-                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-success  txtpdf" style="background: #04609d !important;">FERIADO</span></td>
-                                                <?php elseif($DiasEspelho['COMPENSADO'] > 0): ?>
-                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: #004d95 !important;">COMPENSADO</span></td>
-                                                <?php elseif($DiasEspelho['DESCANSO'] > 0): ?>
-                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: #004d95 !important;">DESCANSO</span></td>
-                                                <?php elseif($DiasEspelho['FERIAS'] > 0): ?>
-                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: #004d95 !important;">FÉRIAS</span></td>
+												<?php if(!$impressao): ?>
+                                                    <?php $bgtipo = "#004d95"; $colortipo="#fff"; $bgferiado = "#04609d"; $bghr = "#9de3ad"; ?>
                                                 <?php else: ?>
-                                                    <td <?php if($idaafdt_ent[4] > 0 && $status_ent[4] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($ent_motivo_reprova[4])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[4].'"';}elseif(strlen(trim($ent_portal[4])) > 0 && $status_ent[4] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[4] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?= $ent[4]; ?></td>
-                                                    <td <?php if($idaafdt_sai[4] > 0 && $status_sai[4] == "D") { echo ' style="background:#9de3ad;" ';} elseif(strlen(trim($sai_motivo_reprova[4])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[4].'"';}elseif(strlen(trim($sai_portal[4])) > 0 && $status_sai[4] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[4] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?= $sai[4]; ?></td>
+                                                    <?php $bgtipo = "#fff"; $colortipo="#000"; $bgferiado = "#fff"; $bghr = "#fff";?>
+                                                <?php endif; ?>
+
+                                                <td <?php if($idaafdt_ent[1] > 0 && $status_ent[1] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($ent_motivo_reprova[1])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[1].'"';}elseif(strlen(trim($ent_portal[1])) > 0 && $status_ent[1] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[1] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[1])) > 0): ?><?= $ent[1].' <span class="badge badge-light">'.(($status_ent[1] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_sai[1] > 0 && $status_sai[1] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($sai_motivo_reprova[1])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[1].'"';}elseif(strlen(trim($sai_portal[1])) > 0 && $status_sai[1] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[1] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[1])) > 0): ?><?= $sai[1].' <span class="badge badge-light">'.(($status_sai[1] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_ent[2] > 0 && $status_ent[2] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($ent_motivo_reprova[2])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[2].'"';}elseif(strlen(trim($ent_portal[2])) > 0 && $status_ent[2] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[2] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[2])) > 0): ?><?= $ent[2].' <span class="badge badge-light">'.(($status_ent[2] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_sai[2] > 0 && $status_sai[2] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($sai_motivo_reprova[2])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[2].'"';}elseif(strlen(trim($sai_portal[2])) > 0 && $status_sai[2] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[2] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[2])) > 0): ?><?= $sai[2].' <span class="badge badge-light">'.(($status_sai[2] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_ent[3] > 0 && $status_ent[3] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($ent_motivo_reprova[3])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[3].'"';}elseif(strlen(trim($ent_portal[3])) > 0 && $status_ent[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($ent[3])) > 0): ?><?= $ent[3].' <span class="badge badge-light">'.(($status_ent[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                <td <?php if($idaafdt_sai[3] > 0 && $status_sai[1] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($sai_motivo_reprova[3])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[3].'"';}elseif(strlen(trim($sai_portal[3])) > 0 && $status_sai[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[3])) > 0): ?><?= $sai[3].' <span class="badge badge-light">'.(($status_sai[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
+                                                
+                                                <?php if(strlen(trim($resFuncionario[0]['DATADEMISSAO'])) > 0 && $DiasEspelho['DATA'] >= $resFuncionario[0]['DATADEMISSAO']): ?>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-dark  txtpdf" style="background:  <?= $bgtipo ?> !important;color: <?= $colortipo ?>;">Demitido - Não Utiliza Ponto</span></td>
+                                                <?php elseif($desc_abono <> ''): ?>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background:  <?= $bgtipo ?> !important;color: <?= $colortipo ?>;"><?= $desc_abono; ?></span></td>
+                                                <?php elseif($DiasEspelho['AFASTAMENTO'] > 0): ?>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: <?= $bgtipo ?> !important;color: <?= $colortipo ?>;"><?= $DiasEspelho['AFASTAMENTO']; ?></span></td>
+                                                <?php elseif($DiasEspelho['FERIADO'] > 0): ?>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-success  txtpdf" style="background: <?= $bgferiado ?> !important;">FERIADO</span></td>
+                                                <?php elseif($DiasEspelho['COMPENSADO'] > 0): ?>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: <?= $bgtipo ?> !important;color: <?= $colortipo ?>;">COMPENSADO</span></td>
+                                                <?php elseif($DiasEspelho['DESCANSO'] > 0): ?>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: <?= $bgtipo ?> !important;color: <?= $colortipo ?>;">DESCANSO</span></td>
+                                                <?php elseif($DiasEspelho['FERIAS'] > 0): ?>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: <?= $bgtipo ?> !important;color: <?= $colortipo ?>;">FÉRIAS</span></td>
+                                                <?php else: ?>
+                                                    <td <?php if($idaafdt_ent[4] > 0 && $status_ent[4] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($ent_motivo_reprova[4])) > 0){echo ' style="background:#f5943f;" title="'.$ent_motivo_reprova[4].'"';}elseif(strlen(trim($ent_portal[4])) > 0 && $status_ent[4] != "T"){echo ' style="background:#feca07;" ';}elseif($status_ent[4] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?= $ent[4]; ?></td>
+                                                    <td <?php if($idaafdt_sai[4] > 0 && $status_sai[4] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($sai_motivo_reprova[4])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[4].'"';}elseif(strlen(trim($sai_portal[4])) > 0 && $status_sai[4] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[4] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?= $sai[4]; ?></td>
                                                 <?php endif; ?>
 														   
                                             <td <?= $bglinha; ?> class="n-mobile-cell text-center text-primary"><?= ((int)$DiasEspelho['HTRAB'] > 0) ? m2h($DiasEspelho['HTRAB']) : ""; ?></td>
@@ -3438,5 +3437,68 @@ loadPlugin(array('select2', 'mask', 'tooltips'))
         .colbatida {
             width: 98px;
         }
+    }
+</style>
+<!-- Regras CSS específicas para impressão em preto e branco -->
+<style media="print">
+    /* Forçar todos os elementos a serem preto e branco */
+    * {
+        color: #000 !important;
+        background-color: #fff !important;
+        background-image: none !important;
+        background: #fff !important;
+        border-color: #000 !important;
+    }
+    
+    /* Garantir que textos sejam pretos */
+    .txteldorado_1, .txteldorado_2, .txteldorado_3, .txteldorado_4, 
+    .txteldorado_5, .txteldorado_6, .txteldorado_7, .txteldorado_8, 
+    .txteldorado_9, .bgeldorado_1, .bgeldorado_2, .bgeldorado_3 {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Garantir que badges sejam preto e branco */
+    .badge, .badge-light, .badge-dark, .badge-purple, .badge-success {
+        color: #000 !important;
+        background-color: #fff !important;
+        border: 1px solid #000 !important;
+    }
+    
+    /* Garantir que ícones sejam pretos */
+    .mdi, i {
+        color: #000 !important;
+    }
+    
+    /* Garantir que células de tabela sejam brancas */
+    td, th {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+    
+    /* Garantir que elementos com cores inline sejam preto e branco */
+    [style*="background"] {
+        background-color: #fff !important;
+        background: #fff !important;
+    }
+    
+    [style*="color"] {
+        color: #000 !important;
+    }
+    
+    /* Garantir que elementos com classe txtpdf sejam preto e branco */
+    .txtpdf {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Manter bordas visíveis em preto */
+    table, th, td {
+        border-color: #000 !important;
+    }
+    
+    /* Garantir que elementos com background cinza sejam brancos */
+    [style*="#f9f9f9"], [style*="#f0f0f0"] {
+        background-color: #fff !important;
     }
 </style>
