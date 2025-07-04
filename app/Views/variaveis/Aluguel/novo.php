@@ -134,10 +134,13 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 
 <script>
        var fora_periodo=0 ;
-       var CODIGOGRUPO ;
+       var CODFILIAL ;
 $(document).ready(function(){
     $("[data-money]").maskMoney({prefix:'', allowNegative: false, allowZero:false, thousands:'.', decimal:',', affixesStay: false});
     verificaData();
+    if (fora_periodo == 1) { 
+        exibeAlerta("error", "Atenção! Fora do período de abertura para novas requisições."); 
+    }
 });
 
 function verificaValor(input) {
@@ -146,11 +149,12 @@ function verificaValor(input) {
     var limiteminimo = null;
     var limitePermitido = null;
     $.each(regra.dependentes, function(index, func) {
-        if (func.codigo == CODIGOGRUPO) {
+        if (func.codigo == CODFILIAL) {
             valorLimite = func.valor_max;
             valorminimo = func.valor_min;
             limitePermitido = parseFloat(func.valor_max.replace(/[^0-9,-]+/g,"").replace(",","."));
             limiteminimo = parseFloat(func.valor_min.replace(/[^0-9,-]+/g,"").replace(",","."));
+            
             return false; // Encerra o loop assim que encontrar a correspondência
         }else{
 
@@ -158,6 +162,8 @@ function verificaValor(input) {
 
     });
 
+    console.log('valor_max:', limitePermitido);
+    console.log('regra.dep', regra.dependentes);
     if (limitePermitido !== null && valor > limitePermitido) {
         Swal.fire({
             icon: 'error', // Ícone de erro para indicar que algo está errado
@@ -338,8 +344,9 @@ const selecionaFuncionario = (chapa) => {
         success:function(result){
            
             var response = JSON.parse(result);
+            console.log(response[0]);
 
-            CODIGOGRUPO =  response[0].CARGO;
+            CODFILIAL =  response[0].CODFILIAL;
 
             $("#valor").val('');
             $("#filial").val(response[0].CODFILIAL)

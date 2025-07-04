@@ -31,7 +31,7 @@
                               
                                 <div class="form-group row mb-2">
                                     <label for="tipoReq" class="col-sm-2 col-form-label text-right text-left-sm"><span class="text-danger">*</span>Tipo de Requisição:</label>
-                                    <div class="col-sm-10">
+                                    <div class="col-sm-4">
                                         <select  class="select2 custom-select form-control form-control-sm"  name="tipoReq" id="tipoReq">
                                             <option disabled value=""> ... </option>
                                             <option value="1" <?= ($req[0]->tiporeq == '1') ? " selected " : ""; ?>> Mensal </option>
@@ -39,6 +39,17 @@
                                         
                                         </select>
                                     
+                                    </div>
+
+                                    <label for="tipoPer" class="col-sm-2 col-form-label text-right text-left-sm"><span class="text-danger">*</span>Período de Ponto:</label>
+                                    <div class="col-sm-4">
+                                        <select  class="select2 custom-select form-control form-control-sm" name="tipoPer" id="tipoPer">
+                                            <option value=""> ... </option>
+                                            <option value="1" <?= (isset($valores->tipoPer) and $valores->tipoPer == '1') ? " selected " : ""; ?>> Atual &nbsp;&nbsp;&nbsp; (<?= DateTime::createFromFormat('Y-m-d', $per_ini_atual)->format('d/m/Y'); ?> a <?= DateTime::createFromFormat('Y-m-d', $per_fim_atual)->format('d/m/Y'); ?>)</option>
+                                            <option value="2" <?= (isset($valores->tipoPer) and $valores->tipoPer == '2') ? " selected " : ""; ?>> Futuro &nbsp; (<?= DateTime::createFromFormat('Y-m-d', $per_ini_futuro)->format('d/m/Y'); ?> a <?= DateTime::createFromFormat('Y-m-d', $per_fim_futuro)->format('d/m/Y'); ?>)</option>
+                                          
+                                        </select>
+                                      
                                     </div>
                                 </div>
                             
@@ -55,6 +66,29 @@
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="form-group row mb-2">
+                                <label for="datas" class="col-sm-2 col-form-label text-right text-left-sm"> <span class="text-danger">*</span> Data Inicial:</label>
+                                <div class="input-group col-sm-4 ">
+                                    <input class="form-control datepicker m_data" type="date"  value="<?= isset($valores->data_inicio) ?  $valores->data_inicio : ''; ?>" name="data_inicio" id="data_inicio" required>
+                                    <div class="input-group-prepend input-group-append">
+                                        <span class="input-group-text">Data Final</span>
+                                    </div>
+                                    <input class="form-control datepicker m_data" type="date"  value="<?= isset($valores->data_fim) ? $valores->data_fim : ''; ?>" name="data_fim" id="data_fim" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-2">
+                                <label for="horas" class="col-sm-2 col-form-label text-right text-left-sm"> <span class="text-danger">*</span> Hora Inicial:</label>
+                                <div class="input-group col-sm-4 ">
+                                    <input class="form-control" type="time"  value="<?= isset($valores->hora_inicio) ? $valores->hora_inicio :''; ?>"  name="hora_inicio" id="hora_inicio" required>
+                                    <div class="input-group-prepend input-group-append">
+                                        <span class="input-group-text">Hora Final</span>
+                                    </div>
+                                    <input class="form-control" type="time" value="<?= isset($valores->hora_fim) ? $valores->hora_fim : ''; ?>" name="hora_fim" id="hora_fim" required>
+                                </div>
+                            </div>
+
                             <div class="form-group row mb-2">
                                 <label for="tipoReq" class="col-sm-2 col-form-label text-right text-left-sm"><span class="text-danger">*</span>Quantidade de horas:</label>
                                 <div class="col-sm-10">
@@ -130,6 +164,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     $(document).ready(function(){
         desabilitaInputs();
         verificaData();
+        console.log(<?= json_encode($req[0]->valores) ?>);
     });
     
     function verificaValor(input) {
@@ -253,7 +288,11 @@ const salvaDados = () => {
     formData.append("filial", $("#filial").val());
     formData.append("valor", $("#valor").val());
     formData.append("tipoReq", $("#tipoReq").find("option:selected").val());
-   
+    formData.append("tipoPer", $("#tipoPer").val());
+    formData.append("data_inicio", $("#data_inicio").val());
+    formData.append("data_fim", $("#data_fim").val());
+    formData.append("hora_inicio", $("#hora_inicio").val());
+    formData.append("hora_fim", $("#hora_fim").val());
     formData.append("funcao", $("#funcao").val());
     formData.append("tipo", '3');
     formData.append("id", ' <?= $req[0]->id; ?>');
@@ -269,6 +308,20 @@ const salvaDados = () => {
             formData.append("anexo[]", fileInput[i]);
         }
     }
+    if($("#tipoPer").val()==1) {
+      if($("#data_inicio").val() < '<?= $per_ini_atual ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
+      if($("#data_inicio").val() > '<?= $per_fim_atual ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
+      if($("#data_fim").val() < '<?= $per_ini_atual ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
+      if($("#data_fim").val() > '<?= $per_fim_atual ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
+    } else {
+      if($("#data_inicio").val() < '<?= $per_ini_futuro ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
+      if($("#data_inicio").val() > '<?= $per_fim_futuro ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
+      if($("#data_fim").val() < '<?= $per_ini_futuro ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
+      if($("#data_fim").val() > '<?= $per_fim_futuro ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
+    }
+    if($("#data_fim").val() < $("#data_inicio").val()){ exibeAlerta("error", "<b>Data Final deve ser maior ou igual à Data Inicial</b> ."); return false; }
+    if($("#hora_inicio").val() == ""){ exibeAlerta("error", "<b>Hora Inicial</b> é obrigatória."); return false; }
+    if($("#hora_fim").val() == ""){ exibeAlerta("error", "<b>Hora Final</b> é obrigatória."); return false; }
     if($("#valor").val() == ""){ exibeAlerta("error", "<b>Quantidade de horas obrigatória </b> ."); return false; }
     if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
     if($("#tipoReq").val() == ""){ exibeAlerta("error", "<b>Tipo obrigatório </b> ."); return false; }

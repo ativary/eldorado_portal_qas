@@ -185,13 +185,13 @@ Class Critica extends BaseController {
 
       // titulo das colunas 17 colunas
       $colunas = array(
-        1 => 'M',
-        2 => 'N',
-        3 => 'O',
-        4 => 'P',
-        5 => 'Q',
-        6 => 'R',
-        7 => 'S'
+        1 => 'N',
+        2 => 'O',
+        3 => 'P',
+        4 => 'Q',
+        5 => 'R',
+        6 => 'S',
+        7 => 'T'
       );
 
       $sheet = $spreadsheet->getActiveSheet();
@@ -235,6 +235,7 @@ Class Critica extends BaseController {
       $sheet->setCellValue('J4', 'ENT3');
       $sheet->setCellValue('K4', 'SAI3');
       $sheet->setCellValue('L4', 'JUSTIFICATIVA');
+      $sheet->setCellValue('M4', 'OBSERVAÇÃO');
 
       $n = 0;
       if(strlen(trim($dados['ck_ExtraExecutado'])) > 0){$n++; $sheet->setCellValue($colunas[$n].'4', 'EXTRA EXECUTADO');}
@@ -824,6 +825,7 @@ Class Critica extends BaseController {
                 }
 
           $motivo_justificativa = (strlen(trim($resData[$i]['JUSTIFICATIVA'])) > 0) ? $resData[$i]['JUSTIFICATIVA'] : 'Não justificado';
+          $motivo_obs = (strlen(trim($resData[$i]['OBS'])) > 0) ? $resData[$i]['OBS'] : '-';
 
           $status_atitude = '';
           if(strlen(trim($resData[$i]['JUSTIFICATIVA_ATITUDE'])) > 0){
@@ -939,6 +941,7 @@ Class Critica extends BaseController {
           }
 
           $sheet->setCellValue('L' . $rows, $motivo_justificativa);
+          $sheet->setCellValue('M' . $rows, $motivo_obs);
 
           $n = 0;
           if($dados['ck_ExtraExecutado'] == 1){$n++; $sheet->setCellValue($colunas[$n].$rows, ($resData[$i]['EXTRAEXECUTADO_CASE']) ? m2h($resData[$i]['EXTRAEXECUTADO_CASE']) : '');}

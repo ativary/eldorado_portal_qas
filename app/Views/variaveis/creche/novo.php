@@ -177,6 +177,10 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             $("[data-money]").maskMoney({prefix:'', allowNegative: false, allowZero:false, thousands:'.', decimal:',', affixesStay: false});
            
             verificaData();
+
+            if (fora_periodo == 1) { 
+                exibeAlerta("error", "Atenção! Fora do período de abertura para novas requisições."); 
+            }
     });
     $("#anexo").fileinput({
     showUpload: false,
@@ -351,7 +355,10 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
         return false; 
     }
 
- 
+    if (fora_periodo == 1) { 
+        exibeAlerta("error", "Fora do Período de abertura."); 
+        return false; 
+    }
 
     openLoading();
 

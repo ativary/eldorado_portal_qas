@@ -171,6 +171,7 @@ Class Ocorrencia extends BaseController {
 		$dados['resHorario'] = $this->mOcorrencia->ListarOcorrenciaHorarios();
 		$dados['resWorkflow'] = $this->mOcorrencia->ListaConfiguracaoWorkflow();
 		$dados['resWorkflowRH'] = $this->mOcorrencia->ListaConfiguracaoWorkflowRH();
+		$dados['resWorkflowFaltas'] = $this->mOcorrencia->ListaConfigWorkflowFaltas();
 		
 		$dados['resHorarioConfig'] = $this->mOcorrencia->ListarOcorrenciaHorariosPortal();
 		return parent::ViewPortal('ponto/ocorrencia/configuracao', $dados);
@@ -848,6 +849,9 @@ Class Ocorrencia extends BaseController {
                 break;
             case 'salva_configuracao_workflow_RH':
                 exit($this->mOcorrencia->ConfiguracaoWorkflowRH($dados['dados']));
+                break;
+            case 'salva_config_workflow_faltas':
+                exit($this->mOcorrencia->ConfigWorkflowFaltas($dados['dados']));
                 break;
             case 'config_motorista':
                 exit($this->mOcorrencia->ConfiguracaoMotorista($dados));

@@ -372,6 +372,46 @@ table th {
                                         $idaafdt_ent[4] = false;
                                         $idaafdt_sai[4] = false;
 
+                                        //desc_abono
+                                        $desc_abono = '';
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][0]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][0]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][1]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][1]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][2]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][2]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][3]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][3]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][4]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][4]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][4]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][4]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][5]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][5]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][6]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][6]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['desc_abono'];
+                                        }
+                                        if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][8]['desc_abono'])) {
+                                          $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][8]['desc_abono'];
+                                        }
+                                        if(isset($DiasEspelho['USABANCOHORAS']) and $DiasEspelho['USABANCOHORAS'] = 1 and 
+                                            ($DiasEspelho['FALTA'] > 0 or $DiasEspelho['ATRASO'] > 0) ) {
+                                          $desc_abono = 'BANCO DE HORAS';
+                                        }
+                                        if(isset($DiasEspelho['ABONOS'])) {
+                                          $desc_abono = $DiasEspelho['ABONOS'];
+                                        }
+                                        
                                         // ent 1
                                         if (isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][0]['batida'])) {
                                             $concat = false;
@@ -895,7 +935,9 @@ table th {
                                                 <td <?php if($idaafdt_sai[3] > 0 && $status_sai[1] == "D") { echo ' style="background:'.$bghr.';" ';} elseif(strlen(trim($sai_motivo_reprova[3])) > 0){echo ' style="background:#f5943f;" title="'.$sai_motivo_reprova[3].'"';}elseif(strlen(trim($sai_portal[3])) > 0 && $status_sai[3] != "T"){echo ' style="background:#feca07;" ';}elseif($status_sai[3] == "T"){echo ' style="background:#dbdcdd;" ';} ?> <?= $bglinha; ?> class="n-mobile-cell text-center"><?php if(strlen(trim($sai[3])) > 0): ?><?= $sai[3].' <span class="badge badge-light">'.(($status_sai[3] != 'C') ? 'D' : 'C').'</span>'; ?><?php endif; ?></td>
                                                 
                                                 <?php if(strlen(trim($resFuncionario[0]['DATADEMISSAO'])) > 0 && $DiasEspelho['DATA'] >= $resFuncionario[0]['DATADEMISSAO']): ?>
-                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-dark  txtpdf" style="background: <?= $bgtipo ?> !important;color: <?= $colortipo ?>;">Demitido - Não Utiliza Ponto</span></td>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-dark  txtpdf" style="background:  <?= $bgtipo ?> !important;color: <?= $colortipo ?>;">Demitido - Não Utiliza Ponto</span></td>
+                                                <?php elseif($desc_abono <> ''): ?>
+                                                    <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background:  <?= $bgtipo ?> !important;color: <?= $colortipo ?>;"><?= $desc_abono; ?></span></td>
                                                 <?php elseif($DiasEspelho['AFASTAMENTO'] > 0): ?>
                                                     <td <?= $bglinha; ?> class="n-mobile-cell text-center" colspan="2"><span class="badge badge-purple  txtpdf" style="background: <?= $bgtipo ?> !important;color: <?= $colortipo ?>;"><?= $DiasEspelho['AFASTAMENTO']; ?></span></td>
                                                 <?php elseif($DiasEspelho['FERIADO'] > 0): ?>
@@ -936,7 +978,9 @@ table th {
                                             <td <?= $bglinha; ?> class="y-mobile-cell d-none text-center">
                                                 <h3 style="font-size: 20px;" class="m-0 p-0"><?= date('d/m', strtotime($DiasEspelho['DATA'])); ?></h3><small class="text-gray d-block" style="color: #999999;"><?= diaSemana($DiasEspelho['DATA']); ?></small><?= $abono_pendente_mobile.$justificativa_extra; ?>
 
-                                                <?php if($DiasEspelho['AFASTAMENTO'] > 0): ?>
+                                                <?php if($desc_abono<> ''): ?>
+                                                    <span class="badge badge-purple txtpdf" style="background: #004d95 !important;"><?= $desc_abono; ?></span>
+                                                <?php elseif($DiasEspelho['AFASTAMENTO'] > 0): ?>
                                                     <span class="badge badge-purple txtpdf" style="background: #004d95 !important;"><?= $DiasEspelho['AFASTAMENTO']; ?></span>
                                                 <?php elseif($DiasEspelho['FERIADO'] > 0): ?>
                                                     <span class="badge badge-success txtpdf" style="background: #04609d !important;">FERIADO</span>
@@ -981,11 +1025,24 @@ table th {
                                                                         $inicioEscala   = $escala[0];
                                                                         $terminoEscala  = end($escala);
                                                                         ?>
-                                                                        <button onclick="abrirAlteracaoBatida('<?= dtEn($DiasEspelho['DATA'], true); ?>', '<?= urlencode(json_encode($array_batidas)); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= dtBr($DiasEspelho['DATA']); ?>', '<?= ($periodo_bloqueado) ? 1 : 0; ?>', '<?= $inicioEscala; ?>', '<?= $terminoEscala; ?>')" type="button" class="dropdown-item" title="Alterar registro"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar registro</button>
+
+                                                                        <?php if($desc_abono == 'BANCO DE HORAS' or $desc_abono == '') { ?>
+                                                                          <button onclick="abrirAlteracaoBatida('<?= dtEn($DiasEspelho['DATA'], true); ?>', '<?= urlencode(json_encode($array_batidas)); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= dtBr($DiasEspelho['DATA']); ?>', '<?= ($periodo_bloqueado) ? 1 : 0; ?>', '<?= $inicioEscala; ?>', '<?= $terminoEscala; ?>')" type="button" class="dropdown-item" title="Alterar registro"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar registro</button>
+                                                                        <?php } else { ?>
+                                                                          <button type="button" class="dropdown-item disabled" title="Alterar registro" disabled><i class="mdi mdi-lock-alert" disabled ></i> Incluir/Alterar registro</button>
+                                                                        <?php } ?>
+
                                                                         <button onclick="abrirResumoDiario('<?= dtBr($DiasEspelho['DATA']); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= ((int)$DiasEspelho['HTRAB'] > 0) ? m2h($DiasEspelho['HTRAB']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['ATRASO'] > 0) ? m2h($DiasEspelho['ATRASO']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['FALTA'] > 0) ? m2h($DiasEspelho['FALTA']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['EXTRAAUTORIZADO'] > 0) ? m2h($DiasEspelho['EXTRAAUTORIZADO']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['ABONO'] > 0) ? m2h($DiasEspelho['ABONO']) : '0:00'; ?>', '<?= urlencode(json_encode($array_batidas)); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= ((int)$DiasEspelho['total_refeicao'] > 0) ? m2h($DiasEspelho['total_refeicao']) : "0:00"; ?>', '<?= ((int)$DiasEspelho['total_direcao'] > 0) ? ($DiasEspelho['total_direcao'].':00') : "0:00"; ?>', '<?= ((int)$DiasEspelho['total_espera'] > 0) ? m2h($DiasEspelho['total_espera']) : "0:00"; ?>', '<?= ((int)$DiasEspelho['total_parado'] > 0) ? m2h($DiasEspelho['total_parado']) : "0:00"; ?>', '<?= m2h($DiasEspelho['ADICIONAL']); ?>', '0:00')" type="button" class="dropdown-item" title="Resumo diário"><i class="mdi mdi-file-document-box-outline"></i> Resumo diário</button>
                                                                         
                                                                         
-                                                                        <?php if((int)$DiasEspelho['ATRASO'] > 0 || (int)$DiasEspelho['FALTA'] > 0): ?><button onclick="abrirSolicitacaoAbono('<?= dtEn($DiasEspelho['DATA'], true); ?>', '<?= dtBr($DiasEspelho['DATA']); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= urlencode(json_encode($array_abonos)); ?>', <?= $tipo_ocorrencia; ?>, '<?= urlencode(json_encode($array_batidas)); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= ($periodo_bloqueado) ? 1 : 0; ?>', '<?= $inicioEscala; ?>', '<?= $terminoEscala; ?>', '<?= ((int)$DiasEspelho['FALTA'] > 0) ? m2h($DiasEspelho['FALTA']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['ATRASO'] > 0) ? m2h($DiasEspelho['ATRASO']) : '0:00'; ?>')" type="button" class="dropdown-item" title="Solicitar abono"><i class="mdi mdi-timer-off"></i> Solicitar abono</button><?php endif; ?>
+                                                                        <?php if((int)$DiasEspelho['ATRASO'] > 0 || (int)$DiasEspelho['FALTA'] > 0): ?>
+                                                                          <?php if($desc_abono == 'BANCO DE HORAS' or $desc_abono == '') { ?>
+                                                                            <button onclick="abrirSolicitacaoAbono('<?= dtEn($DiasEspelho['DATA'], true); ?>', '<?= dtBr($DiasEspelho['DATA']); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= urlencode(json_encode($array_abonos)); ?>', <?= $tipo_ocorrencia; ?>, '<?= urlencode(json_encode($array_batidas)); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= ($periodo_bloqueado) ? 1 : 0; ?>', '<?= $inicioEscala; ?>', '<?= $terminoEscala; ?>', '<?= ((int)$DiasEspelho['FALTA'] > 0) ? m2h($DiasEspelho['FALTA']) : '0:00'; ?>', '<?= ((int)$DiasEspelho['ATRASO'] > 0) ? m2h($DiasEspelho['ATRASO']) : '0:00'; ?>')" type="button" class="dropdown-item" title="Solicitar abono"><i class="mdi mdi-timer-off"></i> Solicitar abono</button>
+                                                                          <?php } else { ?>
+                                                                            <button type="button" class="dropdown-item disabled" title="Alterar registro" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar abono</button>
+                                                                          <?php } ?>
+                                                                        <?php endif; ?>
+
                                                                         <?php if((int)$DiasEspelho['EXTRAAUTORIZADO'] > 0): ?><button onclick="abrirJustificativaExtra('<?= dtEn($DiasEspelho['DATA'], true); ?>', '<?= dtBr($DiasEspelho['DATA']); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= $codigo_justificativa_extra; ?>', '<?= urlencode(json_encode($array_batidas)); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= ($periodo_bloqueado) ? 1 : 0; ?>')" type="button" class="dropdown-item" title="Justificativa de Extra"><i class="mdi mdi-comment-check-outline"></i> Justificativa de Extra</button><?php endif; ?>
                                                                     </div>
                                                                 <?php else: ?>
@@ -3081,7 +3138,7 @@ function m2h(minutos) {
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="return justificarExtra()">Salvar Justificativa <i class="fas fa-check"></i></button>
+                <button type="button" class="btn btn-success" onclick="return justificarExtra()">Salvar<i class="fas fa-check"></i></button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

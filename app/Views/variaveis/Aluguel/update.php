@@ -67,7 +67,7 @@
                             <div class="form-group row mb-2">
                                 <label for="tipoReq" class="col-sm-2 col-form-label text-right text-left-sm"><span class="text-danger">*</span>Valor:</label>
                                 <div class="col-sm-10">
-                                    <input class="form-control form-control-sm " data-money  type="text" value="<?= $valores->valor; ?>" name="valor" id="valor" required>
+                                    <input onchange="verificaValor(this)"  class="form-control form-control-sm " data-money  type="text" value="<?= $valores->valor; ?>" name="valor" id="valor" required>
                                    
                                 </div>
                             </div>
@@ -190,7 +190,8 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 function verificaValor(input) {
     var valor = parseFloat(input.value.replace(/[^0-9,-]+/g,"").replace(",","."));
     const regra = <?= $param6 ?>;
-    const cargo = $("#grupoCargo").val();
+    const cargo = $("#filial").val();
+    console.log(cargo);
     var limiteminimo = null;
     var limitePermitido = null;
     $.each(regra.dependentes, function(index, func) {

@@ -13544,6 +13544,20 @@ exit();
 			
 	}
 
+  public function ListaConfigWorkflowFaltas()
+	{
+		$result = $this->dbportal
+				->table('zcrmportal_workflow_faltas_config')
+				->select('*')
+				->where('codcoligada', $this->coligada);
+		if($result){
+			return $result->get()->getResult() ?? false;
+		}
+
+		return false;
+			
+	}
+
 	public function ListaConfiguracaoWorkflowRH()
 	{
 		$result = $this->dbportal
@@ -13621,6 +13635,46 @@ exit();
 			->set($data)
 			->where('coligada', $this->coligada)
 			->update();
+
+			return 	($this->dbportal->affectedRows() > 0) 
+					? responseJson('success', 'Configuração realizada com sucesso')
+					: responseJson('error', 'Não foi possivel configurar este workflow');
+
+		} catch (\Exception | \Error $e) {
+			return responseJson('error', 'Erro interno: '.$e->getMessage());
+		}
+
+	}
+
+  	public function ConfigWorkflowFaltas($request)
+	{
+		try{
+
+			$data = [
+        'codcoligada'       => $this->coligada,
+				'dias_faltas' 		  => $request['dias_faltas'],
+				'dias_de_espera'    => $request['dias_de_espera'],
+				'dias_para_escalar' => $request['dias_para_escalar'],
+        'email_rh'          => $request['email_rh'],
+        'usualt'            => $this->log_id, 
+				'dtalt'             => $this->now,
+			];
+
+			$result = self::ListaConfigWorkflowFaltas();
+
+      if($result) {
+        $this->dbportal
+        ->table('zcrmportal_workflow_faltas_config')
+        ->set($data)
+        ->where('codcoligada', $this->coligada)
+        ->update();
+
+      } else {
+        $this->dbportal
+        ->table('zcrmportal_workflow_faltas_config')
+        ->set($data)
+        ->insert();
+      }
 
 			return 	($this->dbportal->affectedRows() > 0) 
 					? responseJson('success', 'Configuração realizada com sucesso')

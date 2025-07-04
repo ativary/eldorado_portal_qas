@@ -247,6 +247,7 @@ class Aprova extends BaseController
         $dados['resMotivoReprova']   = $mEspelho->ListarJustificativa(5);
         $dados['isGestorOrLider']   = $mEspelho->isGestorOrLider($dados);
         $dados['isGestor']          = $mEspelho->isGestor($dados);
+        $dados['resParam'] = $this->mAprova->ListarParam();
 
         unset($objListaBatidaApr,$listaSecaoUsuarioRM,$objSecaoUsu,$resFuncionarioSecao,$chapa);
         
@@ -675,7 +676,34 @@ class Aprova extends BaseController
               break;
             //-------------------------------------
 
-      
+            //-------------------------------------
+            // sincroniza requisição de Art.61
+            case 'sincArt61RM':
+              exit($this->mAprova->SincArt61RM($dados));
+              break;
+            //-
+            
+            //-------------------------------------
+            // cancela sincronismo requisição de Art.61
+            case 'cancSincArt61RM':
+              exit($this->mAprova->CancSincArt61RM($dados));
+              break;
+            //-
+   
+            //-------------------------------------
+            // envia telegrama de abandono de emprgo
+            case 'enviaTelegrama':
+              exit($this->mAprova->EnviaTelegrama($dados['id']));
+              break;
+            //-
+
+            //-------------------------------------
+            // recusa envio de telegrama de abandono de emprgo
+            case 'recusaTelegrama':
+              exit($this->mAprova->RecusaTelegrama($dados['id'], $dados['justificativa']));
+              break;
+            //-
+   
         }        
 
     }
@@ -694,6 +722,41 @@ class Aprova extends BaseController
     public function workflow_art61(){
         $this->mAprova->Workflow_Art61();
         exit();
+    }
+
+    //-----------------------------------------------------------
+    // Workflow de envio de emails para gestores aprovar envio de 
+    // aviso para colaboradores com mais de 10 faltas consecutivas
+    //-----------------------------------------------------------
+    public function workflow_faltas(){
+        $this->mAprova->Workflow_Faltas();
+        exit();
+    }
+
+    //-----------------------------------------------------------
+    // Tela para gestor responder se RH deve enviar telegrama de
+    // abandono de emprego
+    //-----------------------------------------------------------
+    public function telegrama($id, $random = ''){
+
+      $dados['_titulo'] = "Faltas Consecutivas - Abandono de Emprego";
+      $dados['resFaltas'] = $this->mAprova->ListarFaltas($id);
+      $dados['botoes'] = "N";
+
+      if($dados['resFaltas'] and strlen($random)>10) {
+        if($dados['resFaltas'][0]['status'] == 'FINALIZADO') {
+          $dados['msg'] = "<br>Este registro de Faltas Consecutivas já foi finalizado.";
+        } else {
+          $dados['botoes'] = "S";
+          $dados['msg'] = "<br>O(a) colaborador(a) <strong>".$dados['resFaltas'][0]['nome_colab']."</strong>, de chapa <strong>".$dados['resFaltas'][0]['chapa_colab']."</strong> e função <strong>".$dados['resFaltas'][0]['funcao_colab']."</strong>, está com <strong>".$dados['resFaltas'][0]['faltas_finais']."</strong> faltas consecutivas desde <strong>". date( 'd/m/Y' , strtotime( $dados['resFaltas'][0]['prim_falta'] ))."</strong>.<br><br><strong>Confirma o envio de telegrama de abandono de emprego?</strong><br>";
+        }
+      } else {
+        $dados['msg'] = "<br>Registro de Faltas Consecutivas não encontrado.";
+      }
+
+      $dados['id'] = $id;
+      
+      return parent::ViewPortal('ponto/aprova/telegrama', $dados);
     }
 
 }

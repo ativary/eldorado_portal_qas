@@ -86,7 +86,8 @@
                                 </select>
                             </div>
                             <div class="form-group row">
-                                <label for="periodo_moradia" class="col-sm-12 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_moradia" class="col-sm-7 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-5 text-primary">Complementar no Mês:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
                                     <div class="input-group">
                                     <input type="number"  onchange="validateField(this)" id="periodo_moradia" name="periodo_moradia" class="form-control" placeholder="00" value="<?= $param6->periodo_moradia ?? ''; ?>">
@@ -98,7 +99,12 @@
                                     <label for="auxilio_moradia_porcentagem" class="col-sm-8 pt-2 col-form-label text-left">Periodo permitido para abertura no mês atual.</label>
                                     </div> 
                                 </div>
-                               
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
+                                    <input type="number" id="dia_limite_compl6"  onchange="validateField(this)" name="dia_limite_compl6" class="form-control" placeholder="00" value="<?= $param6->dia_limite_compl6 ?? ''; ?>">
+                                    <label for="dia_limite_compl6" class="col-sm-10 pt-2 col-form-label text-left">Dia limite para complementar entrar na folha do mês.</label>
+                                    </div> 
+                                </div>
                             </div>
                             <div class="form-group row mb-2">
                                     <label for="gestor_pcd" class="col-sm-2 col-form-label text-right text-primary text-left-sm">Exceção Gestor:</label>
@@ -182,15 +188,30 @@
                                 </select>
                             </div>
                             <div class="form-group row">
-                                <label for="limite_sobreaviso" class="col-sm-12 text-primary">Limite de Horas:</label>
+                                <label for="dias_ponto" class="col-sm-7 text-primary">Dias de Ponto:</label>
+                                <label for="limite_sobreaviso" class="col-sm-5 text-primary">Limite de Horas:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
-                                    
+                                    <div class="input-group">
+                                    <input type="number"  onchange="validateField(this)" id="dia_ponto_ini" name="dia_ponto_ini" class="form-control" placeholder="00" value="<?= $param3->dia_ponto_ini ?? ''; ?>">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text"><strong>Até</strong></span>
+                                        </div>
+                                    <input type="number"  onchange="validateField(this)" id="dia_ponto_fim" name="dia_ponto_fim" class="form-control" placeholder="00" value="<?= $param3->dia_ponto_fim ?? ''; ?>">
+                                    <label for="dia_ponto_aviso" class="col-sm-8 pt-2 col-form-label text-left">Dias de início e fim do ponto.</label>
+                                    </div> 
+                                </div>
+
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
                                     <input type="number"  id="limite_sobreaviso" name="limite_sobreaviso" class="form-control" placeholder="00" value="<?= $param3->limite_sobreaviso ?? ''; ?>">
+                                    <label for="dia_limite_compl3" class="col-sm-10 pt-2 col-form-label text-left">Limite de horas de sobreaviso no mês</label>
+                                    </div>
                                 </div>
                             
                             </div>
                             <div class="form-group row">
-                                <label for="periodo_sobreaviso" class="col-sm-12 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_sobreaviso" class="col-sm-7 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-5 text-primary">Complementar no Mês:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
                                     <div class="input-group">
                                     <input type="number"  onchange="validateField(this)" id="periodo_sobreaviso" name="periodo_sobreaviso" class="form-control" placeholder="00" value="<?= $param3->periodo_sobreaviso ?? ''; ?>">
@@ -200,6 +221,12 @@
                                         </div>
                                     <input type="number"  onchange="validateField(this)" id="periodo_sobreaviso_fim" name="periodo_sobreaviso_fim" class="form-control" placeholder="00" value="<?= $param3->periodo_sobreaviso_fim ?? ''; ?>">
                                     <label for="sobreaviso_porcentagem" class="col-sm-8 pt-2 col-form-label text-left">Periodo permitido para abertura no mês atual.</label>
+                                    </div> 
+                                </div>
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
+                                    <input type="number" id="dia_limite_compl3"  onchange="validateField(this)" name="dia_limite_compl3" class="form-control" placeholder="00" value="<?= $param3->dia_limite_compl3 ?? ''; ?>">
+                                    <label for="dia_limite_compl3" class="col-sm-10 pt-2 col-form-label text-left">Dia limite para complementar entrar na folha do mês.</label>
                                     </div> 
                                 </div>
                             
@@ -638,7 +665,8 @@
                                 </select>
                             </div>
                             <div class="form-group row">
-                                <label for="periodo_pcd" class="col-sm-12 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_pcd" class="col-sm-7 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-5 text-primary">Complementar no Mês:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
                                     <div class="input-group">
                                     <input type="number" id="periodo_pcd"  onchange="validateField(this)" name="periodo_pcd" class="form-control" placeholder="00" value="<?= $param4->periodo_pcd ?? ''; ?>">
@@ -650,7 +678,12 @@
                                     <label for="periodo_pcd_fim" class="col-sm-8 pt-2 col-form-label text-left">Periodo permitido para abertura no mês atual.</label>
                                     </div> 
                                 </div>
-                               
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
+                                    <input type="number" id="dia_limite_compl4"  onchange="validateField(this)" name="dia_limite_compl4" class="form-control" placeholder="00" value="<?= $param4->dia_limite_compl4 ?? ''; ?>">
+                                    <label for="dia_limite_compl4" class="col-sm-10 pt-2 col-form-label text-left">Dia limite para complementar entrar na folha do mês.</label>
+                                    </div> 
+                                </div>
                             </div>
 
                             <div class="form-group "> 
@@ -803,7 +836,8 @@
           
                             
                             <div class="form-group row">
-                                <label for="periodo_creche" class="col-sm-12 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-7 text-primary">Periodo de abertura:</label>
+                                <label for="periodo_creche" class="col-sm-5 text-primary">Complementar no Mês:</label>
                                 <div class="col-sm-7" style="width:100px !important;">
                                     <div class="input-group">
                                     <input type="number" id="periodo_creche"  onchange="validateField(this)" name="periodo_creche" class="form-control" placeholder="00" value="<?= $param2->periodo_creche ?? ''; ?>">
@@ -815,6 +849,12 @@
                                     <label for="periodo_creche_fim" class="col-sm-8 pt-2 col-form-label text-left">Periodo permitido para abertura no mês atual.</label>
                                     </div> 
                                 </div>
+                                <div class="col-sm-5" style="width:100px !important;">
+                                    <div class="input-group">
+                                    <input type="number" id="dia_limite_compl2"  onchange="validateField(this)" name="dia_limite_compl2" class="form-control" placeholder="00" value="<?= $param2->dia_limite_compl2 ?? ''; ?>">
+                                    <label for="dia_limite_compl2" class="col-sm-10 pt-2 col-form-label text-left">Dia limite para complementar entrar na folha do mês.</label>
+                                    </div> 
+                                </div>
                                
                             </div>
                             <div class="form-group row">
@@ -824,7 +864,7 @@
                                     <input type="number" id="idade_creche"   name="idade_creche" class="form-control" placeholder="00" value="<?= $param2->idade_creche ?? ''; ?>">
 
                                         <div class="input-group-append">
-                                            <span class="input-group-text"><strong>Anos</strong></span>
+                                            <span class="input-group-text"><strong>Meses</strong></span>
                                         </div>
                                     </div> 
                                 </div>
@@ -872,7 +912,7 @@
                                             <tr>
                                                 <th>Filial</th>
                                                 <th>Valor</th> <!-- Nova coluna para o valor -->
-                                                <th>Idade Maximo</th> <!-- Nova coluna para o valor -->
+                                                <th>Idade Máxima em Meses</th> <!-- Nova coluna para o valor -->
                                                 <th>Ação</th>
                                             </tr>
                                         </thead>
@@ -1053,13 +1093,13 @@
                          
 
                             <div class="form-group row mb-2">
-                                    <label for="CargoAluguel" class="col-sm-2 col-form-label text-right text-primary text-left-sm">Grupo de Cargo:</label>
+                                    <label for="CargoAluguel" class="col-sm-2 col-form-label text-right text-primary text-left-sm">Valores por Filial:</label>
                                     <div class="col-sm-8">
                                         <select  class="select2 custom-select form-control form-control-sm" name="CargoAluguel" id="CargoAluguel">
                                             <option value=""> ... </option>
-                                            <?php if ($listaCargos) : ?>
-                                                <?php foreach ($listaCargos as $key2 => $filial) : ?>
-                                                    <option value='<?= $filial->CODIGO ?>' ><?= $filial->NOME ?></option>
+                                            <?php if ($listaFiliais) : ?>
+                                                <?php foreach ($listaFiliais as $key2 => $filial) : ?>
+                                                    <option value='<?= $filial->CODFILIAL ?>' ><?= $filial->CODFILIAL ?></option>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </select>
@@ -1077,8 +1117,7 @@
                                     <table class="table table-bordered" id="dependentesAluguelTable">
                                         <thead>
                                             <tr>
-                                                <th>Codigo Cargo</th>
-                                                <th>Cargo</th>
+                                                <th>Filial</th>
                                                 <th>Valor Minimo</th> <!-- Nova coluna para o valor -->
                                                 <th>Valor Maximo</th> <!-- Nova coluna para o valor -->
                                                 <th>Ação</th>
@@ -1089,7 +1128,6 @@
                                         <?php foreach ($param7->dependentes as $key2 => $dados3) : ?>
                                             <tr>
                                                 <td class="n-mobile-cell"><?= $dados3->codigo ?></td>
-                                                <td class="n-mobile-cell"><?= $dados3->nome ?></td>
                                                 <td class="n-mobile-cell" ><input type="text" data-money class=" form-control form-control-sm valorDependenteAluguel" value="<?= $dados3->valor_min ?>" placeholder="Valor"></td>
                                                 <td class="n-mobile-cell" ><input type="text" data-money class=" form-control form-control-sm valorDependenteAluguel" value="<?= $dados3->valor_max ?>" placeholder="Valor"></td>
                                                 <td class="n-mobile-cell"><button class="btn btn-danger btn-sm" onclick="RemoveAluguelDepend(this)">Remover</button></td>
@@ -1806,15 +1844,13 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             var cell2 = newRow.insertCell(1);
             var cell3 = newRow.insertCell(2);
             var cell4 = newRow.insertCell(3);
-            var cell5 = newRow.insertCell(4);
            
             cell1.innerHTML = dependenteValue;  // Nome do dependente
-            cell2.innerHTML = dependenteText;  // Nome do dependente 
+            cell2.innerHTML = '<input type="text" data-money class=" form-control form-control-sm valorDependente" placeholder="Valor">';  // Input para valor
             cell3.innerHTML = '<input type="text" data-money class=" form-control form-control-sm valorDependente" placeholder="Valor">';  // Input para valor
-            cell4.innerHTML = '<input type="text" data-money class=" form-control form-control-sm valorDependente" placeholder="Valor">';  // Input para valor
-            cell5.innerHTML = '<button class="btn btn-danger btn-sm" onclick="RemoveAluguelDepend(this)">Remover</button>';
+            cell4.innerHTML = '<button class="btn btn-danger btn-sm" onclick="RemoveAluguelDepend(this)">Remover</button>';
         
-            $(cell3).find('input[data-money]').maskMoney({
+            $(cell2).find('input[data-money]').maskMoney({
                 prefix: '',
                 allowNegative: false,
                 allowZero: true,
@@ -1822,7 +1858,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
                 decimal: ',',
                 affixesStay: false
             });
-            $(cell4).find('input[data-money]').maskMoney({
+            $(cell3).find('input[data-money]').maskMoney({
                 prefix: '',
                 allowNegative: false,
                 allowZero: true,
@@ -2405,6 +2441,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             'reembolso_cpd_parente': $('#reembolso_cpd_parente').val(),
             'periodo_pcd_fim': $('#periodo_pcd_fim').val(),
             'periodo_pcd': $('#periodo_pcd').val(),
+            'dia_limite_compl4': $('#dia_limite_compl4').val(),
             "dependentes": [], // Adicionando o array de dependentes
             "gestor": [] // Adicionando o array de dependentes
         }
@@ -2444,6 +2481,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             'reembolso_creche_parente': $('#reembolso_creche_parente').val(),
             'periodo_creche_fim': $('#periodo_creche_fim').val(),
             'periodo_creche': $('#periodo_creche').val(),
+            'dia_limite_compl2': $('#dia_limite_compl2').val(),
             'idade_creche': $('#idade_creche').val(),
             "dependentes": [], // Adicionando o array de dependentes
             "gestor": [] // Adicionando o array de dependentes
@@ -2527,9 +2565,8 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     $("#dependentesAluguelTable tbody tr").each(function() {
         let dependente = {
             "codigo": $(this).find("td:eq(0)").text(),
-            "nome": $(this).find("td:eq(1)").text(),
-            "valor_min": $(this).find("td:eq(2) input").val(), // Captura o valor do input
-            "valor_max": $(this).find("td:eq(3) input").val() // Captura o valor do input
+            "valor_min": $(this).find("td:eq(1) input").val(), // Captura o valor do input
+            "valor_max": $(this).find("td:eq(2) input").val() // Captura o valor do input
         };
         dados.dependentes.push(dependente);
     });
@@ -2747,6 +2784,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             'auxilio_moradia_porcentagem': $('#auxilio_moradia_porcentagem').val(),
             'periodo_moradia_fim': $('#periodo_moradia_fim').val(),
             'periodo_moradia': $('#periodo_moradia').val(),
+            'dia_limite_compl6': $('#dia_limite_compl6').val(),
             'auxilio_moradia_evento': $('#auxilio_moradia_evento').val(),
             "gestor": [], // Adicionando o array de dependentes
         }
@@ -2775,6 +2813,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
           
             'periodo_sobreaviso_fim': $('#periodo_sobreaviso_fim').val(),
             'periodo_sobreaviso': $('#periodo_sobreaviso').val(),
+            'dia_ponto_ini': $('#dia_ponto_ini').val(),
+            'dia_ponto_fim': $('#dia_ponto_fim').val(),
+            'dia_limite_compl3': $('#dia_limite_compl3').val(),
             'limite_sobreaviso': $('#limite_sobreaviso').val(),
             'sobreaviso_evento': $('#sobreaviso_evento').val(),
             "gestor": [], // Adicionando o array de dependentes

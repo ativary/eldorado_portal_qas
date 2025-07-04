@@ -220,6 +220,19 @@ class RelatorioModel extends Model {
             case 30:
                 return self::relatorioEscalaDia($request);
                 break;
+            case 40:
+                return self::relatorioConfArt61($request);
+                break;
+            case 41:
+                return self::relatorioGestorSubstituto($request);
+                break;
+            case 42:
+                return self::relatorioMudancaHorario($request);
+                break;
+            case 43:
+                return self::relatorioWorkflowFaltas($request);
+                break;
+
         }
     }
     private function relatorioVariaveisCreche($request)
@@ -253,7 +266,8 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
+        
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -279,9 +293,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -377,7 +396,7 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -403,9 +422,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+            CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -487,7 +511,7 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -514,9 +538,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -573,9 +602,9 @@ class RelatorioModel extends Model {
                 $linha['SECAO_SUB'] =  $funcSUb[0]['SECAO']; // 
                 $linha['FUNCAO_SUB'] =  $funcSUb[0]['FUNCAO']; // 
                 $linha['SALARIO_SUB'] =  moeda($funcSUb[0]['SALARIO']); // 
-                $linha['FERIAS'] =  intval($ferias[0]['QUANTIDADE_DIAS']); 
-                $linha['ATESTADO'] =  intval($atestado[0]['QUANTIDADE_DIAS']); 
-                $linha['FALTAS'] =  intval($falta[0]['FALTAS']);                ; 
+                $linha['FERIAS'] =  $ferias ? intval($ferias[0]['QUANTIDADE_DIAS']) : 0; 
+                $linha['ATESTADO'] =  $atestado ? intval($atestado[0]['QUANTIDADE_DIAS']) : 0; 
+                $linha['FALTAS'] =  $falta ? intval($falta[0]['FALTAS']) : 0; 
                 // Se necessário, adicione mais tratamentos para outros campos do JSON aqui
             }
 
@@ -621,7 +650,7 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -648,9 +677,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -734,7 +768,7 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -761,9 +795,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -861,7 +900,7 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -888,9 +927,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -973,7 +1017,7 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -992,9 +1036,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         LEFT JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         LEFT JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         LEFT JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -1106,7 +1155,7 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -1132,9 +1181,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -1215,7 +1269,7 @@ class RelatorioModel extends Model {
             }
         }
       
-
+        $filtroDatas = "";
         if($request['dataIni'] && $request['dataFim'] ){
             $filtroDatas = "AND A.dtcad BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'";
         }
@@ -1241,9 +1295,14 @@ class RelatorioModel extends Model {
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(6,7) ) AS DATA_APROV_RH,
             (SELECT   TOP 1 Z.NOME +' : ' + XX.CHAPA FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_RH,
             (SELECT TOP 1   CONVERT(VARCHAR, A.dtcad, 103) AS dtcad FROM zcrmportal_variaveis_aprovacao WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(3) ) AS DATA_SINCRONIZAÇÂO,
-           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC
+           CONCAT(SUBSTRING(A.periodo, 6, 2), '/', SUBSTRING(A.periodo, 1, 4)) AS PERIODO_SINC,
+            CASE 
+              WHEN A.STATUS <> 0 THEN ''
+              ELSE CONCAT( CONVERT(VARCHAR, A.dtalt, 103), ' - ', X.nome )
+            END LOG_EXCLUSAO
         FROM zcrmportal_variaveis_req A
         INNER JOIN zcrmportal_usuario ON A.usucad = zcrmportal_usuario.id
+        LEFT JOIN zcrmportal_usuario X ON X.id = A.usualt
         INNER JOIN ".DBRM_BANCO."..PFUNC B ON A.chapa = B.CHAPA COLLATE Latin1_General_CI_AS
         INNER JOIN ".DBRM_BANCO."..PSECAO C ON B.CODSECAO = C.codigo
         INNER JOIN  ".DBRM_BANCO."..GCCUSTO on gccusto.codcoligada = C.codcoligada and gccusto.codccusto = C.nrocencustocont
@@ -1746,6 +1805,15 @@ class RelatorioModel extends Model {
                     AND aa.coligada = A.CODCOLIGADA
                     AND aa.dtponto = A.DATA
                 ) JUSTIFICATIVA_EXTRA
+                ,(SELECT
+                    top 1 aa.OBS
+                FROM
+                    ".DBPORTAL_BANCO."..zcrmportal_ponto_justificativa_func aa
+                WHERE
+                    aa.chapa = A.CHAPA COLLATE Latin1_General_CI_AS
+                    AND aa.coligada = A.CODCOLIGADA
+                    AND aa.dtponto = A.DATA
+                ) OBS
                 ,(CASE WHEN DATEPART(WEEKDAY,A.DATA) = 1 THEN 'Domingo'
                 WHEN DATEPART(WEEKDAY,A.DATA) = 2 THEN 'Segunda' 
                 WHEN DATEPART(WEEKDAY,A.DATA) = 3 THEN 'Terça'
@@ -4270,6 +4338,7 @@ FROM (
                     BATIDA AS REGISTRO, 
                     STATUS, 
                     (CASE WHEN STATUS <> 'C' THEN JUSTIFICATIVA ELSE '' END) JUSTIFICATIVA,
+                    OBS,
                     CONVERT(VARCHAR, DATA_REGISTRO, 103) DATA_REGISTRO,
                     CONVERT(VARCHAR, DATA_REGISTRO, 108) HORA_REGISTRO,
                     DATA_APROVADOR,
@@ -4315,6 +4384,19 @@ FROM (
                         AND pa.status = 'S'
                         AND COALESCE(pa.ent1, pa.ent2, pa.ent3, pa.ent4, pa.ent5, pa.sai1, pa.sai2, pa.sai3, pa.sai4, pa.sai5) = A.BATIDA
                     ) JUSTIFICATIVA,
+                    (
+                        SELECT
+                            top 1 pa.obs
+                        FROM
+                            ".DBPORTAL_BANCO."..zcrmportal_ponto_horas pa
+                        WHERE
+                                pa.chapa = A.CHAPA COLLATE Latin1_General_CI_AS
+                            AND pa.coligada = A.CODCOLIGADA
+                            AND pa.dtponto = A.DATA
+                            AND pa.movimento = 1
+                            AND pa.status = 'S'
+                            AND COALESCE(pa.ent1, pa.ent2, pa.ent3, pa.ent4, pa.ent5, pa.sai1, pa.sai2, pa.sai3, pa.sai4, pa.sai5) = A.BATIDA
+                    ) OBS,
                     (
                         SELECT
                             MAX(pa.dtcadastro)
@@ -4431,6 +4513,7 @@ FROM (
                         DBO.MINTOTIME(A.BATIDA) BATIDA,
                         A.STATUS,
                         G.JUSTIFICA COLLATE Latin1_General_CI_AS JUSTIFICATIVA,
+                        NULL OBS,
                         A.RECCREATEDON DATA_REGISTRO,
                         NULL DATA_APROVADOR,
                         NULL DATA_APROVADOR,
@@ -5331,7 +5414,7 @@ FROM (
                 --, '0' INFORMACOES_ADICIONAIS
                 , dtcadastro DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5368,15 +5451,15 @@ FROM (
 
                 , CASE 
                     WHEN usu_reprova IS NOT NULL THEN 
-                        ISNULL((SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                        ISNULL((SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usu_reprova AS VARCHAR)
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
-                			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT nome FROM zcrmportal_usuario WHERE ID = usu_reprova))
+                			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT TOP 1 nome FROM zcrmportal_usuario WHERE ID = usu_reprova))
                     
                     WHEN aprgestor_user IS NOT NULL THEN 
-                        ISNULL((SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                        ISNULL((SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = aprgestor_user
@@ -5391,17 +5474,17 @@ FROM (
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = apr_user
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
-                			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT nome FROM zcrmportal_usuario WHERE ID = apr_user))
+                			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT TOP 1 nome FROM zcrmportal_usuario WHERE ID = apr_user))
 
                     WHEN aprrh_user IS NOT NULL THEN 
-                        ISNULL((SELECT 
+                        ISNULL((SELECT TOP 1 
                             X.CHAPA + ' - ' + X.NOME
                         FROM ".DBRM_BANCO."..PFUNC X 
                             INNER JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                             LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                         WHERE Z.id = aprrh_user
                             AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
-                            AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT nome FROM zcrmportal_usuario WHERE ID = aprrh_user))
+                            AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), (SELECT TOP 1 nome FROM zcrmportal_usuario WHERE ID = aprrh_user))
                 END AS USUARIO_GESTOR,
                 
                 '' USUARIO_RH
@@ -5460,7 +5543,7 @@ FROM (
                 --, dbo.Base64Decode(observacao) INFORMACOES_ADICIONAIS
                 , A.dtcad DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5481,7 +5564,7 @@ FROM (
                     
                     
                     WHEN gestor_usuapr IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(gestor_usuapr AS VARCHAR)
@@ -5494,7 +5577,7 @@ FROM (
                 	CASE 
                     
                     WHEN usu_sinc IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usu_sinc AS VARCHAR)
@@ -5565,7 +5648,7 @@ FROM (
                 --, '0' INFORMACOES_ADICIONAIS
                 , A.dtcad DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5587,14 +5670,14 @@ FROM (
                 , CASE 
                     
                     WHEN usucancelado IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usucancelado AS VARCHAR)
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."'))
                    	WHEN usuapr IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usuapr AS VARCHAR)
@@ -5606,7 +5689,7 @@ FROM (
                 
                 CASE 
                 WHEN usurh IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usurh AS VARCHAR)
@@ -5689,7 +5772,7 @@ FROM (
                 , A.dtcadastro DATA_SOLICITACAO
                 , 
                 COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5708,21 +5791,21 @@ FROM (
                 END AS VARCHAR) AS JUSTIFICATIVA
                 , CASE 
                     WHEN usu_rep IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usu_rep AS VARCHAR)
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."'))
                 	WHEN usucancel IS NOT NULL THEN
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(usucancel AS VARCHAR)
                     		AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                 			AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."'))
                     WHEN apr_usugestor IS NOT NULL THEN
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(apr_usugestor AS VARCHAR)
@@ -5733,7 +5816,7 @@ FROM (
                 
                 CASE 
                     WHEN aprrh_user IS NOT NULL THEN 
-                    	(SELECT X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                    	(SELECT TOP 1 X.CHAPA + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                     		LEFT JOIN ".DBRM_BANCO."..PPESSOA Y ON Y.CODIGO = X.CODPESSOA
                     		LEFT JOIN zcrmportal_usuario Z ON Z.login COLLATE Latin1_General_CI_AS = Y.CPF
                     		WHERE Z.id = CAST(aprrh_user AS VARCHAR)
@@ -5812,15 +5895,15 @@ FROM (
                 , A.dtcad DATA_SOLICITACAO
                 ,
                 COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                         AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')
                         ) COLLATE Latin1_General_CI_AS + ' - ', '') + g.nome USUARIO_SOLICITANTE
 
-                , (SELECT dtcad FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND dtcad = (SELECT max(dtcad) FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND nivel_apr_area NOT IN (0, 8, 9))) DATA_APROVACAO_REPROVACAO
-                , (SELECT observacao FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND dtcad = (SELECT max(dtcad) FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND nivel_apr_area NOT IN (0, 8, 9)))  JUSTIFICATIVA
+                , (SELECT TOP 1 dtcad FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND dtcad = (SELECT max(dtcad) FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND nivel_apr_area NOT IN (0, 8, 9))) DATA_APROVACAO_REPROVACAO
+                , (SELECT TOP 1 observacao FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND dtcad = (SELECT max(dtcad) FROM zcrmportal_variaveis_aprovacao WHERE id_requisicao = A.id AND nivel_apr_area NOT IN (0, 8, 9)))  JUSTIFICATIVA
     
                 ,(SELECT TOP 1 XX.CHAPA + ' - ' + Z.NOME FROM zcrmportal_variaveis_aprovacao INNER JOIN zcrmportal_usuario X ON zcrmportal_variaveis_aprovacao.id_user = X.id INNER JOIN ".DBRM_BANCO."..PPESSOA Z ON X.login = Z.CPF COLLATE Latin1_General_CI_AS INNER JOIN ".DBRM_BANCO."..PFUNC XX ON Z.CODIGO = XX.CODPESSOA WHERE zcrmportal_variaveis_aprovacao.id_requisicao = A.id AND zcrmportal_variaveis_aprovacao.nivel_apr_area IN(5,2) AND XX.CODSITUACAO = 'A'  ) AS USUARIO_GESTOR
                  
@@ -5883,7 +5966,7 @@ FROM (
                     END AS STATUS
                 , A.dt_requisicao DATA_SOLICITACAO
                 , COALESCE((
-                    SELECT ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
+                    SELECT TOP 1 ZZ.CHAPA FROM ".DBRM_BANCO."..PPESSOA YY
                           LEFT JOIN ".DBRM_BANCO."..PFUNC ZZ ON ZZ.CODPESSOA = YY.CODIGO
                         WHERE YY.CPF = g.login COLLATE Latin1_General_CI_AS 
                          AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
@@ -5901,7 +5984,7 @@ FROM (
                 
                 , CASE 
                     WHEN chapa_aprov_reprov IS NOT NULL THEN 
-                        COALESCE((SELECT chapa_aprov_reprov COLLATE Latin1_General_CI_AS + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                        COALESCE((SELECT TOP 1 chapa_aprov_reprov COLLATE Latin1_General_CI_AS + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                             WHERE X.chapa = chapa_aprov_reprov COLLATE Latin1_General_CI_AS
                             AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                             AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), chapa_aprov_reprov)
@@ -5911,7 +5994,7 @@ FROM (
                 
                 CASE 
                 WHEN chapa_rh_aprov_reprov IS NOT NULL THEN 
-                        COALESCE((SELECT chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
+                        COALESCE((SELECT TOP 1 chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS + ' - ' + X.NOME FROM ".DBRM_BANCO."..PFUNC X 
                             WHERE X.chapa = chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS
                             AND (TIPODEMISSAO IS NULL OR TIPODEMISSAO NOT IN ('5','6'))
                             AND (DATADEMISSAO IS NULL OR DATADEMISSAO >= '".$request['dataIni']."')), chapa_rh_aprov_reprov)
@@ -5946,6 +6029,58 @@ FROM (
                 AND A.status NOT IN ('I', 'P')
                 AND (dt_rh_aprovacao IS NOT NULL OR dt_aprovacao IS NOT NULL)
             
+            --//-----------------------------------------------------------------
+            --//--- ARTIGO 61
+            --//-----------------------------------------------------------------
+            UNION ALL 
+
+                SELECT 
+                  A.ID, 
+                  A.id_COLIGADA COD_COLIGADA,
+                    B.CODFILIAL COD_FILIAL,
+                    A.chapa_requisitor CHAPA,
+                    B.NOME NOME,
+                    I.DESCRICAO SITUACAO,
+                    B.CODFUNCAO COD_FUNCAO,
+                    F.NOME FUNCAO,
+                    B.CODSECAO COD_SECAO,
+                    E.DESCRICAO SECAO,
+                    E.NROCENCUSTOCONT CODIGO_CENTRO_CUSTO,
+                    G.NOME CENTRO_CUSTO,
+                    'Artigo.61' PRODUTO,
+                    'Artigo.61' PROCESSO,
+                    CASE 
+                    WHEN A.status = 2 THEN 'PENDENTE GESTOR'
+                    WHEN A.status = 3 THEN 'PENDENTE RH CALCULAR'
+                    WHEN A.status = 4 THEN 'PENDENTE RH'
+                    WHEN A.status = 5 THEN 'PENDENTE SINCRONIZAÇÃO'
+                    WHEN A.status = 6 THEN 'CONCLUÍDO'
+                    WHEN A.status = 9 THEN 'REPROVADO'
+                        ELSE NULL
+                    END AS STATUS,
+                  A.dt_requisicao DATA_SOLICITACAO,
+                  A.chapa_requisitor + ' - ' + B.NOME COLLATE Latin1_General_CI_AS USUARIO_SOLICITANTE,
+                  A.dt_aprovacao DATA_APROVACACO_REPROVACAO,
+                  A.motivo_recusa JUSTIFICATIVA,
+                  A.chapa_aprov_reprov + ' - ' + H.NOME COLLATE Latin1_General_CI_AS USUARIO_GESTOR,
+                  A.chapa_rh_aprov_reprov + ' - ' + J.NOME COLLATE Latin1_General_CI_AS USUARIO_RH
+
+                FROM zcrmportal_art61_requisicao A
+                LEFT JOIN " . DBRM_BANCO . "..PFUNC B ON B.CHAPA = A.chapa_requisitor COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..GCOLIGADA C ON C.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..GFILIAL D ON D.CODFILIAL = B.CODFILIAL AND D.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..PSECAO E ON E.CODIGO = B.CODSECAO AND E.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..GCCUSTO G ON G.CODCCUSTO = E.NROCENCUSTOCONT AND E.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..PFUNCAO F ON F.CODIGO = B.CODFUNCAO AND F.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..PFUNC H ON H.CHAPA = A.chapa_aprov_reprov COLLATE Latin1_General_CI_AS AND H.CODCOLIGADA = A.id_COLIGADA
+                LEFT JOIN " . DBRM_BANCO . "..PCODSITUACAO I ON I.CODINTERNO = B.CODSITUACAO
+                LEFT JOIN " . DBRM_BANCO . "..PFUNC J ON J.CHAPA = A.chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS AND J.CODCOLIGADA = A.id_COLIGADA
+
+                WHERE 
+                  A.status > 1 AND
+                    A.id_coligada = '{$this->coligada}'
+
+
                 )K
                 
                 WHERE DATA_SOLICITACAO BETWEEN '".$request['dataIni']."' AND '".$request['dataFim']."'
@@ -6199,6 +6334,497 @@ FROM (
             )Y
         ";
         $result = $this->dbportal->query($query);
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+
+    private function relatorioConfArt61($request)
+    {
+       // print_r($request);
+         //exit();
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND f.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND f.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND c.CHAPA_COLAB = '".$request['chapa']."'";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        $query = "
+          WITH LISTA AS (
+		  
+		      SELECT 
+            r.ID AS ID_REQ,
+            r.ID_REQ_ORIGINAL AS ID_REQ_ORIGINAL,
+            CASE 
+              WHEN r.status = '0' THEN 'EXCLUÍDA'
+              WHEN r.status = '2' THEN 'PEND./APROV.GESTOR'
+              WHEN r.status = '3' THEN 'PEND./CALC.RH'
+              WHEN r.status = '4' THEN 'PEND./APROV.RH'
+              WHEN r.status = '5' THEN 'PEND./SINCRONISMO'
+              WHEN r.status = '6' THEN 'SINCRONIZADA'
+              ELSE 'CRIADA'
+            END AS STATUS_REQ,
+            r.id_coligada AS CODCOLIGADA,
+            f.CODFILIAL AS CODFILIAL,
+            FORMAT( r.dt_requisicao, 'dd/MM/yyyy') AS DATA_REQ,
+            c.id AS ID_REQ_CHAPA,
+            CASE 
+              WHEN c.status = 'A' THEN 'ATIVO NA REQ.'
+              ELSE 'EXCLUÍDO DA REQ.'
+            END AS STATUS_COLAB,
+            c.CHAPA_COLAB AS CHAPA_COLAB,
+            f.NOME AS NOME_COLAB,
+            f.CODSITUACAO AS CODSITUACAO_COLAB,
+            f.CODFUNCAO AS CODFUNCAO_COLAB,
+            u.NOME AS FUNCAO_COLAB,
+            s.NROCENCUSTOCONT AS CENTRO_DE_CUSTO,
+            g.NOME AS DESC_CCUSTO,
+            f.CODSECAO AS CODSECAO_COLAB,
+            s.DESCRICAO AS DESC_SECAO,
+            a.area AS AREA,
+            a.diretoria AS DIRETORIA,
+            r.chapa_gestor AS CHAPA_GESTOR,
+            n.NOME AS NOME_GESTOR,
+            r.chapa_requisitor AS CHAPA_REQUISITOR,
+            o.NOME AS NOME_REQUISITOR,
+            c.id_justificativa AS ID_JUSTIFICATIVA,
+            m.descricao AS DESC_JUSTIFICATIVA,
+            c.obs AS OBSERVACAO,
+            r.chapa_aprov_reprov AS CHAPA_APROV_REPROV,
+            j.NOME AS NOME_APROV_REPROV,
+            r.chapa_rh_aprov_reprov AS CHAPA_RH_APROV_REPROV,
+            k.NOME AS NOME_RH_APROV_REPROV,
+            FORMAT( r.dt_aprovacao, 'dd/MM/yyyy') AS DATA_APROV_REPROV,
+            r.motivo_recusa AS JUSTIFICATIVA_REPROVACAO,
+            r.dt_ini_ponto AS DT_INICIO_PONTO,
+            r.dt_fim_ponto AS DT_FIM_PONTO,
+            FORMAT( r.dt_ini_ponto, 'dd/MM/yyyy') AS DATA_INICIO_PONTO,
+            FORMAT( r.dt_fim_ponto, 'dd/MM/yyyy') AS DATA_FIM_PONTO,
+            FORMAT( c.dt_ponto, 'dd/MM/yyyy') AS DATA_PONTO,
+            c.codhorario AS CODHORARIO,
+            c.indice AS INDICE,
+            (
+              RIGHT('00' + CAST(CAST(c.valor AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.valor AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_ORIGINAIS,
+            c.codevento AS CODEVENTO_ORIGINAL,
+            (
+              RIGHT('00' + CAST(CAST(c.extra_normal AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.extra_normal AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_NORMAIS,
+            c.codevento_art61 AS CODEVENTO_ART61,
+            (
+              RIGHT('00' + CAST(CAST(c.extra_art61 AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.extra_art61 AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_ART61
+
+          FROM zcrmportal_art61_req_chapas c
+          LEFT JOIN zcrmportal_art61_requisicao r ON r.id = c.id_req
+          LEFT JOIN ".DBRM_BANCO."..PFUNC f ON f.CODCOLIGADA = r.id_coligada AND f.CHAPA = c.chapa_colab COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA AND u.CODIGO = f.CODFUNCAO
+          LEFT JOIN ".DBRM_BANCO."..PSECAO s ON s.CODCOLIGADA = f.CODCOLIGADA AND s.CODIGO = f.CODSECAO
+          LEFT JOIN ".DBRM_BANCO."..GCCUSTO g ON g.CODCOLIGADA = f.CODCOLIGADA AND g.CODCCUSTO = s.NROCENCUSTOCONT
+          LEFT JOIN ".DBRM_BANCO."..PFUNC n ON n.CODCOLIGADA = r.id_coligada AND n.CHAPA = r.chapa_gestor COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNC o ON o.CODCOLIGADA = r.id_coligada AND o.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNC j ON j.CODCOLIGADA = r.id_coligada AND j.CHAPA = r.chapa_aprov_reprov COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNC k ON k.CODCOLIGADA = r.id_coligada AND k.CHAPA = r.chapa_rh_aprov_reprov COLLATE Latin1_General_CI_AS
+          LEFT JOIN zcrmportal_art61_areas a ON a.coligada = r.id_coligada AND a.codcusto = s.NROCENCUSTOCONT COLLATE Latin1_General_CI_AS
+          LEFT JOIN zcrmportal_ponto_motivos m ON m.id = c.id_justificativa
+          
+          WHERE
+            r.id_coligada = ".$this->coligada." 
+            AND c.dt_ponto >= '".$request['dataIni']."' 
+            AND c.dt_ponto <= '".$request['dataFim']."'
+            ".$FiltroSecao."
+            ".$FiltroChapa."
+            ".$FiltroFuncao." 
+          ),
+
+          FILTRO AS (
+          SELECT DISTINCT CODCOLIGADA, CHAPA_COLAB, DT_INICIO_PONTO, DT_FIM_PONTO, CODEVENTO_ORIGINAL FROM LISTA
+          ),
+
+          MOVFUNDIA AS (
+          SELECT F.DT_FIM_PONTO, A.* 
+          FROM FILTRO F
+          LEFT JOIN ".DBRM_BANCO."..AMOVFUNDIA A ON 
+          F.CODCOLIGADA = A.CODCOLIGADA AND 
+          F.CHAPA_COLAB = A.CHAPA COLLATE Latin1_General_CI_AS AND 
+          A.DATA >= F.DT_INICIO_PONTO AND 
+          A.DATA <= F.DT_FIM_PONTO AND 
+          F.CODEVENTO_ORIGINAL = A.CODEVE COLLATE Latin1_General_CI_AS
+          ),
+
+          MOVFUN AS (
+          SELECT 
+          CODCOLIGADA,
+          CHAPA,
+          DT_FIM_PONTO,
+          CODEVE,
+          SUM(NUMHORAS) AS TOTEVE
+          FROM MOVFUNDIA
+          GROUP BY CODCOLIGADA, CHAPA, DT_FIM_PONTO, CODEVE
+              )
+
+          SELECT 
+          L.*,
+                (
+                  RIGHT('00' + CAST(CAST(M.TOTEVE AS INT) / 60 AS VARCHAR), 2) + ':' + 
+                  RIGHT('00' + CAST(CAST(M.TOTEVE AS INT) % 60 AS VARCHAR), 2) 
+                ) AS TOT_EVENTO_PERIODO
+          FROM LISTA L
+          LEFT JOIN MOVFUN M ON
+          M.CODCOLIGADA = L.CODCOLIGADA AND
+          M.CHAPA = L.CHAPA_COLAB COLLATE Latin1_General_CI_AS AND
+          M.DT_FIM_PONTO = L.DT_FIM_PONTO AND
+          M.CODEVE = L.CODEVENTO_ORIGINAL COLLATE Latin1_General_CI_AS 
+        ";
+
+        //echo '<pre>';
+        //echo $query;exit();
+        $result = $this->dbportal->query($query);
+
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+
+    private function relatorioGestorSubstituto($request)
+    {
+       // print_r($request);
+         //exit();
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND f.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND f.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND ( g.CHAPA_GESTOR = '".$request['chapa']."' OR g.CHAPA_SUBSTITUTO = '".$request['chapa']."' )";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        $query = "              
+          SELECT 
+            g.coligada as COLIGADA,
+            g.chapa_gestor AS CHAPA_GESTOR,
+            f.nome AS NOME_GESTOR,
+            f.CODFILIAL AS FILIAL_GESTOR,
+            f.CODFUNCAO AS CODFUNCAO_GESTOR,
+            u.nome AS FUNCAO_GESTOR,
+            f.CODSECAO AS CODSECAO_GESTOR,
+            s.DESCRICAO AS SECAO_GESTOR,
+            s.NROCENCUSTOCONT AS CENTRO_DE_CUSTO_GESTOR,
+            c.NOME AS NOME_CCUSTO_GESTOR,
+            a.area AS AREA_GESTOR,
+            a.diretoria AS DIRETORIA_GESTOR,
+            g.chapa_substituto AS CHAPA_SUBSTITUTO,
+            n.NOME AS NOME_SUBSTITUTO,
+            FORMAT( g.dtini, 'dd/MM/yyyy') as DATA_INICIAL,
+            FORMAT( g.dtfim, 'dd/MM/yyyy') as DATA_FINAL,
+            g.modulos AS CODIGOS_MODULOS,
+            ( SELECT STUFF((
+              SELECT ', ' + m.nome
+              FROM zcrmportal_hierarquia_gestor_substituto_modulos m
+              WHERE id IN (
+                SELECT id
+                FROM EXTRAIR_DADOS_JSON(g.modulos)
+              )
+              FOR XML PATH(''), TYPE
+              ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') 
+            ) AS NOMES_MODULOS
+          FROM zcrmportal_hierarquia_gestor_substituto g
+          LEFT JOIN ".DBRM_BANCO."..PFUNC f ON f.CODCOLIGADA = g.coligada AND f.CHAPA = g.chapa_gestor COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA AND u.CODIGO = f.CODFUNCAO
+          LEFT JOIN ".DBRM_BANCO."..PSECAO s ON s.CODCOLIGADA = f.CODCOLIGADA AND s.CODIGO = f.CODSECAO
+          LEFT JOIN ".DBRM_BANCO."..GCCUSTO c ON c.CODCOLIGADA = s.CODCOLIGADA AND c.CODCCUSTO = s.NROCENCUSTOCONT
+          LEFT JOIN zcrmportal_art61_areas a ON a.coligada = g.coligada AND a.codcusto = c.CODCCUSTO COLLATE Latin1_General_CI_AS
+          LEFT JOIN ".DBRM_BANCO."..PFUNC n ON n.CODCOLIGADA = g.coligada AND n.CHAPA = g.chapa_substituto COLLATE Latin1_General_CI_AS
+          WHERE 
+            g.inativo = 0
+            AND g.coligada = ".$this->coligada." 
+            ".$FiltroSecao."
+            ".$FiltroChapa."
+            ".$FiltroFuncao." 
+        ";
+
+        //echo '<pre>';
+        //echo $query;exit();
+        $result = $this->dbportal->query($query);
+
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+
+    private function relatorioMudancaHorario($request)
+    {
+       // print_r($request);
+         //exit();
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND f.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND f.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND ( g.CHAPA = '".$request['chapa']."' )";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        $query = "              
+          WITH LISTA AS (
+          SELECT 
+            g.CODCOLIGADA as COLIGADA,
+            g.CHAPA AS CHAPA,
+            f.nome AS NOME,
+            f.CODFILIAL AS FILIAL,
+            f.CODFUNCAO AS CODFUNCAO,
+            u.nome AS FUNCAO,
+            f.CODSECAO AS CODSECAO,
+            s.DESCRICAO AS SECAO,
+            s.NROCENCUSTOCONT AS CENTRO_DE_CUSTO,
+            c.NOME AS NOME_CCUSTO,
+            a.area AS AREA,
+            a.diretoria AS DIRETORIA,
+            FORMAT( g.DTMUDANCA, 'dd/MM/yyyy') as DATA_ALTERACAO,
+            ( SELECT TOP 1 CODHORARIO FROM " . DBRM_BANCO . "..PFHSTHOR h 
+              WHERE h.CHAPA = g.CHAPA AND h.CODCOLIGADA = g.CODCOLIGADA
+              AND  h.DTMUDANCA < g.DTMUDANCA AND h.CODHORARIO <> g.CODHORARIO
+              ORDER BY h.DTMUDANCA DESC
+            ) AS CODHORARIO_ANTERIOR,
+            '' AS HORARIO_ANTERIOR,
+            g.CODHORARIO AS CODHORARIO_ATUAL,
+            '' AS HORARIO_ATUAL,
+            f.CODSINDICATO AS CODSINDICATO
+            
+          FROM " . DBRM_BANCO . "..PFHSTHOR g
+          LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON f.CODCOLIGADA = g.CODCOLIGADA AND f.CHAPA = g.CHAPA 
+          LEFT JOIN " . DBRM_BANCO . "..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA AND u.CODIGO = f.CODFUNCAO
+          LEFT JOIN " . DBRM_BANCO . "..PSECAO s ON s.CODCOLIGADA = f.CODCOLIGADA AND s.CODIGO = f.CODSECAO
+          LEFT JOIN " . DBRM_BANCO . "..GCCUSTO c ON c.CODCOLIGADA = s.CODCOLIGADA AND c.CODCCUSTO = s.NROCENCUSTOCONT
+          LEFT JOIN zcrmportal_art61_areas a ON a.coligada = g.CODCOLIGADA AND a.codcusto = c.CODCCUSTO COLLATE Latin1_General_CI_AS
+          
+          WHERE 
+                g.CODCOLIGADA = ".$this->coligada." 
+            AND g.DTMUDANCA >= '".$request['dataIni']."' 
+            AND g.DTMUDANCA <= '".$request['dataFim']."'
+            ".$FiltroSecao."
+            ".$FiltroChapa."
+            ".$FiltroFuncao." 
+
+          )
+
+          SELECT DISTINCT
+            l.COLIGADA,
+            l.CHAPA,
+            l.NOME,
+            l.FILIAL,
+            l.CODFUNCAO,
+            l.FUNCAO,
+            l.CODSECAO,
+            l.SECAO,
+            l.CENTRO_DE_CUSTO,
+            l.NOME_CCUSTO,
+            l.AREA,
+            l.DIRETORIA,
+            l.DATA_ALTERACAO,
+            l.CODHORARIO_ANTERIOR,
+            a.DESCRICAO AS HORARIO_ANTERIOR,
+            l.CODHORARIO_ATUAL,
+            b.DESCRICAO AS HORARIO_ATUAL,
+            l.CODSINDICATO AS COD_SINDICATO_ATUAL,
+            c.NOME AS SINDICATO_ATUAL
+
+          FROM LISTA l
+          LEFT JOIN " . DBRM_BANCO . "..AHORARIO a ON a.CODCOLIGADA = l.COLIGADA AND a.CODIGO = l.CODHORARIO_ANTERIOR
+          LEFT JOIN " . DBRM_BANCO . "..AHORARIO b ON b.CODCOLIGADA = l.COLIGADA AND b.CODIGO = l.CODHORARIO_ATUAL
+          LEFT JOIN " . DBRM_BANCO . "..PSINDIC c ON c.CODCOLIGADA = l.COLIGADA AND c.CODIGO = l.CODSINDICATO
+        ";
+
+        //echo '<pre>';
+        //echo $query;exit();
+        $result = $this->dbportal->query($query);
+
+        return ($result)
+            ? array(
+                'dados'     => $result->getResultArray(),
+                'colunas'   => $result->getFieldCount()
+            )
+            : false;
+
+    }
+
+
+    private function relatorioWorkflowFaltas($request)
+    {
+       // print_r($request);
+         //exit();
+        $select = "";
+        foreach($request['colunas'] as $Select){
+            $select .= $Select.',';
+        }
+
+        $FiltroSecao = "";
+        if(is_array($request['secao'])){
+            if(count($request['secao']) > 0){
+                $codsecao = "";
+                foreach($request['secao'] as $Secao){
+                    $codsecao .= "'{$Secao}',";
+                }
+                $FiltroSecao = " AND f.CODSECAO IN (".rtrim($codsecao,',').") ";
+            }
+        }
+
+        if($request['funcao'] != ""){
+            $FiltroFuncao = "AND f.CODFUNCAO = '".$request['funcao']."'";
+        }else{
+            $FiltroFuncao = "";
+        }
+
+        if($request['chapa']){
+            if($request['chapa'] != ""){
+                $FiltroChapa = "AND ( w.chapa_colab = '".$request['chapa']."' )";
+            }else{
+                $FiltroChapa = "";
+            }
+        }else{
+            $FiltroChapa = "";
+        }
+
+        $query = "              
+          SELECT 
+            w.codcoligada	    AS CODCOLIGADA,
+            w.chapa_colab	    AS CHAPA,
+            w.nome_colab	    AS NOME,
+            f.codfilial		    AS FILIAL,
+            f.codfuncao		    AS CODFUNCAO,
+            u.nome			      AS FUNCAO,
+            f.codsecao		    AS CODSECAO,
+            s.DESCRICAO		    AS SECAO, 
+            s.NROCENCUSTOCONT AS CENTRO_DE_CUSTO,
+            c.NOME			      AS NOME_CCUSTO,
+            w.prim_falta	    AS INICIO_FALTAS,
+            w.faltas_finais   AS FALTAS_CONSECUTIVAS, 
+            w.status		      AS STATUS,
+            w.dtenvio1		    AS DATA_ENVIO_GESTOR1,
+            w.chapa_gestor1   AS CHAPA_GESTOR1,
+            w.nome_gestor1	  AS NOME_GESTOR1,
+            w.gestor_sub1	    AS CHAPA_SUB_GESTOR1,
+            w.nome_sub1		    AS NOME_SUB_GESTOR1,
+            w.dtenvio2		    AS DATA_ENVIO_GESTOR2,
+            w.chapa_gestor2   AS CHAPA_GESTOR2,
+            w.nome_gestor2    AS NOME_GESTOR2,
+            w.gestor_sub2	    AS CHAPA_SUB_GESTOR2,
+            w.nome_sub2		    AS NOME_SUB_GESTOR2,
+            w.dtaprovado	    AS DATA_CONFIRMACAO,
+            w.chapa_aprovou   AS CHAPA_CONFIRMOU,
+            w.dtrecusado	    AS DATA_RECUSA,
+            w.chapa_recusou   AS CHAPA_RECUSOU,
+            w.motivo_recusa   AS MOTIVO_RECUSA
+          FROM zcrmportal_workflow_faltas w
+          LEFT JOIN CorporeRMDEV..PFUNC f ON f.CODCOLIGADA = w.codcoligada and f.CHAPA = w.chapa_colab COLLATE Latin1_General_CI_AS
+          LEFT JOIN CorporeRMDEV..PFUNCAO u ON u.CODCOLIGADA = f.CODCOLIGADA and u.CODIGO = f.CODFUNCAO
+          LEFT JOIN CorporeRMDEV..PSECAO s ON s.CODCOLIGADA = f.CODCOLIGADA and s.CODIGO = f.CODSECAO
+          LEFT JOIN CorporeRMDEV..GCCUSTO c ON c.CODCOLIGADA = s.CODCOLIGADA and c.CODCCUSTO = s.NROCENCUSTOCONT
+
+          WHERE 
+                w.CODCOLIGADA = ".$this->coligada." 
+            AND ( ( w.dtcad >= '".$request['dataIni']."' AND w.dtcad <= '".$request['dataFim']."' ) OR
+                  ( w.dtenvio1 >= '".$request['dataIni']."' AND w.dtenvio1 <= '".$request['dataFim']."' ) OR
+                  ( w.dtenvio2 >= '".$request['dataIni']."' AND w.dtenvio2 <= '".$request['dataFim']."' ) OR
+                  ( w.dtaprovado >= '".$request['dataIni']."' AND w.dtaprovado <= '".$request['dataFim']."' ) OR
+                  ( w.dtrecusado >= '".$request['dataIni']."' AND w.dtrecusado <= '".$request['dataFim']."' ) ) 
+            ".$FiltroSecao."
+            ".$FiltroChapa."
+            ".$FiltroFuncao." 
+
+        ";
+
+        //echo '<pre>';
+        //echo $query;exit();
+        $result = $this->dbportal->query($query);
+
         return ($result)
             ? array(
                 'dados'     => $result->getResultArray(),

@@ -1102,16 +1102,21 @@ $(document).ready(function(){
 
 									$abono_pendente_rh = $resData[$i]['ABONO_PENDENTE_RH'];
 
-									$motivo_justificativa = (strlen(trim($resData[$i]['JUSTIFICATIVA'])) > 0) ? $resData[$i]['JUSTIFICATIVA'] : 'Não justificado';
+                  $motivo_justificativa = 'Não justificado';
+
+                  if($resData[$i]['USABANCOHORAS'] == 1) {
+                    $motivo_justificativa = 'Banco de Horas';
+                  }
+
+                  if(strlen(trim($resData[$i]['JUSTIFICATIVA'])) > 0) {
+									  $motivo_justificativa = $resData[$i]['JUSTIFICATIVA'];
+                  }
 
 									$status_atitude = '';
 									if(strlen(trim($resData[$i]['JUSTIFICATIVA_ATITUDE'])) > 0){
 										$status_atitude = substr($resData[$i]['JUSTIFICATIVA_ATITUDE'],-1);
 										$motivo_justificativa = substr($resData[$i]['JUSTIFICATIVA_ATITUDE'],0, -1);
-									}
-
-
-
+									}     
 
 									$html = '<tr class="tbadmlistalin">';
 
@@ -1656,26 +1661,7 @@ $(document).ready(function(){
 </div>
 <!-- modal -->
 
-
 <script>
-	$(document).ready(function() {
-
-		$('[mask-batida]').mask("99:99");
-		$('[mask-data]').mask("99/99/9999");
-
-		$('#tb-ponto-critica').DataTable({
-			"aLengthMenu": [
-				[25, 50, 100, 200, -1],
-				[25, 50, 100, 200, "Todos"]
-			],
-			"iDisplayLength": 25,
-			"aaSorting": [
-				[4, "desc"]
-			],
-			"fixedHeader": true
-		});
-	});
-
 	$('#abonoAtrasoAcao').on('change', function() {
 
 		const valor = $(this).val();
@@ -1785,6 +1771,12 @@ $(document).ready(function(){
 
 		}
 	})
+
+  function removerHTML(variavelComHTML) {
+    const elemento = document.createElement('div');
+    elemento.innerHTML = variavelComHTML;
+    return elemento.textContent || elemento.innerText || '';
+  }
 
 	function h2m(hora) {
 		var horas = hora.split(':');
@@ -2428,11 +2420,6 @@ $(document).ready(function(){
     border: 1px solid #cccccc;
 }
 </style>
-
-<link rel="stylesheet" type="text/css" href="<?= base_url('public/assets/plugins/datatables/fixedHeader/jquery.dataTables.css'); ?>"/>
-<link rel="stylesheet" type="text/css" href="<?= base_url('public/assets/plugins/datatables/fixedHeader/fixedHeader.dataTables.css'); ?>"/>
-<script type="text/javascript" src="<?= base_url('public/assets/plugins/datatables/fixedHeader/jquery.dataTables.js'); ?>"></script>
-<script type="text/javascript" src="<?= base_url('public/assets/plugins/datatables/fixedHeader/dataTables.fixedHeader.js'); ?>"></script>
 
 <?php
 loadPlugin(array('select2', 'datatable', 'mask', 'tooltips'))
@@ -4078,7 +4065,7 @@ $.ajax({
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="return justificarExtra()">Salvar Justificativa <i class="fas fa-check"></i></button>
+                <button type="button" class="btn btn-success" onclick="return justificarExtra()">Salvar<i class="fas fa-check"></i></button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -4397,3 +4384,86 @@ function getNextAndPreviousDates(dateString) {
         }
     }
 </style>
+
+<?php loadPlugin(array('datatable')); ?>
+<link rel="stylesheet" type="text/css" href="<?= base_url('public/assets/plugins/datatables/fixedHeader/jquery.dataTables.css'); ?>" />
+<link rel="stylesheet" type="text/css" href="<?= base_url('public/assets/plugins/datatables/fixedHeader/fixedHeader.dataTables.css'); ?>" />
+<script type="text/javascript" src="<?= base_url('public/assets/plugins/datatables/fixedHeader/jquery.dataTables.js'); ?>"></script>
+<script type="text/javascript" src="<?= base_url('public/assets/plugins/datatables/fixedHeader/dataTables.fixedHeader.js'); ?>"></script>
+<script>
+	$(document).ready(function() {
+
+		$('[mask-batida]').mask("99:99");
+		$('[mask-data]').mask("99/99/9999");
+
+    // Inicialização do DataTable
+    var tabelaCritica = $('#tb-ponto-critica').DataTable({
+      "aLengthMenu": [
+        [25, 50, 100, 200, -1],
+        [25, 50, 100, 200, "Todos"]
+      ],
+      "iDisplayLength": 25,
+      "aaSorting": [
+        [0, "desc"]
+      ],
+      "fixedHeader": true, // Ativa o fixedHeader
+      "language": {
+        "decimal": ",",
+        "thousands": ".",
+        "sProcessing": "Processando...",
+        "sLengthMenu": "Exibir _MENU_ registros",
+        "sZeroRecords": "Nenhum registro encontrado",
+        "sEmptyTable": "Nenhum dado disponível nesta tabela",
+        "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+        "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+        "sInfoFiltered": "(filtrado de _MAX_ registros no total)",
+        "sSearch": "Procurar:",
+        "oPaginate": {
+          "sFirst": "Primeiro",
+          "sPrevious": "Anterior",
+          "sNext": "Próximo",
+          "sLast": "Último"
+        },
+        "oAria": {
+          "sSortAscending": ": Ordenar colunas de forma ascendente",
+          "sSortDescending": ": Ordenar colunas de forma descendente"
+        }
+      },
+      initComplete: function() {
+        var api = this.api(); // Instância do DataTable
+        var p_linha = api.columns()[0].length;
+
+        // Configura filtros personalizados
+        api.columns().every(function() {
+          var column = this;
+
+          if (column[0][0] <= 4 || column[0][0] >=  10) return false;
+
+          var select = $('<select class="form-control form-control-sm filtro_table"><option value="">Todos</option></select>')
+            .appendTo($(column.header()))
+            .on('change', function() {
+              var val = $(this).val();
+              column.search(val ? '^' + val + '$' : '', true, false).draw();
+            });
+
+          column.data().unique().sort().each(function(d, j) {
+            var noHTML = removerHTML(d);
+            select.append('<option value="' + noHTML + '">' + noHTML + '</option>');
+          });
+        });
+
+        $(".filtro_table").select2({
+          width: '100%',
+          language: {
+            noResults: function() {
+              return 'Nenhum resultado encontrado';
+            }
+          }
+        });
+        setInterval(function() {
+          tabelaCritica.fixedHeader.adjust();
+        }, 1000);
+      },
+    });
+	});
+  </script>

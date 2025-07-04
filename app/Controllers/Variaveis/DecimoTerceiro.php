@@ -48,15 +48,23 @@ Class Decimoterceiro extends BaseController {
         parent::VerificaPerfil('VARIAVEIS_DECIMOTERCEIRO');
         $dados['_titulo'] = "Nova Antecipação 1 parcela do 13º Salário";
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
-        if(!$dados['rh']){
-            $gestor  = $this->mParam->funcGestor(util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null);
+        
+        $coligada = (session()->get('func_coligada') ?? null);
+        $chapa = (util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null);
+
+        $mHierarquia = Model('HierarquiaModel');
+		    $dados['isGestor'] = $mHierarquia->isGestor($chapa, $coligada);
+        $dados['isLider'] = $mHierarquia->isLider($chapa, $coligada);
          
+        if(!$dados['rh']){
+            $gestor  = $this->mParam->funcGestor($chapa);   
             $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados,false,$gestor[0]['CHAPA']);
         }else{
+            $dados['isGestor'] = true;
             $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
         }
        
-     
+        
         $dados['chapaFunc'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
         $dados['funcionario'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
         

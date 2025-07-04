@@ -109,7 +109,8 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'AD_NOTURNO_40', 'name': 'Ad. Noturno 40%'},
                 {'value':'DEBITO_BH', 'name': 'Debito BH'},
                 {'value':'SALDO_BH_COM_ACRESCIMO', 'name': 'Saldo BH c/ Acréscimo'},
-                {'value':'JUSTIFICATIVA_EXTRA', 'name': 'Justificativas de Horas Extras'}
+                {'value':'JUSTIFICATIVA_EXTRA', 'name': 'Justificativas de Horas Extras'},
+                {'value':'OBS', 'name': 'Observação'}
 
             ];
         break;
@@ -294,6 +295,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'REGISTRO', 'name': 'Registro'},
                 {'value':'STATUS', 'name': 'Status'},
                 {'value':'JUSTIFICATIVA', 'name': 'Justificativa do Registro'},
+                {'value':'OBS', 'name': 'Observação'},
                 {'value':'DATA_REGISTRO', 'name': 'Data Registro'},
                 {'value':'HORA_REGISTRO', 'name': 'Hora Registro'},
                 {'value':'USUARIO', 'name': 'Usuário'},
@@ -396,6 +398,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'EVENTO', 'name': 'Evento'},
              
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -424,6 +427,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'JUSTIFICATIVA_APROV', 'name': 'Justificativa Aprovação'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -453,6 +457,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'EVENTO', 'name': 'Evento'},
                 
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -481,7 +486,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
-               
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
             ];
         break;
         case '21':
@@ -526,6 +531,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
             
@@ -556,7 +562,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
-               
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
             ];
         break;
         case '23':
@@ -586,6 +592,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -614,6 +621,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
                
             ];
         break;
@@ -642,7 +650,7 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                 {'value':'DATA_SINCRONIZAÇÂO', 'name': 'Data Sincronização'},
                 {'value':'EVENTO', 'name': 'Evento'},
                 {'value':'PERIODO_SINC', 'name': 'Periodo Sincronismo'},
-               
+                {'value':'LOG_EXCLUSAO', 'name': 'Log de Exclusão'},
             ];
         break;
 
@@ -826,7 +834,135 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                     {'value': '[USUÁRIO - RH]', 'name': 'Aprovador RH'},
                 ]
                 
-            break;
+        break;
+        case '40':
+                colunas = [
+                    {'value': '[ID_REQ]', 'name': 'ID da Requisição'},
+                    {'value': '[ID_REQ_ORIGINAL]', 'name': 'ID Original da Requisição'},
+                    {'value': '[STATUS_REQ]', 'name': 'Status Requisição'},
+                    {'value': '[CODCOLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[CODFILIAL]', 'name': 'Cód. Filial'},
+                    {'value': '[DATA_REQ]', 'name': 'Data da Requisição'},
+                    {'value': '[ID_REQ_CHAPA]', 'name': 'ID da Chapa na Requisição'},
+                    {'value': '[STATUS_COLAB]', 'name': 'Status do Colaborador na Requisição'},
+                    {'value': '[CHAPA_COLAB]', 'name': 'Chapa do Colaborador'},
+                    {'value': '[NOME_COLAB]', 'name': 'Nome do Colaborador'},
+                    {'value': '[CODSITUACAO_COLAB]', 'name': 'Cód. Situação Colaborador'},
+                    {'value': '[CODFUNCAO_COLAB]', 'name': 'Cód. Função'},
+                    {'value': '[FUNCAO_COLAB]', 'name': 'Função do Colaborador'},
+                    {'value': '[CENTRO_DE_CUSTO]', 'name': 'Centro de Custo'},
+                    {'value': '[DESC_CCUSTO]', 'name': 'Desc. Centro de Custo'},
+                    {'value': '[CODSECAO_COLAB]', 'name': 'Cód. Seção'},
+                    {'value': '[DESC_SECAO]', 'name': 'Seção do Colaborador'},
+                    {'value': '[AREA]', 'name': 'Área'},
+                    {'value': '[DIRETORIA]', 'name': 'Diretoria'},
+                    {'value': '[CHAPA_GESTOR]', 'name': 'Chapa do Gestor'},
+                    {'value': '[NOME_GESTOR]', 'name': 'Nome do Gestor'},
+                    {'value': '[CHAPA_REQUISITOR]', 'name': 'Chapa do Requisitor'},
+                    {'value': '[NOME_REQUISITOR]', 'name': 'Nome do Requisitor'},
+                    {'value': '[ID_JUSTIFICATIVA]', 'name': 'ID Justificativa'},
+                    {'value': '[DESC_JUSTIFICATIVA]', 'name': 'Desc. Justificativa'},
+                    {'value': '[OBSERVACAO]', 'name': 'Observação'},
+                    {'value': '[CHAPA_APROV_REPROV]', 'name': 'Chapa do Aprovador ou Reprovador'},
+                    {'value': '[NOME_APROV_REPROV]', 'name': 'Nome do Aprovador ou Reprovador'},
+                    {'value': '[CHAPA_RH_APROV_REPROV]', 'name': 'Chapa do RH Aprovador ou Reprovador'},
+                    {'value': '[NOME_RH_APROV_REPROV]', 'name': 'Nome do RH Aprovador ou Reprovador'},
+                    {'value': '[DATA_APROV_REPROV]', 'name': 'Data da Aprovação ou Reprovação'},
+                    {'value': '[JUSTIFICATIVA_REPROVACAO]', 'name': 'Justificativa da Reprovação'},
+                    {'value': '[DATA_INICIO_PONTO]', 'name': 'Data Inicial do Ponto'},
+                    {'value': '[DATA_FIM_PONTO]', 'name': 'Data Final do Ponto'},
+                    {'value': '[DATA_PONTO]', 'name': 'Data do Ponto'},
+                    {'value': '[CODHORARIO]', 'name': 'Código do Horario'},
+                    {'value': '[INDICE]', 'name': 'Indíce'},
+                    {'value': '[HORAS_EXTRAS_ORIGINAIS]', 'name': 'Horas Extras Originais'},
+                    {'value': '[CODEVENTO_ORIGINAL]', 'name': 'Código do Evento Original'},
+                    {'value': '[HORAS_EXTRAS_NORMAIS]', 'name': 'Horas Extras Normais'},
+                    {'value': '[CODEVENTO_ART61]', 'name': 'Código do Evento Artigo.61'},
+                    {'value': '[HORAS_EXTRAS_ART61]', 'name': 'Horas Extras Artigo.61'},
+                    {'value': '[TOT_EVENTO_PERIODO]', 'name': 'Total de Horas do Evento no Período'},
+                ]
+                
+        break;
+        case '41':
+                colunas = [
+                    {'value': '[COLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[CHAPA_GESTOR]', 'name': 'Chapa do Gestor'},
+                    {'value': '[NOME_GESTOR]', 'name': 'Nome do Gestor'},
+                    {'value': '[FILIAL_GESTOR]', 'name': 'Filial do Gestor'},
+                    {'value': '[CODFUNCAO_GESTOR]', 'name': 'Código da Função do Gestor'},
+                    {'value': '[FUNCAO_GESTOR]', 'name': 'Função do Gestor'},
+                    {'value': '[CODSECAO_GESTOR]', 'name': 'Código da Seção do Gestor'},
+                    {'value': '[SECAO_GESTOR]', 'name': 'Seção do Gestor'},
+                    {'value': '[CENTRO_DE_CUSTO_GESTOR]', 'name': 'Centro de Custo do Gestor'},
+                    {'value': '[NOME_CCUSTO_GESTOR]', 'name': 'Nome do Centro de Custo do Gestor'},
+                    {'value': '[AREA_GESTOR]', 'name': 'Área do Gestor'},
+                    {'value': '[DIRETORIA_GESTOR]', 'name': 'Diretoria do Gestor'},
+                    {'value': '[CHAPA_SUBSTITUTO]', 'name': 'Chapa do Gestor Substituto'},
+                    {'value': '[NOME_SUBSTITUTO]', 'name': 'Nome do Gestor Substituto'},
+                    {'value': '[DATA_INICIAL]', 'name': 'Data Inicial da Substituição'},
+                    {'value': '[DATA_FINAL]', 'name': 'Data Final da Substituição'},
+                    {'value': '[CODIGOS_MODULOS]', 'name': 'Códigos dos Módulos'},
+                    {'value': '[NOMES_MODULOS]', 'name': 'Nomes do Módulos'},
+                ]
+                
+        break;
+        case '42':
+                colunas = [
+                    {'value': '[COLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[CHAPA]', 'name': 'Chapa do Colaborador'},
+                    {'value': '[NOME]', 'name': 'Nome'},
+                    {'value': '[FILIAL]', 'name': 'Filial'},
+                    {'value': '[CODFUNCAO]', 'name': 'Código da Função'},
+                    {'value': '[FUNCAO]', 'name': 'Função'},
+                    {'value': '[CODSECAO]', 'name': 'Código da Seção'},
+                    {'value': '[SECAO]', 'name': 'Seção'},
+                    {'value': '[CENTRO_DE_CUSTO]', 'name': 'Centro de Custo'},
+                    {'value': '[NOME_CCUSTO]', 'name': 'Nome do Centro de Custo'},
+                    {'value': '[AREA]', 'name': 'Área'},
+                    {'value': '[DIRETORIA]', 'name': 'Diretoria'},
+                    {'value': '[DATA_ALTERACAO]', 'name': 'Data da Mudança'},
+                    {'value': '[CODHORARIO_ANTERIOR]', 'name': 'Código do Horário Anterior'},
+                    {'value': '[HORARIO_ANTERIOR]', 'name': 'Horário Anterior'},
+                    {'value': '[CODHORARIO_ATUAL]', 'name': 'Código do Horário Atual'},
+                    {'value': '[HORARIO_ATUAL]', 'name': 'Horário Atual'},
+                    {'value': '[COD_SINDICATO_ATUAL]', 'name': 'Código do Sindicato Atual'},
+                    {'value': '[SINDICATO_ATUAL]', 'name': 'Sindicato Atual'},
+                ]
+                
+        break;
+        case '43':
+                colunas = [
+                    {'value': '[CODCOLIGADA]', 'name': 'Cód. Coligada'},
+                    {'value': '[CHAPA]', 'name': 'Chapa do Colaborador'},
+                    {'value': '[NOME]', 'name': 'Nome'},
+                    {'value': '[FILIAL]', 'name': 'Filial'},
+                    {'value': '[CODFUNCAO]', 'name': 'Código da Função'},
+                    {'value': '[FUNCAO]', 'name': 'Função'},
+                    {'value': '[CODSECAO]', 'name': 'Código da Seção'},
+                    {'value': '[SECAO]', 'name': 'Seção'},
+                    {'value': '[CENTRO_DE_CUSTO]', 'name': 'Centro de Custo'},
+                    {'value': '[NOME_CCUSTO]', 'name': 'Nome do Centro de Custo'},
+                    {'value': '[INICIO_FALTAS]', 'name': 'Data de Início das Faltas'},
+                    {'value': '[FALTAS_CONSECUTIVAS]', 'name': 'Faltas Consecutivas'},
+                    {'value': '[STATUS]', 'name': 'Status do Workflow'},
+                    {'value': '[DATA_ENVIO_GESTOR1]', 'name': 'Envio para Gestor 1'},
+                    {'value': '[CHAPA_GESTOR1]', 'name': 'Chapa do Gestor 1'},
+                    {'value': '[NOME_GESTOR1]', 'name': 'Nome do Gestor 1'},
+                    {'value': '[CHAPA_SUB_GESTOR1]', 'name': 'Chapa do Substituto do Gestor 1'},
+                    {'value': '[NOME_SUB_GESTOR1]', 'name': 'Nome do Substituto do Gestor 1'},
+                    {'value': '[DATA_ENVIO_GESTOR2]', 'name': 'Envio para Gestor 2'},
+                    {'value': '[CHAPA_GESTOR2]', 'name': 'Chapa do Gestor 2'},
+                    {'value': '[NOME_GESTOR2]', 'name': 'Nome do Gestor 2'},
+                    {'value': '[CHAPA_SUB_GESTOR2]', 'name': 'Chapa do Substituto do Gestor 2'},
+                    {'value': '[NOME_SUB_GESTOR2]', 'name': 'Nome do Substituto do Gestor 2'},
+                    {'value': '[DATA_CONFIRMACAO]', 'name': 'Data que foi Confirmado o Envio'},
+                    {'value': '[CHAPA_CONFIRMOU]', 'name': 'Chapa que Confirmou o Envio'},
+                    {'value': '[DATA_RECUSA]', 'name': 'Data que foi Recusado o Envio'},
+                    {'value': '[CHAPA_RECUSOU]', 'name': 'Chapa que Recusou o Envio'},
+                    {'value': '[MOTIVO_RECUSA]', 'name': 'Motivo que foi Recusado o Envio'}
+                ]
+                
+        break;
 
     }
 
@@ -908,7 +1044,7 @@ const gerarRelatorioTabela = () => {
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
     if(relatorio == 11 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42 || relatorio == 43) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
 
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
 
@@ -920,6 +1056,7 @@ const gerarRelatorioTabela = () => {
     $("#form_filtro").attr('action',base_url + '/relatorio/gerar').attr('target', '_self');
     $("#form_filtro").submit();
 }
+
 const gerarExcel = () => {
 
     let relatorio = $('#relatorio').val();
@@ -934,7 +1071,7 @@ const gerarExcel = () => {
     if(relatorio == 8 && dataI == "" || relatorio == 8 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42 || relatorio == 43) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
   
@@ -957,7 +1094,7 @@ const gerarPDF = () => {
     if(relatorio == 9 && dataI == "" || relatorio == 9 && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
     if(relatorio == 10 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
     if(relatorio == 11 && dataF == ""){ exibeAlerta('warning', '<b>Data Fim</b> obrigatório.'); return false; }
-    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
+    if((relatorio == 13 || relatorio == 16 || relatorio == 26 || relatorio == 27 || relatorio == 28 || relatorio == 40 || relatorio == 42 || relatorio == 43) && dataI == "" && dataF == ""){ exibeAlerta('warning', 'Selecione as datas necessárias.'); return false; }
 
     if(relatorio == ""){ exibeAlerta('warning', 'Selecione um tipo de relatório.'); return false; }
 

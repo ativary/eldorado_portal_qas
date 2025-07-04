@@ -173,7 +173,7 @@ class CriticaModel extends Model {
 		  WHEN FALTA_JUST > 0 AND FALTA_JUST > FALTA_CASE THEN FALTA_CASE ELSE FALTA_CASE END )
 		FALTA_CASE*/
 
-		, EXTRAEXECUTADO_CASE, SEM_PAR_CORRESPONDENTE, INTERJORNADA, JORNADA_MAIOR_10HORAS, JORNADA_MAIOR_12HORAS, SEM_PAR_CORRESPONDENTE_DESC, INTERJORNADA_DESC, JORNADA_MAIOR_10HORAS_DESC, JORNADA_MAIOR_12HORAS_DESC, BANCO_HORA,STATUS, JUSTIFICATIVA_BATIDA
+		, EXTRAEXECUTADO_CASE, SEM_PAR_CORRESPONDENTE, INTERJORNADA, JORNADA_MAIOR_10HORAS, JORNADA_MAIOR_12HORAS, SEM_PAR_CORRESPONDENTE_DESC, INTERJORNADA_DESC, JORNADA_MAIOR_10HORAS_DESC, JORNADA_MAIOR_12HORAS_DESC, BANCO_HORA,STATUS, JUSTIFICATIVA_BATIDA, OBS
 			FROM (
 
 				SELECT
@@ -205,7 +205,7 @@ class CriticaModel extends Model {
 					--(SELECT CODAVISO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '5') SEM_PAR_CORRESPONDENTE,
 					(SELECT CODAVISO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '1') INTERJORNADA,
 					(SELECT CODAVISO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '2') JORNADA_MAIOR_10HORAS,
-          (SELECT CODAVISO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '11') JORNADA_MAIOR_12HORAS,
+          (SELECT CODAVISO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '2' AND RIGHT(DESCRICAO,5) >= '12:00') JORNADA_MAIOR_12HORAS,
 					--(SELECT DESCRICAO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '5') SEM_PAR_CORRESPONDENTE_DESC,
 
           'Registro sem par correspondente' SEM_PAR_CORRESPONDENTE_DESC,
@@ -223,7 +223,7 @@ class CriticaModel extends Model {
 
 					(SELECT DESCRICAO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '1') INTERJORNADA_DESC,
 					(SELECT DESCRICAO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '2') JORNADA_MAIOR_10HORAS_DESC,
-          (SELECT DESCRICAO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '11') JORNADA_MAIOR_12HORAS_DESC,
+          (SELECT DESCRICAO FROM AAVISOCALCULADO C WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '2' AND RIGHT(DESCRICAO,5) >= '12:00') JORNADA_MAIOR_12HORAS_DESC,
           (CASE WHEN D.justificativa IN (1,21) THEN 'X' ELSE NULL END) BANCO_HORA,
               (
                   SELECT 
@@ -237,7 +237,8 @@ class CriticaModel extends Model {
                       AND A.coligada = Z.CODCOLIGADA
                       AND COALESCE(A.ent1,A.ent2,A.ent3,A.ent4,A.sai1,A.sai2,A.sai3,A.sai4) = Z.BATIDA
               
-              ) JUSTIFICATIVA_BATIDA
+              ) JUSTIFICATIVA_BATIDA,
+          D.OBS OBS
 				FROM
 					AAFHTFUN A
             LEFT JOIN ".DBPORTAL_BANCO."..zcrmportal_ponto_justificativa_func D ON  A.DATA  = D.dtponto AND A.CHAPA = D.chapa Collate Database_Default AND A.CODCOLIGADA = D.coligada AND D.justificativa IN (1,21)
@@ -452,7 +453,7 @@ class CriticaModel extends Model {
         WHEN FALTA_JUST > 0 AND FALTA_JUST > FALTA_CASE THEN FALTA_CASE ELSE FALTA_CASE END )
       FALTA_CASE*/
       ISNULL(FALTA_CASE,0) FALTA_CASE
-      , EXTRAEXECUTADO_CASE, SEM_PAR_CORRESPONDENTE, INTERJORNADA, JORNADA_MAIOR_10HORAS, JORNADA_MAIOR_12HORAS, SEM_PAR_CORRESPONDENTE_DESC, INTERJORNADA_DESC, JORNADA_MAIOR_10HORAS_DESC, JORNADA_MAIOR_12HORAS_DESC, BANCO_HORA, JUSTIFICATIVA, JUSTIFICATIVA_CODIGO, QTDE_ABONO, ABONO_PENDENTE_RH, JUSTIFICATIVA_ATITUDE, USABANCOHORAS, CPF, CODSITUACAO, IS_MOTORISTA
+      , EXTRAEXECUTADO_CASE, SEM_PAR_CORRESPONDENTE, INTERJORNADA, JORNADA_MAIOR_10HORAS, JORNADA_MAIOR_12HORAS, SEM_PAR_CORRESPONDENTE_DESC, INTERJORNADA_DESC, JORNADA_MAIOR_10HORAS_DESC, JORNADA_MAIOR_12HORAS_DESC, BANCO_HORA, JUSTIFICATIVA, OBS, JUSTIFICATIVA_CODIGO, QTDE_ABONO, ABONO_PENDENTE_RH, JUSTIFICATIVA_ATITUDE, USABANCOHORAS, CPF, CODSITUACAO, IS_MOTORISTA
         FROM (
 
           SELECT
@@ -478,7 +479,7 @@ class CriticaModel extends Model {
             --(SELECT CODAVISO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '5') SEM_PAR_CORRESPONDENTE,
             (SELECT CODAVISO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '1') INTERJORNADA,
             (SELECT CODAVISO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '2') JORNADA_MAIOR_10HORAS,
-            (SELECT CODAVISO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '11') JORNADA_MAIOR_12HORAS,
+            (SELECT CODAVISO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '2' AND RIGHT(DESCRICAO,5) >= '12:00') JORNADA_MAIOR_12HORAS,
             --(SELECT DESCRICAO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '5') SEM_PAR_CORRESPONDENTE_DESC,
 
             'Registro sem par correspondente' SEM_PAR_CORRESPONDENTE_DESC,
@@ -496,7 +497,7 @@ class CriticaModel extends Model {
 
             (SELECT DESCRICAO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '1') INTERJORNADA_DESC,
             (SELECT DESCRICAO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '2') JORNADA_MAIOR_10HORAS_DESC,
-            (SELECT DESCRICAO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '11') JORNADA_MAIOR_12HORAS_DESC,
+            (SELECT DESCRICAO FROM AAVISOCALCULADO C (NOLOCK) WHERE A.CODCOLIGADA = C.CODCOLIGADA AND A.CHAPA = C.CHAPA AND A.DATA = C.DATAREFERENCIA AND CODAVISO = '2' AND RIGHT(DESCRICAO,5) >= '12:00') JORNADA_MAIOR_12HORAS_DESC,
             (SELECT COUNT(*) FROM ABATFUN AS hor (NOLOCK) WHERE hor.DATAREFERENCIA = A.DATA AND hor.CODCOLIGADA = A.CODCOLIGADA AND hor.CHAPA = A.CHAPA) AS BATIDAS_PORTAL,
             (CASE WHEN D.justificativa IN (1,21) THEN 'X' ELSE NULL END) BANCO_HORA,
 
@@ -504,6 +505,11 @@ class CriticaModel extends Model {
               SELECT max(CAST(BB.descricao AS VARCHAR)) FROM ".DBPORTAL_BANCO."..zcrmportal_ponto_justificativa_func AA  (NOLOCK) 
 		        INNER JOIN ".DBPORTAL_BANCO."..zcrmportal_ponto_motivos BB (NOLOCK) ON AA.justificativa = BB.id AND AA.coligada = BB.codcoligada WHERE AA.coligada = A.CODCOLIGADA AND AA.dtponto = A.DATA AND AA.chapa = A.CHAPA Collate Database_Default
             ) JUSTIFICATIVA,
+
+            (
+              SELECT top 1 AA.obs FROM ".DBPORTAL_BANCO."..zcrmportal_ponto_justificativa_func AA  (NOLOCK) 
+		        WHERE AA.coligada = A.CODCOLIGADA AND AA.dtponto = A.DATA AND AA.chapa = A.CHAPA Collate Database_Default
+            ) OBS,
 
             (
               SELECT max(CAST(BB.id AS VARCHAR)) FROM ".DBPORTAL_BANCO."..zcrmportal_ponto_justificativa_func AA (NOLOCK) 
@@ -595,9 +601,9 @@ class CriticaModel extends Model {
         ORDER BY NOME, DATA
       ";
 
-// if($_SESSION['log_id'] == 3021){
-//   echo '<pre>'.$query.'</pre>';exit();
-// }
+ //if($_SESSION['log_id'] == 3021){
+ //  echo '<pre>'.$query.'</pre>';exit();
+ //}
       // exit();
       $result = $this->dbrm->query($query);
       if(!$result) return false;
@@ -1742,19 +1748,20 @@ class CriticaModel extends Model {
                   if($request['atitude'] == 0){
                     // falta confirmada
                     $this->dbportal->query(" DELETE FROM zcrmportal_ponto_justificativa_func WHERE chapa = '{$request['chapa']}' AND dtponto = '{$request['data']}' AND coligada = '{$this->coligada}' AND justificativa = (SELECT id FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = 'BANCO DE HORAS' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}') ");
-
-                    $this->dbportal->query(" INSERT INTO zcrmportal_ponto_justificativa_func 
-                      SELECT '{$request['data']}', '{$request['chapa']}', codcoligada, null, null, id, '{$this->log_id}', tipo FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = '{$descricao}' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}'
-                    ");
+                    $query = " INSERT INTO zcrmportal_ponto_justificativa_func 
+                      SELECT '{$request['data']}', '{$request['chapa']}', codcoligada, null, null, id, '{$this->log_id}', tipo, null FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = '{$descricao}' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}'
+                    ";
+                    $this->dbportal->query($query);
 
                   }
 
                   if($request['atitude'] == 1){
                     // banco de horas
                     $this->dbportal->query(" DELETE FROM zcrmportal_ponto_justificativa_func WHERE chapa = '{$request['chapa']}' AND dtponto = '{$request['data']}' AND coligada = '{$this->coligada}' AND justificativa = (SELECT id FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = '{$descricao}' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}') ");
-                    $this->dbportal->query(" INSERT INTO zcrmportal_ponto_justificativa_func 
-                      SELECT '{$request['data']}', '{$request['chapa']}', codcoligada, null, null, id, '{$this->log_id}', tipo FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = 'BANCO DE HORAS' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}'
-                    ");
+                    $query = " INSERT INTO zcrmportal_ponto_justificativa_func 
+                      SELECT '{$request['data']}', '{$request['chapa']}', codcoligada, null, null, id, '{$this->log_id}', tipo, null FROM zcrmportal_ponto_motivos WHERE CAST(descricao AS VARCHAR) = 'BANCO DE HORAS' AND codcoligada = '{$this->coligada}' AND tipo = '{$tipo}'
+                    ";
+                    $this->dbportal->query($query);
 
                   }
 
