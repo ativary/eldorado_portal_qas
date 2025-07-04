@@ -464,8 +464,7 @@ class EspelhoModel extends Model {
                 AAFHTFUN A
                 LEFT JOIN APARFUN AS B ON B.CODCOLIGADA = A.CODCOLIGADA AND B.CHAPA = A.CHAPA
                 LEFT JOIN ".DBPORTAL_BANCO."..zcrmportal_ponto_motorista C ON C.coligada = A.CODCOLIGADA AND C.chapa = A.CHAPA COLLATE Latin1_General_CI_AS AND C.dtponto = A.DATA
-                LEFT JOIN PFUNC F ON F.CODCOLIGADA = A.CODCOLIGADA AND F.CHAPA = A.CHAPA
-                LEFT JOIN APARCOL P ON P.CODCOLIGADA = F.CODCOLIGADA AND P.CODIGO = F.CODSINDICATO
+                LEFT JOIN APARCOL P ON P.CODCOLIGADA = B.CODCOLIGADA AND P.CODIGO = B.CODPARCOL
                 
             WHERE 
                     A.CODCOLIGADA = {$coligada}
@@ -653,8 +652,7 @@ class EspelhoModel extends Model {
                 AAFHTFUNAM A
                 LEFT JOIN APARFUN AS B ON B.CODCOLIGADA = A.CODCOLIGADA AND B.CHAPA = A.CHAPA
                 LEFT JOIN ".DBPORTAL_BANCO."..zcrmportal_ponto_motorista C ON C.coligada = A.CODCOLIGADA AND C.chapa = A.CHAPA COLLATE Latin1_General_CI_AS AND C.dtponto = A.DATA
-                LEFT JOIN PFUNC F ON F.CODCOLIGADA = A.CODCOLIGADA AND F.CHAPA = A.CHAPA
-                LEFT JOIN APARCOL P ON P.CODCOLIGADA = F.CODCOLIGADA AND P.CODIGO = F.CODSINDICATO
+                LEFT JOIN APARCOL P ON P.CODCOLIGADA = B.CODCOLIGADA AND P.CODIGO = B.CODPARCOL
                 
             WHERE 
                     A.CODCOLIGADA = {$coligada}
@@ -665,9 +663,9 @@ class EspelhoModel extends Model {
                 DATA
         ";
         
-         //echo '<pre>';
-         //echo $query;
-         //exit();
+        //echo '<pre>';
+        //echo $query;
+        //exit(); 
       
         $result = $this->dbrm->query($query);
         return ($result->getNumRows() > 0) 
