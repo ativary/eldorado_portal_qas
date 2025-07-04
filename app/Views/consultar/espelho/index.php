@@ -60,6 +60,7 @@
                                     <th class="text-center">Ent</th>
                                     <th class="text-center">Sai</th>
                                     <th class="text-center">Hr. Trab.</th>
+                                    <th class="text-center">Extra Executado</th>
                                     <th class="text-center">Atraso</th>
                                     <th class="text-center">Falta</th>
                                     <th class="text-center">Extra</th>
@@ -311,6 +312,7 @@
                                         <td <?= $bglinha; ?> class="text-center"><?= $ent[4]; ?></td>
                                         <td <?= $bglinha; ?> class="text-center"><?= $sai[4]; ?></td>
                                         <td <?= $bglinha; ?> class="text-center text-primary"><?= ((int)$DiasEspelho['HTRAB'] > 0) ? m2h($DiasEspelho['HTRAB']) : ""; ?></td>
+                                        <td <?= $bglinha; ?> class="text-center text-primary"><?= ((int)$DiasEspelho['EXTRAEXECUTADO'] > 0) ? m2h($DiasEspelho['EXTRAEXECUTADO']) : ""; ?></td>
                                         <td <?= $bglinha; ?> class="text-center text-danger"><?= ((int)$DiasEspelho['ATRASO'] > 0) ? m2h($DiasEspelho['ATRASO']) : ""; ?></td>
                                         <td <?= $bglinha; ?> class="text-center text-danger"><?= ((int)$DiasEspelho['FALTA'] > 0) ? m2h($DiasEspelho['FALTA']) : ""; ?></td>
                                         <td <?= $bglinha; ?> class="text-center text-success"><?= ((int)$DiasEspelho['EXTRAEXECUTADO'] > 0) ? m2h($DiasEspelho['EXTRAEXECUTADO']) : ""; ?></td>
