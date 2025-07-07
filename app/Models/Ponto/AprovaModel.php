@@ -484,7 +484,7 @@ class AprovaModel extends Model
 				';
         $htmlEmail = templateEmail($mensagem);
 
-        $email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
+        //$email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
         //$email_solicitante = 'alvaro.zaragoza@ativary.com';
         enviaEmail($email_solicitante, '[Portal RH] Sua Solicitação Foi Reprovada', $htmlEmail);
 
@@ -813,7 +813,7 @@ class AprovaModel extends Model
 				';
         $htmlEmail = templateEmail($mensagem);
 
-        $email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
+        //$email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
         //$email_solicitante = 'alvaro.zaragoza@ativary.com';
         enviaEmail($email_solicitante, '[Portal RH] Sua Solicitação Foi Reprovada', $htmlEmail);
       }
@@ -2326,7 +2326,7 @@ class AprovaModel extends Model
 
           $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
 
-          $email = 'deivison.batista@eldoradobrasil.com.br';
+          //$email = 'deivison.batista@eldoradobrasil.com.br';
           //$email = 'alvaro.zaragoza@ativary.com';
           $response = enviaEmail($email, $assunto, $htmlEmail);
           echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
@@ -2334,7 +2334,7 @@ class AprovaModel extends Model
           if (!is_null($email_sub)) {
             $msg_nome_sub = 'Prezado(a) ' . $nome_sub . ',<br><br>';
             $htmlEmail = templateEmail($msg_nome_sub . $mensagem, '95%');
-            $email_sub = 'deivison.batista@eldoradobrasil.com.br';
+            //$email_sub = 'deivison.batista@eldoradobrasil.com.br';
             //$email = 'alvaro.zaragoza@ativary.com';
             $response = enviaEmail($email_sub, $assunto, $htmlEmail);
             echo 'Enviado email para ' . $nome_sub . ' - ' . $email_sub . '<br>';
@@ -2378,14 +2378,14 @@ class AprovaModel extends Model
 
         $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
 
-        $email = 'deivison.batista@eldoradobrasil.com.br';
+        //$email = 'deivison.batista@eldoradobrasil.com.br';
         //$email = 'alvaro.zaragoza@ativary.com';
         $response = enviaEmail($email, $assunto, $htmlEmail);
 
         if (!is_null($email_sub)) {
           $msg_nome_sub = 'Prezado(a) ' . $nome_sub . ',<br><br>';
           $htmlEmail = templateEmail($msg_nome_sub . $mensagem, '95%');
-          $email_sub = 'deivison.batista@eldoradobrasil.com.br';
+          //$email_sub = 'deivison.batista@eldoradobrasil.com.br';
           //$email_sub = 'alvaro.zaragoza@ativary.com';
           $response = enviaEmail($email_sub, $assunto, $htmlEmail);
         }
@@ -3102,9 +3102,9 @@ class AprovaModel extends Model
 
           if ($this->dbportal->affectedRows() > 0) {
             $id_reg = $this->dbportal->insertId();
-            echo 'Registro de abandono de emprego criado com sucesso para coligada-chapa: '.$codcoligada.'-'.$chapa_colab;
+            echo 'Registro de abandono de emprego criado com sucesso para coligada-chapa: '.$codcoligada.'-'.$chapa_colab.'<br>';
           } else {
-            echo 'Falha ao criar registro de abandono de emprego para chapa: '.$codcoligada.'-'.$chapa_colab;
+            echo 'Falha ao criar registro de abandono de emprego para chapa: '.$codcoligada.'-'.$chapa_colab.'<br>';
           }
           $enviar = 1;
 
@@ -3222,7 +3222,7 @@ class AprovaModel extends Model
             $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
             $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
             //$email = 'deivison.batista@eldoradobrasil.com.br';
-            //$email = 'alvaro.zaragoza@ativary.com';
+            $email = 'alvaro.zaragoza@ativary.com';
             $response = enviaEmail($email, $assunto, $htmlEmail);
             echo 'Enviado email para ' . $nome . ' - ' . $email . '<br>';
           }
