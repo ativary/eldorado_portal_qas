@@ -275,7 +275,7 @@ $(document).ready(function(){
                                         <th class="n-mobile-cell" style="min-width: 290px;"><strong>Descrição Tipo</strong></th>
                                         <th class="n-mobile-cell"><strong>Justificativa</strong></th>
                                         <th class="n-mobile-cell"><strong>Anexo</strong></th>
-                                        <th class="n-mobile-cell"><strong>Batidas do Dia</strong></th>
+                                        <th class="n-mobile-cell"><strong>Registros do Dia</strong></th>
                                         <th class="n-mobile-cell"><strong>Data de Referência</strong></th>
                                         <th class="n-mobile-cell"><strong>Data solicitação</strong></th>
                                         <th class="n-mobile-cell"><strong>Solicitante</strong></th>
