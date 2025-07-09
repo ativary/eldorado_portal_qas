@@ -188,18 +188,16 @@ Class Aprovacao extends BaseController {
             $request['situacao'] = '8';
            
         }else{
-            $dados['rh'] = false;
-            $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados, false,false,'3');
-            
-            if($dados['resFuncionarioSecao']){
-                $request['situacao'] = '3';
+            if($_SESSION['rh_master'] != 'S') {
+              $dados['rh'] = false;
+              $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados, false,false,'3');
+              
+              if($dados['resFuncionarioSecao']){
+                  $request['situacao'] = '3';
+              }
             }
-          
-
         }
 
-     
-      
         $result     = $this->mParam->aprovarReq($request['id'], $request['situacao']);
      
         if($result){
@@ -219,14 +217,14 @@ Class Aprovacao extends BaseController {
             $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
             $request['situacao'] = '8';
         }else{
-            $dados['rh'] = false;
-            $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados, false,false,'3');
-            
-            if($dados['resFuncionarioSecao']){
-                $request['situacao'] = '3';
+            if($_SESSION['rh_master'] != 'S') {
+              $dados['rh'] = false;
+              $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados, false,false,'3');
+              
+              if($dados['resFuncionarioSecao']){
+                  $request['situacao'] = '3';
+              }
             }
-           
-
         }
         $result     = $this->mParam->aprovarReq($request['ids'], $request['situacao']);
      
