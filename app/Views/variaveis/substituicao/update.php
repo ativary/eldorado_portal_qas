@@ -87,7 +87,7 @@
                             <div class="form-group row mb-2">
                                 <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm">Adicionar novos Anexos:</label>
                                 <div class="col-sm-10">
-                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required accept="application/pdf, image/jpeg">
+                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required>
                                 </div>
                             </div>
 
@@ -252,9 +252,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
     browseLabel: "Selecionar Arquivo", // Texto personalizado do botão de anexar
     dropZoneTitle: "Arraste os arquivos aqui", // Texto personalizado da zona de drop
-    dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
-    allowedFileExtensions: ['pdf', 'jpeg', 'jpg'], // Permite apenas arquivos PDF e JPEG
-    msgInvalidFileExtension: 'Tipo de arquivo não suportado. Apenas arquivos PDF e JPEG são permitidos.' // Mensagem personalizada
+    dropZoneClickTitle: "ou clique para selecionar os arquivos"
 });
 
 

@@ -136,6 +136,11 @@ class VariaveisModel extends Model {
         AND CAR.NOME <> 'Empregados' 
       ";
     }
+
+    if($dados['rh']) {
+      $filtro_sub = "";
+      $where_sub = "";
+    }
         
 		$query = " 
 			SELECT 

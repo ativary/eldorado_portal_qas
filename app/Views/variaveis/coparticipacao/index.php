@@ -100,7 +100,8 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <button id="enviaAprovacaoBtn" onclick="return enviaAprovacao()" type="button" class="btnpeq btn-sm btn-success" style="float: center; margin: -13px 0 2px 0; display: none;">
+                      
+                <button id="enviaAprovacaoBtn" onclick="return enviaAprovacao()" type="button" class="btnpeq btn-sm btn-success" style="float: center; margin: -13px 0 10px 0; display: block;">
                     <i class="fa fa-check"></i> Enviar todos para aprovação
                 </button>
                 <div class="">
@@ -641,7 +642,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     };
 
 
-
+    /*
     function toggleButtonVisibility() {
         const checkboxes = document.querySelectorAll('input[name="idbatida[]"]');
         const button = document.getElementById('enviaAprovacaoBtn');
@@ -654,7 +655,8 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
         });
 
         button.style.display = isChecked ? 'block' : 'none';
-    }
+    }*/
+   
     const abrirResumoDiario = (justificativa) => {
 
         $(".modal_resumo_diario").modal('show');
