@@ -68,32 +68,37 @@
                             <div class="form-group row mb-2">
                                 <label for="datas" class="col-sm-2 col-form-label text-right text-left-sm"> <span class="text-danger">*</span> Data Inicial:</label>
                                 <div class="input-group col-sm-4 ">
-                                    <input class="form-control datepicker m_data" type="date"  value="" name="data_inicio" id="data_inicio" required>
+                                    <input class="form-control datepicker m_data" type="date"  value="" name="data_inicio" id="data_inicio" required onchange="calcularDiferenca()">
                                     <div class="input-group-prepend input-group-append">
                                         <span class="input-group-text">Data Final</span>
                                     </div>
-                                    <input class="form-control datepicker m_data" type="date"  value="" name="data_fim" id="data_fim" required>
+                                    <input class="form-control datepicker m_data" type="date"  value="" name="data_fim" id="data_fim" required onchange="calcularDiferenca()">
                                 </div>
                             </div>
 
                             <div class="form-group row mb-2">
                                 <label for="horas" class="col-sm-2 col-form-label text-right text-left-sm"> <span class="text-danger">*</span> Hora Inicial:</label>
                                 <div class="input-group col-sm-4 ">
-                                    <input class="form-control" type="time"  value="" name="hora_inicio" id="hora_inicio" required>
+                                    <input class="form-control" type="time"  value="" name="hora_inicio" id="hora_inicio" required onchange="calcularDiferenca()">
                                     <div class="input-group-prepend input-group-append">
                                         <span class="input-group-text">Hora Final</span>
                                     </div>
-                                    <input class="form-control" type="time"  value="" name="hora_fim" id="hora_fim" required>
+                                    <input class="form-control" type="time"  value="" name="hora_fim" id="hora_fim" required onchange="calcularDiferenca()"> 
                                 </div>
                             </div>
 
                             <div class="form-group row mb-2">
-                                <label for="tipoReq" class="col-sm-2 col-form-label text-sm-right text-left"><span class="text-danger">*</span>Qtde. Total de Horas:</label>
+                                <label for="tipoReq" class="col-sm-2 col-form-label text-sm-right text-left"><span class="text-danger"></span>Qtde. Total de Horas:</label>
                                 <div class="col-sm-1">
-                                    <input onchange="verificaValor(this)" class="form-control form-control-sm" type="number" value="" name="valor" id="valor" min="1" step="1" required>
+                                    <input class="form-control form-control-sm" type="text" name="valor_h" id="valor_h" disabled>
+                                </div>
+                                <div class="col-sm-4">
+                                    <i><h6 style="color:gray;" name="resultado" id="resultado"></h6></i>
+                                </div>
+                                <div class="col-sm-1">
+                                    <input class="form-control form-control-sm" type="hidden" name="valor" id="valor" disabled>
                                 </div>
                             </div>
-
 
                             <div class="form-group row mb-2">
                                 <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm"> <span class="text-danger">*</span>Justificativa:</label>
@@ -104,7 +109,7 @@
                             <div class="form-group row mb-2">
                                 <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm">Anexar:</label>
                                 <div class="col-sm-10">
-                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple accept="application/pdf, image/jpeg" required>
+                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple  required>
                                 </div>
                             </div>
 
@@ -340,11 +345,53 @@ $("#anexo").fileinput({
     showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
     browseLabel: "Selecionar Arquivo", // Texto personalizado do botão de anexar
     dropZoneTitle: "Arraste o(s) arquivo(s) aqui. Para anexar mais de um arquivo arraste todos de uma vez. Os navegadores de internet não permitem arrastar um arquivo por vez. O mesmo vale para a seleção de arquivos, caso queira mais de um arquivo selecione todos de uma vez, usando o SHIFT ou CRTL junto com o clique do mouse.", // Texto personalizado da zona de drop
-    dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
-    allowedFileExtensions: ['pdf', 'jpeg', 'jpg'], // Permite apenas arquivos PDF e JPEG
-    msgInvalidFileExtension: 'Tipo de arquivo não suportado. Apenas arquivos PDF e JPEG são permitidos.' // Mensagem personalizada
+    dropZoneClickTitle: "ou clique para selecionar os arquivos"
 });
 
+function calcularDiferenca() {
+  const dataInicio = document.getElementById('data_inicio').value;
+  const horaInicio = document.getElementById('hora_inicio').value;
+  const dataFim = document.getElementById('data_fim').value;
+  const horaFim = document.getElementById('hora_fim').value;
+
+  $("#valor").val(0);
+  $("#valor_h").val('');
+
+  if (!dataInicio || !horaInicio || !dataFim || !horaFim) {
+    document.getElementById('resultado').textContent = 'Preencha todos os campos para calcular o total';
+    return;
+  }
+
+  let dini = `${dataInicio}T${horaInicio}`;
+  let dfim = `${dataFim}T${horaFim}`;
+  console.log(dini);
+  console.log(dfim);
+  // Combina data e hora em uma string compatível com o Date
+  const inicio = new Date(dini);
+  const fim = new Date(dfim);
+
+  // Calcula a diferença em milissegundos
+  const diffMs = fim - inicio;
+
+  if (diffMs < 0) {
+    document.getElementById('resultado').textContent = 'Data/hora final é anterior à inicial';
+    return;
+  }
+
+  // Converte milissegundos para horas
+  const diffHoras = diffMs / (1000 * 60 * 60);
+
+  //document.getElementById('resultado').textContent = `Diferença: ${diffHoras.toFixed(2)} horas`;
+  document.getElementById('resultado').textContent = '';
+  $("#valor").val(diffHoras.toFixed(2));
+  $("#valor_h").val(convertDecimalHoursToHHMM(diffHoras.toFixed(2)));
+}
+
+function convertDecimalHoursToHHMM(decimalHours) {
+    const hours = Math.floor(decimalHours); // Get full hours
+    const minutes = Math.round((decimalHours - hours) * 60); // Convert decimal to minutes
+    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+}
 
 const selecionaFuncionario = (chapa) => {
     let dados = {

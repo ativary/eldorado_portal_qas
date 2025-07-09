@@ -2046,7 +2046,7 @@ const salvaTermo = () => {
         }
         
         // Definir extensões permitidas
-        const extensoesPermitidas = ['jpeg',  'pdf'];
+        /*const extensoesPermitidas = ['jpeg',  'pdf'];
         let extensaoInvalida = false;
 
         // Validar extensões dos arquivos
@@ -2061,7 +2061,7 @@ const salvaTermo = () => {
         if (extensaoInvalida) {
             Swal.fire('Erro', 'Apenas arquivos com as extensões .jpeg ou .pdf são permitidos.', 'error');
             return false;
-        }
+        }*/
 
         // Cria um objeto FormData para enviar os arquivos
         let formData = new FormData();
@@ -2333,7 +2333,7 @@ $.ajax({
         }
           
         // Definir extensões permitidas
-        const extensoesPermitidas = ['jpeg',  'pdf'];
+        /*const extensoesPermitidas = ['jpeg',  'pdf'];
         let extensaoInvalida = false;
 
         // Validar extensões dos arquivos
@@ -2348,7 +2348,7 @@ $.ajax({
         if (extensaoInvalida) {
             Swal.fire('Erro', 'Apenas arquivos com as extensões .jpeg ou .pdf são permitidos.', 'error');
             return false;
-        }
+        }*/
 
         // Cria um objeto FormData para enviar os arquivos
         let formData = new FormData();

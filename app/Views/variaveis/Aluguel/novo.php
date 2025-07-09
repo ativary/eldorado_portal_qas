@@ -78,7 +78,7 @@
                             <div class="form-group row mb-2">
                                 <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm">Anexar:</label>
                                 <div class="col-sm-10">
-                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required accept="application/pdf, image/jpeg">
+                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required >
                                 </div>
                             </div>
 
@@ -322,9 +322,7 @@ $("#anexo").fileinput({
     showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
     browseLabel: "Selecionar Arquivos", // Texto personalizado do botão de anexar
     dropZoneTitle: "Arraste o(s) arquivo(s) aqui. Para anexar mais de um arquivo arraste todos de uma vez. Os navegadores de internet não permitem arrastar um arquivo por vez. O mesmo vale para a seleção de arquivos, caso queira mais de um arquivo selecione todos de uma vez, usando o SHIFT ou CRTL junto com o clique do mouse.", // Texto personalizado da zona de drop
-    dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
-    allowedFileExtensions: ['pdf', 'jpeg', 'jpg'], // Permite apenas arquivos PDF e JPEG
-    msgInvalidFileExtension: 'Tipo de arquivo não suportado. Apenas arquivos PDF e JPEG são permitidos.' // Mensagem personalizada
+    dropZoneClickTitle: "ou clique para selecionar os arquivos"
 });
 
 

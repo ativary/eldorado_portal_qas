@@ -101,7 +101,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <button id="enviaAprovacaoBtn" onclick="return enviaAprovacao()" type="button" class="btnpeq btn-sm btn-success" style="float: center; margin: -13px 0 2px 0; display: none;">
+                <button id="enviaAprovacaoBtn" onclick="return enviaAprovacao()" type="button" class="btnpeq btn-sm btn-success" style="float: center; margin: -13px 0 10px 0; display: block;">
                     <i class="fa fa-check"></i> Enviar todos para aprovação
                 </button>
                 <div class="">
@@ -432,7 +432,7 @@
                 <div class="form-group row mb-2">
                     <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm">Anexar:</label>
                     <div class="col-sm-10">
-                        <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required  accept="application/pdf, image/jpeg">
+                        <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required>
                         <input class="form-control" hidden type="text" value="" name="id" id="id" required>
                     </div>
                 </div>
@@ -536,7 +536,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
         $('input[name="idbatida[]"]:not(:disabled)').prop('checked', this.checked);
     });
 
-
+    /*
     function toggleButtonVisibility() {
         const checkboxes = document.querySelectorAll('input[name="idbatida[]"]');
         const button = document.getElementById('enviaAprovacaoBtn');
@@ -550,6 +550,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 
         button.style.display = isChecked ? 'block' : 'none';
     }
+    */
 
     const historicoAprovacao = (id) => {
 
@@ -698,7 +699,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     }
 
     // Definir extensões permitidas
-    const extensoesPermitidas = ['jpeg',  'pdf'];
+    /*const extensoesPermitidas = ['jpeg',  'pdf'];
     let extensaoInvalida = false;
 
     // Validar extensões dos arquivos
@@ -713,7 +714,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     if (extensaoInvalida) {
         Swal.fire('Erro', 'Apenas arquivos com as extensões .jpeg, ou .pdf são permitidos.', 'error');
         return false;
-    }
+    }*/
 
     // Cria um objeto FormData para enviar os arquivos
     let formData = new FormData();
