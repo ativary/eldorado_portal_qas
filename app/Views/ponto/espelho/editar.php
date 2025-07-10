@@ -1340,6 +1340,7 @@ table th {
                         title: 'swal2-title'
                     }
                 }).then((result) => {
+                    console.log(result)
                     if (result.isConfirmed) {
                         abrirModalObservacao(dados, enviarBatidaComObservacao);
                     } else {
@@ -2829,6 +2830,9 @@ table th {
             callbackObservacao = callback;
             $("#campoObservacao").val('');
             $("#modalObservacao").modal('show');
+            console.log($("#modalObservacao"))
+            var modal = new bootstrap.Modal(document.getElementById('modalObservacao'));
+            modal.show();
         }
 
         // Ao clicar em salvar no modal
@@ -3161,6 +3165,25 @@ function m2h(minutos) {
 </div><!-- /.modal -->
 <!-- modal modal_justificativa_extra -->
 
+<!-- Modal Observação -->
+<div class="modal modal_observacao" id="modalObservacao" tabindex="-1" role="dialog" aria-labelledby="modalObservacaoLabel" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success">
+        <h5 class="modal-title" id="modalObservacaoLabel">Adicionar Observação</h5>
+        <button type="button" class="close text-white" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
+      </div>
+      <div class="modal-body">
+        <textarea id="campoObservacao" class="form-control" rows="4" placeholder="Digite sua observação aqui..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="btnSalvarObservacao">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Observação -->
 <!-- modal modal_macro -->
 <div class="modal modal_macro" tabindex="-1" role="dialog" aria-labelledby="modal_macro" aria-hidden="true" data-keyboard="false" data-backdrop="static" style="width: auto !important;">
     <div class="modal-dialog modal-dialog-full">
@@ -3216,27 +3239,6 @@ function m2h(minutos) {
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <!-- modal modal_macro -->
-<!-- Modal Observação -->
-<div class="modal fade" id="modalObservacao" tabindex="-1" role="dialog" aria-labelledby="modalObservacaoLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalObservacaoLabel">Adicionar Observação</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <textarea id="campoObservacao" class="form-control" rows="4" placeholder="Digite sua observação aqui..."></textarea>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-success" id="btnSalvarObservacao">Salvar</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Modal Observação -->
 <script>
     $(function() {
         $(".modal").draggable();
@@ -3244,7 +3246,6 @@ function m2h(minutos) {
 
 const carregaMacro = (data_macro = data_nova_batida ) => {
 
-console.log(data_macro);
 const dateString = data_macro;
 const { nextDate, previousDate } = getNextAndPreviousDates(dateString);
 console.log(previousDate, nextDate);
