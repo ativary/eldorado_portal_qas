@@ -903,7 +903,7 @@ class VariaveisModel extends Model {
         
        
 
-        $dadosReq        = self::getReqDados($id);
+        $dadosReq = self::getReqDados($id);
         $valores = json_decode($dadosReq[0]->valores) ;
 
         if($tipo == '4'){
@@ -2338,10 +2338,10 @@ class VariaveisModel extends Model {
 
         if($request['funcionario']){
             $chapa =$request['funcionario'];
-            $valida_req = self::validaReq($request['funcionario'],  $request['tipo'],  $request['tipoReq']);
+            $valida_req = self::validaReq($request['funcionario'],  $request['tipo'],  $request['tipoReq'], $request);
         }else{
             $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-            $valida_req = self::validaReq($request['funcionario'],  $request['tipo'],  $request['tipoReq']);
+            $valida_req = self::validaReq($request['funcionario'],  $request['tipo'],  $request['tipoReq'], $request);
         }
         
         if($valida_req){
@@ -2456,14 +2456,44 @@ class VariaveisModel extends Model {
 
     }
     
-    public function validaReq($chapa, $tipo, $tipoReq)
+    public function validaReq($chapa, $tipo, $tipoReq, $request)
     {
         if($chapa){
             $ft_chapa =" AND chapa ='".$chapa."'";
         }
-        $query = " 
-        SELECT * FROM zcrmportal_variaveis_req WHERE status IN('1','2','3','4','7') AND tipo = '".$tipo."' AND coligada = '".$this->coligada."' AND tiporeq = '".$tipoReq."' AND periodo = '".date('Y-m')."' ".$ft_chapa;
-        //  exit('<pre>'.print_r($query,1));
+
+        // valida sobreaviso
+        if($tipo = 3) {
+          $data_inicio = $request['data_inicio'];
+          $data_fim = $request['data_fim'];
+          $query = " 
+            SELECT * FROM zcrmportal_variaveis_req 
+            WHERE status IN('1','2','3','4','7') 
+            AND tipo = '".$tipo."' 
+            AND coligada = '".$this->coligada."' 
+            AND tiporeq = '".$tipoReq."' 
+            AND
+              SUBSTRING(
+                    valores,
+                    CHARINDEX('\"data_inicio\":\"', valores) + LEN('\"data_inicio\":\"'),
+                    10
+                ) >= '".$data_inicio."'
+            AND
+              SUBSTRING(
+                    valores,
+                    CHARINDEX('\"data_fim\":\"', valores) + LEN('\"data_fim\":\"'),
+                    10
+                ) <= '".$data_fim."'
+            AND periodo = '".date('Y-m')."' ".$ft_chapa;
+       
+        } else {
+          $query = " 
+            SELECT * FROM zcrmportal_variaveis_req WHERE status IN('1','2','3','4','7') AND tipo = '".$tipo."' AND coligada = '".$this->coligada."' AND tiporeq = '".$tipoReq."' AND periodo = '".date('Y-m')."' ".$ft_chapa;
+        }
+
+        //echo '<pre> '.$query;
+        //die();
+        //exit();
         $result = $this->dbportal->query($query);
         if(!$result) return false;
         return ($result->getNumRows() > 0) 

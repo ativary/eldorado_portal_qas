@@ -70,11 +70,11 @@
                             <div class="form-group row mb-2">
                                 <label for="datas" class="col-sm-2 col-form-label text-right text-left-sm"> <span class="text-danger">*</span> Data Inicial:</label>
                                 <div class="input-group col-sm-4 ">
-                                    <input class="form-control datepicker m_data" type="date"  value="<?= isset($valores->data_inicio) ?  $valores->data_inicio : ''; ?>" name="data_inicio" id="data_inicio" required onchange="calcularDiferenca()">
+                                    <input disabled class="form-control datepicker m_data" type="date"  value="<?= isset($valores->data_inicio) ?  $valores->data_inicio : ''; ?>" name="data_inicio" id="data_inicio" required onchange="calcularDiferenca()">
                                     <div class="input-group-prepend input-group-append">
                                         <span class="input-group-text">Data Final</span>
                                     </div>
-                                    <input class="form-control datepicker m_data" type="date"  value="<?= isset($valores->data_fim) ? $valores->data_fim : ''; ?>" name="data_fim" id="data_fim" required onchange="calcularDiferenca()">
+                                    <input disabled class="form-control datepicker m_data" type="date"  value="<?= isset($valores->data_fim) ? $valores->data_fim : ''; ?>" name="data_fim" id="data_fim" required onchange="calcularDiferenca()">
                                 </div>
                             </div>
 
