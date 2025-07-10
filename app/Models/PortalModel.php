@@ -25,8 +25,12 @@ class PortalModel extends Model {
 
         if(!$cpf && !$chapa) return false;
         
-       if($data_referencia) {
+        $dataFim = null;
+        $dataInicio = null;
+       
+        if($data_referencia) {
             $dataFim = dtEn(substr($data_referencia, 10, 10));
+            $dataInicio = dtEn(substr($data_referencia, 0, 10));
             
             $fcoJoin = "
                 LEFT JOIN (
@@ -123,6 +127,39 @@ class PortalModel extends Model {
                 A.CODHORARIO,
                 H.DESCRICAO NOMEHORARIO,
                 I.NOME CARGO,
+                STUFF((
+                    SELECT 
+                        ' <br/> ' + Linha
+                    FROM (
+                        SELECT 
+                            CONCAT(AH.CODIGO, ' - ', AH.DESCRICAO, ' - A partir de: ', FORMAT(PFHSTHOR.DTMUDANCA, 'dd/MM/yyyy')) AS Linha
+                        FROM PFHSTHOR
+                            INNER JOIN AHORARIO AH 
+                                ON AH.CODIGO = PFHSTHOR.CODHORARIO 
+                                AND AH.CODCOLIGADA = PFHSTHOR.CODCOLIGADA 
+                        WHERE PFHSTHOR.CODCOLIGADA = 1
+                            AND PFHSTHOR.CHAPA = '$chapa'
+                            AND PFHSTHOR.DTMUDANCA BETWEEN '$dataInicio' AND '$dataFim'
+
+                        UNION ALL
+
+                        SELECT 
+                            CONCAT(e.CODIGO, ' - ', e.DESCRICAO, ' - A partir de: ', FORMAT(e.DTMUDANCA, 'dd/MM/yyyy'))
+                        FROM (
+                            SELECT TOP 1 
+                                AH.*, PFHSTHOR.DTMUDANCA 
+                            FROM PFHSTHOR
+                                INNER JOIN AHORARIO AH 
+                                    ON AH.CODIGO = PFHSTHOR.CODHORARIO 
+                                    AND AH.CODCOLIGADA = PFHSTHOR.CODCOLIGADA 
+                            WHERE PFHSTHOR.CODCOLIGADA = 1
+                                AND PFHSTHOR.CHAPA = '$chapa'
+                                AND PFHSTHOR.DTMUDANCA < '$dataInicio'
+                            ORDER BY PFHSTHOR.DTMUDANCA DESC
+                        ) e
+                    ) AS t
+                    FOR XML PATH(''), TYPE
+                ).value('.', 'NVARCHAR(MAX)'), 1, 7, '') AS HIST_HORARIOS,
                 (
                     SELECT 
                 			MIN(DTMUDANCA) 
