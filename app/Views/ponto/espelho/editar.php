@@ -2830,9 +2830,6 @@ table th {
             callbackObservacao = callback;
             $("#campoObservacao").val('');
             $("#modalObservacao").modal('show');
-            console.log($("#modalObservacao"))
-            var modal = new bootstrap.Modal(document.getElementById('modalObservacao'));
-            modal.show();
         }
 
         // Ao clicar em salvar no modal
