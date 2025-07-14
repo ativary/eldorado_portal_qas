@@ -540,12 +540,7 @@ class VariaveisModel extends Model {
                     break; 
                 }
             }
-            $regraIdade ='AND DATEDIFF(MONTH, B.DTNASCIMENTO, GETDATE()) - 
-            CASE 
-                WHEN DATEADD(MONTH, DATEDIFF(MONTH, B.DTNASCIMENTO, GETDATE()), B.DTNASCIMENTO) > GETDATE() 
-                THEN 1 
-                ELSE 0 
-            END <= '.$idade.'';
+            $regraIdade ='AND DATEDIFF(MONTH, B.DTNASCIMENTO, GETDATE()) <= '.$idade.'';
         }
      
 
@@ -2458,14 +2453,20 @@ class VariaveisModel extends Model {
     
     public function validaReq($chapa, $tipo, $tipoReq, $request)
     {
+        
+        $ft_chapa = '';
         if($chapa){
             $ft_chapa =" AND chapa ='".$chapa."'";
         }
 
-        // valida sobreaviso
-        if($tipo = 3) {
+        if($tipo == 3) {
+          if (!$request['data_inicio'] || !$request['data_fim']) {
+            throw new \Exception("Data de início ou fim não informada.");
+          }
+
           $data_inicio = $request['data_inicio'];
           $data_fim = $request['data_fim'];
+
           $query = " 
             SELECT * FROM zcrmportal_variaveis_req 
             WHERE status IN('1','2','3','4','7') 
