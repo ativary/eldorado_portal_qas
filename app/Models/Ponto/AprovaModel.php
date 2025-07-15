@@ -501,6 +501,27 @@ class AprovaModel extends Model
   public function reprovaArt61($id_req, $motivo_reprova = "", $rh = false)
   {
     $query = "
+      WITH CHAPA_EMAIL AS ( 
+        SELECT 
+          DISTINCT
+          A.CHAPA,
+          A.NOME,
+          A.CODCOLIGADA,
+          C.email EMAIL,
+          A.CODSITUACAO
+        FROM
+          zcrmportal_art61_requisicao D,
+          " . DBRM_BANCO . "..PFUNC A,
+          " . DBRM_BANCO . "..PPESSOA B,
+          zcrmportal_usuario C
+          
+        WHERE
+          D.id = '{$id_req}'
+          AND A.CODCOLIGADA = D.id_coligada AND A.CHAPA = D.chapa_requisitor COLLATE Latin1_General_CI_AS
+          AND A.CODPESSOA = B.CODIGO
+          AND C.login = B.CPF COLLATE Latin1_General_CI_AS
+      )
+
       SELECT 
         FORMAT(r.dt_requisicao, 'dd/MM/yyyy') dtreq_br,
         r.status,
@@ -528,7 +549,7 @@ class AprovaModel extends Model
               AND c.status <> 'I' 
         ) as horas_min
 			FROM zcrmportal_art61_requisicao r
-			LEFT JOIN email_chapa u (NOLOCK) ON u.chapa = r.chapa_requisitor COLLATE Latin1_General_CI_AS and u.codcoligada = r.id_coligada
+			LEFT JOIN CHAPA_EMAIL u (NOLOCK) ON u.chapa = r.chapa_requisitor COLLATE Latin1_General_CI_AS and u.codcoligada = r.id_coligada
 			INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = r.id_coligada
 			WHERE r.id = '{$id_req}' 
 		";
@@ -538,23 +559,22 @@ class AprovaModel extends Model
     $result = ($art61) ? $art61->getResultArray() : null;
 
     if ($result) {
-
       $chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? 'RH';
       if ($chapaUser == $result[0]['chapa_requisitor']) {
         notificacao('danger', 'Requisição não pode ser reprovada pelo requisitor.');
-        return false;
+        return true;
       }
 
       if (!$rh) {
         if (!self::isGestorOrLiderAprovador($result[0]['chapa_requisitor'])) {
           notificacao('danger', 'Requisição não pode ser reprovada.');
-          return false;
+          return true;
         }
       }
 
       if (is_null($result[0]['email_requisitor'])) {
         notificacao('danger', 'Requisição não pode ser reprovada. Email do requisitor não encontrado');
-        return false;
+        return true;
       }
 
       $tipo_solicitacao = 'Artigo 61';
@@ -572,6 +592,8 @@ class AprovaModel extends Model
       } else {
         $query = " UPDATE zcrmportal_art61_requisicao SET status = 9, motivo_recusa = '(" . ((!$rh) ? 'Gestor' : 'RH') . "){$motivo_reprova}', dt_rh_aprovacao = '" . date('Y-m-d H:i:s') . "', chapa_rh_aprov_reprov = '{$chapaUser}' WHERE id = '{$id_req}' AND status IN (3, 4, 5) ";
       }
+      //echo $query;
+      //die();
       $this->dbportal->query($query);
       
       if ($this->dbportal->affectedRows() > 0) {
@@ -602,14 +624,16 @@ class AprovaModel extends Model
         $htmlEmail = templateEmail($mensagem);
 
         //$email_solicitante = 'deivison.batista@eldoradobrasil.com.br';
-        //$email_solicitante = 'alvaro.zaragoza@ativary.com';
+        $email_solicitante = 'alvaro.zaragoza@ativary.com';
         enviaEmail($email_solicitante, '[Portal RH] Sua Solicitação Foi Reprovada', $htmlEmail);
 
-        return responseJson('success', 'Requisição do Artigo 61 REPROVADA com sucesso');
+        notificacao('success', 'Requisição do Artigo 61 REPROVADA com sucesso');
+        return true;
       }
     }
 
-    return false;
+    notificacao('danger', 'Falha na reprovação da Requisição do Artigo 61');
+    return true;
   }
 
   // #############################################################################

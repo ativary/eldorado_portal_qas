@@ -210,17 +210,21 @@ class Aprova extends BaseController
 
                     if($tipo == 61){
                         $result = $this->mAprova->reprovaArt61($dadosRep[2], $motivo_reprova, $dados['perfilRH']);
+                        $resp = 2;
                     }elseif($tipo == 21 or $tipo == 22){
                         $result = $this->mAprova->reprovaEscala($dadosRep[2], $motivo_reprova, $dados['perfilRH']);
+                        if(!$result) $resp = 1;
                     }else{
                         $result = $this->mAprova->reprovaBatidaRH($id_batida, 'RH', $motivo_reprova, $dados['perfilRH']);
+                        if(!$result) $resp = 1;
                     }
 
-                    if(!$result) $resp = 1;
                 }
 
-                if($resp > 0){
+                if($resp == 1){
                     notificacao('warning', 'Movimento reprovado com sucesso. Porém, ocorreu falha parcial na reprovação.');
+                }elseif($resp == 2){
+                    // notificação vem do model
                 }else{
                     notificacao('success', 'Movimento reprovado com sucesso.');
                 }
