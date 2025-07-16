@@ -2723,7 +2723,8 @@ class AprovaModel extends Model
           c.codevento,
           z.HEXTRA_DIARIA as extra_normal,
           e.para_codevento as codevento_art61,
-          (c.valor - z.HEXTRA_DIARIA) as extra_art61
+          (c.valor - z.HEXTRA_DIARIA) as extra_art61,
+		      ROW_NUMBER() OVER (PARTITION BY c.dt_ponto, c.chapa_colab ORDER BY c.id) as numero_linha
 
         from zcrmportal_art61_req_chapas c
         left join zcrmportal_art61_requisicao r on r.id = c.id_req
@@ -2739,9 +2740,15 @@ class AprovaModel extends Model
       UPDATE
           r
       SET
-          r.extra_normal = c.extra_normal,
+          r.extra_normal =  CASE 
+                              WHEN c.numero_linha = 1 THEN c.extra_normal 
+                              ELSE 0 
+                            END,
           r.codevento_art61 = c.codevento_art61,
-          r.extra_art61 = c.extra_art61
+          r.extra_art61 =   CASE 
+                              WHEN c.numero_linha = 1 THEN c.extra_art61 
+                              ELSE r.valor 
+                            END
       FROM
           zcrmportal_art61_req_chapas as r
           INNER JOIN calc AS c
@@ -2750,6 +2757,9 @@ class AprovaModel extends Model
           r.id_req = " . $id_req . "
     ";
 
+    //echo $query;
+    //exit();
+    //die();
     $this->dbportal->query($query);
     /*if ($this->dbportal->affectedRows() == 0) {
       return responseJson('error', 'Não foi possível calcular. Será necessário processar a requisição novamente. Antes, verifique configurações de eventos do Artigo.61. '.$this->dbportal->affectedRows());
