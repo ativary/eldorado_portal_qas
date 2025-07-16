@@ -273,7 +273,9 @@ $("#anexo").fileinput({
     showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
     browseLabel: "Selecionar Arquivo", // Texto personalizado do botão de anexar
     dropZoneTitle: "Arraste o(s) arquivo(s) aqui. Para anexar mais de um arquivo arraste todos de uma vez. Os navegadores de internet não permitem arrastar um arquivo por vez. O mesmo vale para a seleção de arquivos, caso queira mais de um arquivo selecione todos de uma vez, usando o SHIFT ou CRTL junto com o clique do mouse.", // Texto personalizado da zona de drop
-    dropZoneClickTitle: "ou clique para selecionar os arquivos" // Texto secundário na zona de drop
+    dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
+    allowedFileExtensions: ['pdf', 'jpeg', 'jpg', 'doc', 'doc', 'docx', 'png', 'gif', 'tiff', 'webp', 'bmp'], // Permite apenas arquivos PDF e JPEG
+    msgInvalidFileExtension: "Tipo de arquivo não suportado. Apenas arquivos PDF, DOC, DOCx e imagens são permitidos." // Mensagem personalizada
 });
 
 

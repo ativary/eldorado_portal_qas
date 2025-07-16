@@ -78,7 +78,18 @@
                             <div class="form-group row mb-2">
                                 <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm">Anexar:</label>
                                 <div class="col-sm-10">
-                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required >
+                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required 
+                                accept="
+                                  application/pdf,
+                                  application/msword,
+                                  application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                  image/jpeg,
+                                  image/jpg,
+                                  image/png,
+                                  image/gif,
+                                  image/tiff,
+                                  image/webp,
+                                  image/bmp">
                                 </div>
                             </div>
 
@@ -261,15 +272,24 @@ const salvaDados = () => {
     formData.append("tipo", '7');
     formData.append("id", '');
   
-
-      // Adiciona múltiplos arquivos ao formData
+    let extensoesPermitidas = ['pdf', 'jpeg', 'jpg', 'doc', 'doc', 'docx', 'png', 'gif', 'tiff', 'webp', 'bmp'];
+    // Adiciona múltiplos arquivos ao formData
     let fileInput = $('#anexo')[0].files;
+    let extensaoInvalida = false;
     if (fileInput.length > 0) {
         for (let i = 0; i < fileInput.length; i++) {
-            formData.append("anexo[]", fileInput[i]);
+            let file = fileInput[i];
+            let extension = file.name.split('.').pop().toLowerCase();
+            console.log('extensao ',extension);
+            if (extensoesPermitidas.includes(extension)) {
+                formData.append("anexo[]", file);
+            } else {
+                extensaoInvalida = true;
+            }
         }
     }
 
+    if(extensaoInvalida){ exibeAlerta("error", "Apenas arquivos PDF, DOC, DOCx e imagens são permitidos."); return false; }
 
     if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
     if($("#tipoReq").val() == ""){ exibeAlerta("error", "<b>Tipo obrigatório </b> ."); return false; }
@@ -322,7 +342,9 @@ $("#anexo").fileinput({
     showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
     browseLabel: "Selecionar Arquivos", // Texto personalizado do botão de anexar
     dropZoneTitle: "Arraste o(s) arquivo(s) aqui. Para anexar mais de um arquivo arraste todos de uma vez. Os navegadores de internet não permitem arrastar um arquivo por vez. O mesmo vale para a seleção de arquivos, caso queira mais de um arquivo selecione todos de uma vez, usando o SHIFT ou CRTL junto com o clique do mouse.", // Texto personalizado da zona de drop
-    dropZoneClickTitle: "ou clique para selecionar os arquivos"
+    dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
+    allowedFileExtensions: ['pdf', 'jpeg', 'jpg', 'doc', 'doc', 'docx', 'png', 'gif', 'tiff', 'webp', 'bmp'], // Permite apenas arquivos PDF e JPEG
+    msgInvalidFileExtension: "Tipo de arquivo não suportado. Apenas arquivos PDF, DOC, DOCx e imagens são permitidos." // Mensagem personalizada
 });
 
 
