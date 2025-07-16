@@ -433,7 +433,18 @@
                 <div class="form-group row mb-2">
                     <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm">Anexar:</label>
                     <div class="col-sm-10">
-                        <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required>
+                        <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required
+                          accept="
+                            application/pdf,
+                            application/msword,
+                            application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                            image/jpeg,
+                            image/jpg,
+                            image/png,
+                            image/gif,
+                            image/tiff,
+                            image/webp,
+                            image/bmp">
                         <input class="form-control" hidden type="text" value="" name="id" id="id" required>
                     </div>
                 </div>
@@ -701,7 +712,7 @@ const salvaAnexo = () => {
     }
 
     // Definir extensões permitidas
-    /*const extensoesPermitidas = ['jpeg',  'pdf'];
+    const extensoesPermitidas = ['pdf', 'jpeg', 'jpg', 'doc', 'doc', 'docx', 'png', 'gif', 'tiff', 'webp', 'bmp'];
     let extensaoInvalida = false;
 
     // Validar extensões dos arquivos
@@ -714,9 +725,9 @@ const salvaAnexo = () => {
     });
 
     if (extensaoInvalida) {
-        Swal.fire('Erro', 'Apenas arquivos com as extensões .jpeg, ou .pdf são permitidos.', 'error');
+        Swal.fire('Erro', 'Apenas arquivos PDF, DOC, DOCx e imagens são permitidos.', 'error');
         return false;
-    }*/
+    }
 
     // Cria um objeto FormData para enviar os arquivos
     let formData = new FormData();

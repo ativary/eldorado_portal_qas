@@ -111,7 +111,18 @@
                             <div class="form-group row mb-2">
                                 <label for="justificativa" class="col-sm-2 col-form-label text-right text-left-sm">Adicionar novos Anexos:</label>
                                 <div class="col-sm-10">
-                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required>
+                                <input class="form-control filepond" type="file" name="anexo[]" id="anexo" multiple required
+                                  accept="
+                                    application/pdf,
+                                    application/msword,
+                                    application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                                    image/jpeg,
+                                    image/jpg,
+                                    image/png,
+                                    image/gif,
+                                    image/tiff,
+                                    image/webp,
+                                    image/bmp">
                                 </div>
                             </div>
 
@@ -231,8 +242,10 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     fileType: "any",
     showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
     browseLabel: "Selecionar Arquivo", // Texto personalizado do botão de anexar
-    dropZoneTitle: "Arraste os arquivos aqui", // Texto personalizado da zona de drop
-    dropZoneClickTitle: "ou clique para selecionar os arquivos"
+    dropZoneTitle: "Arraste o(s) arquivo(s) aqui. Para anexar mais de um arquivo arraste todos de uma vez. Os navegadores de internet não permitem arrastar um arquivo por vez. O mesmo vale para a seleção de arquivos, caso queira mais de um arquivo selecione todos de uma vez, usando o SHIFT ou CRTL junto com o clique do mouse.", // Texto personalizado da zona de drop
+    dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
+    allowedFileExtensions: ['pdf', 'jpeg', 'jpg', 'doc', 'doc', 'docx', 'png', 'gif', 'tiff', 'webp', 'bmp'], // Permite apenas arquivos PDF e JPEG
+    msgInvalidFileExtension: "Tipo de arquivo não suportado. Apenas arquivos PDF, DOC, DOCx e imagens são permitidos." // Mensagem personalizada
 });
 
 

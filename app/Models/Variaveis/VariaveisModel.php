@@ -133,14 +133,16 @@ class VariaveisModel extends Model {
         INNER JOIN PFUNCAO FCO ON ( FCO.CODCOLIGADA = A.CODCOLIGADA AND FCO.CODIGO = A.CODFUNCAO )
         LEFT OUTER JOIN PCARGO CAR ON ( CAR.CODCOLIGADA = FCO.CODCOLIGADA AND CAR.CODIGO = FCO.CARGO )';
       $where_sub = "
-        AND CAR.NOME <> 'Empregados' 
+        AND CAR.NOME = 'Empregados' 
       ";
     }
 
+    /*
     if($dados['rh']) {
       $filtro_sub = "";
       $where_sub = "";
     }
+    */
         
 		$query = " 
 			SELECT 
