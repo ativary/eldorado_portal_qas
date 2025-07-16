@@ -18,9 +18,9 @@
                         <li class="nav-item">
                             <a data-tab="2" class="nav-link <?php echo ($tab == '2' ? 'active' : ''); ?>" data-toggle="tab" href="#areas" role="tab">Áreas e Diretoria</a>
                         </li>
-                        <li class="nav-item">
+                        <!--li class="nav-item">
                             <a data-tab="4" class="nav-link <?php echo ($tab == '4' ? 'active' : ''); ?>" data-toggle="tab" href="#colab" role="tab">Exceção Hierarquia</a>
-                        </li>
+                        </li-->
                         <li class="nav-item">
                             <a data-tab="5" class="nav-link <?php echo ($tab == '5' ? 'active' : ''); ?>" data-toggle="tab" href="#evento" role="tab">Eventos</a>
                         </li>
