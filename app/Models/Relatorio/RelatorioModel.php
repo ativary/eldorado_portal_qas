@@ -1808,11 +1808,12 @@ class RelatorioModel extends Model {
                 ,(SELECT
                     top 1 aa.OBS
                 FROM
-                    ".DBPORTAL_BANCO."..zcrmportal_ponto_justificativa_func aa
+                    ".DBPORTAL_BANCO."..zcrmportal_ponto_horas aa
                 WHERE
                     aa.chapa = A.CHAPA COLLATE Latin1_General_CI_AS
                     AND aa.coligada = A.CODCOLIGADA
                     AND aa.dtponto = A.DATA
+                    AND aa.OBS is not null
                 ) OBS
                 ,(CASE WHEN DATEPART(WEEKDAY,A.DATA) = 1 THEN 'Domingo'
                 WHEN DATEPART(WEEKDAY,A.DATA) = 2 THEN 'Segunda' 
@@ -2157,9 +2158,9 @@ class RelatorioModel extends Model {
 
         ";
 
-//         echo '<pre>';
-// echo $query;
-//         exit();
+        //echo '<pre>';
+        //echo $query;
+        //exit();
 
         $result = $this->dbrm->query($query, [], false, '', ['Scrollable' => SQLSRV_CURSOR_FORWARD]);
 
