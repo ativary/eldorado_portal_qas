@@ -1104,7 +1104,7 @@ $(document).ready(function(){
 
                   $motivo_justificativa = 'Não justificado';
 
-                  if($resData[$i]['USABANCOHORAS'] == 1) {
+                  if($resData[$i]['USABANCOHORAS'] == 1 and ($resData[$i]['ATRASO_CASE'] or $resData[$i]['FALTA_CASE'])) {
                     $motivo_justificativa = 'Banco de Horas';
                   }
 
