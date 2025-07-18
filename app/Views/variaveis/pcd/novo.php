@@ -206,7 +206,16 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
         const $selectTipoReq = $('#tipoReq');
         const $opcaoMensal = $selectTipoReq.find('option[value="1"]');
         hoje.setHours(0, 0, 0, 0);
-       
+
+        // opção "Complementar"
+        const dia_lim_compl = parseInt(regra.dia_limite_compl4, 10);
+        const $opcaoCompl = $selectTipoReq.find('option[value="2"]');
+        if (diaHoje <= dia_lim_compl) {
+            $opcaoCompl.prop('disabled', false); // Habilita a opção "Complementar"
+        } else {
+            $opcaoCompl.prop('disabled', true); // Desabilita a opção "Complementar"
+        }
+
         if (diaHoje >= periodoInicio && diaHoje <= periodoFim) {
             
             fora_periodo=0 ;
