@@ -1019,6 +1019,7 @@ class AprovaModel extends Model
     $mHierarquia = Model('HierarquiaModel');
     $objFuncLider = $mHierarquia->ListarHierarquiaSecaoPodeVer(false, false, true);
     $isLider = $mHierarquia->isLider();
+    $isGestor = $mHierarquia->isGestor();
 
     $filtro_chapa_lider = "";
     $filtro_secao_lider = "";
@@ -1073,9 +1074,16 @@ class AprovaModel extends Model
     }
 
     $filtro_filial = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND B.CODFILIAL = '{$dados['filtro_filial']}' " : '';
+    $filtro_filial61 = (strlen(trim($dados['filtro_filial'])) != 0) ? " AND f.CODFILIAL = '{$dados['filtro_filial']}' " : '';
     $filtro_legenda = "";
     $filtro_legenda2 = "";
-    $in_leg_art61 = "AND r.status in (2, 3, 4, 5, 6) ";
+
+    if($isGestor) {
+      $in_leg_art61 = "AND r.status = 2 ";
+    } else {
+      $in_leg_art61 = "AND r.status in (2, 3, 4, 5, 6) ";
+    }
+    
     if ((strlen(trim($dados['filtro_legenda'])) != 0)) {
       if ($dados['filtro_legenda'] == 10) {
         $filtro_legenda2 = " AND a.situacao = '10' ";
@@ -1084,11 +1092,10 @@ class AprovaModel extends Model
       if ($dados['filtro_legenda'] == 2) {
         $filtro_legenda = " AND 1 = 2 ";
         $filtro_legenda2 = " AND a.situacao = '2' ";
-        $in_leg_art61 = " AND r.status = 4 ";
+        $in_leg_art61 = " AND r.status in (3,4,5) ";
       }
 
     }
-
 
     //(strlen(trim($dados['filtro_legenda'])) != 0) ? " AND a.situacao = '{$dados['filtro_legenda']}' " : '';
 
@@ -1229,7 +1236,8 @@ class AprovaModel extends Model
               WHERE AA.coligada = A.coligada
                 AND AA.dtponto = A.dtponto
                 AND AA.chapa = A.chapa
-            ) obs_just
+            ) obs_just,
+          B.CODFILIAL as codfilial
 				FROM
 					zcrmportal_ponto_horas A (NOLOCK)
 					INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
@@ -1341,7 +1349,8 @@ class AprovaModel extends Model
           NULL art61_horas,
 	        NULL art61_chapa_gerente,
 	        NULL obs,
-	        NULL just_obs
+	        NULL obs_just,
+          B.CODFILIAL as codfilial
 				FROM
 					zcrmportal_escala a (NOLOCK)
 					INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
@@ -1417,7 +1426,8 @@ class AprovaModel extends Model
           ) as art61_horas,
 	        g.ger_chapa as art61_chapa_gerente,
 	        NULL obs,
-	        NULL just_obs
+	        NULL obs_just,
+          f.CODFILIAL as codfilial
           FROM zcrmportal_art61_requisicao r
             LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON f.CODCOLIGADA = r.id_coligada
             AND f.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS
@@ -1430,6 +1440,7 @@ class AprovaModel extends Model
           {$in_leg_art61}
           {$periodoArt61}
           {$filtro_tipo_art61}
+          {$filtro_filial61}
  			)X
 			ORDER BY
 				X.chapa,

@@ -151,7 +151,7 @@ $(document).ready(function(){
                                         <option value="">Todas as filiais</option>
                                         <?php if($resFilial): ?>
                                                 <?php foreach($resFilial as $key => $Filial): ?>
-                                                    <option value="<?= $Filial['CODFILIAL']; ?>" <?= (($filtro_filial ?? "") == $Filial['CODFILIAL']) ? " selected " : ""; ?>><?= $Filial['CODFILIAL'].' - '.$Filial['NOMEFILIAL']; ?></option>
+                                                    <option value="<?= $Filial['CODFILIAL']; ?>" <?= (($filtro_filial ?? "") == $Filial['CODFILIAL']) ? " selected " : ""; ?>><?= $Filial['CODFILIAL']; ?></option>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                     </select>
@@ -271,6 +271,7 @@ $(document).ready(function(){
                                         <th class="n-mobile-cell"><strong>Status</strong></th>
                                         <th><strong>Tipo</strong></th>
                                         <th class="n-mobile-cell"><strong>Data</strong></th>
+                                        <th class="n-mobile-cell"><strong>Filial</strong></th>
                                         <th class="n-mobile-cell"><strong>Colaborador</strong></th>
                                         <th class="n-mobile-cell" style="min-width: 290px;"><strong>Descrição Tipo</strong></th>
                                         <th class="n-mobile-cell"><strong>Justificativa</strong></th>
@@ -351,6 +352,7 @@ $(document).ready(function(){
                                                 ?>
                                                 </td>
                                                 <td class="n-mobile-cell"><?= dtBr($registro['dtponto']); ?></td>
+                                                <td class="n-mobile-cell"><?= $registro['codfilial']; ?></td>
                                                 <td class="n-mobile-cell"><?= $registro['chapa'].' - '.$registro['nome']; ?></td>
                                                 <td class="n-mobile-cell">
                                                     <?php
@@ -1391,7 +1393,7 @@ body {
             api.columns().every(function () {
                 var column = this;
 
-                if (column[0][0] == 0 || column[0][0] == 1 || column[0][0] >= (p_linha - 2) || column[0][0] == 8 || column[0][0] == 6) return false;
+                if (column[0][0] == 0 || column[0][0] == 1 || column[0][0] >= (p_linha - 2) || column[0][0] == 9 || column[0][0] == 7) return false;
 
                 var select = $('<select class="form-control form-control-sm filtro_table"><option value="">Todos</option></select>')
                     .appendTo($(column.header()))

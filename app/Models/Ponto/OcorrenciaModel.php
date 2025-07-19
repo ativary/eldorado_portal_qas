@@ -311,6 +311,7 @@ class OcorrenciaModel extends Model {
 				GROUP BY
 					B.CODFILIAL,
 					B.NOME
+        ORDER BY B.CODFILIAL
 			";
 			//echo '<textarea>'.$query.'</textarea>';exit;
 			$result = $this->dbrm->query($query);
