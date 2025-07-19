@@ -101,68 +101,70 @@
                 </thead>
                 <tbody>
                   <?php if ($resListaArt61): ?>
-                    <?php foreach ($resListaArt61 as $key => $registro): ?>
-                      <tr data-linha="<?= $registro['id'] ?>">
-                        <td width="20" class="text-center">
-                          <input type="checkbox" onclick="VerificaCheck()" name="idart61[]" data-checkbox="<?= $registro['id']; ?>" value="<?= $registro['id']; ?>">
-                        </td>
-                        <td class="n-mobile-cell"><?= $registro['id']; ?></td>
-                        <td class="n-mobile-cell text-center">
-                          <?php
-                          switch ($registro['status']) {
-                            case 1:
-                              echo '<span class="badge badge-dark">Criada</span>';
-                              break;
-                            case 2:
-                              echo '<span class="badge badge-warning">Pend/Ação Gestor</span>';
-                              break;
-                            case 3:
-                              echo '<span class="badge badge-info">Pend/Calc.RH</span>';
-                              break;
-                            case 4:
-                              echo '<span class="badge badge-info">Pend/Ação RH</span>';
-                              break;
-                            case 5:
-                              echo '<span class="badge badge-primary">Pend/Sincronização</span>';
-                              break;
-                            case 6:
-                              echo '<span class="badge badge-success">Sincronizada</span>';
-                              break;
-                            case 9:
-                              echo '<span class="badge badge-danger">Reprovada</span>';
-                              break;
-                            default:
-                              echo '';
-                          }
-                          ?>
-                        </td>
-                        <td class="n-mobile-cell"><?= $registro['dt_req_br']; ?></td>
-                        <td class="n-mobile-cell"><?= $registro['chapa_requisitor'] . ' - ' . $registro['nome_requisitor']; ?></td>
-                        <td class="n-mobile-cell"><?= $registro['chapa_gestor'] . ' - ' . $registro['nome_gestor']; ?></td>
-                        <td class="n-mobile-cell"><?= $registro['justificados'] . ' / ' . $registro['registros']; ?></td>
-                        <td class="n-mobile-cell"><?= $registro['mescomp'] . '/' . $registro['anocomp']; ?></td>
-                        <td class="n-mobile-cell"><?= $registro['per_ponto_br']; ?></td>
-                        <td>
-                          <div class="dropdown">
-                            <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
-                            <div class="dropdown-menu" style="margin-left: -131px;">
+                    <?php foreach ($resListaArt61 as $key => $registro):
+                      if($registro['registros'] != 0):  ?>
+                        <tr data-linha="<?= $registro['id'] ?>">
+                          <td width="20" class="text-center">
+                            <input type="checkbox" onclick="VerificaCheck()" name="idart61[]" data-checkbox="<?= $registro['id']; ?>" value="<?= $registro['id']; ?>">
+                          </td>
+                          <td class="n-mobile-cell"><?= $registro['id']; ?></td>
+                          <td class="n-mobile-cell text-center">
+                            <?php
+                            switch ($registro['status']) {
+                              case 1:
+                                echo '<span class="badge badge-dark">Criada</span>';
+                                break;
+                              case 2:
+                                echo '<span class="badge badge-warning">Pend/Ação Gestor</span>';
+                                break;
+                              case 3:
+                                echo '<span class="badge badge-info">Pend/Calc.RH</span>';
+                                break;
+                              case 4:
+                                echo '<span class="badge badge-info">Pend/Ação RH</span>';
+                                break;
+                              case 5:
+                                echo '<span class="badge badge-primary">Pend/Sincronização</span>';
+                                break;
+                              case 6:
+                                echo '<span class="badge badge-success">Sincronizada</span>';
+                                break;
+                              case 9:
+                                echo '<span class="badge badge-danger">Reprovada</span>';
+                                break;
+                              default:
+                                echo '';
+                            }
+                            ?>
+                          </td>
+                          <td class="n-mobile-cell"><?= $registro['dt_req_br']; ?></td>
+                          <td class="n-mobile-cell"><?= $registro['chapa_requisitor'] . ' - ' . $registro['nome_requisitor']; ?></td>
+                          <td class="n-mobile-cell"><?= $registro['chapa_gestor'] . ' - ' . $registro['nome_gestor']; ?></td>
+                          <td class="n-mobile-cell"><?= $registro['justificados'] . ' / ' . $registro['registros']; ?></td>
+                          <td class="n-mobile-cell"><?= $registro['mescomp'] . '/' . $registro['anocomp']; ?></td>
+                          <td class="n-mobile-cell"><?= $registro['per_ponto_br']; ?></td>
+                          <td>
+                            <div class="dropdown">
+                              <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
+                              <div class="dropdown-menu" style="margin-left: -131px;">
 
-                              <?php if ($registro['status'] == 1 || $registro['status'] == 9):  ?>
-                                <a href="<?= base_url('ponto/art61/solicitacao_chapas/' . $registro['id']); ?>" class="dropdown-item"><i class="mdi mdi-pencil"></i> Editar requisição</a>
-                                <button type="button" onclick="enviarAprovacao('<?= $registro['id']; ?>', <?= $registro['status']; ?>, <?= $registro['qtde_gestores']; ?>, <?= $registro['justificados']; ?>, <?= $registro['registros']; ?>)" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
-                                <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
+                                <?php if ($registro['status'] == 1 || $registro['status'] == 9):  ?>
+                                  <a href="<?= base_url('ponto/art61/solicitacao_chapas/' . $registro['id']); ?>" class="dropdown-item"><i class="mdi mdi-pencil"></i> Editar requisição</a>
+                                  <button type="button" id="btnEnvia1" name="btnEnvia1" onclick="enviarAprovacao('<?= $registro['id']; ?>', <?= $registro['status']; ?>, <?= $registro['qtde_gestores']; ?>, <?= $registro['justificados']; ?>, <?= $registro['registros']; ?>)" class="dropdown-item text-success"><i class="far fa-paper-plane"></i> Enviar para Aprovação</button>
+                                  <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
 
-                              <?php else:  ?>
-                                <a href="/ponto/art61/solicitacao_chapas/<?= $registro['id']; ?>" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Ver Solicitação</a>
-                                <?php if ($rh):  ?>
-                                   <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
+                                <?php else:  ?>
+                                  <a href="/ponto/art61/solicitacao_chapas/<?= $registro['id']; ?>" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Ver Solicitação</a>
+                                  <?php if ($rh):  ?>
+                                    <button type="button" onclick="apagarRequisicao('<?= $registro['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Apagar Solicitação</button>
+                                  <?php endif;  ?>
                                 <?php endif;  ?>
-                              <?php endif;  ?>
-                              
+                                
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                      </tr>
+                          </td>
+                        </tr>
+                      <?php endif; ?>
                     <?php endforeach; ?>
                   <?php endif; ?>
                 </tbody>
@@ -193,8 +195,10 @@
         <div class="input-group mb-3">
           <label for="chapa">Solicitante: </label>
           <select class="select2 custom-select" id="chapa" name="chapa">
-            <option value="">...</option>
-            <?php foreach ($resColab as $key => $Colab): ?>
+            <?php if($_SESSION['rh_master']=='S') {?>
+              <option value="">...</option>
+            <?php } ?>
+            <?php foreach ($resSolicitante as $key => $Colab): ?>
               <option value="<?= $Colab['CHAPA']; ?>"><?= $Colab['NOME'] . ' - ' . $Colab['CHAPA']; ?></option>
             <?php endforeach; ?>
           </select>
@@ -261,7 +265,9 @@
     //abre modal
     let validas = true;
     let todosJust = true;
+    let isGestor = "<?php echo $isGestor; ?>";
     console.log(id_req, status, validas);
+    console.log(isGestor);
 
     // Get all checkboxes with name="idart61[]"
     const checkboxes = document.querySelectorAll('input[name="idart61[]"]');
@@ -313,6 +319,7 @@
     let dados = {
       "id": id_req,
       "sel_ids": selecionados,
+      "isGestor": isGestor
     }
     console.log(dados);
 
@@ -396,8 +403,12 @@
     console.log('<?= $resConfig[0]['per_ponto_sql']; ?>');
     if ($("#periodo").val() == '<?= $resConfig[0]['per_ponto_sql']; ?>') {
       $("#btnNova").show();
+      $("#btnEnvia").show();
+      $("#btnEnvia1").show();
     } else {
       $("#btnNova").hide();
+      $("#btnEnvia").hide();
+      $("#btnEnvia1").hide();
     }
     return true;
   }

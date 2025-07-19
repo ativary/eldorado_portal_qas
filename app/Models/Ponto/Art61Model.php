@@ -192,6 +192,62 @@ class Art61Model extends Model
   }
 
   //---------------------------------------------
+  // Lista Solicitantes
+  //---------------------------------------------
+  public function ListarSolicitante()
+  {
+
+    $chapa = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? '';
+    if($_SESSION['rh_master']=='S') {
+      $where = " CHAPA IN (SELECT CHAPA COLLATE Latin1_General_CI_AS FROM CHAPAS) ";
+    } else {
+      $where = " CHAPA = '".$chapa."'" ;
+    }
+    
+    $query = "
+      WITH CHAPAS AS (
+        SELECT DISTINCT chapa FROM (
+          SELECT 
+            a.chapa 
+          FROM 
+            zcrmportal_hierarquia_chapa a
+            INNER JOIN zcrmportal_hierarquia b ON b.id = a.id_hierarquia AND b.inativo IS NULL
+          WHERE 
+            a.inativo IS NULL 
+            AND a.coligada = '" . $_SESSION['func_coligada'] . "' 
+
+          UNION ALL 
+              
+          SELECT 
+            a.chapa 
+          FROM 
+            zcrmportal_hierarquia_chapa_sub a
+            INNER JOIN zcrmportal_hierarquia b ON b.id = a.id_hierarquia AND b.inativo IS NULL
+          WHERE 
+            a.inativo IS NULL 
+            AND a.coligada = '" . $_SESSION['func_coligada'] . "' 
+        )X
+      )
+
+      SELECT
+          CHAPA,
+          NOME
+      FROM
+          " . DBRM_BANCO . "..PFUNC
+      WHERE
+          CODSITUACAO <> 'D'
+          AND {$where}
+      ORDER BY
+          NOME ASC
+    ";
+    
+    $result = $this->dbportal->query($query);
+    return ($result->getNumRows() > 0)
+      ? $result->getResultArray()
+      : false;
+  }
+
+  //---------------------------------------------
   // Listar Filiais
   //---------------------------------------------
   public function ListarFilial()
@@ -1281,7 +1337,13 @@ class Art61Model extends Model
             FORMAT(a.dtini_ponto, 'yyyy-MM-dd')+'-'+FORMAT(a.dtfim_ponto , 'yyyy-MM-dd') AS per_ponto_sql,
             FORMAT(a.dtini_ponto, 'dd/MM/yyyy')+' a '+FORMAT(a.dtfim_ponto, 'dd/MM/yyyy') AS per_ponto_br,
 			      p.dt_extendida,
-			      r.id
+			      r.id,
+              (
+                SELECT COUNT(id) AS qtde
+                FROM zcrmportal_art61_req_chapas c
+                WHERE c.id_req = r.id
+                  AND c.status <> 'I'
+              ) as registros
         FROM zcrmportal_art61_config a 
 		    LEFT JOIN zcrmportal_art61_prorroga p ON 
               p.coligada = '1' 
@@ -1304,9 +1366,18 @@ class Art61Model extends Model
     $dtExtendida = ($dtExtendida < $resConfig[0]['dtfim_req']) ? $resConfig[0]['dtfim_req'] : $dtExtendida;
 
     $chapaExiste = is_null($resConfig[0]['id']) ? false : true;
+    $usar_req_existente = false;
 
     if ($chapaExiste) {
-      return responseJson('error', 'Já existe solicitação para colaborador nesse período.');
+      if($resConfig[0]['registros'] > 0) {
+        if($_SESSION['rh_master']=='S') {
+          return responseJson('error', 'Já existe solicitação para colaborador nesse período.');
+        } else {
+          return responseJson('error', 'Você ja tem uma nesse período.');
+        }
+      } else {
+        $usar_req_existente = true;
+      }
     }
 
     if ($dtExtendida < $data_requisicao) {
@@ -1317,19 +1388,25 @@ class Art61Model extends Model
       return responseJson('error', 'Esse período não está liberado para criar solicitações.');
     }
 
-    $query = " 
-      INSERT INTO zcrmportal_art61_requisicao 
-        (dt_requisicao, chapa_requisitor, dt_ini_ponto, dt_fim_ponto, mescomp, anocomp, id_coligada, id_criador) 
-      VALUES 
-        ('" . $data_requisicao . "', '" . $chapa_solicitante . "', '" . $dtini_ponto . "', '" . $dtfim_ponto . "', " . $mescomp . ", " . $anocomp . ", " . session()->get('func_coligada') . ", " . $_SESSION['log_id'] . ") ";
-
-    $this->dbportal->query($query);
-
-    if ($this->dbportal->affectedRows() > 0) {
-      $lastID = $this->dbportal->insertId();
+    if($usar_req_existente) {
+      $lastID = $resConfig[0]['id'];
       return responseJson('success', 'Solicitação criada com sucesso.', $lastID);
+
     } else {
-      return responseJson('error', 'Falha ao criar a solicitação.');
+      $query = " 
+        INSERT INTO zcrmportal_art61_requisicao 
+          (dt_requisicao, chapa_requisitor, dt_ini_ponto, dt_fim_ponto, mescomp, anocomp, id_coligada, id_criador) 
+        VALUES 
+          ('" . $data_requisicao . "', '" . $chapa_solicitante . "', '" . $dtini_ponto . "', '" . $dtfim_ponto . "', " . $mescomp . ", " . $anocomp . ", " . session()->get('func_coligada') . ", " . $_SESSION['log_id'] . ") ";
+
+      $this->dbportal->query($query);
+
+      if ($this->dbportal->affectedRows() > 0) {
+        $lastID = $this->dbportal->insertId();
+        return responseJson('success', 'Solicitação criada com sucesso.', $lastID);
+      } else {
+        return responseJson('error', 'Falha ao criar a solicitação.');
+      }
     }
   }
 
@@ -1449,7 +1526,7 @@ class Art61Model extends Model
   }
 
   // -------------------------------------------------------
-  // Processar solcitacao
+  // Processar solicitacao
   // -------------------------------------------------------
   public function Processar_Req($dados)
   {
@@ -1492,13 +1569,12 @@ class Art61Model extends Model
     exit();
 */
 
-    // Desabilita todos os colaboradores
+    // Coloca os registros atuais em status de processamento
     $query = "
     UPDATE
       zcrmportal_art61_req_chapas
     SET
-      status = 'I',
-      obs = 'REPROCESSAMENTO EM " . $this->now . "'
+      status = 'P'
     WHERE
       status = 'A' AND
       id_req = " . $id_req . "
@@ -1568,6 +1644,8 @@ class Art61Model extends Model
       $batidas = $result->getResult();
       foreach ($batidas as $batida) {
         if ($batida->NUMHORAS > $batida->HEXTRA_DIARIA) { // só gera se hora extra do dia maior que o permitido
+
+          // INCLUSÃO DE REGISTROS 
           $query = " 
             INSERT INTO zcrmportal_art61_req_chapas
               (id_req, chapa_colab, dt_ponto, codevento, dt_ini_ponto, dt_fim_ponto, valor, chapa_gestor, codhorario, indice) 
@@ -1583,12 +1661,47 @@ class Art61Model extends Model
           //exit();
           $this->dbportal->query($query);
 
-          if ($this->dbportal->affectedRows() <= 0) {
-            $resp = 'Processamento finalizado. Alguns registros não foram gravados.';
-          }
+          // ALTERAÇÃO DE DADOS
+          $query = " 
+            UPDATE zcrmportal_art61_req_chapas
+            SET
+              valor = " . $batida->NUMHORAS . ", 
+              chapa_gestor = '" . $batida->GESTOR_CHAPA . "', 
+              codhorario = '" . $batida->HORARIO . "', 
+              indice = " . $batida->INDICE . ",
+              status = 'A' 
+            WHERE 
+                  id_req = " . $id_req . " 
+              AND status = 'P' 
+              AND chapa_colab = '".$batida->CHAPA."' 
+              AND dt_ponto = '".SUBSTR($batida->DATA,0,10)."' 
+              AND codevento = '".$batida->CODEVE."'
+            ";
+
+          //echo $query;
+          //exit();
+          $this->dbportal->query($query);
+
+          // Desativado por alvaro em 19/07/2025 pois rotina de processamento mudou para não perder dados de justificativas e anexos
+          //if ($this->dbportal->affectedRows() <= 0) {
+          //  $resp = 'Processamento finalizado. Alguns registros não foram gravados.';
+          //}
         }
       }
     }
+
+    // Remove os registros que não tiveram mais dados após o reprocessamento
+    $query = "
+    UPDATE
+      zcrmportal_art61_req_chapas
+    SET
+      status = 'I'
+    WHERE
+      status = 'P' AND
+      id_req = " . $id_req . "
+    ";
+    $this->dbportal->query($query);
+
     return responseJson('success', $resp);
   }
 
@@ -1631,6 +1744,8 @@ class Art61Model extends Model
   public function Envia_Aprovacao($dados)
   {
     $ids = ($dados['id'] == -1) ? $dados['sel_ids'] : $dados['id'];
+    $isGestor = ($dados['isGestor'] == 'S') ? true : false;
+    $chapaUser = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
 
     // VALIDA SE REQ TEM CHAPAS
     $query = "
@@ -1741,75 +1856,93 @@ class Art61Model extends Model
       $this->dbportal->transCommit();
     }
 
-    // ROTINA DE ENVIO DE EMAIL
-    $query = "
-      SELECT DISTINCT
-        r.chapa_gestor,
-        e.NOME,
-        e.EMAIL,
-        FORMAT(r.dt_ini_ponto, 'dd/MM/yyyy') DTINI_BR, 
-        FORMAT(r.dt_fim_ponto, 'dd/MM/yyyy') DTFIM_BR
-      
-      FROM zcrmportal_art61_requisicao r
-      LEFT JOIN EMAIL_CHAPA e ON e.CODCOLIGADA = r.id_coligada AND e.CHAPA = r.chapa_gestor COLLATE Latin1_General_CI_AS
-      WHERE 
-        e.EMAIL IS NOT NULL AND 
-        r.status <> 0 AND
-        ( r.id IN  (" . $ids . ") or r.id_req_original IN (" . $ids . ") )
-    ";
+    if(!$isGestor) {
+      // ROTINA DE ENVIO DE EMAIL
+      $query = "
+        SELECT DISTINCT
+          r.chapa_gestor,
+          e.NOME,
+          e.EMAIL,
+          FORMAT(r.dt_ini_ponto, 'dd/MM/yyyy') DTINI_BR, 
+          FORMAT(r.dt_fim_ponto, 'dd/MM/yyyy') DTFIM_BR
+        
+        FROM zcrmportal_art61_requisicao r
+        LEFT JOIN EMAIL_CHAPA e ON e.CODCOLIGADA = r.id_coligada AND e.CHAPA = r.chapa_gestor COLLATE Latin1_General_CI_AS
+        WHERE 
+          e.EMAIL IS NOT NULL AND 
+          r.status <> 0 AND
+          ( r.id IN  (" . $ids . ") or r.id_req_original IN (" . $ids . ") )
+      ";
 
-    //echo '<PRE> '.$query;
-    //exit();
+      //echo '<PRE> '.$query;
+      //exit();
 
-    $result = $this->dbportal->query($query);
-    if ($result->getNumRows() > 0) {
-      $resFuncs = $result->getResultArray();
-      foreach ($resFuncs as $key => $Func):
-        $nome = $Func['NOME'];
-        $email = $Func['EMAIL'];
-        $dtinip_br = $Func['DTINI_BR'];
-        $dtfimp_br = $Func['DTFIM_BR'];
+      $result = $this->dbportal->query($query);
+      if ($result->getNumRows() > 0) {
+        $resFuncs = $result->getResultArray();
+        foreach ($resFuncs as $key => $Func):
+          $nome = $Func['NOME'];
+          $email = $Func['EMAIL'];
+          $dtinip_br = $Func['DTINI_BR'];
+          $dtfimp_br = $Func['DTFIM_BR'];
 
-        $assunto = '[Portal RH] Você possui solicitações pendentes de aprovação';
-        $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
-        $mensagem = '
-          Este é um lembrete de que você possui solicitações pendentes de aprovação no <strong>Portal RH - Módulo de Ponto</strong> no período de <strong>' . $dtinip_br . ' a ' . $dtfimp_br . '</strong>, ou posterior. Abaixo está um resumo das pendências: <br><br>
-          <strong>Pendências de Artigo.61</strong><br><br>
-          Solicitamos que acesse o Portal RH para revisar as solicitações pendentes.<br><br>
-          Segue abaixo link para acesso ao Portal RH <a href="' . base_url() . '" target="_blank">' . base_url() . '</a><br><br>
-          Atenciosamente,<br>
-          <strong>Equipe Processos de RH</strong><br>
-        ';
+          $assunto = '[Portal RH] Você possui solicitações pendentes de aprovação';
+          $msg_nome = 'Prezado(a) ' . $nome . ',<br><br>';
+          $mensagem = '
+            Este é um lembrete de que você possui solicitações pendentes de aprovação no <strong>Portal RH - Módulo de Ponto</strong> no período de <strong>' . $dtinip_br . ' a ' . $dtfimp_br . '</strong>, ou posterior. Abaixo está um resumo das pendências: <br><br>
+            <strong>Pendências de Artigo.61</strong><br><br>
+            Solicitamos que acesse o Portal RH para revisar as solicitações pendentes.<br><br>
+            Segue abaixo link para acesso ao Portal RH <a href="' . base_url() . '" target="_blank">' . base_url() . '</a><br><br>
+            Atenciosamente,<br>
+            <strong>Equipe Processos de RH</strong><br>
+          ';
 
-        $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
+          $htmlEmail = templateEmail($msg_nome . $mensagem, '95%');
 
-        //$email = 'deivison.batista@eldoradobrasil.com.br';
-        //$email = 'alvaro.zaragoza@ativary.com';
-        $response = enviaEmail($email, $assunto, $htmlEmail);
+          //$email = 'deivison.batista@eldoradobrasil.com.br';
+          //$email = 'alvaro.zaragoza@ativary.com';
+          $response = enviaEmail($email, $assunto, $htmlEmail);
 
-      /* EMAIL PARA SUBSTITUTO
-          if (!is_null($email_sub)) {
-            $msg_nome_sub = 'Prezado(a) ' . $nome_sub . ',<br><br>';
-            $htmlEmail = templateEmail($msg_nome_sub . $mensagem, '95%');
-            $email_sub = 'deivison.batista@eldoradobrasil.com.br';
-            //$email = 'alvaro.zaragoza@ativary.com';
-            $response = enviaEmail($email_sub, $assunto, $htmlEmail);
-            echo 'Enviado email para ' . $nome_sub . ' - ' . $email_sub . '<br>';
-          }
-          */
-      endforeach;
+        /* EMAIL PARA SUBSTITUTO
+            if (!is_null($email_sub)) {
+              $msg_nome_sub = 'Prezado(a) ' . $nome_sub . ',<br><br>';
+              $htmlEmail = templateEmail($msg_nome_sub . $mensagem, '95%');
+              $email_sub = 'deivison.batista@eldoradobrasil.com.br';
+              //$email = 'alvaro.zaragoza@ativary.com';
+              $response = enviaEmail($email_sub, $assunto, $htmlEmail);
+              echo 'Enviado email para ' . $nome_sub . ' - ' . $email_sub . '<br>';
+            }
+            */
+        endforeach;
+      }
     }
 
-    $query = "
-      UPDATE
-          zcrmportal_art61_requisicao
-      SET
-          dt_envio_email = '" . date('Y-m-d H:i:s') . "',
-          status = '2'
-      WHERE
-          ( id IN  (" . $ids . ") OR id_req_original IN (" . $ids . ") )
-      AND status in ('1','9')
-    ";
+    if($isGestor) {
+      $query = "
+        UPDATE
+            zcrmportal_art61_requisicao
+        SET
+            dt_envio_email = '" . date('Y-m-d H:i:s') . "',
+            dt_aprovacao = '" . date('Y-m-d H:i:s') . "', 
+            id_aprovador = '{$this->log_id}', 
+            chapa_aprov_reprov = '{$chapaUser}',
+            status = '3'
+        WHERE
+            ( id IN  (" . $ids . ") OR id_req_original IN (" . $ids . ") )
+        AND status in ('1','9')
+      ";
+    } else {
+      $query = "
+        UPDATE
+            zcrmportal_art61_requisicao
+        SET
+            dt_envio_email = '" . date('Y-m-d H:i:s') . "',
+            status = '2'
+        WHERE
+            ( id IN  (" . $ids . ") OR id_req_original IN (" . $ids . ") )
+        AND status in ('1','9')
+      ";
+    }
     //echo $query;
     //die();
     $this->dbportal->query($query);
@@ -1822,4 +1955,36 @@ class Art61Model extends Model
       return responseJson('error', 'Falha ao enviar para aprovação.');
     }
   }
+
+  // -------------------------------------------------------
+  // Salva Requisição
+  // -------------------------------------------------------
+  public function Salvar_Req($dados)
+  {
+
+    $id = $dados['id'];
+
+    $query = "
+            UPDATE
+               zcrmportal_art61_req_chapas
+            SET
+               status = 'I'
+            WHERE
+               id_req =" . $id . "
+            AND status <> 'I' 
+            AND id_justificativa IS NULL 
+        ";
+
+    $this->dbportal->query($query);
+    //echo $query;
+    //die();
+
+    $regs = $this->dbportal->affectedRows();
+    if ($regs > 0) {
+      return responseJson('success', 'Requisição Salva. '.$regs.' registro(s) removido(s).');
+    } else {
+      return responseJson('success', 'Requisição Salva. Nenhum registro foi removido.');
+    }
+  }
+
 }

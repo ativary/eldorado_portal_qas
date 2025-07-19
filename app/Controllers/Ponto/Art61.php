@@ -11,13 +11,15 @@ class Art61 extends BaseController
 
   private $mArt61;
   private $mEspelho;
+  public $mHierarquia;
 
   public function __construct()
   {
     parent::__construct('Ponto');
     $this->_moduloName = '<i class="mdi mdi-account-star-outline"></i> Ponto';
     $this->mArt61 = model('Ponto/Art61Model');
-    $this->mEspelho = model('Ponto/EspelhoModel');
+    $this->mEspelho = model('Ponto/EspelhoModel'); 
+    $this->mHierarquia    = model('HierarquiaModel');
   }
 
   public function index()
@@ -161,6 +163,13 @@ class Art61 extends BaseController
       // grava novo colaborador
       case 'processar_req':
         exit($this->mArt61->Processar_Req($dados));
+        break;
+      //-------------------------------------
+
+      //-------------------------------------
+      // salva requisição
+      case 'salvar_req':
+        exit($this->mArt61->Salvar_Req($dados));
         break;
       //-------------------------------------
 
@@ -312,6 +321,7 @@ class Art61 extends BaseController
     $dados['_titulo'] = "Histórico de solicitação";
     $dados['periodo'] = $this->request->getPost('periodo');
     //$dados['acessoPermitido']       = ($dados['isGestorHierarquia'] || $dados['perfilRH'] || $dados['isLiderAprovador'] || $dados['isGestorSubstituto']) ? true : false;
+    $dados['isGestor'] = $this->mHierarquia->isGestor() ? 'S' : 'N';
     $dados['acessoPermitido']  = true;
     $dados['resConfig'] = $this->mArt61->ListarConfigArt61();
 
@@ -319,6 +329,7 @@ class Art61 extends BaseController
     $dados['periodo'] = $periodo;
 
     $dados['resColab'] = $this->mArt61->ListarColabSolicitacao($dados['rh']);
+    $dados['resSolicitante'] = $this->mArt61->ListarSolicitante();
     $dados['resListaArt61'] = $this->mArt61->ListarArt61($periodo);
     $dados['resPeriodo'] = $this->mArt61->ListarPeriodoPonto();
     $dados['resProroga'] = $this->mArt61->ListarProrroga();
