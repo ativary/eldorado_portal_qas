@@ -7,17 +7,18 @@
 
         <div class="card-header mt-0">
           <div class="row">
-            <h4 class="col-6 mb-1 mt-1"><?= $_titulo; ?></h4>
-            <div class="col-6 text-right">
+            <div class="col-4 text-left">
               <div class="button-items">
-                <?php if ($pode_editar) { ?>
-                  <a href="javascript:void(0);" onclick="return processar(<?= $id_requisicao; ?> )" class="btn btn-purple btn-xxs mb-0 <?= $em_analise; ?>"><i class="fas fa-table"></i> Processar</a>
-                <?php } ?>
+                <a href="<?= base_url('ponto/art61/solicitacao') ?>" class="btn btn-primary btn-xxs mb-0"><i class="far fa-arrow-alt-circle-left"></i> voltar</a>
+              </div>
+            </div>
+            <h4 class="col-4 mb-1 mt-1 text-center"><?= $_titulo; ?></h4>
+            <div class="col-4 text-right">
+              <div class="button-items">
                 <a href="<?= base_url('ponto/art61/exportar_req/' . $id_requisicao) ?>" class="btn btn-success btn-xxs mb-0"><i class="fas fa-file-excel"></i> Exportar Excel</a>
                 <?php if ($pode_editar) { ?>
                   <a href="<?= base_url('ponto/art61/importar_justificativas/' . $id_requisicao) ?>" class="btn btn-warning btn-xxs mb-0 <?= $em_analise; ?>"><i class="fas fa-file-excel"></i> Importar Excel</a>
                 <?php } ?>
-                <a href="<?= base_url('ponto/art61/solicitacao') ?>" class="btn btn-primary btn-xxs mb-0"><i class="far fa-arrow-alt-circle-left"></i> voltar</a>
               </div>
             </div>
           </div>
@@ -25,13 +26,11 @@
         <div class="card-header mt-0">
           <div class="row">
             <h6 class="col-1 text-right mb-1 mt-1">Solicitante:</h6>
-            <h5 class="col-4 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['nome_requisitor'] . ' (' . $resListaArt61[0]['chapa_requisitor'] . ')'; ?></h5>
-            <h6 class="col-1 text-right mb-1 mt-1">Data Requisição:</h6>
-            <h5 class="col-6 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['dt_req_br']; ?></h5>
+            <h5 class="col-11 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['nome_requisitor'] . ' (' . $resListaArt61[0]['chapa_requisitor'] . ')'; ?></h5>
           </div>
           <div class="row">
             <h6 class="col-1 text-right mb-1 mt-1">Período Ponto:</h6>
-            <h5 class="col-4 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['per_ponto_br']; ?>&nbsp;&nbsp;&nbsp;
+            <h5 class="col-11 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['per_ponto_br']; ?>&nbsp;&nbsp;&nbsp;
                       <?php
                           switch ($resListaArt61[0]['status']) {
                             case 1:
@@ -60,21 +59,33 @@
                           }
                           ?>
             </h5>
+            
+          </div>
+           <div class="row">
+            <h6 class="col-1 text-right mb-1 mt-1">Data Requisição:</h6>
+            <h5 class="col-4 mb-1 mt-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= $resListaArt61[0]['dt_req_br']; ?></h5>
             <div class="col-7 mb-1 mt-1 text-right">
               <?php if ($pode_editar) { ?>
-                <button style="margin-left: 20px;" id="btnJust" name="btnJust" class="btnpeq btn-sm btn-success" type="button" onclick="return Justificar()"><i class="fa fa-plus"></i> Justificar Selecionados</button>
+                <button style="margin-left: 12px;" id="btnProc" name="btnProc" class="btnpeq btn-sm btn-purple" type="button" onclick="return processar(<?= $id_requisicao; ?> )"><i class="fa fa-table"></i> Processar</button>
               <?php } ?>
               <?php if ($pode_editar) { ?>
-                <button style="margin-left: 20px;" id="btnRemover" name="btnRemover" class="btnpeq btn-sm btn-danger" type="button" onclick="return apagarColaborador(-1)"><i class="fa fa-trash"></i> Remover Selecionados</button>
+                <button style="margin-left: 12px;" id="btnJust" name="btnJust" class="btnpeq btn-sm btn-success" type="button" onclick="return Justificar()"><i class="fa fa-plus"></i> Justificar Selecionados</button>
               <?php } ?>
               <?php if ($pode_editar) { ?>
-                <button style="margin-left: 20px;" id="btnAnexos" name="btnAnexos" class="btnpeq btn-sm btn-info" type="button" onclick="return verAnexos(-1, 1)"><i class="fa fa-eye"></i> Anexos</button>
+                <button style="margin-left: 12px;" id="btnRemover" name="btnRemover" class="btnpeq btn-sm btn-danger" type="button" onclick="return apagarColaborador(-1)"><i class="fa fa-trash"></i> Remover Selecionados</button>
+              <?php } ?>
+              <?php if ($pode_editar) { ?>
+                <button style="margin-left: 12px;" id="btnAnexos" name="btnAnexos" class="btnpeq btn-sm btn-info" type="button" onclick="return verAnexos(-1, 1)"><i class="fa fa-eye"></i> Anexos</button>
               <?php } ?>
               <?php if ($rh and $pode_editar) { ?>
-                <button style="margin-left: 20px;" id="btnNovo" name="btnNovo" class="btnpeq btn-sm btn-primary" type="button" onclick="return novoColaborador()"><i class="fa fa-plus"></i> Novo Colaborador</button>
+                <button style="margin-left: 12px;" id="btnNovo" name="btnNovo" class="btnpeq btn-sm btn-warning" type="button" onclick="return novoColaborador()"><i class="fa fa-plus"></i> Novo Colaborador</button>
+              <?php } ?>
+              <?php if ($pode_editar) { ?>
+                <button style="margin-left: 12px;" id="btnSalvar" name="btnSalvar" class="btnpeq btn-sm btn-primary" type="button" onclick="return salvar(<?= $id_requisicao; ?> )"><i class="fa fa-check"></i> Salvar</button>
               <?php } ?>
             </div>
           </div>
+          
         </div>
 
         <div class="card-body">
@@ -760,6 +771,45 @@
 
   }
 
+  const salvar = (id) => {
+    let dados = {
+      "id": id
+    };
+    console.log(dados);
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Ao salvar, eventos sem justificativas serão removidos da requisição. <b>Deseja salvar agora</b>?',
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: `Sim, Salvar`,
+      denyButtonText: `Cancelar`,
+      showCancelButton: false,
+      showCloseButton: false,
+      allowOutsideClick: false,
+      width: 600,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        openLoading();
+        $.ajax({
+          url: "<?= base_url('ponto/art61/action/salvar_req'); ?>",
+          type: 'POST',
+          data: dados,
+          success: function(result) {
+            openLoading(true);
+            var response = JSON.parse(result);
+            if (response.tipo != 'success') {
+              exibeAlerta(response.tipo, response.msg);
+            } else {
+              exibeAlerta(response.tipo, response.msg, 2, '<?= base_url('ponto/art61/solicitacao'); ?>');
+            }
+          },
+        });
+      }
+    });
+
+  }
+
   function removerHTML(variavelComHTML) {
     const elemento = document.createElement('div');
     elemento.innerHTML = variavelComHTML;
@@ -786,7 +836,15 @@
       "aaSorting": [
         [0, "desc"]
       ],
+      "columnDefs": [
+        {
+          targets: 1,     // índice da coluna que você quer esconder (começa em 0)
+          visible: false, // oculta a coluna
+          searchable: false // opcional: evita buscas por esse campo
+        }
+      ],
       "fixedHeader": true, // Ativa o fixedHeader
+      "dom": '<"top d-flex flex-column align-items-start"l i>rt<"bottom d-flex justify-content-between"p><"clear">',
       "language": {
         "decimal": ",",
         "thousands": ".",
@@ -817,7 +875,7 @@
         api.columns().every(function() {
           var column = this;
 
-          if (column[0][0] == 0 || column[0][0] >= (p_linha - 1)) return false;
+          if (column[0][0] == 0 || column[0][0] == 1 || column[0][0] >= (p_linha - 1)) return false;
 
           var select = $('<select class="form-control form-control-sm filtro_table"><option value="">Todos</option></select>')
             .appendTo($(column.header()))
