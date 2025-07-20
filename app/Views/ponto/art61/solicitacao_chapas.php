@@ -127,7 +127,9 @@
                       </td>
                       <td class="n-mobile-cell"><?= $registro['id']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['codfilial']; ?></td>
-                      <td class="n-mobile-cell"><?= $registro['dt_ponto_br'] ?></td>
+                      <td class="n-mobile-cell">
+                        <a href="/ponto/espelho/editar/<?= $registro['chapa_colab']; ?>/<?= $registro['dt_ponto']; ?>" target="_blank" title="Ver Espelho do Ponto"><?= $registro['dt_ponto_br'] ?></a>
+                      </td>
                       <td class="n-mobile-cell"><?= $registro['chapa_colab'] . ' - ' . $registro['nome_colab']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['desc_funcao'] . ' - ' . $registro['codfuncao']; ?></td>
                       <td class="n-mobile-cell"><?= $registro['desc_ccusto'] . ' - ' . $registro['cod_ccusto']; ?></td>
