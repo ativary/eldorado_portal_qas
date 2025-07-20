@@ -691,10 +691,9 @@ function menuConfigPonto($opcaoConfig='') {
         [ "btnJust", "Justificativas", "ponto/justificativa" ],
         [ "btnArt61", "Artigo.61", "ponto/art61/config" ],
         [ "btnOcorrencia", "Ocorrências", "ponto/ocorrencia/config" ],
-        [ "btnCargos", "Cargos", "ponto/ocorrencia/motorista" ],
-        [ "btnTipos", "Tipos", "ponto/ocorrencia/config_ocorrencias" ]            ,
         [ "btnEspelho", "Espelho", "ponto/espelho/configuracao" ],
-        [ "btnEscala", "Escala", "ponto/escala/configuracao" ]
+        [ "btnEscala", "Escala", "ponto/escala/configuracao" ],
+        [ "btnWorkflow", "Workflow", "ponto/ocorrencia/configworkflow" ]
     ];
 
     $style = '
