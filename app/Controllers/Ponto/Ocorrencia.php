@@ -162,23 +162,49 @@ Class Ocorrencia extends BaseController {
 
     }
 	
-	public function config(){
-		 
-		 
+	public function config($tab = '1')
+  {		 
 		parent::VerificaPerfil('GLOBAL_RH');
     parent::VerificaPerfil('PONTO_CONFIG');
+
     $dados['_titulo'] = "Configuração Ocorrência de Ponto";
+
+    // config.horario
 		$dados['resHorario'] = $this->mOcorrencia->ListarOcorrenciaHorarios();
+		$dados['resHorarioConfig'] = $this->mOcorrencia->ListarOcorrenciaHorariosPortal();
+    
+    //cargos
+    $dados['resFuncao'] = model('PortalModel')->ListarFuncao();
+    $dados['resMotorista'] = $this->mOcorrencia->ListaConfiguracaoMotorita();
+
+    //tipos
+    $dados['resTipos'] = $this->mOcorrencia->ListarOcorrenciaTipoPortal();
+
+		$dados['tab'] = $tab;
+
+		return parent::ViewPortal('ponto/ocorrencia/configuracao', $dados);
+
+  }
+
+  public function configWorkflow($tab = '1')
+  {		 
+		parent::VerificaPerfil('GLOBAL_RH');
+    parent::VerificaPerfil('PONTO_CONFIG');
+
+    $dados['_titulo'] = "Configuração Ocorrência de Ponto";
+
+    // workflow
 		$dados['resWorkflow'] = $this->mOcorrencia->ListaConfiguracaoWorkflow();
 		$dados['resWorkflowRH'] = $this->mOcorrencia->ListaConfiguracaoWorkflowRH();
 		$dados['resWorkflowFaltas'] = $this->mOcorrencia->ListaConfigWorkflowFaltas();
 		
-		$dados['resHorarioConfig'] = $this->mOcorrencia->ListarOcorrenciaHorariosPortal();
-		return parent::ViewPortal('ponto/ocorrencia/configuracao', $dados);
+    $dados['tab'] = $tab;
 
-    }
+		return parent::ViewPortal('ponto/ocorrencia/config_workflow', $dados);
 
-    public function motorista(){
+  }
+
+  public function motorista(){
         
         parent::VerificaPerfil('GLOBAL_RH');
         parent::VerificaPerfil('PONTO_CONFIG');
