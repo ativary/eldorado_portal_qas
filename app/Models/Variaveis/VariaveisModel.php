@@ -909,7 +909,7 @@ class VariaveisModel extends Model {
             $dia_limite    = $param4->dia_limite_compl4;
             $dia_atual     = date('d');
             $complementar  = true;
-            if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param4->periodo_pcd_fim) $complementar = false;
+            //if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param4->periodo_pcd_fim) $complementar = false;
 
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
 
@@ -974,7 +974,7 @@ class VariaveisModel extends Model {
             $dia_limite    = $param6->dia_limite_compl6;
             $dia_atual     = date('d');
             $complementar  = true;
-            if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param6->periodo_moradia_fim) $complementar = false;
+            //if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param6->periodo_moradia_fim) $complementar = false;
 
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
@@ -1045,7 +1045,7 @@ class VariaveisModel extends Model {
             $dia_limite    = $param2->dia_limite_compl2;
             $dia_atual     = date('d');
             $complementar  = true;
-            if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param2->periodo_creche_fim) $complementar = false;
+            //if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param2->periodo_creche_fim) $complementar = false;
 
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
@@ -1351,7 +1351,7 @@ class VariaveisModel extends Model {
             $dia_limite    = $param3->dia_limite_compl3;
             $dia_atual     = date('d');
             $complementar  = true;
-            if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param3->periodo_sobreaviso_fim) $complementar = false;
+            //if($dia_limite and $dia_atual <= $dia_limite and $dia_atual > $param3->periodo_sobreaviso_fim) $complementar = false;
             
             $dadosFunc     = self::dadosFunc($dadosReq[0]->chapa);
             if($dadosFunc[0]['CODSITUACAO'] != 'D' ){
@@ -2461,7 +2461,7 @@ class VariaveisModel extends Model {
             $ft_chapa =" AND chapa ='".$chapa."'";
         }
 
-        if($tipo == 3) {
+        /*if($tipo == 3) {
           if (!$request['data_inicio'] || !$request['data_fim']) {
             throw new \Exception("Data de início ou fim não informada.");
           }
@@ -2489,10 +2489,10 @@ class VariaveisModel extends Model {
                 ) <= '".$data_fim."'
             AND periodo = '".date('Y-m')."' ".$ft_chapa;
        
-        } else {
+        } else {*/
           $query = " 
             SELECT * FROM zcrmportal_variaveis_req WHERE status IN('1','2','3','4','7') AND tipo = '".$tipo."' AND coligada = '".$this->coligada."' AND tiporeq = '".$tipoReq."' AND periodo = '".date('Y-m')."' ".$ft_chapa;
-        }
+        //}
 
         //echo '<pre> '.$query;
         //die();

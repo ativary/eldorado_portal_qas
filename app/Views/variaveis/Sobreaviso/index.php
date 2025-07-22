@@ -183,7 +183,13 @@
                                     
                                     ?>
                                     <tr class="text-center">
-                                        <td class="n-mobile-cell" width="20" ><input <?= ($dados->status != '1') ? 'disabled' : ''; ?> type="checkbox" name="idbatida[]" onchange="toggleButtonVisibility()"   value="<?= $dados->id ?>"> </td>
+                                        <td class="n-mobile-cell" width="50" ><input <?= ($dados->status != '1') ? 'disabled' : ''; ?> type="checkbox" name="idbatida[]" onchange="toggleButtonVisibility()"   value="<?= $dados->id ?>"> 
+                                          <button class="btn btn-sm btn-soft-primary btn-toggle" 
+                                              type="button"
+                                              data-horarios='<?php echo isset($valores->horarios) ? $valores->horarios : "{}" ; ?>'>
+                                              +
+                                          </button>
+                                        </td>
                                         <td class="n-mobile-cell" <?= $fora_prazo ?>><?= $dados->id ?></td>
                                         <?= '  <td class="n-mobile-cell"  width="150"><span style="background-color: ' . $corFundo . '; color: ' . $corTexto . '; padding: 5px 10px; border-radius: 5px; font-weight: bold;">' . $descricao . '</span></td>'; ?>
                                         <td class="n-mobile-cell" ><?= $valores->filial?></td>
@@ -490,8 +496,72 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
         "aaSorting": [[1, "desc"]],
         });
     });
+
+    // Manipulador de clique para o botão "+"
+    $(document).on('click', '.btn-toggle', function() {
+        // Obtém a linha atual
+        var $currentRow = $(this).closest('tr');
+
+        // Verifica se a linha de detalhe já existe
+        if ($currentRow.next('.detail-row').length > 0) {
+            // Se a linha de detalhe já existe, simplesmente a remove (fechar)
+            $currentRow.next('.detail-row').remove();
+        } else {
+            // Obtém os dados de horarios do atributo data
+            var horariosData = $(this).attr('data-horarios');
+
+            if (horariosData) {
+                try {
+                    // Converte a string JSON para um array de objetos
+                    var horarios = JSON.parse(horariosData);
+
+                    if (Array.isArray(horarios)) {
+                        // Cria o HTML da linha de detalhe
+                        var detailRow = '<tr class="detail-row"><td colspan="12">';
+                        detailRow += '<table class="table table-sm table-bordered">';
+                        detailRow += '<thead><tr><th>Data Inicial</th><th>Hora Inicial</th><th>Data Final</th><th>Hora Final</th><th>Total de Horas</th></tr></thead>';
+                        detailRow += '<tbody>';
+
+                        // Itera sobre os dados dos horarios e cria as linhas da tabela de detalhes
+                        horarios.forEach(function(horario) {
+                            detailRow += '<tr>';
+                            detailRow += '<td>' + horario.data_inicio + '</td>';
+                            detailRow += '<td>' + horario.hora_inicio + '</td>';
+                            detailRow += '<td>' + horario.data_fim + '</td>';
+                            detailRow += '<td>' + horario.hora_fim + '</td>';
+                            detailRow += '<td>' + horario.tot_horas + '</td>';
+                            detailRow += '</tr>';
+                        });
+
+                        detailRow += '</tbody></table></td></tr>';
+
+                        // Adiciona a linha de detalhe após a linha atual
+                        $currentRow.after(detailRow);
+                    } else {
+                        console.error("Os dados de horarios não são um array.");
+                    }
+                } catch (e) {
+                    console.error("Erro ao fazer parse dos dados de horarios:", e);
+                }
+            }
+        }
+    });
+
     $('#select-all').on('click', function() {
         $('input[name="idbatida[]"]:not(:disabled)').prop('checked', this.checked);
+    });
+
+    $('.btn-toggle').on('click', function() {
+        var $button = $(this);
+        var $detailRow = $button.closest('tr').next('.detail-row');
+
+        if ($detailRow.is(':visible')) {
+            $detailRow.hide();
+            $button.text('+');
+        } else {
+            $detailRow.show();
+            $button.text('−'); // Muda o texto do botão para um menos (−) ao expandir
+        }
     });
 
     const salvaAnexo = () => {
