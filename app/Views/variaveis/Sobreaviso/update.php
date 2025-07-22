@@ -147,7 +147,8 @@
                                                 <th>Ação</th>
                                             </tr>
                                         </thead>
-                                        <?php  $horarios = json_decode($valores->horarios); 
+                                        <tbody>
+                                        <?php  $horarios = json_decode(isset($valores->horarios) ? $valores->horarios : '[]');
                                         foreach ($horarios as $key2 => $dados2) : ?>
                                             <tr>
                                                 <td class="n-mobile-cell"><?= dtBr($dados2->data_inicio) ?></td>
@@ -211,6 +212,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     $(document).ready(function(){
         desabilitaInputs();
         verificaData();
+        selecionaFuncionario('<?= $req[0]->chapa ?>');
     });
     
     function verificaValor(input) {
@@ -364,7 +366,6 @@ const salvaDados = () => {
         }
     }
     
-    if($("#valor").val() == ""){ exibeAlerta("error", "<b>Quantidade de horas obrigatória </b> ."); return false; }
     if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
     if($("#tipoReq").val() == ""){ exibeAlerta("error", "<b>Tipo obrigatório </b> ."); return false; }
     if($("#justificativa").val().trim() == ""){ exibeAlerta("error", "<b>Justificativa</b> obrigatório."); return false; }
@@ -401,6 +402,8 @@ const salvaDados = () => {
 
     formData.append("horarios", JSON.stringify(horas));
     formData.append("valor", total/60);
+
+    if(total == 0){ exibeAlerta("error", "<b>É necessário informar pelo menos um intervalo de horários para atualizar</b> ."); return false; }
 
     if (parseInt(regra.limite_sobreaviso*60) < parseInt(total)) {
       exibeAlerta("error", "<b>Total de horas ("+minutosParaHora(total)+"h)</b> maior que o permitido ("+regra.limite_sobreaviso+":00h)."); return false;
@@ -445,9 +448,7 @@ const selecionaFuncionario = (chapa) => {
            
 
             var response = JSON.parse(result);
-            salario = response[0].SALARIO;
-
-
+            
             $("#filial").val(response[0].CODFILIAL)
             $("#funcao").val(response[0].CODFUNCAO +':'+response[0].NOMEFUNCAO)
             openLoading(true);
