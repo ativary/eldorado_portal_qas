@@ -195,7 +195,7 @@
                                         <td class="n-mobile-cell" ><?= $valores->filial?></td>
                                      
                                         <td class="n-mobile-cell"><?= $dados->tiporeq == '1' ? 'Mensal' : 'Complementar' ?></td>
-                                        <td class="n-mobile-cell"><?= $valores->valor ?></td>
+                                        <td class="n-mobile-cell"><?= gmdate('H:i', floor($valores->valor * 3600));  ?></td>
                                                 
                                         <td class="n-mobile-cell"><?= $valores->Nome ?></td>
                                         <td class="n-mobile-cell"><?= $valores->funcao ?></td>
@@ -509,6 +509,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
         } else {
             // Obtém os dados de horarios do atributo data
             var horariosData = $(this).attr('data-horarios');
+            var semHorarios = false;
 
             if (horariosData) {
                 try {
@@ -525,9 +526,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
                         // Itera sobre os dados dos horarios e cria as linhas da tabela de detalhes
                         horarios.forEach(function(horario) {
                             detailRow += '<tr>';
-                            detailRow += '<td>' + horario.data_inicio + '</td>';
+                            detailRow += '<td>' + formatarDataParaBR(horario.data_inicio) + '</td>';
                             detailRow += '<td>' + horario.hora_inicio + '</td>';
-                            detailRow += '<td>' + horario.data_fim + '</td>';
+                            detailRow += '<td>' + formatarDataParaBR(horario.data_fim) + '</td>';
                             detailRow += '<td>' + horario.hora_fim + '</td>';
                             detailRow += '<td>' + horario.tot_horas + '</td>';
                             detailRow += '</tr>';
@@ -539,10 +540,20 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
                         $currentRow.after(detailRow);
                     } else {
                         console.error("Os dados de horarios não são um array.");
+                        semHorarios = true;
                     }
                 } catch (e) {
                     console.error("Erro ao fazer parse dos dados de horarios:", e);
+                    semHorarios = true;
                 }
+            }
+            
+            if (semHorarios) {
+              var detailRow = '<tr class="detail-row"><td colspan="12">';
+              detailRow += '<table class="table table-sm table-bordered">';
+              detailRow += '<thead><tr><th>Sobreaviso sem horários registrados</th></tr></thead>';
+              detailRow += '</table>';
+              $currentRow.after(detailRow);
             }
         }
     });
@@ -563,6 +574,11 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             $button.text('−'); // Muda o texto do botão para um menos (−) ao expandir
         }
     });
+
+    function formatarDataParaBR(data) {
+      let [ano, mes, dia] = data.split("-");
+      return `${dia}/${mes}/${ano}`;
+    }
 
     const salvaAnexo = () => {
         // Obtenha os arquivos selecionados
