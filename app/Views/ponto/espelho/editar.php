@@ -406,12 +406,19 @@ table th {
                                         if(isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][8]['desc_abono'])) {
                                           $desc_abono = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][8]['desc_abono'];
                                         }
-                                        if(isset($DiasEspelho['USABANCOHORAS']) and $DiasEspelho['USABANCOHORAS'] = 1 and 
-                                            ($DiasEspelho['FALTA'] > 0 or $DiasEspelho['ATRASO'] > 0) ) {
-                                          $desc_abono = 'BANCO DE HORAS';
-                                        }
+
                                         if(isset($DiasEspelho['ABONOS'])) {
                                           $desc_abono = $DiasEspelho['ABONOS'];
+                                        }
+                                        if(strlen(trim($DiasEspelho['justificativa_extra'])) > 0){
+                                            $dados_justificados = explode(' - ', $DiasEspelho['justificativa_extra']);
+                                            $desc_abono = $dados_justificados[1];
+                                        }
+
+                                        $banco_horas_menu = false;
+                                        if(isset($DiasEspelho['USABANCOHORAS']) and $DiasEspelho['USABANCOHORAS'] = 1 and 
+                                            ($DiasEspelho['FALTA'] > 0 or $DiasEspelho['ATRASO'] > 0) and $desc_abono == '') {
+                                            $banco_horas_menu = true;
                                         }
                                         
                                         // ent 1
@@ -1043,6 +1050,13 @@ table th {
                                                                           <?php } else { ?>
                                                                             <button type="button" class="dropdown-item disabled" title="Alterar registro" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar abono</button>
                                                                           <?php } ?>
+                                                                          <?php if ($banco_horas_menu) { 
+                                                                            if((int)$DiasEspelho['ATRASO'] > 0) { ?>
+                                                                              <button onclick="confirmaBH('<?= dtEn($DiasEspelho['DATA'], true)?>', '<?= $chapa ?>', 'A', '<?= $DiasEspelho['ATRASO']?>')" type="button" class="dropdown-item" title="Confirma Banco de horas"><i class="mdi mdi-calendar-clock"></i> Confirma Banco de Horas</button>
+                                                                            <?php } else { ?> 
+                                                                              <button onclick="confirmaBH('<?= dtEn($DiasEspelho['DATA'], true)?>', '<?= $chapa ?>', 'F', '<?= $DiasEspelho['FALTA']?>')" type="button" class="dropdown-item" title="Confirma Banco de horas"><i class="mdi mdi-calendar-clock"></i> Confirma Banco de Horas</button>
+                                                                            <?php } ?> 
+                                                                          <?php } ?> 
                                                                         <?php endif; ?>
 
                                                                         <?php if((int)$DiasEspelho['EXTRAAUTORIZADO'] > 0): ?><button onclick="abrirJustificativaExtra('<?= dtEn($DiasEspelho['DATA'], true); ?>', '<?= dtBr($DiasEspelho['DATA']); ?>', '<?= diaSemana($DiasEspelho['DATA']); ?>', '<?= $codigo_justificativa_extra; ?>', '<?= urlencode(json_encode($array_batidas)); ?>', '<?= $DiasEspelho['ESCALA']; ?>', '<?= ($periodo_bloqueado) ? 1 : 0; ?>')" type="button" class="dropdown-item" title="Justificativa de Extra"><i class="mdi mdi-comment-check-outline"></i> Justificativa de Extra</button><?php endif; ?>
@@ -3387,6 +3401,57 @@ $(document).ready(function() {
         sticky = header.offset().top;
     });
 });
+
+const confirmaBH = ( data, chapa, tipo, minutos ) => {
+	var fd = new FormData();
+	var dados = [];
+	var tem_anexo = 0;
+	dados.push({
+		'chapa'		: chapa,
+		'data'		: data,
+		'atitude'	: 1,
+		'tipo'		: tipo,
+		'horas'		: m2h(minutos),
+		'tem_anexo'	: tem_anexo
+	});
+
+	fd.append('dados[]', JSON.stringify(dados));
+  //console.log(JSON.stringify(dados));
+  //return false;
+
+	openLoading();
+
+	$.ajax({
+		url: "<?= base_url('ponto/critica/action/altera_atitude') ?>",
+		type: 'POST',
+		processData: false,
+		contentType: false,
+		data: fd,
+		success: function(result) {
+
+			openLoading(true);
+
+			try {
+				var response = JSON.parse(result);
+
+				if (response.tipo != 'success') {
+					exibeAlerta(response.tipo, response.msg);
+				} else {
+					exibeAlerta(response.tipo, response.msg, 3);
+					var myTimeout = setTimeout(function() {
+						consultarEspelho();
+						clearTimeout(myTimeout);
+					}, 2000);
+				}
+
+			} catch (e) {
+				exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+			}
+
+
+		},
+	});
+}
 
 function getNextAndPreviousDates(dateString) {
     // Parse the input date string

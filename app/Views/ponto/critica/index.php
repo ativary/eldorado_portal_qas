@@ -1103,19 +1103,23 @@ $(document).ready(function(){
 									$abono_pendente_rh = $resData[$i]['ABONO_PENDENTE_RH'];
 
                   $motivo_justificativa = 'Não justificado';
+                  $banco_horas_menu = false;
 
                   if($resData[$i]['USABANCOHORAS'] == 1 and ($resData[$i]['ATRASO_CASE'] or $resData[$i]['FALTA_CASE'])) {
-                    $motivo_justificativa = 'Banco de Horas';
+                    //$motivo_justificativa = 'Banco de Horas';
+                    $banco_horas_menu = true;
                   }
 
                   if(strlen(trim($resData[$i]['JUSTIFICATIVA'])) > 0) {
 									  $motivo_justificativa = $resData[$i]['JUSTIFICATIVA'];
+                    $banco_horas_menu = false;
                   }
 
 									$status_atitude = '';
 									if(strlen(trim($resData[$i]['JUSTIFICATIVA_ATITUDE'])) > 0){
 										$status_atitude = substr($resData[$i]['JUSTIFICATIVA_ATITUDE'],-1);
 										$motivo_justificativa = substr($resData[$i]['JUSTIFICATIVA_ATITUDE'],0, -1);
+                    $banco_horas_menu = false;
 									}     
 
 									$html = '<tr class="tbadmlistalin">';
@@ -1235,6 +1239,10 @@ $(document).ready(function(){
 
                               if ($motivo_justificativa == 'Não justificado') {
 															  $html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_atraso)).'\', 5, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \'0:00\', \''.m2h($resData[$i]['ATRASO_CASE']).'\')" type="button" class="dropdown-item" title="Solicitar Abono Atraso"><i class="mdi mdi-av-timer"></i> Solicitar Abono Atraso</button>';
+                                if ($banco_horas_menu) {
+                                  $banco_horas_menu = false;
+                                  $html .= '<button onclick="confirmaBH(\''.dtEn($resData[$i]['DATA'], true).'\', \''.$resData[$i]['CHAPA'].'\', \'A\', \''.$resData[$i]['ATRASO_CASE'].'\')" type="button" class="dropdown-item" title="Confirma Banco de horas"><i class="mdi mdi-calendar-clock"></i> Confirma Banco de Horas</button>';
+                                }
                               } else {
                                 $html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Atraso" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Atraso</button>';
                               }
@@ -1246,6 +1254,10 @@ $(document).ready(function(){
 														if ($ck_Faltas && ($resData[$i]['FALTA_CASE'] && $resData[$i]['BATIDAS_PORTAL'] == 0)){
                               if ($motivo_justificativa == 'Não justificado') {
                                 $html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_falta)).'\', 6, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.m2h($resData[$i]['FALTA_CASE']).'\', \'0:00\')" type="button" class="dropdown-item" title="Solicitar Abono Falta"><i class="mdi mdi-timer-off"></i> Solicitar Abono Falta</button>';
+                                if ($banco_horas_menu) {
+                                  $banco_horas_menu = false;
+                                  $html .= '<button onclick="confirmaBH(\''.dtEn($resData[$i]['DATA'], true).'\', \''.$resData[$i]['CHAPA'].'\', \'F\', \''.$resData[$i]['FALTA_CASE'].'\')" type="button" class="dropdown-item" title="Confirma Banco de horas"><i class="mdi mdi-calendar-clock"></i> Confirma Banco de Horas</button>';
+                                }
                               } else {
                                 $html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Falta" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Falta</button>';
                               }
@@ -3777,6 +3789,58 @@ const abrirAlteraAtitude = (data, data_br, diasemana, chapa, escala, batidas, ti
 	});
 
 }
+
+const confirmaBH = ( data, chapa, tipo, minutos ) => {
+	var fd = new FormData();
+	var dados = [];
+	var tem_anexo = 0;
+	dados.push({
+		'chapa'		: chapa,
+		'data'		: data,
+		'atitude'	: 1,
+		'tipo'		: tipo,
+		'horas'		: m2h(minutos),
+		'tem_anexo'	: tem_anexo
+	});
+
+	fd.append('dados[]', JSON.stringify(dados));
+  //console.log(JSON.stringify(dados));
+  //return false;
+
+	openLoading();
+
+	$.ajax({
+		url: "<?= base_url('ponto/critica/action/altera_atitude') ?>",
+		type: 'POST',
+		processData: false,
+		contentType: false,
+		data: fd,
+		success: function(result) {
+
+			openLoading(true);
+
+			try {
+				var response = JSON.parse(result);
+
+				if (response.tipo != 'success') {
+					exibeAlerta(response.tipo, response.msg);
+				} else {
+					exibeAlerta(response.tipo, response.msg, 3);
+					var myTimeout = setTimeout(function() {
+						Filtro();
+						clearTimeout(myTimeout);
+					}, 2000);
+				}
+
+			} catch (e) {
+				exibeAlerta('error', '<b>Erro interno:</b> ' + e);
+			}
+
+
+		},
+	});
+}
+
 const salvarAtitude = () => {
 
 	var fd = new FormData();
