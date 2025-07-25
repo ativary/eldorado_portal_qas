@@ -150,6 +150,9 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div class="col-sm-12">
+                                    <strong><h5 style="color:black; text-align:center;" name="tot_geral" id="tot_geral"></h5></strong>
+                                </div>
                             </div>
 
                         </div>
@@ -277,6 +280,7 @@ document.getElementById('btnadd').addEventListener('click', function(e) {
         cell5.innerHTML = $("#valor_h").val();                            // total de horas
         cell6.innerHTML = '<button class="btn btn-danger btn-sm" onclick="removeRow(this)">Remover</button>';
         sortTable();
+        calcTotal();
     } else {
       exibeAlerta("error", "<b>Preencha todos os dados para adicionar.")
     }
@@ -292,6 +296,7 @@ function removeRow(btn) {
     if (tableBody.rows.length === 0) {
         document.getElementById('horasTableContainer').style.display = "none";
     }
+    calcTotal();
 }
 
 // função para ordenar a table
@@ -343,6 +348,25 @@ function minutosParaHora(minutosTotais) {
   const mm = String(minutos).padStart(2, '0');
 
   return `${hh}:${mm}`;
+}
+
+function calcTotal() {
+  // Verifica se o horas já foi adicionado
+    var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
+    let total = 0;
+    
+    for (var i = 0; i < tableBody.rows.length; i++) {
+        var row = tableBody.rows[i];
+        var tot_minutos = horasParaMinutos(row.cells[4].innerText);
+        total = total + tot_minutos;
+    }
+
+    if(total == 0) {
+      document.getElementById('tot_geral').textContent = '';
+    } else {
+      document.getElementById('tot_geral').textContent = `Total: ${convertDecimalHoursToHHMM((total/60).toFixed(2))} horas`;
+    }
+    
 }
 
 function verificaData() {

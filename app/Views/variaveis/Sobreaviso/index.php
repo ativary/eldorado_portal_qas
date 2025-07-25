@@ -195,7 +195,7 @@
                                         <td class="n-mobile-cell" ><?= $valores->filial?></td>
                                      
                                         <td class="n-mobile-cell"><?= $dados->tiporeq == '1' ? 'Mensal' : 'Complementar' ?></td>
-                                        <td class="n-mobile-cell"><?= gmdate('H:i', floor($valores->valor * 3600));  ?></td>
+                                        <td class="n-mobile-cell"><?= sprintf('%d:%02d', $h = floor($valores->valor), round(($valores->valor - $h) * 60));  ?></td>
                                                 
                                         <td class="n-mobile-cell"><?= $valores->Nome ?></td>
                                         <td class="n-mobile-cell"><?= $valores->funcao ?></td>
@@ -819,7 +819,13 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
         });
         
     }
-    
+
+    function formatDecimalHours(decimal) {
+        const hours = Math.floor(decimal);
+        const minutes = Math.round((decimal - hours) * 60);
+        const paddedMinutes = String(minutes).padStart(2, '0');
+        return `${hours}:${paddedMinutes}`;
+    }
     
     const historicoAprovacao = (id) => {
 
