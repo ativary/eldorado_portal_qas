@@ -44,10 +44,13 @@
                                     <label for="tipoPer" class="col-sm-2 col-form-label text-right text-left-sm"><span class="text-danger">*</span>Período de Ponto:</label>
                                     <div class="col-sm-4">
                                         <select  class="select2 custom-select form-control form-control-sm" name="tipoPer" id="tipoPer">
-                                            <option value=""> ... </option>
-                                            <option value="1" <?= (isset($valores->tipoPer) and $valores->tipoPer == '1') ? " selected " : ""; ?>> Atual &nbsp;&nbsp;&nbsp; (<?= DateTime::createFromFormat('Y-m-d', $per_ini_atual)->format('d/m/Y'); ?> a <?= DateTime::createFromFormat('Y-m-d', $per_fim_atual)->format('d/m/Y'); ?>)</option>
-                                            <option value="2" <?= (isset($valores->tipoPer) and $valores->tipoPer == '2') ? " selected " : ""; ?>> Futuro &nbsp; (<?= DateTime::createFromFormat('Y-m-d', $per_ini_futuro)->format('d/m/Y'); ?> a <?= DateTime::createFromFormat('Y-m-d', $per_fim_futuro)->format('d/m/Y'); ?>)</option>
-                                          
+                                            <?php if($per_ini_futuro=='') {?>
+                                              <option value="1" <?= (isset($valores->tipoPer) and $valores->tipoPer == '1') ? " selected " : ""; ?>><?= DateTime::createFromFormat('Y-m-d', $per_ini_atual)->format('d/m/Y'); ?> a <?= DateTime::createFromFormat('Y-m-d', $per_fim_atual)->format('d/m/Y'); ?></option>
+                                            <?php } else {?>
+                                              <option value=""> ... </option>
+                                              <option value="1" <?= (isset($valores->tipoPer) and $valores->tipoPer == '1') ? " selected " : ""; ?>> Atual &nbsp;&nbsp;&nbsp; (<?= DateTime::createFromFormat('Y-m-d', $per_ini_atual)->format('d/m/Y'); ?> a <?= DateTime::createFromFormat('Y-m-d', $per_fim_atual)->format('d/m/Y'); ?>)</option>
+                                              <option value="2" <?= (isset($valores->tipoPer) and $valores->tipoPer == '2') ? " selected " : ""; ?>> Futuro &nbsp; (<?= DateTime::createFromFormat('Y-m-d', $per_ini_futuro)->format('d/m/Y'); ?> a <?= DateTime::createFromFormat('Y-m-d', $per_fim_futuro)->format('d/m/Y'); ?>)</option>
+                                            <?php }?>
                                         </select>
                                       
                                     </div>
@@ -92,6 +95,11 @@
                             </div>
 
                             <hr>
+                              <button onclick="$('.modal_planhoras').modal('show');" class="btn btn-warning btn-xxs mb-0"><i class="fas fa-file-excel"></i> Importar </button>
+
+                              <button onclick="exportaTable();" class="btn btn-success btn-xxs mb-0"><i class="fas fa-file-excel"></i> Exportar </button>
+                            <hr>
+
                             <div class="form-group row mb-2">
                                 <label for="datas" class="col-sm-1 col-form-label text-right text-left-sm"> <span class="text-danger">*</span> Data Inicial:</label>
                                 <div class="input-group col-sm-3 ">
@@ -131,7 +139,7 @@
                             <input class="form-control datepicker m_data" hidden type="text" value="" name="funcao" id="funcao" required>
                             
                             <hr>
-
+                            
                             </div>
                             <!-- Tabela de Horas -->
                             <div class="form-group row mb-2" id="horasTableContainer" >
@@ -183,8 +191,33 @@
         
     </div>
 </div><!-- container -->
+
+<div class="modal modal_planhoras" tabindex="-1" role="dialog" aria-labelledby="modal_planhoras" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 50%; width: 50%;">
+        <div class="modal-content modal-content-full">
+            <div class="modal-header bg-dark">
+                <h5 class="modal-title mt-0 text-white"><i class="mdi mdi-file-document-box-outline"></i> Planilha de Horas</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row mb-2">
+                    <label for="planilha" class="col-sm-2 col-form-label text-right text-left-sm">Planilha:</label>
+                    <div class="col-sm-10">
+                        <input class="form-control filepond" type="file" name="planilha" id="planilha" required>
+                        <input class="form-control" hidden type="text" value="" name="id" id="id" required>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <button class="btn btn-success bteldorado_1" id="btnimportar"><i class="fas fa-check"></i> Importar</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput/js/fileinput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 .tab-pane {
@@ -210,8 +243,19 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 }
 </style>
 <script>
-     var fora_periodo=0 ;
-     var salario = 0;
+
+    // variáveis par importar dados
+    var dadosImportados = [];
+    var errosImport = '';
+    var linhaImport = 0;
+    var loopImport = false;
+    var erro = '';
+    var alterou = false;
+    const colunasEsperadas = ['DATA_INICIAL', 'HORA_INICIAL', 'DATA_FINAL', 'HORA_FINAL', 'TOTAL_DE_HORAS'];
+
+    var fora_periodo=0 ;
+    var salario = 0;
+
     $(document).ready(function(){
         desabilitaInputs();
         verificaData();
@@ -248,12 +292,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
             return false;
         }else
        {
-
-        
             const inputs = document.querySelectorAll('input, textarea, select, button');
             
             // Itera sobre cada elemento e define o atributo disabled para true
-
 
             inputs.forEach(function(input) {
                 input.disabled = true;
@@ -341,7 +382,34 @@ function verificaData() {
         
     }
 }
-const salvaDados = () => {
+
+// Sua função sincrona de validação
+function antesDeExportar() {
+    let tudoCerto = true;
+    if (alterou) {
+      tudoCerto = false;
+      Swal.fire({
+          icon: 'question',
+          title: 'A tabela de horários foi alterada. Para exportar é necessário salvar as alterações. Deseja salvar agora?',
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: `Sim, salvar`,
+          denyButtonText: `Cancelar`,
+          showCancelButton: false,
+          showCloseButton: false,
+          allowOutsideClick: false,
+          width: 600,
+      }).then((result) => {
+          if (result.isConfirmed) {
+              salvaDados(true);
+          }
+      });
+    }
+    // Retorne true ou false conforme o necessário
+    return tudoCerto;
+}
+
+const salvaDados = (exportacao=false) => {
     
     let formData = new FormData();
     let resultado = 0;
@@ -370,9 +438,9 @@ const salvaDados = () => {
         }
     }
     
-    if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
-    if($("#tipoReq").val() == ""){ exibeAlerta("error", "<b>Tipo obrigatório </b> ."); return false; }
-    if($("#justificativa").val().trim() == ""){ exibeAlerta("error", "<b>Justificativa</b> obrigatório."); return false; }
+    if($("#funcionario").val() == ""){ exibeAlerta("error", "Funcionário obrigatório."); return false; }
+    if($("#tipoReq").val() == ""){ exibeAlerta("error", "Tipo obrigatório."); return false; }
+    if($("#justificativa").val().trim() == ""){ exibeAlerta("error", "Justificativa obrigatório."); return false; }
 
     let total = 0;
     let hasEmptyValue = false; // Flag para identificar valor vazio
@@ -405,12 +473,12 @@ const salvaDados = () => {
     }
 
     formData.append("horarios", JSON.stringify(horas));
-    formData.append("valor", total/60);
+    formData.append("valor", total);
 
-    if(total == 0){ exibeAlerta("error", "<b>É necessário informar pelo menos um intervalo de horários para atualizar</b> ."); return false; }
+    if(total == 0){ exibeAlerta("error", "É necessário informar pelo menos um intervalo de horários para atualizar."); return false; }
 
     if (parseInt(regra.limite_sobreaviso*60) < parseInt(total)) {
-      exibeAlerta("error", "<b>Total de horas ("+minutosParaHora(total)+"h)</b> maior que o permitido ("+regra.limite_sobreaviso+":00h)."); return false;
+      exibeAlerta("error", "Total de horas ("+minutosParaHora(total)+"h) maior que o permitido ("+regra.limite_sobreaviso+":00h)."); return false;
     }
 
     openLoading();
@@ -427,15 +495,65 @@ const salvaDados = () => {
             var response = JSON.parse(result);
 
             if(response.tipo != 'success'){
-                exibeAlerta(response.tipo, response.msg, 2);
+                exibeAlerta(response.tipo, response.msg, 3);
             }else{
-                exibeAlerta(response.tipo, response.msg, 3, '<?=($req[0]->status == '3' || $req[0]->status == '7'  ) ? base_url('variaveis/sincronizacao') : base_url('variaveis/sobreaviso');?> ');
+                if(exportacao) {
+                  exibeAlerta(response.tipo, response.msg, 3);
+                  openLoading(true);
+                  alterou = false;
+                } else {
+                  exibeAlerta(response.tipo, response.msg, 3, '<?=($req[0]->status == '3' || $req[0]->status == '7'  ) ? base_url('variaveis/sincronizacao') : base_url('variaveis/sobreaviso');?> ');
+                }
             }
 
         },
     });
     
 }
+
+const exportaTable = () => {
+    
+    let formData = new FormData();
+    let horas = [];
+
+    // Verifica se o horas já foi adicionado
+    var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
+    for (var i = 0; i < tableBody.rows.length; i++) {
+        var row = tableBody.rows[i];
+        var dini = formatarData(row.cells[0].innerText);
+        var dfim = formatarData(row.cells[2].innerText);
+        var hini = row.cells[1].innerText;
+        var hfim = row.cells[3].innerText;
+        var tot_horas = row.cells[4].innerText;
+        var tot_minutos = horasParaMinutos(row.cells[4].innerText);
+
+        let horario = {
+            "data_inicio": dini,
+            "hora_inicio": hini,
+            "data_fim": dfim,
+            "hora_fim": hfim,
+            "tot_horas": tot_horas,
+            "tot_minutos": tot_minutos
+        };
+        horas.push(horario);
+    }
+
+    // Convert to JSON string
+    const jsonString = JSON.stringify(horas);
+
+    // URL encode the JSON string
+    const encodedJson = encodeURIComponent(jsonString);
+
+    console.log(encodedJson);
+    // Construct the URL
+    const base = "<?= base_url('variaveis/sobreaviso/exportar'); ?>";
+    const url = `${base}/${encodedJson}`;
+
+    // Make the request (using fetch API)
+    window.location.href = url;
+    openLoading(true);
+}
+
 
 function calcTotal() {
   // Verifica se o horas já foi adicionado
@@ -529,20 +647,34 @@ function calcularDiferenca() {
 document.getElementById('btnadd').addEventListener('click', function(e) {
     e.preventDefault();
 
+    erro = '';
+
+    //console.log('validando datas');
+    //console.log($("#data_fim").val());
+    //console.log('<?= $per_ini_atual ?>');
+
     if($("#tipoPer").val()==1) {
-      if($("#data_inicio").val() < '<?= $per_ini_atual ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_inicio").val() > '<?= $per_fim_atual ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_fim").val() < '<?= $per_ini_atual ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_fim").val() > '<?= $per_fim_atual ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
+      if($("#data_inicio").val() < '<?= $per_ini_atual ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
+      if($("#data_inicio").val() > '<?= $per_fim_atual ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
+      if($("#data_fim").val() < '<?= $per_ini_atual ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+      if($("#data_fim").val() > '<?= $per_fim_atual ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
     } else {
-      if($("#data_inicio").val() < '<?= $per_ini_futuro ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_inicio").val() > '<?= $per_fim_futuro ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_fim").val() < '<?= $per_ini_futuro ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_fim").val() > '<?= $per_fim_futuro ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
+      if($("#data_inicio").val() < '<?= $per_ini_futuro ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
+      if($("#data_inicio").val() > '<?= $per_fim_futuro ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
+      if($("#data_fim").val() < '<?= $per_ini_futuro ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+      if($("#data_fim").val() > '<?= $per_fim_futuro ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
     }
-    if($("#data_fim").val() < $("#data_inicio").val()){ exibeAlerta("error", "<b>Data Final deve ser maior ou igual à Data Inicial</b> ."); return false; }
-    if($("#hora_inicio").val() == ""){ exibeAlerta("error", "<b>Hora Inicial</b> é obrigatória."); return false; }
-    if($("#hora_fim").val() == ""){ exibeAlerta("error", "<b>Hora Final</b> é obrigatória."); return false; }
+    if($("#data_fim").val() < $("#data_inicio").val()){ erro = "Data Final deve ser maior ou igual à Data Inicial."; }
+    if($("#hora_inicio").val() == ""){ erro = "Hora Inicial é obrigatória."; }
+
+    if(erro!='') {
+      if(loopImport) {
+        errosImport = errosImport + `Linha ${linhaImport}: ${erro}\n`;
+      } else {
+        exibeAlerta("error", erro);  
+      }
+      return false;
+    }
     
     // Verifica se tem horas
     if ($("#valor_h").val() != "") {
@@ -559,20 +691,21 @@ document.getElementById('btnadd').addEventListener('click', function(e) {
             var fim = formatarData(row.cells[2].innerText) + row.cells[3].innerText;
             var dini = $("#data_inicio").val()+$("#hora_inicio").val();
             var dfim = $("#data_fim").val()+$("#hora_fim").val();
-
-            if (dini >= ini && dfim <= fim)  {
+            console.log(dini,ini,dfim,fim);
+            if (dini < fim && dfim > ini) {
                 alreadyAdded = true;
                 break;
             }
         }
 
         if (alreadyAdded) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Erro',
-                text: 'Esse intervalo de horas já está na lista',
-                });
-                return false;
+          erro = 'Esse intervalo de horas já está na lista.';
+          if(loopImport) {
+            errosImport = errosImport + `Linha ${linhaImport}: ${erro}\n`;
+          } else {
+            exibeAlerta("error", erro);   
+          }
+          return false; 
         }
 
         tableContainer.style.display = "block";
@@ -598,13 +731,20 @@ document.getElementById('btnadd').addEventListener('click', function(e) {
         cell6.innerHTML = '<button class="btn btn-danger btn-sm" onclick="removeRow(this)">Remover</button>';
         sortTable();
         calcTotal();
+        alterou = true;
     } else {
-      exibeAlerta("error", "<b>Preencha todos os dados para adicionar.")
+      erro = 'Preencha todos os dados para adicionar.';
+      if(loopImport) {
+        errosImport = errosImport + `Linha ${linhaImport}: ${erro}\n`;
+      } else {
+        exibeAlerta("error", erro); 
+      }
     }
 });
 
 // Função para remover a linha da tabela
 function removeRow(btn) {
+    alterou = true;
     var row = btn.parentNode.parentNode;
     row.parentNode.removeChild(row);
     
@@ -667,5 +807,125 @@ function minutosParaHora(minutosTotais) {
   return `${hh}:${mm}`;
 }
 
+function ehDataValida(dataStr) {
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) return false;
+
+    const [dia, mes, ano] = dataStr.split('/').map(Number);
+    const data = new Date(ano, mes - 1, dia);
+
+    // Verifica se o JS interpretou a data corretamente
+    return data.getFullYear() === ano &&
+           data.getMonth() === mes - 1 &&
+           data.getDate() === dia;
+}
+
+function ehHoraValida(horaStr) {
+    // Aceita HH:MM ou HH:MM:SS
+    return /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(horaStr);
+}
+
+document.getElementById('planilha').addEventListener('change', function (e) {
+    errosImport = '';
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+
+        dadosImportados = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    };
+    reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('btnimportar').addEventListener('click', function () {
+    openLoading();
+    console.log('importação');
+    loopImport = true;
+    errosImport = '';
+    if (dadosImportados.length === 0) {
+        exibeAlerta("error", 'Nenhuma planilha foi carregada.');
+        return false;
+    }
+
+    const cabecalho = dadosImportados[0].map(col => col?.toString().trim().toUpperCase());
+    const colunasEsperadas = ['DATA_INICIAL', 'HORA_INICIAL', 'DATA_FINAL', 'HORA_FINAL', 'TOTAL_DE_HORAS'];
+
+    const colunasCorretas = JSON.stringify(cabecalho) === JSON.stringify(colunasEsperadas);
+    if (!colunasCorretas) {
+        exibeAlerta("error", `As colunas da planilha estão incorretas.
+Esperado: ${colunasEsperadas.join(', ')}
+Encontrado: ${cabecalho.join(', ')}`);
+        return false;
+    }
+
+    // Validação linha a linha
+    for (let i = 1; i < dadosImportados.length; i++) {
+        const linha = dadosImportados[i];
+        const [dataIni, horaIni, dataFim, horaFim, totalHoras] = linha;
+        if (!ehDataValida(dataIni)) {
+            exibeAlerta("error", `Linha ${i + 1}: DATA_INICIAL inválida → "${dataIni}"` );
+            return false;
+        }
+        if (!ehHoraValida(horaIni)) {
+            exibeAlerta("error", `Linha ${i + 1}: HORA_INICIAL inválida → "${horaIni}"` );
+            return false;
+        }
+        if (!ehDataValida(dataFim)) {
+            exibeAlerta("error", `Linha ${i + 1}: DATA_FINAL inválida → "${dataFim}"` );
+            return false;
+        }
+        if (!ehHoraValida(horaFim)) {
+            exibeAlerta("error", `Linha ${i + 1}: HORA_FINAL inválida → "${horaFim}"` );
+            return false;
+        }
+    }
+
+    // Medir o tamanho inicial antes do loop
+    const tabela = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
+    const linhasAntes = tabela.rows.length;
+
+    // Se passou todas as validações, insere as linhas via btnadd
+    for (let i = 1; i < dadosImportados.length; i++) {
+        linhaImport = i;
+        const [dataIni, horaIni, dataFim, horaFim, totalHoras] = dadosImportados[i];
+
+        $("#data_inicio").val(formatarData(dataIni));               // Ex: "30/06/2025"
+        $("#hora_inicio").val(horaIni);               // Ex: "08:00"
+        $("#data_fim").val(formatarData(dataFim));
+        $("#hora_fim").val(horaFim);
+        calcularDiferenca();
+
+        document.getElementById('btnadd').click();     // Usa seu próprio validador
+    }
+
+    $('.modal_planhoras').modal('hide');
+    openLoading(true);
+
+    loopImport = false;
+
+    // Medir linhas depois do loop
+    setTimeout(() => {
+        const linhasDepois = tabela.rows.length;
+        const totalImportadas = linhasDepois - linhasAntes;
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Importação concluída',
+            text: `${totalImportadas} linha(s) importada(s).\n${errosImport}`,
+            showConfirmButton: true
+        });
+
+        $('.modal_planhoras').modal('hide');
+    }, 100); // pequeno delay para garantir que DOM atualizou
+    
+});
+
 </script>
+
 <?php loadPlugin(['select2','maskmoney']); ?>

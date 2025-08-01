@@ -29,8 +29,8 @@ Class Sincronizacao extends BaseController {
         $dados['data_inicio']         = $this->request->getPost('data_inicio');
         $dados['data_fim']            = $this->request->getPost('data_fim');
 
-        if (is_null($dados['data_inicio'])) $dados['data_inicio'] = date('Y-m-d');
-        if (is_null($dados['data_fim'])) $dados['data_fim'] = $dados['data_inicio']; 
+        //if (is_null($dados['data_inicio'])) $dados['data_inicio'] = date('Y-m-d');
+        //if (is_null($dados['data_fim'])) $dados['data_fim'] = $dados['data_inicio']; 
 
         $dados['situacao']            = $this->request->getPost('situacao');
         if($dados['rh']){

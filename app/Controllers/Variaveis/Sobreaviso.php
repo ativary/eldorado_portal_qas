@@ -1,5 +1,10 @@
 <?php
+
 namespace App\Controllers\Variaveis;
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 use App\Controllers\BaseController;
 use Ramsey\Uuid\Uuid;
 use \Mpdf\Mpdf;
@@ -89,10 +94,30 @@ Class Sobreaviso extends BaseController {
         
         $dados['resFuncionarioSecao'] = $this->mParam->ListarFuncionariosSecao('all', $dados);
     
-        $dados['req']     = $this->mParam->getReqDados($id);
+        $dados['req'] = $this->mParam->getReqDados($id);
         $dados['chapaFunc'] = util_chapa(session()->get('func_chapa'))['CHAPA'] ?? null;
-        $dados['param6']   = json_encode($this->mParam->getParametros(3));
-        $dados['valores']     = json_decode($dados['req'][0]->valores) ;
+        $dados['param6'] = json_encode($this->mParam->getParametros(3));
+        $dados['valores'] = json_decode($dados['req'][0]->valores) ;
+
+        $horarios = json_decode(isset($dados['valores']->horarios) ? $dados['valores']->horarios : '[]');
+        $mes1 = '';
+        $mes2 = '';
+        foreach ($horarios as $key2 => $dados2) :
+            if(substr($dados2->data_inicio,-2) > '15') {
+              $mes1 = date('Y-m', strtotime($dados2->data_inicio));
+              $mes2 = date('Y-m', strtotime('+1 month', strtotime($dados2->data_inicio)));
+            } else {
+              $mes1 = date('Y-m', strtotime('-1 month', strtotime($dados2->data_inicio)));
+              $mes2 = date('Y-m', strtotime($dados2->data_inicio));
+            }
+            break;
+        endforeach;
+        if($mes1<>'') {
+          $dados['per_ini_atual'] = $mes1.'-'.$param3->dia_ponto_ini;
+          $dados['per_fim_atual'] = $mes2.'-'.$param3->dia_ponto_fim;
+          $dados['per_ini_futuro'] ='';
+          $dados['per_fim_futuro'] = '';
+        }
     
         $this->_breadcrumb->add('Editar Sobreaviso');
 
@@ -306,6 +331,91 @@ Class Sobreaviso extends BaseController {
         exit(responseJson('error', 'Nenhum funcionário localizado para essa seção.'));
 
     }
-   
+
+  // ------------------------------------------------------------------
+  // exportar horarios para excel
+  // ------------------------------------------------------------------
+  public function exportar($dados)
+  {
+    
+    $horarios = json_decode(urldecode($dados));
+    /*print_r($horarios);
+    $valores = json_decode($horarios);
+    print_r($valores);
+    exit();
+    die();*/
+
+    $spreadsheet = new Spreadsheet();
+
+    // cor do texto
+    $styleArray = array(
+      'font'  => array(
+        'bold'  => true,
+        'color' => array('rgb' => 'FFFFFF')
+      )
+    );
+    $styleBorda = array(
+      'borders' => array(
+        'allBorders' => array(
+          'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+          'color' => array('rgb' => '000000'),
+        ),
+      ),
+    );
+
+    $spreadsheet->getActiveSheet()->getStyle('A1:E1')->applyFromArray($styleArray);
+    $spreadsheet->getActiveSheet()->getStyle('A1:E1')->applyFromArray($styleBorda);
+
+    $spreadsheet
+      ->getActiveSheet()
+      ->getStyle('A1:E1')
+      ->getFill()
+      ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+      ->getStartColor()
+      ->setARGB('006f49');
+
+    // nome da aba da planilha
+    $spreadsheet->getActiveSheet()->setTitle('Planilha de Horas de Sobreaviso');
+    $spreadsheet->getActiveSheet()->setAutoFilter('A1:E1'); // auto filtro no titulo
+
+    // titulo das colunas
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setCellValue('A1', 'DATA_INICIAL');
+    $sheet->setCellValue('B1', 'HORA_INICIAL');
+    $sheet->setCellValue('C1', 'DATA_FINAL');
+    $sheet->setCellValue('D1', 'HORA_FINAL');
+    $sheet->setCellValue('E1', 'TOTAL_DE_HORAS');
+
+    $rows = 2;
+
+    //$horarios = json_decode(isset($valores->horarios) ? $valores->horarios : '[]');
+    foreach ($horarios as $key2 => $dados2) :
+        $sheet->setCellValue('A' . $rows, dtBr($dados2->data_inicio));
+        $sheet->setCellValue('B' . $rows, $dados2->hora_inicio);
+        $sheet->setCellValue('C' . $rows, dtBr($dados2->data_fim));
+        $sheet->setCellValue('D' . $rows, $dados2->hora_fim);
+        $sheet->setCellValue('E' . $rows, $dados2->tot_horas);
+
+        $spreadsheet->getActiveSheet()->getStyle('A' . $rows . ':E' . $rows)->applyFromArray($styleBorda);
+        $rows++;
+    endforeach; 
+
+    for ($i = 'A'; $i !=  $spreadsheet->getActiveSheet()->getHighestColumn(); $i++) {
+      $spreadsheet->getActiveSheet()->getColumnDimension($i)->setAutoSize(TRUE);
+    }
+
+    $writer = new Xlsx($spreadsheet);
+
+    header('Content-Disposition: attachment; filename=Planilha de Horas de Sobreaviso.xlsx');
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Transfer-Encoding: binary');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+
+    $writer->save("php://output");
+
+    exit();
+  }
+
 
 }

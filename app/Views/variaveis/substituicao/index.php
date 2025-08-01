@@ -214,9 +214,9 @@
                                                     
                                                     <button onclick="abrirReq('<?= base64_encode(json_encode($dados)); ?>')" class="dropdown-item">Ver requisição</button>
                                                     <!-- <button onclick="abrirResumoDiario('<?= $valores->justificativa; ?>')"  class="dropdown-item">Ver justificativa</button> -->
-                                                    <?php if ($rh) : ?>
+                                                    <!--?php if ($rh) : ?-->
                                                     <button onclick="logCalculo('<?= $dados->id; ?>')" class="dropdown-item">Log de Calculo</button>
-                                                    <?php endif; ?>
+                                                    <!--?php endif; ?-->
 
                                                     <a  href="<?= base_url('variaveis/substituicao/editar/'.base64_encode($dados->id)); ?>" class="dropdown-item <?= ($dados->status != '1') ? 'd-none' : ''; ?>">Editar requisição</a>
                                                   
