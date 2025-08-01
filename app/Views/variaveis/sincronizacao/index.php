@@ -1066,7 +1066,7 @@
                                                         <td class="n-mobile-cell"><?= $dados->tiporeq == '1' ? 'Mensal' : 'Complementar' ?></td>
                                                         <td class="n-mobile-cell"><?= $valores->Nome ?></td>
                                                         <td class="n-mobile-cell"><?= $valores->funcao ?></td>
-                                                        <td class="n-mobile-cell"><?= sprintf('%d:%02d', $h = floor($valores->valor), round(($valores->valor - $h) * 60)); ?></td>
+                                                        <td class="n-mobile-cell"><?= sprintf('%d:%02d', $h = floor($valores->valor/60), round(($valores->valor/60 - $h) * 60)); ?></td>
                                                         <td class="n-mobile-cell"><?= date('d/m/Y', strtotime($dados->dtcad)) ?></td>
                                                         <td class="n-mobile-cell"><?= $dados->nome ?></td>
                                                         <td class="n-mobile-cell">

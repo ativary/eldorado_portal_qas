@@ -90,6 +90,11 @@
                             </div>
 
                             <hr>
+                              <button onclick="$('.modal_planhoras').modal('show');" class="btn btn-warning btn-xxs mb-0"><i class="fas fa-file-excel"></i> Importar </button>
+
+                              <button onclick="exportaTable();" class="btn btn-success btn-xxs mb-0"><i class="fas fa-file-excel"></i> Exportar </button>
+                            <hr>
+
                             <div class="form-group row mb-2">
                                 <label for="datas" class="col-sm-1 col-form-label text-right text-left-sm"> <span class="text-danger">*</span> Data Inicial:</label>
                                 <div class="input-group col-sm-3 ">
@@ -156,8 +161,7 @@
                             </div>
 
                         </div>
-                    </div>
-                    
+                    </div>    
 
                 </div>
                 <div class="card-footer text-center">
@@ -170,6 +174,34 @@
         
     </div>
 </div><!-- container -->
+
+<div class="modal modal_planhoras" tabindex="-1" role="dialog" aria-labelledby="modal_planhoras" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 50%; width: 50%;">
+        <div class="modal-content modal-content-full">
+            <div class="modal-header bg-dark">
+                <h5 class="modal-title mt-0 text-white"><i class="mdi mdi-file-document-box-outline"></i> Planilha de Horas</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><i class="mdi mdi-close-circle-outline"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row mb-2">
+                    <label for="planilha" class="col-sm-2 col-form-label text-right text-left-sm">Planilha:</label>
+                    <div class="col-sm-10">
+                        <input class="form-control filepond" type="file" name="planilha" id="planilha" required>
+                        <input class="form-control" hidden type="text" value="" name="id" id="id" required>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <button class="btn btn-success bteldorado_1" id="btnimportar"><i class="fas fa-check"></i> Importar</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput/js/fileinput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <style>
 .tab-pane {
     border-left: 1px solid #dee2e6;
@@ -193,44 +225,335 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     padding: 6px 20px;
 }
 </style>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-fileinput/js/fileinput.min.js"></script>
-
 
 <script>
-var fora_periodo=0 ;
-var salario = 0;
 
-$(document).ready(function(){
-    verificaData();
-    if (fora_periodo == 1) { 
-        exibeAlerta("error", "Atenção! Fora do período de abertura para novas requisições."); 
+    // variáveis par importar dados
+    var dadosImportados = [];
+    var errosImport = '';
+    var linhaImport = 0;
+    var loopImport = false;
+    var erro = '';
+    var alterou = false;
+    const colunasEsperadas = ['DATA_INICIAL', 'HORA_INICIAL', 'DATA_FINAL', 'HORA_FINAL', 'TOTAL_DE_HORAS'];
+
+    var fora_periodo=0 ;
+    var salario = 0;
+
+    $(document).ready(function(){
+        verificaData();
+        if (fora_periodo == 1) { 
+            exibeAlerta("error", "Atenção! Fora do período de abertura para novas requisições."); 
+        }
+    });
+
+    document.getElementById('btnadd').addEventListener('click', function(e) {
+      e.preventDefault();
+
+      erro = '';
+
+      //console.log('validando datas');
+      //console.log($("#data_fim").val());
+      //console.log('<?= $per_ini_atual ?>');
+
+      if($("#tipoPer").val()==1) {
+        if($("#data_inicio").val() < '<?= $per_ini_atual ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
+        if($("#data_inicio").val() > '<?= $per_fim_atual ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
+        if($("#data_fim").val() < '<?= $per_ini_atual ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+        if($("#data_fim").val() > '<?= $per_fim_atual ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+      } else {
+        if($("#data_inicio").val() < '<?= $per_ini_futuro ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
+        if($("#data_inicio").val() > '<?= $per_fim_futuro ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
+        if($("#data_fim").val() < '<?= $per_ini_futuro ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+        if($("#data_fim").val() > '<?= $per_fim_futuro ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+      }
+      if($("#data_fim").val() < $("#data_inicio").val()){ erro = "Data Final deve ser maior ou igual à Data Inicial."; }
+      if($("#hora_inicio").val() == ""){ erro = "Hora Inicial é obrigatória."; }
+
+      if(erro!='') {
+        if(loopImport) {
+          errosImport = errosImport + `Linha ${linhaImport}: ${erro}\n`;
+        } else {
+          exibeAlerta("error", erro);  
+        }
+        return false;
+      }
+      
+      // Verifica se tem horas
+      if ($("#valor_h").val() != "") {
+          // Exibe a tabela se estiver oculta
+          var tableContainer = document.getElementById('horasTableContainer');
+
+          // Verifica se o horas já foi adicionado
+          var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
+          var alreadyAdded = false;
+          
+          for (var i = 0; i < tableBody.rows.length; i++) {
+              var row = tableBody.rows[i];
+              var ini = formatarData(row.cells[0].innerText) + row.cells[1].innerText;
+              var fim = formatarData(row.cells[2].innerText) + row.cells[3].innerText;
+              var dini = $("#data_inicio").val()+$("#hora_inicio").val();
+              var dfim = $("#data_fim").val()+$("#hora_fim").val();
+              console.log(dini,ini,dfim,fim);
+              if (dini < fim && dfim > ini) {
+                  alreadyAdded = true;
+                  break;
+              }
+          }
+
+          if (alreadyAdded) {
+            erro = 'Esse intervalo de horas já está na lista.';
+            if(loopImport) {
+              errosImport = errosImport + `Linha ${linhaImport}: ${erro}\n`;
+            } else {
+              exibeAlerta("error", erro);   
+            }
+            return false; 
+          }
+
+          tableContainer.style.display = "block";
+          
+          // Adiciona uma nova linha na tabela
+        
+          var newRow = tableBody.insertRow();
+
+          // Adicione os dados nas células
+          var cell1 = newRow.insertCell(0);
+          var cell2 = newRow.insertCell(1);
+          var cell3 = newRow.insertCell(2);
+          var cell4 = newRow.insertCell(3);
+          var cell5 = newRow.insertCell(4);
+          var cell6 = newRow.insertCell(5);
+
+          // Dados de exemplo (você pode substituir pelos dados reais)
+          cell1.innerHTML = formatarDataParaBR($("#data_inicio").val());    // data inicial
+          cell2.innerHTML = $("#hora_inicio").val();                        // hora inicial
+          cell3.innerHTML = formatarDataParaBR($("#data_fim").val());       // data final
+          cell4.innerHTML = $("#hora_fim").val();                           // hora final
+          cell5.innerHTML = $("#valor_h").val();                            // total de horas
+          cell6.innerHTML = '<button class="btn btn-danger btn-sm" onclick="removeRow(this)">Remover</button>';
+          sortTable();
+          calcTotal();
+          alterou = true;
+      } else {
+        erro = 'Preencha todos os dados para adicionar.';
+        if(loopImport) {
+          errosImport = errosImport + `Linha ${linhaImport}: ${erro}\n`;
+        } else {
+          exibeAlerta("error", erro); 
+        }
+      }
+    });
+
+    // Função para remover a linha da tabela
+    function removeRow(btn) {
+        var row = btn.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+        
+        // Verifica se a tabela está vazia e oculta se necessário
+        var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
+        if (tableBody.rows.length === 0) {
+            document.getElementById('horasTableContainer').style.display = "none";
+        }
+        calcTotal();
     }
-});
 
+    // função para ordenar a table
+    function sortTable() {
+      const table = document.getElementById("horasTable");
+      const tbody = table.tBodies[0];
+      const rows = Array.from(tbody.rows);
 
-document.getElementById('btnadd').addEventListener('click', function(e) {
-    e.preventDefault();
+      rows.sort((a, b) => {
+        const col0A = formatarData(a.cells[0].textContent.trim());
+        const col0B = formatarData(b.cells[0].textContent.trim());
 
-    if($("#tipoPer").val()==1) {
-      if($("#data_inicio").val() < '<?= $per_ini_atual ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_inicio").val() > '<?= $per_fim_atual ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_fim").val() < '<?= $per_ini_atual ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_fim").val() > '<?= $per_fim_atual ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
-    } else {
-      if($("#data_inicio").val() < '<?= $per_ini_futuro ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_inicio").val() > '<?= $per_fim_futuro ?>'){ exibeAlerta("error", "<b>Data Inicial deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_fim").val() < '<?= $per_ini_futuro ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
-      if($("#data_fim").val() > '<?= $per_fim_futuro ?>'){ exibeAlerta("error", "<b>Data Final deve estar dentro do período de ponto selecionado </b> ."); return false; }
+        if (col0A === col0B) {
+          const col1A = a.cells[1].textContent.trim();
+          const col1B = b.cells[1].textContent.trim();
+
+          // Sort as numbers if possible, else strings
+          return isNaN(col1A - col1B)
+            ? col1A.localeCompare(col1B)
+            : col1A - col1B;
+        }
+
+        return col0A.localeCompare(col0B);
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
     }
-    if($("#data_fim").val() < $("#data_inicio").val()){ exibeAlerta("error", "<b>Data Final deve ser maior ou igual à Data Inicial</b> ."); return false; }
-    if($("#hora_inicio").val() == ""){ exibeAlerta("error", "<b>Hora Inicial</b> é obrigatória."); return false; }
-    if($("#hora_fim").val() == ""){ exibeAlerta("error", "<b>Hora Final</b> é obrigatória."); return false; }
+
+    function formatarDataParaBR(data) {
+      let [ano, mes, dia] = data.split("-");
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    function formatarData(data) {
+      let [dia, mes, ano] = data.split("/");
+      return `${ano}-${mes}-${dia}`;
+    }
+
+    function horasParaMinutos(horaString) {
+      const [horas, minutos] = horaString.split(":").map(Number);
+      return (horas * 60) + minutos;
+    }
+
+    function minutosParaHora(minutosTotais) {
+      const horas = Math.floor(minutosTotais / 60);
+      const minutos = minutosTotais % 60;
+
+      const hh = String(horas).padStart(2, '0');
+      const mm = String(minutos).padStart(2, '0');
+
+      return `${hh}:${mm}`;
+    }
+
+    function calcTotal() {
+      // Verifica se o horas já foi adicionado
+        var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
+        let total = 0;
+        
+        for (var i = 0; i < tableBody.rows.length; i++) {
+            var row = tableBody.rows[i];
+            var tot_minutos = horasParaMinutos(row.cells[4].innerText);
+            total = total + tot_minutos;
+        }
+
+        if(total == 0) {
+          document.getElementById('tot_geral').textContent = '';
+        } else {
+          document.getElementById('tot_geral').textContent = `Total: ${convertDecimalHoursToHHMM((total/60).toFixed(2))} horas`;
+        }
+        
+    }
+
+    function verificaData() {
+        const regra = <?= $param6 ?>; // Certifique-se de que $param6 seja um JSON válido.
+        const funcionario =  "<?= $chapaFunc > 0 ? $chapaFunc  : '0' ?>"; // Defina o valor da constante funcionario
+        console.log(funcionario);
+        const hoje = new Date();
+        const diaHoje = hoje.getDate(); // Obtém o dia do mês atual
+
+        const periodoInicio = parseInt(regra.periodo_sobreaviso, 10);
+        const periodoFim = parseInt(regra.periodo_sobreaviso_fim, 10);
     
-    // Verifica se tem horas
-    if ($("#valor_h").val() != "") {
-        // Exibe a tabela se estiver oculta
-        var tableContainer = document.getElementById('horasTableContainer');
+        const $selectTipoReq = $('#tipoReq');
+        const $opcaoMensal = $selectTipoReq.find('option[value="1"]');
+
+        // opção "Complementar"
+        const dia_lim_compl = parseInt(regra.dia_limite_compl3, 10);
+        const $opcaoCompl = $selectTipoReq.find('option[value="2"]');
+        
+        if (diaHoje <= dia_lim_compl) {
+            $opcaoCompl.prop('disabled', false); // Habilita a opção "Complementar"
+        } else {
+            $opcaoCompl.prop('disabled', true); // Desabilita a opção "Complementar"
+        }
+
+        hoje.setHours(0, 0, 0, 0);
+        if (diaHoje >= periodoInicio && diaHoje <= periodoFim) {
+            fora_periodo=0 ;
+            $opcaoMensal.prop('disabled', false); // Habilita a opção "Mensal"
+        } else {
+            if (Array.isArray(regra.gestor) && regra.gestor.length > 0) {
+                $.each(regra.gestor, function(index, func) {
+                    if (func.chapa == funcionario) {
+                    
+                        // Converter dt_ini e dt_fim para objetos Date
+                        const dtIni = new Date(`${func.dt_ini}T00:00:00`);
+                        const dtFim = new Date(`${func.dt_fim}T00:00:00`);
+                        if (hoje >= dtIni && hoje <= dtFim) {
+                            
+                            fora_periodo = 2;
+                            $opcaoMensal.prop('disabled', false); // Habilita a opção "Mensal"
+                        } else {
+                            fora_periodo = 1;
+                            $opcaoMensal.prop('disabled', true); // Desabilita a opção "Mensal"
+                        }
+                        return false;
+                    }else{
+                        fora_periodo= 1;
+                        $opcaoMensal.prop('disabled', true); // Desabilita a opção "Mensal"
+                    }
+                });
+            }else{
+                    fora_periodo='1';
+                    $opcaoMensal.prop('disabled', true); // Desabilita a opção "Mensal"
+                }
+
+        }
+    }
+
+
+    function verificaValor(valor) {
+        const regra = <?= $param6 ?>;
+        
+        if (parseInt(regra.limite_sobreaviso) < parseInt(valor)) {
+            Swal.fire({
+                icon: 'error', // Ícone de erro para indicar que algo está errado
+                title: 'Limite de Horas Excedido!',
+                text: 'O valor inserido é Maior que o limite permitido.  '+regra.limite_sobreaviso,
+                confirmButtonText: 'Ok',
+                showCloseButton: true,
+                allowOutsideClick: false,
+                width: 600,
+            });
+
+            return false;
+        }
+
+        return true;
+    }
+
+    const salvaDados = () => {
+        
+        let formData = new FormData();
+        let resultado = 0;
+
+        const regra = <?= $param6 ?>;
+        
+        formData.append("funcionario", $("#funcionario").val());
+        formData.append("Nome", $("#funcionario option:selected").text());
+        formData.append("justificativa", $("#justificativa").val());
+        formData.append("filial", $("#filial").val());
+        formData.append("tipoReq", $("#tipoReq").val());
+        formData.append("per_ini_atual", '<?= $per_ini_atual ?>');
+        formData.append("per_fim_atual", '<?= $per_fim_atual ?>');
+        formData.append("per_ini_futuro", '<?= $per_ini_futuro ?>');
+        formData.append("per_fim_futuro", '<?= $per_fim_futuro ?>');
+        formData.append("tipoPer", $("#tipoPer").val());
+        formData.append("funcao", $("#funcao").val());
+        formData.append("tipo", '3');
+        formData.append("id", '');
+            
+        // Adiciona múltiplos arquivos ao formData
+        let fileInput = $('#anexo')[0].files;
+        if (fileInput.length > 0) {
+            for (let i = 0; i < fileInput.length; i++) {
+                formData.append("anexo[]", fileInput[i]);
+            }
+        }
+
+        if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
+        if($("#valor").val() == ""){ exibeAlerta("error", "<b>Quantidade de horas obrigatória </b> ."); return false; }
+        if($("#tipoReq").val() == ""){ exibeAlerta("error", "<b>Tipo obrigatório </b> ."); return false; }
+        if($("#justificativa").val().trim() == ""){ exibeAlerta("error", "<b>Justificativa</b> obrigatória."); return false; }
+
+        if (fora_periodo == 1) { 
+            exibeAlerta("error", "Fora do Período de abertura."); 
+            return false; 
+        }
+        
+        if($("#tipoReq").val() == "2" && fora_periodo == 2){ 
+            fora_periodo = 1;
+        }
+        formData.append("fora_periodo",fora_periodo);
+
+        let total = 0;
+        let hasEmptyValue = false; // Flag para identificar valor vazio
+
+        let horas = [];
 
         // Verifica se o horas já foi adicionado
         var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
@@ -238,410 +561,313 @@ document.getElementById('btnadd').addEventListener('click', function(e) {
         
         for (var i = 0; i < tableBody.rows.length; i++) {
             var row = tableBody.rows[i];
-            var ini = formatarData(row.cells[0].innerText) + row.cells[1].innerText;
-            var fim = formatarData(row.cells[2].innerText) + row.cells[3].innerText;
-            var dini = $("#data_inicio").val()+$("#hora_inicio").val();
-            var dfim = $("#data_fim").val()+$("#hora_fim").val();
+            var dini = formatarData(row.cells[0].innerText);
+            var dfim = formatarData(row.cells[2].innerText);
+            var hini = row.cells[1].innerText;
+            var hfim = row.cells[3].innerText;
+            var tot_horas = row.cells[4].innerText;
+            var tot_minutos = horasParaMinutos(row.cells[4].innerText);
 
-            if (dini >= ini && dfim <= fim)  {
-                alreadyAdded = true;
-                break;
-            }
+            let horario = {
+                "data_inicio": dini,
+                "hora_inicio": hini,
+                "data_fim": dfim,
+                "hora_fim": hfim,
+                "tot_horas": tot_horas,
+                "tot_minutos": tot_minutos
+            };
+            total = total + tot_minutos;
+            horas.push(horario);
         }
 
-        if (alreadyAdded) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Erro',
-                text: 'Esse intervalo de horas já está na lista',
-                });
-                return false;
+        formData.append("horarios", JSON.stringify(horas));
+        formData.append("valor", total);
+
+        if (parseInt(regra.limite_sobreaviso*60) < parseInt(total)) {
+          exibeAlerta("error", "<b>Total de horas ("+minutosParaHora(total)+"h)</b> maior que o permitido ("+regra.limite_sobreaviso+":00h)."); return false;
         }
 
-        tableContainer.style.display = "block";
-        
-        // Adiciona uma nova linha na tabela
-       
-        var newRow = tableBody.insertRow();
+        //console.log(JSON.stringify(Object.fromEntries(formData.entries())));
+        //return false;
 
-        // Adicione os dados nas células
-        var cell1 = newRow.insertCell(0);
-        var cell2 = newRow.insertCell(1);
-        var cell3 = newRow.insertCell(2);
-        var cell4 = newRow.insertCell(3);
-        var cell5 = newRow.insertCell(4);
-        var cell6 = newRow.insertCell(5);
+        openLoading();
 
-        // Dados de exemplo (você pode substituir pelos dados reais)
-        cell1.innerHTML = formatarDataParaBR($("#data_inicio").val());    // data inicial
-        cell2.innerHTML = $("#hora_inicio").val();                        // hora inicial
-        cell3.innerHTML = formatarDataParaBR($("#data_fim").val());       // data final
-        cell4.innerHTML = $("#hora_fim").val();                           // hora final
-        cell5.innerHTML = $("#valor_h").val();                            // total de horas
-        cell6.innerHTML = '<button class="btn btn-danger btn-sm" onclick="removeRow(this)">Remover</button>';
-        sortTable();
-        calcTotal();
-    } else {
-      exibeAlerta("error", "<b>Preencha todos os dados para adicionar.")
-    }
-});
+        $.ajax({
+            url: "<?= base_url('variaveis/sobreaviso/save'); ?>",
+            type:'POST',
+            data:formData,
+            processData: false, // impede que o jQuery processe os dados
+            contentType: false, // impede que o jQuery defina o tipo de conteúdo
+            success:function(result){
+                console.log(result);
 
-// Função para remover a linha da tabela
-function removeRow(btn) {
-    var row = btn.parentNode.parentNode;
-    row.parentNode.removeChild(row);
-    
-    // Verifica se a tabela está vazia e oculta se necessário
-    var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
-    if (tableBody.rows.length === 0) {
-        document.getElementById('horasTableContainer').style.display = "none";
-    }
-    calcTotal();
-}
+                var response = JSON.parse(result);
 
-// função para ordenar a table
-function sortTable() {
-  const table = document.getElementById("horasTable");
-  const tbody = table.tBodies[0];
-  const rows = Array.from(tbody.rows);
-
-  rows.sort((a, b) => {
-    const col0A = formatarData(a.cells[0].textContent.trim());
-    const col0B = formatarData(b.cells[0].textContent.trim());
-
-    if (col0A === col0B) {
-      const col1A = a.cells[1].textContent.trim();
-      const col1B = b.cells[1].textContent.trim();
-
-      // Sort as numbers if possible, else strings
-      return isNaN(col1A - col1B)
-        ? col1A.localeCompare(col1B)
-        : col1A - col1B;
-    }
-
-    return col0A.localeCompare(col0B);
-  });
-
-  rows.forEach(row => tbody.appendChild(row));
-}
-
-function formatarDataParaBR(data) {
-  let [ano, mes, dia] = data.split("-");
-  return `${dia}/${mes}/${ano}`;
-}
-
-function formatarData(data) {
-  let [dia, mes, ano] = data.split("/");
-  return `${ano}-${mes}-${dia}`;
-}
-
-function horasParaMinutos(horaString) {
-  const [horas, minutos] = horaString.split(":").map(Number);
-  return (horas * 60) + minutos;
-}
-
-function minutosParaHora(minutosTotais) {
-  const horas = Math.floor(minutosTotais / 60);
-  const minutos = minutosTotais % 60;
-
-  const hh = String(horas).padStart(2, '0');
-  const mm = String(minutos).padStart(2, '0');
-
-  return `${hh}:${mm}`;
-}
-
-function calcTotal() {
-  // Verifica se o horas já foi adicionado
-    var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
-    let total = 0;
-    
-    for (var i = 0; i < tableBody.rows.length; i++) {
-        var row = tableBody.rows[i];
-        var tot_minutos = horasParaMinutos(row.cells[4].innerText);
-        total = total + tot_minutos;
-    }
-
-    if(total == 0) {
-      document.getElementById('tot_geral').textContent = '';
-    } else {
-      document.getElementById('tot_geral').textContent = `Total: ${convertDecimalHoursToHHMM((total/60).toFixed(2))} horas`;
-    }
-    
-}
-
-function verificaData() {
-    const regra = <?= $param6 ?>; // Certifique-se de que $param6 seja um JSON válido.
-    const funcionario =  "<?= $chapaFunc > 0 ? $chapaFunc  : '0' ?>"; // Defina o valor da constante funcionario
-    console.log(funcionario);
-    const hoje = new Date();
-    const diaHoje = hoje.getDate(); // Obtém o dia do mês atual
-
-    const periodoInicio = parseInt(regra.periodo_sobreaviso, 10);
-    const periodoFim = parseInt(regra.periodo_sobreaviso_fim, 10);
- 
-    const $selectTipoReq = $('#tipoReq');
-    const $opcaoMensal = $selectTipoReq.find('option[value="1"]');
-
-    // opção "Complementar"
-    const dia_lim_compl = parseInt(regra.dia_limite_compl3, 10);
-    const $opcaoCompl = $selectTipoReq.find('option[value="2"]');
-    
-    if (diaHoje <= dia_lim_compl) {
-        $opcaoCompl.prop('disabled', false); // Habilita a opção "Complementar"
-    } else {
-        $opcaoCompl.prop('disabled', true); // Desabilita a opção "Complementar"
-    }
-
-    hoje.setHours(0, 0, 0, 0);
-    if (diaHoje >= periodoInicio && diaHoje <= periodoFim) {
-         fora_periodo=0 ;
-        $opcaoMensal.prop('disabled', false); // Habilita a opção "Mensal"
-    } else {
-        if (Array.isArray(regra.gestor) && regra.gestor.length > 0) {
-            $.each(regra.gestor, function(index, func) {
-                if (func.chapa == funcionario) {
-                
-                    // Converter dt_ini e dt_fim para objetos Date
-                    const dtIni = new Date(`${func.dt_ini}T00:00:00`);
-                    const dtFim = new Date(`${func.dt_fim}T00:00:00`);
-                    if (hoje >= dtIni && hoje <= dtFim) {
-                        
-                        fora_periodo = 2;
-                        $opcaoMensal.prop('disabled', false); // Habilita a opção "Mensal"
-                    } else {
-                        fora_periodo = 1;
-                        $opcaoMensal.prop('disabled', true); // Desabilita a opção "Mensal"
-                    }
-                    return false;
+                if(response.tipo != 'success'){
+                    exibeAlerta(response.tipo, response.msg, 2);
+                    openLoading(true);
                 }else{
-                    fora_periodo= 1;
-                    $opcaoMensal.prop('disabled', true); // Desabilita a opção "Mensal"
+                    exibeAlerta(response.tipo, response.msg, 3, '<?= base_url('variaveis/sobreaviso'); ?>');
+                    
                 }
-            });
-        }else{
-                fora_periodo='1';
-                $opcaoMensal.prop('disabled', true); // Desabilita a opção "Mensal"
-            }
 
+            },
+        });
+        
     }
-}
 
+    $("#anexo").fileinput({
+        showUpload: false,
+        showCaption: true,
+        dropZoneEnabled: true, // Mantém a dropzone visível
+        fileActionSettings: {
+            showRemove: true, // Exibe o botão de remover
+            showZoom: false, // Oculta o botão de zoom
+        },
+        browseClass: "btn btn-primary",
+        fileType: "any",
+        showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
+        browseLabel: "Selecionar Arquivo", // Texto personalizado do botão de anexar
+        dropZoneTitle: "Arraste o(s) arquivo(s) aqui. Para anexar mais de um arquivo arraste todos de uma vez. Os navegadores de internet não permitem arrastar um arquivo por vez. O mesmo vale para a seleção de arquivos, caso queira mais de um arquivo selecione todos de uma vez, usando o SHIFT ou CRTL junto com o clique do mouse.", // Texto personalizado da zona de drop
+        dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
+        allowedFileExtensions: ['pdf', 'jpeg', 'jpg', 'doc', 'doc', 'docx', 'png', 'gif', 'tiff', 'webp', 'bmp'], // Permite apenas arquivos PDF e JPEG
+        msgInvalidFileExtension: "Tipo de arquivo não suportado. Apenas arquivos PDF, DOC, DOCx e imagens são permitidos." // Mensagem personalizada
+    });
 
-function verificaValor(valor) {
-    const regra = <?= $param6 ?>;
-    
-    if (parseInt(regra.limite_sobreaviso) < parseInt(valor)) {
-        Swal.fire({
-            icon: 'error', // Ícone de erro para indicar que algo está errado
-            title: 'Limite de Horas Excedido!',
-            text: 'O valor inserido é Maior que o limite permitido.  '+regra.limite_sobreaviso,
-            confirmButtonText: 'Ok',
-            showCloseButton: true,
-            allowOutsideClick: false,
-            width: 600,
+    function calcularDiferenca() {
+      const dataInicio = document.getElementById('data_inicio').value;
+      const horaInicio = document.getElementById('hora_inicio').value;
+      const dataFim = document.getElementById('data_fim').value;
+      const horaFim = document.getElementById('hora_fim').value;
+
+      $("#valor").val(0);
+      $("#valor_h").val('');
+
+      if (!dataInicio || !horaInicio || !dataFim || !horaFim) {
+        document.getElementById('resultado').textContent = 'Preencha todos os campos para calcular o total';
+        return;
+      }
+
+      let dini = `${dataInicio}T${horaInicio}`;
+      let dfim = `${dataFim}T${horaFim}`;
+      //console.log(dini);
+      //console.log(dfim);
+      // Combina data e hora em uma string compatível com o Date
+      const inicio = new Date(dini);
+      const fim = new Date(dfim);
+
+      // Calcula a diferença em milissegundos
+      const diffMs = fim - inicio;
+
+      if (diffMs < 0) {
+        document.getElementById('resultado').textContent = 'Data/hora final é anterior à inicial';
+        return;
+      }
+
+      // Converte milissegundos para horas
+      const diffHoras = diffMs / (1000 * 60 * 60);
+
+      //document.getElementById('resultado').textContent = `Diferença: ${diffHoras.toFixed(2)} horas`;
+      document.getElementById('resultado').textContent = '';
+      $("#valor").val(diffHoras.toFixed(2));
+      $("#valor_h").val(convertDecimalHoursToHHMM(diffHoras.toFixed(2)));
+    }
+
+    function convertDecimalHoursToHHMM(decimalHours) {
+        const hours = Math.floor(decimalHours); // Get full hours
+        const minutes = Math.round((decimalHours - hours) * 60); // Convert decimal to minutes
+        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    const selecionaFuncionario = (chapa) => {
+        let dados = {
+            "chapa":chapa,
+            
+        }
+        openLoading();
+
+        $.ajax({
+            url: "<?= base_url('variaveis/sobreaviso/dadosFunc'); ?>",
+            type:'POST',
+            data:dados,
+            success:function(result){
+              
+
+                var response = JSON.parse(result);
+                salario = response[0].SALARIO;
+
+                $("#filial").val(response[0].CODFILIAL)
+                $("#funcao").val(response[0].CODFUNCAO +':'+response[0].NOMEFUNCAO)
+                openLoading(true);
+                
+
+            },
         });
 
-        return false;
-    }
-
-    return true;
-}
-
-const salvaDados = () => {
-    
-    let formData = new FormData();
-    let resultado = 0;
-
-    const regra = <?= $param6 ?>;
-    
-    formData.append("funcionario", $("#funcionario").val());
-    formData.append("Nome", $("#funcionario option:selected").text());
-    formData.append("justificativa", $("#justificativa").val());
-    formData.append("filial", $("#filial").val());
-    formData.append("tipoReq", $("#tipoReq").val());
-    formData.append("tipoPer", $("#tipoPer").val());
-    formData.append("funcao", $("#funcao").val());
-    formData.append("tipo", '3');
-    formData.append("id", '');
         
-    // Adiciona múltiplos arquivos ao formData
-    let fileInput = $('#anexo')[0].files;
-    if (fileInput.length > 0) {
-        for (let i = 0; i < fileInput.length; i++) {
-            formData.append("anexo[]", fileInput[i]);
-        }
-    }
+    }    
 
-    if($("#funcionario").val() == ""){ exibeAlerta("error", "<b>Funcionário obrigatório </b> ."); return false; }
-    if($("#valor").val() == ""){ exibeAlerta("error", "<b>Quantidade de horas obrigatória </b> ."); return false; }
-    if($("#tipoReq").val() == ""){ exibeAlerta("error", "<b>Tipo obrigatório </b> ."); return false; }
-    if($("#justificativa").val().trim() == ""){ exibeAlerta("error", "<b>Justificativa</b> obrigatória."); return false; }
-
-    if (fora_periodo == 1) { 
-        exibeAlerta("error", "Fora do Período de abertura."); 
-        return false; 
-    }
+    const exportaTable = () => {
     
-    if($("#tipoReq").val() == "2" && fora_periodo == 2){ 
-        fora_periodo = 1;
-    }
-    formData.append("fora_periodo",fora_periodo);
+      let formData = new FormData();
+      let horas = [];
 
-    let total = 0;
-    let hasEmptyValue = false; // Flag para identificar valor vazio
+      // Verifica se o horas já foi adicionado
+      var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
+      for (var i = 0; i < tableBody.rows.length; i++) {
+          var row = tableBody.rows[i];
+          var dini = formatarData(row.cells[0].innerText);
+          var dfim = formatarData(row.cells[2].innerText);
+          var hini = row.cells[1].innerText;
+          var hfim = row.cells[3].innerText;
+          var tot_horas = row.cells[4].innerText;
+          var tot_minutos = horasParaMinutos(row.cells[4].innerText);
 
-    let horas = [];
+          let horario = {
+              "data_inicio": dini,
+              "hora_inicio": hini,
+              "data_fim": dfim,
+              "hora_fim": hfim,
+              "tot_horas": tot_horas,
+              "tot_minutos": tot_minutos
+          };
+          horas.push(horario);
+      }
 
-    // Verifica se o horas já foi adicionado
-    var tableBody = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
-    var alreadyAdded = false;
-    
-    for (var i = 0; i < tableBody.rows.length; i++) {
-        var row = tableBody.rows[i];
-        var dini = formatarData(row.cells[0].innerText);
-        var dfim = formatarData(row.cells[2].innerText);
-        var hini = row.cells[1].innerText;
-        var hfim = row.cells[3].innerText;
-        var tot_horas = row.cells[4].innerText;
-        var tot_minutos = horasParaMinutos(row.cells[4].innerText);
+      // Convert to JSON string
+      const jsonString = JSON.stringify(horas);
 
-        let horario = {
-            "data_inicio": dini,
-            "hora_inicio": hini,
-            "data_fim": dfim,
-            "hora_fim": hfim,
-            "tot_horas": tot_horas,
-            "tot_minutos": tot_minutos
-        };
-        total = total + tot_minutos;
-        horas.push(horario);
-    }
+      // URL encode the JSON string
+      const encodedJson = encodeURIComponent(jsonString);
 
-    formData.append("horarios", JSON.stringify(horas));
-    formData.append("valor", total);
+      console.log(encodedJson);
+      // Construct the URL
+      const base = "<?= base_url('variaveis/sobreaviso/exportar'); ?>";
+      const url = `${base}/${encodedJson}`;
 
-    if (parseInt(regra.limite_sobreaviso*60) < parseInt(total)) {
-      exibeAlerta("error", "<b>Total de horas ("+minutosParaHora(total)+"h)</b> maior que o permitido ("+regra.limite_sobreaviso+":00h)."); return false;
-    }
-
-    //console.log(JSON.stringify(Object.fromEntries(formData.entries())));
-    //return false;
-
-    openLoading();
-
-    $.ajax({
-        url: "<?= base_url('variaveis/sobreaviso/save'); ?>",
-        type:'POST',
-        data:formData,
-        processData: false, // impede que o jQuery processe os dados
-        contentType: false, // impede que o jQuery defina o tipo de conteúdo
-        success:function(result){
-            console.log(result);
-
-            var response = JSON.parse(result);
-
-            if(response.tipo != 'success'){
-                exibeAlerta(response.tipo, response.msg, 2);
-                openLoading(true);
-            }else{
-                exibeAlerta(response.tipo, response.msg, 3, '<?= base_url('variaveis/sobreaviso'); ?>');
-                
-            }
-
-        },
-    });
-    
-}
-
-$("#anexo").fileinput({
-    showUpload: false,
-    showCaption: true,
-    dropZoneEnabled: true, // Mantém a dropzone visível
-    fileActionSettings: {
-        showRemove: true, // Exibe o botão de remover
-        showZoom: false, // Oculta o botão de zoom
-    },
-    browseClass: "btn btn-primary",
-    fileType: "any",
-    showClose: false, // Esconde o botão de "x" (fechar) na visualização dos arquivos
-    browseLabel: "Selecionar Arquivo", // Texto personalizado do botão de anexar
-    dropZoneTitle: "Arraste o(s) arquivo(s) aqui. Para anexar mais de um arquivo arraste todos de uma vez. Os navegadores de internet não permitem arrastar um arquivo por vez. O mesmo vale para a seleção de arquivos, caso queira mais de um arquivo selecione todos de uma vez, usando o SHIFT ou CRTL junto com o clique do mouse.", // Texto personalizado da zona de drop
-    dropZoneClickTitle: "ou clique para selecionar os arquivos", // Texto secundário na zona de drop
-    allowedFileExtensions: ['pdf', 'jpeg', 'jpg', 'doc', 'doc', 'docx', 'png', 'gif', 'tiff', 'webp', 'bmp'], // Permite apenas arquivos PDF e JPEG
-    msgInvalidFileExtension: "Tipo de arquivo não suportado. Apenas arquivos PDF, DOC, DOCx e imagens são permitidos." // Mensagem personalizada
-});
-
-function calcularDiferenca() {
-  const dataInicio = document.getElementById('data_inicio').value;
-  const horaInicio = document.getElementById('hora_inicio').value;
-  const dataFim = document.getElementById('data_fim').value;
-  const horaFim = document.getElementById('hora_fim').value;
-
-  $("#valor").val(0);
-  $("#valor_h").val('');
-
-  if (!dataInicio || !horaInicio || !dataFim || !horaFim) {
-    document.getElementById('resultado').textContent = 'Preencha todos os campos para calcular o total';
-    return;
+      // Make the request (using fetch API)
+      window.location.href = url;
+      openLoading(true);
   }
 
-  let dini = `${dataInicio}T${horaInicio}`;
-  let dfim = `${dataFim}T${horaFim}`;
-  //console.log(dini);
-  //console.log(dfim);
-  // Combina data e hora em uma string compatível com o Date
-  const inicio = new Date(dini);
-  const fim = new Date(dfim);
+  function ehDataValida(dataStr) {
+      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) return false;
 
-  // Calcula a diferença em milissegundos
-  const diffMs = fim - inicio;
+      const [dia, mes, ano] = dataStr.split('/').map(Number);
+      const data = new Date(ano, mes - 1, dia);
 
-  if (diffMs < 0) {
-    document.getElementById('resultado').textContent = 'Data/hora final é anterior à inicial';
-    return;
+      // Verifica se o JS interpretou a data corretamente
+      return data.getFullYear() === ano &&
+            data.getMonth() === mes - 1 &&
+            data.getDate() === dia;
   }
 
-  // Converte milissegundos para horas
-  const diffHoras = diffMs / (1000 * 60 * 60);
+  function ehHoraValida(horaStr) {
+      // Aceita HH:MM ou HH:MM:SS
+      return /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(horaStr);
+  }
 
-  //document.getElementById('resultado').textContent = `Diferença: ${diffHoras.toFixed(2)} horas`;
-  document.getElementById('resultado').textContent = '';
-  $("#valor").val(diffHoras.toFixed(2));
-  $("#valor_h").val(convertDecimalHoursToHHMM(diffHoras.toFixed(2)));
-}
+  document.getElementById('planilha').addEventListener('change', function (e) {
+      errosImport = '';
+      const file = e.target.files[0];
 
-function convertDecimalHoursToHHMM(decimalHours) {
-    const hours = Math.floor(decimalHours); // Get full hours
-    const minutes = Math.round((decimalHours - hours) * 60); // Convert decimal to minutes
-    return `${hours}:${minutes.toString().padStart(2, '0')}`;
-}
+      if (!file) return;
 
-const selecionaFuncionario = (chapa) => {
-    let dados = {
-        "chapa":chapa,
-        
-    }
-    openLoading();
+      const reader = new FileReader();
+      reader.onload = function (e) {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
 
-    $.ajax({
-        url: "<?= base_url('variaveis/sobreaviso/dadosFunc'); ?>",
-        type:'POST',
-        data:dados,
-        success:function(result){
-           
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
 
-            var response = JSON.parse(result);
-            salario = response[0].SALARIO;
+          dadosImportados = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      };
+      reader.readAsArrayBuffer(file);
+  });
 
-            $("#filial").val(response[0].CODFILIAL)
-            $("#funcao").val(response[0].CODFUNCAO +':'+response[0].NOMEFUNCAO)
-            openLoading(true);
-            
+  document.getElementById('btnimportar').addEventListener('click', function () {
+      openLoading();
+      console.log('importação');
+      loopImport = true;
+      errosImport = '';
+      if (dadosImportados.length === 0) {
+          exibeAlerta("error", 'Nenhuma planilha foi carregada.');
+          return false;
+      }
 
-        },
-    });
+      const cabecalho = dadosImportados[0].map(col => col?.toString().trim().toUpperCase());
+      const colunasEsperadas = ['DATA_INICIAL', 'HORA_INICIAL', 'DATA_FINAL', 'HORA_FINAL', 'TOTAL_DE_HORAS'];
 
-    
-}    
+      const colunasCorretas = JSON.stringify(cabecalho) === JSON.stringify(colunasEsperadas);
+      if (!colunasCorretas) {
+          exibeAlerta("error", `As colunas da planilha estão incorretas.
+  Esperado: ${colunasEsperadas.join(', ')}
+  Encontrado: ${cabecalho.join(', ')}`);
+          return false;
+      }
+
+      // Validação linha a linha
+      for (let i = 1; i < dadosImportados.length; i++) {
+          const linha = dadosImportados[i];
+          const [dataIni, horaIni, dataFim, horaFim, totalHoras] = linha;
+          if (!ehDataValida(dataIni)) {
+              exibeAlerta("error", `Linha ${i + 1}: DATA_INICIAL inválida → "${dataIni}"` );
+              return false;
+          }
+          if (!ehHoraValida(horaIni)) {
+              exibeAlerta("error", `Linha ${i + 1}: HORA_INICIAL inválida → "${horaIni}"` );
+              return false;
+          }
+          if (!ehDataValida(dataFim)) {
+              exibeAlerta("error", `Linha ${i + 1}: DATA_FINAL inválida → "${dataFim}"` );
+              return false;
+          }
+          if (!ehHoraValida(horaFim)) {
+              exibeAlerta("error", `Linha ${i + 1}: HORA_FINAL inválida → "${horaFim}"` );
+              return false;
+          }
+      }
+
+      // Medir o tamanho inicial antes do loop
+      const tabela = document.getElementById('horasTable').getElementsByTagName('tbody')[0];
+      const linhasAntes = tabela.rows.length;
+
+      // Se passou todas as validações, insere as linhas via btnadd
+      for (let i = 1; i < dadosImportados.length; i++) {
+          linhaImport = i;
+          const [dataIni, horaIni, dataFim, horaFim, totalHoras] = dadosImportados[i];
+
+          $("#data_inicio").val(formatarData(dataIni));               // Ex: "30/06/2025"
+          $("#hora_inicio").val(horaIni);               // Ex: "08:00"
+          $("#data_fim").val(formatarData(dataFim));
+          $("#hora_fim").val(horaFim);
+          calcularDiferenca();
+
+          document.getElementById('btnadd').click();     // Usa seu próprio validador
+      }
+
+      $('.modal_planhoras').modal('hide');
+      openLoading(true);
+
+      loopImport = false;
+
+      // Medir linhas depois do loop
+      setTimeout(() => {
+          const linhasDepois = tabela.rows.length;
+          const totalImportadas = linhasDepois - linhasAntes;
+
+          Swal.fire({
+              icon: 'success',
+              title: 'Importação concluída',
+              text: `${totalImportadas} linha(s) importada(s).\n${errosImport}`,
+              showConfirmButton: true
+          });
+
+          $('.modal_planhoras').modal('hide');
+      }, 100); // pequeno delay para garantir que DOM atualizou
+      
+  });
+
 </script>
 <?php loadPlugin(['select2','maskmoney','datepicker']); ?>

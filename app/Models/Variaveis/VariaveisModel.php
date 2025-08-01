@@ -937,8 +937,6 @@ class VariaveisModel extends Model {
              if ($valores->fora_periodo == '1') {
                 // $novoMes = date('m', strtotime('+1 month', strtotime($dadosReq[0]->dtcad)));
                 // $novoAno = date('Y', strtotime('+1 month', strtotime($dadosReq[0]->dtcad)));
-
-
                 $novoMes = date('m');
                 $novoAno = date('Y');
             } else {
@@ -1977,11 +1975,11 @@ class VariaveisModel extends Model {
                 $val =  0;
                 $ref =  $valores->valor;
             }
-
-            if($dadosReq[0]->tiporeq == '2'){
+            
+            if($tiporeq_sinc == '2'){
                 $lancamento ='28';
             }
-
+            
             $del_query = "
                 DELETE FROM PFFINANC 
                 WHERE 
@@ -2547,14 +2545,13 @@ class VariaveisModel extends Model {
                 $builder->where('status', $situacao);
             }
 
-            
             if ($aprovacao) {
-                $builder->groupStart()
-                ->whereIn('status', [2, 9])
-                ->where('aprovador', $_SESSION['log_login']);
-                if($aprovacao == '2'){
-                
-                    $builder->orWhereIn('status', [1,3,4,7,8]); 
+                $builder->groupStart();
+                if($aprovacao == '2'){               
+                    $builder->whereIn('status', [1,2,3,4,7,8]); 
+                } else {
+                  $builder->whereIn('status', [2, 9]);
+                  $builder->where('aprovador', $_SESSION['log_login']);
                 }
                 $builder->groupEnd(); 
             }else{
@@ -2562,8 +2559,12 @@ class VariaveisModel extends Model {
             }
     
             $builder->orderBy('zcrmportal_variaveis_req.id', 'ASC');
+            
             $result = $builder->get();
-           
+            //echo $this->dbportal->getLastQuery(); 
+            //exit();
+            //die();
+            
             if ($result === false) {
                 throw new \Exception("Erro na execução da query: " . $this->dbportal->getLastQuery());
             }
