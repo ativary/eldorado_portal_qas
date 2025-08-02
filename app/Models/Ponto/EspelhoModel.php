@@ -113,6 +113,73 @@ class EspelhoModel extends Model {
 
     }
 
+    // -------------------------------------------------------
+    // Lista Periodos Disponíveis entre duas datas
+    // -------------------------------------------------------
+    public function ListarPeriodosDisponiveis($dataIni, $dataFim, $rh) {
+
+        $configuracao = $this->ListarEspelhoConfiguracao();
+        if(!$configuracao) return false;
+
+        if($rh) $configuracao[0]['dtinicio'] = '1900-01-01';
+
+        $query = "
+            SELECT 
+                * 
+            FROM 
+                APERIODO 
+            WHERE 
+                    CODCOLIGADA = '".session()->get('func_coligada')."'
+                AND INICIOMENSAL >= '{$configuracao[0]['dtinicio']}' AND FIMMENSAL  <= '{$configuracao[0]['dtfim']}'
+                AND INICIOMENSAL >= '{$dataIni}' AND FIMMENSAL <= '{$dataFim}'
+            ORDER BY 
+                ANOCOMP DESC, 
+                MESCOMP DESC
+        ";
+        // exit('<pre>'.$query);
+        $result = $this->dbrm->query($query);
+        return ($result->getNumRows() > 0) 
+                ? $result->getResultArray() 
+                : false;
+    }
+
+    // -------------------------------------------------------
+    // Verifica se data é válida como Início ou Fim de Período
+    // -------------------------------------------------------
+    public function VerificarInicioOuFimPeriodo($tipo, $data, $rh) {
+
+        $configuracao = $this->ListarEspelhoConfiguracao();
+        if(!$configuracao) return false;
+        
+        if($rh) $configuracao[0]['dtinicio'] = '1900-01-01';
+       
+        if($tipo == 'INICIOMENSAL') {
+            $where = "AND INICIOMENSAL = '{$data}'";
+        } else if($tipo == 'FIMMENSAL') {
+            $where = "AND FIMMENSAL = '{$data}'";
+        }
+        
+        $query = "
+            SELECT 
+                * 
+            FROM 
+                APERIODO 
+            WHERE 
+                CODCOLIGADA = '".session()->get('func_coligada')."'
+                AND INICIOMENSAL >= '{$configuracao[0]['dtinicio']}' AND FIMMENSAL  <= '{$configuracao[0]['dtfim']}'
+                $where
+            ORDER BY 
+                ANOCOMP DESC, 
+                MESCOMP DESC
+        ";
+        // exit('<pre>'.$query);
+        $result = $this->dbrm->query($query);
+
+        
+        $result = $this->dbrm->query($query);
+        return $result->getResultArray();
+    }
+
 
     // -------------------------------------------------------
     // Lista periodo do espelho

@@ -228,9 +228,9 @@ class Espelho extends BaseController {
 
     public function impressao()
     {
-
         parent::VerificaPerfil('PONTO_ESPELHO_IMPRESSAO');
         $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
+        $dados['pontoEspelhoImpressaoRhMaster'] = parent::VerificaPerfil('PONTO_ESPELHO_IMPRESSAO_RH_MASTER', false);
         $dados['_titulo'] = "Impressão Espelho de Ponto";
         $dados['impressao'] = true;
         $this->_breadcrumb->add($dados['_titulo'], 'ponto/espelho/impressao');
@@ -238,9 +238,25 @@ class Espelho extends BaseController {
         $dados['periodo'] = $this->request->getPost('periodo');
         $dados['secao'] = $this->request->getPost('secao');
         $dados['chapa'] = $this->request->getPost('funcionario');
+        $dados['dataIni']   = $this->request->getPost('dataIni');
+        $dados['dataFim']   = $this->request->getPost('dataFim');
 
         if($dados['periodo'] != null){
             self::pdf($dados['periodo'], $dados['secao'], $dados['chapa']);
+            exit();
+        }
+
+        if($dados['dataIni'] != null && $dados['dataFim'] != null)
+        {
+            $periodosDisponiveis = $this->mEspelho->ListarPeriodosDisponiveis($dados['dataIni'], $dados['dataFim'], $dados['rh']);
+            $periodosAGerar = [];
+            foreach($periodosDisponiveis as $periodoDisponivel) {
+                $inicio = \DateTime::createFromFormat('Y-m-d H:i:s.u', $periodoDisponivel['INICIOMENSAL']);
+                $fim = \DateTime::createFromFormat('Y-m-d H:i:s.u', $periodoDisponivel['FIMMENSAL']);
+
+                $periodosAGerar[] = (string) $inicio->format('d/m/Y') . (string) $fim->format('d/m/Y');
+            }
+            self::pdf($periodosAGerar, $dados['secao'], $dados['chapa']);
             exit();
         }
 
@@ -491,6 +507,13 @@ class Espelho extends BaseController {
             //-------------------------------------
             case 'espelho_configuracao':
                 exit($this->mEspelho->CadastrarEspelhoConfiguracao($dados));
+                break;
+            
+            //-------------------------------------
+            case 'validar_data_periodo':
+                $dados['rh'] = parent::VerificaPerfil('GLOBAL_RH', false);
+                $result = $this->mEspelho->VerificarInicioOuFimPeriodo($dados['tipoPeriodo'], $dados['data'], $dados['rh']);
+                return $this->response->setJSON($result);
                 break;
             
             //-------------------------------------
