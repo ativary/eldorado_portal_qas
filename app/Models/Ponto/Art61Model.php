@@ -1674,6 +1674,7 @@ class Art61Model extends Model
           a.CHAPA,
           a.CODCOLIGADA,
           f.CODFILIAL,
+          f.CODSECAO,
           a.CODEVE,
           a.DATA,
           a.NUMHORAS,
@@ -1715,14 +1716,19 @@ class Art61Model extends Model
         and a.CODCOLIGADA = '" . session()->get('func_coligada') . "' 
         )
 
-        select l.*, z.HEXTRA_DIARIA 
+        select l.*, z.HEXTRA_DIARIA, z.TIPO TIPO_DATA, CASE WHEN D.FERIADO IS NULL THEN 'N' ELSE 'S' END FERIADO, o.extra_feriado EXTRA_FERIADO, i.tot_horas HORAS_EXTRAS_DO_DIA
         from lista l
         left join Z_OUTSERV_MELHORIAS3 z on z.CODCOLIGADA = l.CODCOLIGADA and z.CODHORARIO = l.HORARIO and z.CODINDICE = l.INDICE
+        LEFT JOIN PSECAO C ON C.CODCOLIGADA = l.CODCOLIGADA AND C.CODIGO = l.CODSECAO
+        LEFT JOIN GFERIADO D ON D.CODCALENDARIO = C.CODCALENDARIO AND D.DIAFERIADO = CONVERT(DATETIME, l.DATA, 103)
+        left join " . DBPORTAL_BANCO . "..zcrmportal_ocorrencia_horario o on o.coligada = l.CODCOLIGADA and o.codigo = l.HORARIO COLLATE Latin1_General_CI_AS 
+        left join (select chapa, codcoligada, data, sum(numhoras) tot_horas from lista group by chapa, codcoligada, data) i on i.chapa = l.chapa and i.CODCOLIGADA = l.CODCOLIGADA and i.data = l.data
+    
     ";
 
-    echo '<PRE> '.$query;
-    die();
-    exit();
+    //echo '<PRE> '.$query;
+    //die();
+    //exit();
 
     $result = $this->dbrm->query($query);
     if ($result->getNumRows() <= 0) {
@@ -1733,14 +1739,14 @@ class Art61Model extends Model
     if ($result) {
       $batidas = $result->getResult();
       foreach ($batidas as $batida) {
-        if ($batida->NUMHORAS > $batida->HEXTRA_DIARIA) { // só gera se hora extra do dia maior que o permitido
+        if ($batida->HORAS_EXTRAS_DO_DIA > $batida->HEXTRA_DIARIA) { // só gera se hora extra do dia maior que o permitido
 
           // INCLUSÃO DE REGISTROS 
           $query = " 
             INSERT INTO zcrmportal_art61_req_chapas
-              (id_req, chapa_colab, dt_ponto, codevento, dt_ini_ponto, dt_fim_ponto, valor, chapa_gestor, codhorario, indice) 
+              (id_req, chapa_colab, dt_ponto, codevento, dt_ini_ponto, dt_fim_ponto, valor, chapa_gestor, codhorario, indice, extra_limite_diario, horas_extras_do_dia, extra_feriado, feriado, tipo_data) 
             SELECT 
-              " . $id_req . ", '" . $batida->CHAPA . "', '" . SUBSTR($batida->DATA,0,10) . "', '" . $batida->CODEVE . "', '" . $dt_ini_per . "', '" . $dt_fim_per . "', " . $batida->NUMHORAS . ", '" . $batida->GESTOR_CHAPA . "', '" . $batida->HORARIO . "', " . $batida->INDICE . "
+              " . $id_req . ", '" . $batida->CHAPA . "', '" . SUBSTR($batida->DATA,0,10) . "', '" . $batida->CODEVE . "', '" . $dt_ini_per . "', '" . $dt_fim_per . "', " . $batida->NUMHORAS . ", '" . $batida->GESTOR_CHAPA . "', '" . $batida->HORARIO . "', " . $batida->INDICE . ", " . $batida->HEXTRA_DIARIA . ", " . $batida->HORAS_EXTRAS_DO_DIA . ", " . $batida->EXTRA_FERIADO . ", '".$batida->FERIADO."', '".$batida->TIPO_DATA."' 
             WHERE NOT EXISTS
               (SELECT chapa_colab FROM zcrmportal_art61_req_chapas WHERE
                 status <> 'I' AND chapa_colab = '".$batida->CHAPA."' AND
@@ -1759,10 +1765,15 @@ class Art61Model extends Model
               chapa_gestor = '" . $batida->GESTOR_CHAPA . "', 
               codhorario = '" . $batida->HORARIO . "', 
               indice = " . $batida->INDICE . ",
+              extra_limite_diario = " . $batida->HEXTRA_DIARIA . ",
+              horas_extras_do_dia = " . $batida->HORAS_EXTRAS_DO_DIA . ",
+              extra_feriado = " . $batida->EXTRA_FERIADO . ",
+              feriado = '" . $batida->FERIADO . "',
+              tipo_data = '" . $batida->TIPO_DATA . "',
               status = 'A' 
             WHERE 
                   id_req = " . $id_req . " 
-              AND status = 'P' 
+              AND status in ('A','P') 
               AND chapa_colab = '".$batida->CHAPA."' 
               AND dt_ponto = '".SUBSTR($batida->DATA,0,10)."' 
               AND codevento = '".$batida->CODEVE."'
