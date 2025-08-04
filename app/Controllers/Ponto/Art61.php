@@ -365,6 +365,7 @@ class Art61 extends BaseController
     $dados['calculado'] = ($dados['resListaArt61'][0]['status'] >= 4 and $dados['resListaArt61'][0]['status'] != 9) ? true : false;
    
     $dados['resReqChapas'] = $this->mArt61->ListarReqChapas($id);
+    $dados['resReqChapasUni'] = $this->mArt61->ListarReqChapasUni($id);
     $dados['resJustificativaArt61'] = $this->mEspelho->ListarJustificativa(6);
 
     return parent::ViewPortal('ponto/art61/solicitacao_chapas', $dados);
