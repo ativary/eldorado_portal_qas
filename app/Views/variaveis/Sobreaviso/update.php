@@ -656,13 +656,13 @@ document.getElementById('btnadd').addEventListener('click', function(e) {
     if($("#tipoPer").val()==1) {
       if($("#data_inicio").val() < '<?= $per_ini_atual ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
       if($("#data_inicio").val() > '<?= $per_fim_atual ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
-      if($("#data_fim").val() < '<?= $per_ini_atual ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
-      if($("#data_fim").val() > '<?= $per_fim_atual ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+      //if($("#data_fim").val() < '<?= $per_ini_atual ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+      //if($("#data_fim").val() > '<?= $per_fim_atual ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
     } else {
       if($("#data_inicio").val() < '<?= $per_ini_futuro ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
       if($("#data_inicio").val() > '<?= $per_fim_futuro ?>'){ erro = "Data Inicial deve estar dentro do período de ponto selecionado."; }
-      if($("#data_fim").val() < '<?= $per_ini_futuro ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
-      if($("#data_fim").val() > '<?= $per_fim_futuro ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+      //if($("#data_fim").val() < '<?= $per_ini_futuro ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
+      //if($("#data_fim").val() > '<?= $per_fim_futuro ?>'){ erro = "Data Final deve estar dentro do período de ponto selecionado."; }
     }
     if($("#data_fim").val() < $("#data_inicio").val()){ erro = "Data Final deve ser maior ou igual à Data Inicial."; }
     if($("#hora_inicio").val() == ""){ erro = "Hora Inicial é obrigatória."; }
@@ -833,19 +833,18 @@ document.getElementById('planilha').addEventListener('change', function (e) {
     const reader = new FileReader();
     reader.onload = function (e) {
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
 
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        dadosImportados = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        dadosImportados = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
     };
     reader.readAsArrayBuffer(file);
 });
 
 document.getElementById('btnimportar').addEventListener('click', function () {
     openLoading();
-    console.log('importação');
     loopImport = true;
     errosImport = '';
     if (dadosImportados.length === 0) {
@@ -859,15 +858,21 @@ document.getElementById('btnimportar').addEventListener('click', function () {
     const colunasCorretas = JSON.stringify(cabecalho) === JSON.stringify(colunasEsperadas);
     if (!colunasCorretas) {
         exibeAlerta("error", `As colunas da planilha estão incorretas.
-Esperado: ${colunasEsperadas.join(', ')}
-Encontrado: ${cabecalho.join(', ')}`);
+            Esperado: ${colunasEsperadas.join(', ')}
+            Encontrado: ${cabecalho.join(', ')}`);
         return false;
     }
 
     // Validação linha a linha
     for (let i = 1; i < dadosImportados.length; i++) {
         const linha = dadosImportados[i];
-        const [dataIni, horaIni, dataFim, horaFim, totalHoras] = linha;
+        let [dataIni, horaIni, dataFim, horaFim, totalHoras] = dadosImportados[i];
+        console.log(linha);
+        dataIni = toBrazilianDate(dataIni);
+        dataFim = toBrazilianDate(dataFim);
+        horaIni = formatTimeShort(horaIni);
+        horaFim = formatTimeShort(horaFim);
+        console.log(typeof dataIni, dataIni);
         if (!ehDataValida(dataIni)) {
             exibeAlerta("error", `Linha ${i + 1}: DATA_INICIAL inválida → "${dataIni}"` );
             return false;
@@ -893,10 +898,14 @@ Encontrado: ${cabecalho.join(', ')}`);
     // Se passou todas as validações, insere as linhas via btnadd
     for (let i = 1; i < dadosImportados.length; i++) {
         linhaImport = i;
-        const [dataIni, horaIni, dataFim, horaFim, totalHoras] = dadosImportados[i];
-
-        $("#data_inicio").val(formatarData(dataIni));               // Ex: "30/06/2025"
-        $("#hora_inicio").val(horaIni);               // Ex: "08:00"
+        let [dataIni, horaIni, dataFim, horaFim, totalHoras] = dadosImportados[i];
+        dataIni = toBrazilianDate(dataIni);
+        dataFim = toBrazilianDate(dataFim);
+        horaIni = formatTimeShort(horaIni);
+        horaFim = formatTimeShort(horaFim);
+        
+        $("#data_inicio").val(formatarData(dataIni));  // Ex: "30/06/2025"
+        $("#hora_inicio").val(horaIni);                // Ex: "08:00"
         $("#data_fim").val(formatarData(dataFim));
         $("#hora_fim").val(horaFim);
         calcularDiferenca();
@@ -925,6 +934,51 @@ Encontrado: ${cabecalho.join(', ')}`);
     }, 100); // pequeno delay para garantir que DOM atualizou
     
 });
+
+function toBrazilianDate(input) {
+    // Check if already in Brazilian format (DD/MM/YYYY)
+    const brazilianFormatRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
+    
+    if (typeof input === 'string' && brazilianFormatRegex.test(input)) {
+        return input; // Already in correct format
+    }
+    
+    // Try to parse as date (handles Excel serial numbers, ISO strings, etc.)
+    let date;
+    
+    if (typeof input === 'number' && input > 0) {
+        // Handle Excel serial date (integer part = days since 1900-01-01)
+        const excelEpoch = new Date(1899, 11, 30); // Excel's epoch is 1900-01-01 (but with 1900 incorrectly treated as leap year)
+        date = new Date(excelEpoch.getTime() + Math.round(input) * 86400000);
+    } else {
+        date = new Date(input);
+    }
+    
+    // Check if we got a valid date
+    if (isNaN(date.getTime())) {
+        return input; // Return original if not a date
+    }
+    
+    // Format as Brazilian date (DD/MM/YYYY)
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
+}
+
+function formatTimeShort(input) {
+    // Convert to string and trim
+    let timeStr = String(input).trim();
+    
+    // Add leading zero if needed (for single-digit hours)
+    if (timeStr.length === 4 && timeStr[1] === ':') {
+        timeStr = '0' + timeStr;
+    }
+    
+    // Ensure we only take first 5 characters (HH:MM)
+    return timeStr.length >= 5 ? timeStr.substring(0, 5) : timeStr.padStart(5, '0');
+}
 
 </script>
 
