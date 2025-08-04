@@ -1089,7 +1089,93 @@ class Art61Model extends Model
   }
 
   // -------------------------------------------------------
-  // Lista chapas de solicitação do Art61
+  // Lista chapas de solicitação do Art61 Unificado por dia
+  // -------------------------------------------------------
+  public function ListarReqChapasUni($id = 0)
+  {
+
+    $filtro = ($id == 0) ? '' : " AND id_req = " . $id;
+
+    $queryConfig = " 
+          SELECT
+              a.id,
+              a.id_req,
+              a.dt_ponto,
+              FORMAT(a.dt_ponto, 'dd/MM/yyyy') AS dt_ponto_br,
+              f.codfilial,
+			        a.chapa_colab,
+              f.nome AS nome_colab,
+              a.chapa_gestor,
+              g.nome AS nome_gestor,
+              dbo.[MINTOTIME](valor) AS valor, 
+              a.id_justificativa,
+              j.descricao AS desc_justificativa,
+              a.obs,
+              FORMAT(r.dt_ini_ponto, 'yyyy-MM-dd')+' and '+FORMAT(r.dt_fim_ponto , 'yyyy-MM-dd') AS per_ponto_sql,
+              FORMAT(r.dt_ini_ponto, 'dd/MM/yyyy')+' a '+FORMAT(r.dt_fim_ponto, 'dd/MM/yyyy') AS per_ponto_br,
+              r.dt_requisicao,
+              FORMAT(r.dt_requisicao, 'dd/MM/yyyy') AS dt_requisicao_br,
+              f.codsecao,
+              s.descricao as desc_secao,
+              f.codfuncao,
+              u.nome as desc_funcao,
+              s.nrocencustocont as cod_ccusto,
+              c.nome as desc_ccusto,
+              e.area as area,
+              a.codevento,
+              p.descricao as desc_evento,
+              dbo.[MINTOTIME](a.extra_normal) AS horas_extras_normais,
+              dbo.[MINTOTIME](a.extra_art61) AS horas_extras_art61,
+              a.codevento_art61,
+              v.descricao as desc_evento_art61
+              
+          FROM zcrmportal_art61_req_chapas a 
+          LEFT JOIN zcrmportal_art61_requisicao r ON 
+                r.id = a.id_req
+          LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON 
+                f.codcoligada = r.id_coligada AND 
+                f.chapa = a.chapa_colab COLLATE Latin1_General_CI_AS 
+          LEFT JOIN " . DBRM_BANCO . "..PFUNC g ON 
+                g.codcoligada = r.id_coligada AND 
+                g.chapa = a.chapa_gestor COLLATE Latin1_General_CI_AS 
+          LEFT JOIN " . DBRM_BANCO . "..PFUNCAO u ON 
+                u.codcoligada = f.codcoligada AND 
+                u.codigo = f.codfuncao 
+          LEFT JOIN " . DBRM_BANCO . "..PSECAO s ON 
+                s.codcoligada = f.codcoligada AND 
+                s.codigo = f.codsecao
+          LEFT JOIN " . DBRM_BANCO . "..GCCUSTO c ON 
+                c.codcoligada = s.codcoligada AND 
+                c.codccusto = s.nrocencustocont
+          LEFT JOIN " . DBRM_BANCO . "..PEVENTO p ON 
+                p.codcoligada = f.codcoligada AND 
+                p.codigo = a.codevento COLLATE Latin1_General_CI_AS
+          LEFT JOIN " . DBRM_BANCO . "..PEVENTO v ON 
+                v.codcoligada = f.codcoligada AND 
+                v.codigo = a.codevento_art61 COLLATE Latin1_General_CI_AS
+          LEFT JOIN zcrmportal_ponto_motivos j ON 
+                j.id = a.id_justificativa
+          LEFT JOIN zcrmportal_art61_areas e ON 
+                e.coligada = r.id_coligada AND 
+                e.codcusto = c.codccusto COLLATE Latin1_General_CI_AS
+          WHERE a.status <> 'I' 
+          " . $filtro . " 
+      ";
+
+    //echo '<PRE> '.$queryConfig;
+    //die();
+    //exit();
+
+    $result = $this->dbportal->query($queryConfig);
+    if ($result->getNumRows() > 0) {
+      return $result->getResultArray();
+    } else {
+      return [];
+    }
+  }
+
+  // -------------------------------------------------------
+  // Lista chapas de solicitação do Art61 
   // -------------------------------------------------------
   public function ListarReqChapas($id = 0)
   {
@@ -1579,7 +1665,7 @@ class Art61Model extends Model
       status = 'A' AND
       id_req = " . $id_req . "
     ";
-    $this->dbportal->query($query);
+    //$this->dbportal->query($query);
 
     // prepara a lista para inserção
     $query = "
@@ -1633,6 +1719,10 @@ class Art61Model extends Model
         from lista l
         left join Z_OUTSERV_MELHORIAS3 z on z.CODCOLIGADA = l.CODCOLIGADA and z.CODHORARIO = l.HORARIO and z.CODINDICE = l.INDICE
     ";
+
+    echo '<PRE> '.$query;
+    die();
+    exit();
 
     $result = $this->dbrm->query($query);
     if ($result->getNumRows() <= 0) {
