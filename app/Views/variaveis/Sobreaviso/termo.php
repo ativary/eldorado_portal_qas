@@ -69,7 +69,7 @@ setlocale(LC_TIME, 'pt_BR.utf8', 'pt_BR', 'Portuguese_Brazil.1252');
         <ul>
             <li><strong>Chapa:</strong> <?= $func[0]['CHAPA']; ?></li>
             <li><strong>Colaborador:</strong> <?= $func[0]['NOME']; ?></li>
-            <li><strong>Quantidade de Horas: <?= sprintf('%d:%02d', $h = floor($valores->valor), round(($valores->valor - $h) * 60)); ?> Horas </strong></li>
+            <li><strong>Quantidade de Horas: <?= sprintf('%d:%02d', $h = floor($valores->valor/60), round(($valores->valor/60 - $h) * 60)); ?> Horas </strong></li>
             <li><strong>Área/Departamento:</strong> <?= $func[0]['NOMESECAO']; ?></li>
         </ul>
 
