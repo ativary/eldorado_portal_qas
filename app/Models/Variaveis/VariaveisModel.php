@@ -1372,12 +1372,12 @@ class VariaveisModel extends Model {
                        
             if($result[0]['VALHORDIAREF'] == 'V'){
                 $val =  0;
-                $ref = $valores->valor;
+                $ref = round($valores->valor/60, 2);
                 
             }else{
                // $val = ($valor_numerico/200) * $valores->valor ;
                 $val =  0;
-                $ref =  $valores->valor;
+                $ref =  round($valores->valor/60, 2);
             }
 
           
@@ -1970,10 +1970,10 @@ class VariaveisModel extends Model {
                        
             if($result[0]['VALHORDIAREF'] == 'V'){
                 $val =  0;
-                $ref = $valores->valor;
+                $ref = round($valores->valor/60, 2);
             }else{
                 $val =  0;
-                $ref =  $valores->valor;
+                $ref =  round($valores->valor/60, 2);
             }
             
             if($tiporeq_sinc == '2'){
