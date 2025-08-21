@@ -887,12 +887,12 @@ class Art61Model extends Model
     $data = $worksheet->toArray();
 
     // Define as colunas esperadas
-    $colunasEsperadas = ['ID', 'ID_REQ', 'DATA', 'FILIAL', 'CHAPA', 'NOME', 'COD_JUSTIFICATIVA', 'DESC_JUSTIFICATIVA', 'OBS'];
+    $colunasEsperadas = ['ID', 'ID_REQ', 'DATA', 'FILIAL', 'CHAPA', 'NOME', 'COD_JUSTIFICATIVA', 'DESC_JUSTIFICATIVA', 'OBS', 'HORAS_EXTRAS_DO_DIA', 'HORAS_DIGITADAS'];
 
     // Valida o nome das colunas
     $colunasLidas = $data[0]; // A primeira linha contém o nome das colunas
     if ($colunasEsperadas !== $colunasLidas) {
-      return responseJson('error', 'As colunas do arquivo Excel não correspondem às colunas esperadas.<br><br>Esperado: ID, ID_REQ, DATA, FILIAL, CHAPA, NOME, COD_JUSTIFICATIVA, DESC_JUSTIFICATIVA, OBS.<br><br>Recebido:' . json_encode($colunasLidas));
+      return responseJson('error', 'As colunas do arquivo Excel não correspondem às colunas esperadas.<br><br>Esperado: ID, ID_REQ, DATA, FILIAL, CHAPA, NOME, COD_JUSTIFICATIVA, DESC_JUSTIFICATIVA, OBS, HORAS_EXTRAS_DO_DIA, HORAS_DIGITADAS.<br><br>Recebido:' . json_encode($colunasLidas));
     }
 
     // Loop para ler e gravar dados novos
@@ -902,8 +902,11 @@ class Art61Model extends Model
       $id_just = $data[$i][6];
       $desc_just = $data[$i][7];
       $obs = $data[$i][8];
+      $obs = $data[$i][8];
+      $horas_extras_do_dia = $data[$i][9];
+      $horas_digitadas = $data[$i][10];
 
-      if (is_numeric($id) and is_numeric($id_req) and (is_numeric($id_just) or $desc_just != '' or $obs != '')) {
+      if ($id != '' and is_numeric($id_req) and (is_numeric($id_just) or $desc_just != '' or $obs != '' or $horas_digitadas != '')) {
         if ($desc_just != '') {
           $query = "select id from zcrmportal_ponto_motivos where lower(cast(descricao AS nvarchar(MAX))) = lower('" . $desc_just . "') and tipo = 6";
           $result = $this->dbportal->query($query);
@@ -925,8 +928,25 @@ class Art61Model extends Model
           $id_just = 'NULL';
         }
 
-        // verifica ccusto já existe
-        $where = "id = '{$id}' AND id_req = '{$id_req}'";
+        // limpa id ou ids
+        $id = substr($id,1);
+        $minutos = 'NULL';
+
+        // valida horas digitadas
+        if (preg_match('/^\d{1,2}:\d{2}$/', $horas_digitadas)) {
+            list($h, $m) = explode(":", $horas_digitadas);
+            $h = (int)$h;
+            $m = (int)$m;
+
+            if ($h > 24 || $m > 59 || ($h === 24 && $m !== 0)) {
+                $minutos = 'NULL';
+            } else {
+                $minutos = $h * 60 + $m;
+            }
+        }
+
+        // atualiza justificativas
+        $where = "id in ({$id}) AND id_req = '{$id_req}'";
         $query = " 
             UPDATE
               zcrmportal_art61_req_chapas
@@ -940,6 +960,21 @@ class Art61Model extends Model
         ";
         //echo '<pre> '.$query;
         //exit();
+        $this->dbportal->query($query);
+
+        // atualiza horas digitadas
+        $query = " 
+            UPDATE
+              zcrmportal_art61_req_chapas
+            SET
+              horas_digitadas = {$minutos}
+            WHERE
+              {$where}
+              AND ('{$minutos}' = 'NULL' OR horas_extras_do_dia >= {$minutos})
+        ";
+        //echo '<pre> '.$query;
+        //exit();
+        //die();
         $this->dbportal->query($query);
       }
     }
@@ -1097,6 +1132,7 @@ class Art61Model extends Model
     $filtro = ($id == 0) ? '' : " AND id_req = " . $id;
 
     $queryConfig = " 
+        WITH L1 AS (
           SELECT
               a.id,
               a.id_req,
@@ -1127,7 +1163,9 @@ class Art61Model extends Model
               dbo.[MINTOTIME](a.extra_normal) AS horas_extras_normais,
               dbo.[MINTOTIME](a.extra_art61) AS horas_extras_art61,
               a.codevento_art61,
-              v.descricao as desc_evento_art61
+              v.descricao as desc_evento_art61,
+              a.horas_extras_do_dia,
+			        a.horas_digitadas
               
           FROM zcrmportal_art61_req_chapas a 
           LEFT JOIN zcrmportal_art61_requisicao r ON 
@@ -1160,6 +1198,70 @@ class Art61Model extends Model
                 e.codcusto = c.codccusto COLLATE Latin1_General_CI_AS
           WHERE a.status <> 'I' 
           " . $filtro . " 
+        ),
+
+        L2 AS (
+          SELECT 
+                  STUFF((
+                  SELECT ',' + CAST(x.id AS VARCHAR)
+                  FROM L1 x
+                  WHERE x.id_req = l.id_req
+                    AND x.dt_ponto = l.dt_ponto
+                    AND x.chapa_colab = l.chapa_colab
+                  FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'),1,1,'') AS id,
+                  l.id_req,
+                  l.dt_ponto,
+                  l.dt_ponto_br,
+                  l.codfilial,
+                  l.chapa_colab,
+                  l.nome_colab,
+                  l.chapa_gestor,
+                  l.nome_gestor,
+                  l.id_justificativa,
+                  l.obs,
+                  l.per_ponto_sql,
+                  l.per_ponto_br,
+                  l.dt_requisicao,
+                  l.dt_requisicao_br,
+                  l.codsecao,
+                  l.desc_secao,
+                  l.codfuncao,
+                  l.desc_funcao,
+                  l.cod_ccusto,
+                  l.desc_ccusto,
+                  l.area,
+            dbo.[MINTOTIME](AVG(l.horas_extras_do_dia)) AS horas_extras_do_dia,
+            dbo.[MINTOTIME](AVG(l.horas_digitadas)) AS horas_digitadas
+
+          FROM L1 l
+          GROUP BY 
+            l.id_req,
+                  l.dt_ponto,
+                  l.dt_ponto_br,
+                  l.codfilial,
+                  l.chapa_colab,
+                  l.nome_colab,
+                  l.chapa_gestor,
+                  l.nome_gestor,
+                  l.id_justificativa,
+                  l.obs,
+                  l.per_ponto_sql,
+                  l.per_ponto_br,
+                  l.dt_requisicao,
+                  l.dt_requisicao_br,
+                  l.codsecao,
+                  l.desc_secao,
+                  l.codfuncao,
+                  l.desc_funcao,
+                  l.cod_ccusto,
+                  l.desc_ccusto,
+                  l.area
+        )
+        
+        SELECT l.*, j.descricao AS desc_justificativa     
+        FROM L2 l
+        LEFT JOIN zcrmportal_ponto_motivos j ON 
+                    j.id = l.id_justificativa          
       ";
 
     //echo '<PRE> '.$queryConfig;
@@ -1726,9 +1828,9 @@ class Art61Model extends Model
     
     ";
 
-    //echo '<PRE> '.$query;
-    //die();
-    //exit();
+    echo '<PRE> '.$query;
+    die();
+    exit();
 
     $result = $this->dbrm->query($query);
     if ($result->getNumRows() <= 0) {
@@ -1804,6 +1906,35 @@ class Art61Model extends Model
     $this->dbportal->query($query);
 
     return responseJson('success', $resp);
+  }
+
+  // -------------------------------------------------------  
+  // Grava Hora Digitada na Chapa da Requisição
+  // -------------------------------------------------------
+  public function Grava_Hora_Req_Chapa($dados)
+  {
+    $ids = ($dados['id'] == -1) ? $dados['sel_ids'] : $dados['id'];
+    $minutos = sscanf($dados['hora_digi'], "%d:%d")[0]*60 + sscanf($dados['hora_digi'], "%d:%d")[1];
+    
+    $query = "
+            UPDATE
+               zcrmportal_art61_req_chapas
+            SET
+               horas_digitadas = " . $minutos . ",
+               dtalt = '" . date('Y-m-d H:i:s') . "',
+               usualt = '" . session()->get('log_id') . "'
+            WHERE
+               id in ( " . $ids . " )
+        ";
+    //echo $query;
+    //die();
+    $this->dbportal->query($query);
+
+    if ($this->dbportal->affectedRows() > 0) {
+      return responseJson('success', 'Hora digitada atualizada com sucesso.');
+    } else {
+      return responseJson('error', 'Falha ao atualizar hora digitada.');
+    }
   }
 
   // -------------------------------------------------------  
