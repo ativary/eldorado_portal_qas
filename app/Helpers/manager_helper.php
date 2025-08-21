@@ -21,7 +21,12 @@ function menu(){
                         $resultMenu .= '<ul class="nav-second-level  '.checkMenuAtivo($DadosMenu['nome'], 2).'" aria-expanded="false">';
                         foreach($ItenMenu as $row => $DadosItenMenu){
                             if($DadosMenu['id'] == $DadosItenMenu['idpai']){
-                                $resultMenu .= '<li><a href="'.base_url($DadosItenMenu['caminho']).'">'.$DadosItenMenu['menutit'].'</a></li>';
+                                // Verifica se o caminho é válido antes de usar base_url()
+                                $caminho = '';
+                                if (isset($DadosItenMenu['caminho']) && !is_null($DadosItenMenu['caminho']) && trim($DadosItenMenu['caminho']) !== '') {
+                                    $caminho = trim($DadosItenMenu['caminho']);
+                                }
+                                $resultMenu .= '<li><a href="'.base_url($caminho).'">'.$DadosItenMenu['menutit'].'</a></li>';
                             }
                         }
                         $resultMenu .= '</ul>';
@@ -39,7 +44,12 @@ function menu(){
                         $resultMenu .= '<ul class="submenu">';
                         foreach($ItenMenu as $row => $DadosItenMenu){
                             if($DadosMenu['id'] == $DadosItenMenu['idpai']){
-                                $resultMenu .= '<li><a href="'.base_url($DadosItenMenu['caminho']).'">'.$DadosItenMenu['menutit'].'</a></li>';
+                                // Verifica se o caminho é válido antes de usar base_url()
+                                $caminho = '';
+                                if (isset($DadosItenMenu['caminho']) && !is_null($DadosItenMenu['caminho']) && trim($DadosItenMenu['caminho']) !== '') {
+                                    $caminho = trim($DadosItenMenu['caminho']);
+                                }
+                                $resultMenu .= '<li><a href="'.base_url($caminho).'">'.$DadosItenMenu['menutit'].'</a></li>';
                             }
                         }
                         $resultMenu .= '</ul>';

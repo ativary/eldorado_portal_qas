@@ -181,6 +181,13 @@ class Art61 extends BaseController
       //-------------------------------------          
 
       //-------------------------------------
+      // grava hora digitada
+      case 'grava_hora_req_chapa':
+        exit($this->mArt61->Grava_Hora_Req_Chapa($dados));
+        break;
+      //-------------------------------------          
+
+      //-------------------------------------
       // importa centro de custo
       case 'importar':
         $dados['documento'] = $_FILES;
@@ -220,7 +227,7 @@ class Art61 extends BaseController
   public function importar_justificativas($id_req)
   {
 
-    $dados['_titulo'] = "Importar Justificativas da Solicitação n° " . $id_req;
+    $dados['_titulo'] = "Importar Justificativas/Horas da Solicitação n° " . $id_req;
     $dados['id_req'] = "$id_req";
     $this->_breadcrumb->add($dados['_titulo'], 'ponto/art61/solicitacao_chapas');
 
@@ -363,12 +370,15 @@ class Art61 extends BaseController
 
     $dados['pode_editar'] = ($dados['resListaArt61'][0]['status'] == 1 or $dados['resListaArt61'][0]['status'] == 9) ? true : false;
     $dados['calculado'] = ($dados['resListaArt61'][0]['status'] >= 4 and $dados['resListaArt61'][0]['status'] != 9) ? true : false;
-   
-    $dados['resReqChapas'] = $this->mArt61->ListarReqChapas($id);
-    $dados['resReqChapasUni'] = $this->mArt61->ListarReqChapasUni($id);
     $dados['resJustificativaArt61'] = $this->mEspelho->ListarJustificativa(6);
 
-    return parent::ViewPortal('ponto/art61/solicitacao_chapas', $dados);
+    if($dados['rh'] and $dados['calculado']) { 
+      $dados['resReqChapas'] = $this->mArt61->ListarReqChapas($id);
+      return parent::ViewPortal('ponto/art61/solicitacao_chapas', $dados);      
+    } else {
+      $dados['resReqChapas'] = $this->mArt61->ListarReqChapasUni($id);
+      return parent::ViewPortal('ponto/art61/solicitacao_chapas_uni', $dados);
+    }
   }
 
   // ------------------------------------------------------------------
@@ -376,7 +386,7 @@ class Art61 extends BaseController
   // ------------------------------------------------------------------
   public function exportar_req($id)
   {
-    $resCCusto = $this->mArt61->ListarReqChapas($id);
+    $resCCusto = $this->mArt61->ListarReqChapasUni($id);
 
     $spreadsheet = new Spreadsheet();
 
@@ -396,12 +406,12 @@ class Art61 extends BaseController
       ),
     );
 
-    $spreadsheet->getActiveSheet()->getStyle('A1:I1')->applyFromArray($styleArray);
-    $spreadsheet->getActiveSheet()->getStyle('A1:I1')->applyFromArray($styleBorda);
+    $spreadsheet->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleArray);
+    $spreadsheet->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleBorda);
 
     $spreadsheet
       ->getActiveSheet()
-      ->getStyle('A1:I1')
+      ->getStyle('A1:K1')
       ->getFill()
       ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
       ->getStartColor()
@@ -409,7 +419,7 @@ class Art61 extends BaseController
 
     // nome da aba da planilha
     $spreadsheet->getActiveSheet()->setTitle('H.EXTRAS-ART.61-JUSTIFICATIVAS');
-    $spreadsheet->getActiveSheet()->setAutoFilter('A1:I1'); // auto filtro no titulo
+    $spreadsheet->getActiveSheet()->setAutoFilter('A1:K1'); // auto filtro no titulo
 
     // titulo das colunas
     $sheet = $spreadsheet->getActiveSheet();
@@ -422,12 +432,14 @@ class Art61 extends BaseController
     $sheet->setCellValue('G1', 'COD_JUSTIFICATIVA');
     $sheet->setCellValue('H1', 'DESC_JUSTIFICATIVA');
     $sheet->setCellValue('I1', 'OBS');
+    $sheet->setCellValue('J1', 'HORAS_EXTRAS_DO_DIA');
+    $sheet->setCellValue('K1', 'HORAS_DIGITADAS');
 
     $rows = 2;
 
     if ($resCCusto) {
       foreach ($resCCusto as $key => $CCusto) {
-        $sheet->setCellValue('A' . $rows, $CCusto['id']);
+        $sheet->setCellValue('A' . $rows, "#".$CCusto['id']);
         $sheet->setCellValue('B' . $rows, $CCusto['id_req']);
         $sheet->setCellValue('C' . $rows, $CCusto['dt_ponto_br']);
         $sheet->setCellValue('D' . $rows, $CCusto['codfilial']);
@@ -436,8 +448,10 @@ class Art61 extends BaseController
         $sheet->setCellValue('G' . $rows, $CCusto['id_justificativa']);
         $sheet->setCellValue('H' . $rows, $CCusto['desc_justificativa']);
         $sheet->setCellValue('I' . $rows, $CCusto['obs']);
+        $sheet->setCellValue('J' . $rows, $CCusto['horas_extras_do_dia']);
+        $sheet->setCellValue('K' . $rows, $CCusto['horas_digitadas']);
 
-        $spreadsheet->getActiveSheet()->getStyle('A' . $rows . ':I' . $rows)->applyFromArray($styleBorda);
+        $spreadsheet->getActiveSheet()->getStyle('A' . $rows . ':K' . $rows)->applyFromArray($styleBorda);
         $rows++;
       }
     }
