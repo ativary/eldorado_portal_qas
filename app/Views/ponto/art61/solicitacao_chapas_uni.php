@@ -148,7 +148,7 @@
                         <div class="dropdown">
                           <button class="btn btn-soft-primary dropdown-toggle pl-1 pr-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> <i class="mdi mdi-dots-vertical"></i></button>
                           <div class="dropdown-menu" style="margin-left: -131px;">
-                            <button type="button" onclick="atuJustificativa('<?= $registro['id']; ?>')" class="dropdown-item" <?= $pode_editar ? '' : 'disabled' ; ?>><i class="mdi mdi-comment-eye-outline"></i> Justificativa</button>
+                            <button type="button" onclick="atuJustificativa('<?= $registro['id']; ?>','<?= $registro['id_justificativa']; ?>','<?= $registro['obs']; ?>')" class="dropdown-item" <?= $pode_editar ? '' : 'disabled' ; ?>><i class="mdi mdi-comment-eye-outline"></i> Justificativa</button>
                             <button type="button" onclick="verAnexos('#<?= $registro['id']; ?>',<?= $pode_editar ? 1 : 0 ; ?>)" class="dropdown-item"><i class="mdi mdi mdi-eye-outline"></i> Anexos</button>
                             <button type="button" onclick="apagarColaborador('<?= $registro['id']; ?>')" class="dropdown-item text-danger" <?= $pode_editar ? '' : 'disabled' ; ?>><i class="mdi mdi-trash-can-outline"></i> Remover Colaborador/Evento</button>
                           </div>
@@ -606,14 +606,14 @@
     });
   };
 
-  const atuJustificativa = (id_req_chapa) => {
+  const atuJustificativa = (id_req_chapa, id_just = '', obs = '') => {
     //abre modal
     console.log(id_req_chapa);
     if (id_req_chapa != -1) {
       $("[type=checkbox]").prop('checked', false)
     };
-    $("#justificativa").val('');
-    $("#obs").val('');
+    $("#justificativa").val(id_just);
+    $("#obs").val(obs);
     $("#id_req_chapa").val(id_req_chapa);
     $("#modalJust").modal();
   }
@@ -886,7 +886,7 @@
 
     Swal.fire({
       icon: 'question',
-      title: 'Ao salvar, eventos sem justificativas serão removidos da requisição. <b>Deseja salvar agora</b>?',
+      title: 'Ao salvar, registros sem justificativas ou horas digitadas serão removidos da requisição. <b>Deseja salvar agora</b>?',
       showDenyButton: true,
       showCancelButton: true,
       confirmButtonText: `Sim, Salvar`,

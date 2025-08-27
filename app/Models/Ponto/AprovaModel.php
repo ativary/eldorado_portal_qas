@@ -2724,42 +2724,128 @@ class AprovaModel extends Model
 
     // Query para calcular e atualizar horas
     $query = "
-      with calc as (
+      with calc1 as (
         select
           c.id,
           c.id_req,
+		      c.dt_ponto,
           c.chapa_colab,
           c.valor,
           f.codfilial,
           c.codevento,
           z.HEXTRA_DIARIA as extra_normal,
+		      c.horas_extras_do_dia,
+          c.horas_digitadas,
+          c.tipo_data,
+          c.feriado,
+          c.extra_feriado,
           e.para_codevento as codevento_art61,
           (c.valor - z.HEXTRA_DIARIA) as extra_art61,
-		      ROW_NUMBER() OVER (PARTITION BY c.dt_ponto, c.chapa_colab ORDER BY c.id) as numero_linha
+		      ROW_NUMBER() OVER (PARTITION BY c.dt_ponto, c.chapa_colab ORDER BY c.codevento) as numero_linha
 
         from zcrmportal_art61_req_chapas c
         left join zcrmportal_art61_requisicao r on r.id = c.id_req
-        left join " . DBRM_BANCO . "..PFUNC f on f.CODCOLIGADA = r.id_coligada and f.CHAPA = c.chapa_colab COLLATE Latin1_General_CI_AS 
-        left join " . DBRM_BANCO . "..Z_OUTSERV_MELHORIAS3 z on z.CODCOLIGADA = f.CODCOLIGADA and z.CODINDICE = c.indice and z.CODHORARIO = c.codhorario COLLATE Latin1_General_CI_AS
+        left join CorporeRMDEV..PFUNC f on f.CODCOLIGADA = r.id_coligada and f.CHAPA = c.chapa_colab COLLATE Latin1_General_CI_AS 
+        left join CorporeRMDEV..Z_OUTSERV_MELHORIAS3 z on z.CODCOLIGADA = f.CODCOLIGADA and z.CODINDICE = c.indice and z.CODHORARIO = c.codhorario COLLATE Latin1_General_CI_AS
         left join zcrmportal_art61_codevento e on e.coligada = r.id_coligada and e.codfilial = f.CODFILIAL and e.de_codevento = c.codevento and e.ativo = 'S'
 
         where r.id_coligada = " . $_SESSION['func_coligada'] . "
         and   c.status = 'A'
         and   c.id_req = " . $id_req . "
-      )
+      ),
+
+      acum as (
+          select
+          c.id,
+          c.chapa_colab,
+          c.dt_ponto,
+          c.codevento,
+          case
+            when c.feriado = 'S' then 'F'
+            when c.tipo_data = 'DESCANSO' then 'D'
+            else 'T'
+          end tipo_dia,
+          c.valor as horas_extras_do_dia,
+          isnull(( select sum(valor) 
+            from calc1
+            where chapa_colab = c.chapa_colab 
+              and dt_ponto = c.dt_ponto
+          ),0) horas_extras_somadas,
+          c.horas_digitadas,
+          c.feriado,
+          c.extra_feriado,
+          isnull(( select sum(valor) 
+            from calc1 
+            where chapa_colab = c.chapa_colab 
+              and dt_ponto = c.dt_ponto 
+              and numero_linha < c.numero_linha
+          ),0) horas_anterior,
+          c.numero_linha
+          from calc1 c
+        ),
+
+        acu2 as (
+          select 
+          a.id,
+          a.chapa_colab,
+          a.dt_ponto,
+          a.codevento,
+          a.tipo_dia,
+          a.horas_extras_somadas,
+          a.horas_digitadas,
+          a.horas_anterior,
+          ( a.horas_extras_somadas - a.horas_digitadas - horas_anterior ) as horas_extras_calculadas,
+          a.horas_extras_do_dia,
+          a.extra_feriado
+          from acum a
+
+        ), 
+
+        calc as (
+          select 
+          a.id,
+          a.chapa_colab,
+          a.dt_ponto,
+          a.codevento,
+          a.tipo_dia,
+          a.extra_feriado,
+          a.horas_extras_somadas,
+          a.horas_digitadas,
+          a.horas_anterior,
+          a.horas_extras_calculadas,
+          a.horas_extras_do_dia,
+          case
+            when a.tipo_dia = 'D' then
+              a.horas_extras_do_dia - a.horas_digitadas- a.horas_anterior 
+            when a.tipo_dia = 'F' then
+              a.extra_feriado 
+            else 
+              case
+                when ( a.horas_extras_calculadas >= a.horas_extras_do_dia ) then a.horas_extras_do_dia
+                else ( a.horas_extras_calculadas ) 
+              end
+          end as hora_normal,
+
+          case
+            when a.tipo_dia = 'D' then
+              a.horas_digitadas - a.horas_anterior
+            when a.tipo_dia = 'F' then
+              a.horas_extras_somadas - a.extra_feriado 
+            else 
+              case
+                when ( a.horas_extras_calculadas >= a.horas_extras_do_dia ) then 0
+                else ( a.horas_digitadas ) 
+              end
+          end as hora_art61
+
+          from acu2 a
+        )
 
       UPDATE
           r
       SET
-          r.extra_normal =  CASE 
-                              WHEN c.numero_linha = 1 THEN c.extra_normal 
-                              ELSE 0 
-                            END,
-          r.codevento_art61 = c.codevento_art61,
-          r.extra_art61 =   CASE 
-                              WHEN c.numero_linha = 1 THEN c.extra_art61 
-                              ELSE r.valor 
-                            END
+          r.extra_normal = c.hora_normal,
+          r.extra_art61 = c.hora_art61
       FROM
           zcrmportal_art61_req_chapas as r
           INNER JOIN calc AS c

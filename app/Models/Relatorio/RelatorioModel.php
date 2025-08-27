@@ -6447,7 +6447,25 @@ FROM (
             (
               RIGHT('00' + CAST(CAST(c.extra_art61 AS INT) / 60 AS VARCHAR), 2) + ':' + 
               RIGHT('00' + CAST(CAST(c.extra_art61 AS INT) % 60 AS VARCHAR), 2) 
-            ) AS HORAS_EXTRAS_ART61
+            ) AS HORAS_EXTRAS_ART61,
+            c.tipo_data AS TIPO_DATA,
+            (
+              RIGHT('00' + CAST(CAST(c.extra_limite_diario AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.extra_limite_diario AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_LIMITE_DIA,
+            c.feriado AS FERIADO,
+            (
+              RIGHT('00' + CAST(CAST(c.extra_feriado AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.extra_feriado AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_LIMITE_FERIADO,
+            (
+              RIGHT('00' + CAST(CAST(c.horas_extras_do_dia AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.horas_extras_do_dia AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_EXTRAS_TOTAIS_DIA,
+              (
+              RIGHT('00' + CAST(CAST(c.horas_digitadas AS INT) / 60 AS VARCHAR), 2) + ':' + 
+              RIGHT('00' + CAST(CAST(c.horas_digitadas AS INT) % 60 AS VARCHAR), 2) 
+            ) AS HORAS_DIGITADAS
 
           FROM zcrmportal_art61_req_chapas c
           LEFT JOIN zcrmportal_art61_requisicao r ON r.id = c.id_req
