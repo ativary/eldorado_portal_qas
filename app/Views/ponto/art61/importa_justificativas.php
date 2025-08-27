@@ -30,7 +30,7 @@
         </div>
 
         <div class="card-footer text-center">
-          <button class="btn btn-secondary" id="btn-importar" disabled onclick="return importarJust()"><i class="ti-arrow-down"></i> Importar Justificativas</button>
+          <button class="btn btn-secondary" id="btn-importar" disabled onclick="return importarJust()"><i class="ti-arrow-down"></i> Importar Justificativas/Horas</button>
         </div>
 
       </div><!-- end card -->

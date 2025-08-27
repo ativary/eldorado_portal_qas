@@ -1807,10 +1807,13 @@ class Art61Model extends Model
                 INNER JOIN AHORARIO Q ON P.CODCOLIGADA = Q.CODCOLIGADA AND P.CODHORARIO = Q.CODIGO 
                 WHERE A.CODCOLIGADA = P.CODCOLIGADA AND A.CHAPA = P.CHAPA AND P.DTMUDANCA <= A.DATA
                 ORDER BY DTMUDANCA DESC
-          ) DESC_HORARIO
+          ) DESC_HORARIO,
+		      m.descricao AS OBS_JUST
         from AMOVFUNDIA a
         left join PFUNC f on f.CODCOLIGADA = a.CODCOLIGADA and f.CHAPA = a.CHAPA
         left join " . DBPORTAL_BANCO . "..GESTOR_CHAPA g on g.CODCOLIGADA = a.CODCOLIGADA and g.CHAPA = a.CHAPA COLLATE Latin1_General_CI_AS 
+        left join PortalRHDEV..zcrmportal_ponto_justificativa_func j on j.coligada = a.CODCOLIGADA and j.dtponto = a.DATA and j.CHAPA = a.CHAPA COLLATE Latin1_General_CI_AS 
+        left join PortalRHDEV..zcrmportal_ponto_motivos m on m.id = j.justificativa
         where 
           a.DATA >= '" . $dt_ini_per . "' AND a.DATA <= '" . $dt_fim_per . "'
         and	cast(f.CODFILIAL AS VARCHAR)+a.CODEVE in (" . $codeventos . ")
@@ -1828,9 +1831,9 @@ class Art61Model extends Model
     
     ";
 
-    echo '<PRE> '.$query;
-    die();
-    exit();
+    //echo $query;
+    //die();
+    //exit();
 
     $result = $this->dbrm->query($query);
     if ($result->getNumRows() <= 0) {
@@ -1848,7 +1851,7 @@ class Art61Model extends Model
             INSERT INTO zcrmportal_art61_req_chapas
               (id_req, chapa_colab, dt_ponto, codevento, dt_ini_ponto, dt_fim_ponto, valor, chapa_gestor, codhorario, indice, extra_limite_diario, horas_extras_do_dia, extra_feriado, feriado, tipo_data) 
             SELECT 
-              " . $id_req . ", '" . $batida->CHAPA . "', '" . SUBSTR($batida->DATA,0,10) . "', '" . $batida->CODEVE . "', '" . $dt_ini_per . "', '" . $dt_fim_per . "', " . $batida->NUMHORAS . ", '" . $batida->GESTOR_CHAPA . "', '" . $batida->HORARIO . "', " . $batida->INDICE . ", " . $batida->HEXTRA_DIARIA . ", " . $batida->HORAS_EXTRAS_DO_DIA . ", " . $batida->EXTRA_FERIADO . ", '".$batida->FERIADO."', '".$batida->TIPO_DATA."' 
+              " . $id_req . ", '" . $batida->CHAPA . "', '" . SUBSTR($batida->DATA,0,10) . "', '" . $batida->CODEVE . "', '" . $dt_ini_per . "', '" . $dt_fim_per . "', " . $batida->NUMHORAS . ", '" . $batida->GESTOR_CHAPA . "', '" . $batida->HORARIO . "', " . $batida->INDICE . ", " . $batida->HEXTRA_DIARIA . ", " . $batida->HORAS_EXTRAS_DO_DIA - $batida->HEXTRA_DIARIA . ", " . $batida->EXTRA_FERIADO . ", '".$batida->FERIADO."', '".$batida->TIPO_DATA."' 
             WHERE NOT EXISTS
               (SELECT chapa_colab FROM zcrmportal_art61_req_chapas WHERE
                 status <> 'I' AND chapa_colab = '".$batida->CHAPA."' AND
@@ -1868,7 +1871,7 @@ class Art61Model extends Model
               codhorario = '" . $batida->HORARIO . "', 
               indice = " . $batida->INDICE . ",
               extra_limite_diario = " . $batida->HEXTRA_DIARIA . ",
-              horas_extras_do_dia = " . $batida->HORAS_EXTRAS_DO_DIA . ",
+              horas_extras_do_dia = " . $batida->HORAS_EXTRAS_DO_DIA - $batida->HEXTRA_DIARIA. ",
               extra_feriado = " . $batida->EXTRA_FERIADO . ",
               feriado = '" . $batida->FERIADO . "',
               tipo_data = '" . $batida->TIPO_DATA . "',
@@ -1884,6 +1887,26 @@ class Art61Model extends Model
           //echo $query;
           //exit();
           $this->dbportal->query($query);
+
+          // ALTERAÇÃO DE OBS de JUTIFICATIVA
+          if(!is_null($batida->OBS_JUST)) {
+            $query = " 
+              UPDATE zcrmportal_art61_req_chapas
+              SET
+                obs = '" . $batida->OBS_JUST . "'
+              WHERE 
+                    id_req = " . $id_req . " 
+                AND status in ('A','P') 
+                AND chapa_colab = '".$batida->CHAPA."' 
+                AND dt_ponto = '".SUBSTR($batida->DATA,0,10)."' 
+                AND codevento = '".$batida->CODEVE."'
+                AND ( obs IS NULL OR obs = '')
+              ";
+
+            //echo $query;
+            //exit();
+            $this->dbportal->query($query);
+          }
 
           // Desativado por alvaro em 19/07/2025 pois rotina de processamento mudou para não perder dados de justificativas e anexos
           //if ($this->dbportal->affectedRows() <= 0) {
@@ -2204,7 +2227,7 @@ class Art61Model extends Model
             WHERE
                id_req =" . $id . "
             AND status <> 'I' 
-            AND id_justificativa IS NULL 
+            AND (id_justificativa IS NULL or horas_digitadas IS NULL or horas_digitadas = 0)
         ";
 
     $this->dbportal->query($query);

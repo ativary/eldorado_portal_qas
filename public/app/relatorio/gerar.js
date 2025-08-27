@@ -879,6 +879,12 @@ const selecionaRelatorio = (idRel, selecionados = '') => {
                     {'value': '[HORAS_EXTRAS_NORMAIS]', 'name': 'Horas Extras Normais'},
                     {'value': '[CODEVENTO_ART61]', 'name': 'Código do Evento Artigo.61'},
                     {'value': '[HORAS_EXTRAS_ART61]', 'name': 'Horas Extras Artigo.61'},
+                    {'value': '[TIPO_DATA]', 'name': 'Tipo da Data'},
+                    {'value': '[HORAS_EXTRAS_LIMITE_DIA]', 'name': 'Limite de horas extras no dia'},
+                    {'value': '[FERIADO]', 'name': 'Feriado (S/N)'},
+                    {'value': '[HORAS_EXTRAS_LIMITE_FERIADO]', 'name': 'Limite de horas extras no feriado'},
+                    {'value': '[HORAS_EXTRAS_TOTAIS_DIA]', 'name': 'Total de horas extras no dia'},
+                    {'value': '[HORAS_DIGITADAS]', 'name': 'Horas Extras Digitadas'},
                     {'value': '[TOT_EVENTO_PERIODO]', 'name': 'Total de Horas do Evento no Período'},
                 ]
                 
