@@ -1435,7 +1435,8 @@ class EspelhoModel extends Model {
                             abn_codabono,
                             abono_atestado,
                             possui_anexo,
-                            codfilial
+                            codfilial,
+                            flag_parcial
                         ) VALUES (
                             '{$Dados['data']}',
                             '{$Dados['tipo_ocorrencia']}',
@@ -1452,7 +1453,8 @@ class EspelhoModel extends Model {
                             '{$Dados['codabono']}',
                             {$atestado},
                             {$possui_atestado},
-                            '{$Dados['codfilial']}'
+                            '{$Dados['codfilial']}',
+                            '{$Dados['flag_parcial']}'
                         )
                     ";
                     $this->dbportal->query($query);
@@ -2630,7 +2632,7 @@ class EspelhoModel extends Model {
                         (CONVERT(VARCHAR,INICIOPERMESALTERADO,103) + ' - ' + CONVERT(VARCHAR, FIMPERMESALTERADO,103))
                     END) MOVIMENTO,
                 
-                    CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
+                    /*CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
                         CASE WHEN C.CODEVENTO IN ('001','002') THEN
                             ((C.VALOR*
                                 (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
@@ -2648,6 +2650,27 @@ class EspelhoModel extends Model {
                                 - (VALORCOMPENSADO+VALORLANCADO) )*-1
                         ELSE
                     (  (C.VALOR - (VALORCOMPENSADO+VALORLANCADO)) *
+                            (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                END 
+                    END SALDO */
+                    CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
+                        CASE WHEN C.CODEVENTO IN ('001','002') THEN
+                            ((C.VALOR*
+                                (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                    - (0+0) )*-1
+                            ELSE
+                        (  (C.VALOR - (0+0)) *
+                                (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                    END 
+                    
+                    ELSE 
+                    
+                    CASE WHEN C.CODEVENTO IN ('001','002') THEN
+                        ((C.VALOR*
+                            (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                - (CASE WHEN INICIOPERMESALTERADO > '{$dataFimAnterior}' THEN 0 ELSE VALORCOMPENSADO+VALORLANCADO END) )*-1
+                        ELSE
+                    (  (C.VALOR - (CASE WHEN INICIOPERMESALTERADO > '{$dataFimAnterior}' THEN 0 ELSE VALORCOMPENSADO+VALORLANCADO END)) *
                             (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
                                 END 
                     END SALDO									 
@@ -2734,7 +2757,7 @@ class EspelhoModel extends Model {
                         (CONVERT(VARCHAR,INICIOPERMESALTERADO,103) + ' - ' + CONVERT(VARCHAR, FIMPERMESALTERADO,103))
                     END) MOVIMENTO,
                 
-                    CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
+                    /*CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
                         CASE WHEN C.CODEVENTO IN ('001','002') THEN
                             ((C.VALOR*
                                 (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
@@ -2752,6 +2775,27 @@ class EspelhoModel extends Model {
                                 - (VALORCOMPENSADO+VALORLANCADO) )*-1
                         ELSE
                     (  (C.VALOR - (VALORCOMPENSADO+VALORLANCADO)) *
+                            (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                END 
+                    END SALDO*/
+                    CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
+                        CASE WHEN C.CODEVENTO IN ('001','002') THEN
+                            ((C.VALOR*
+                                (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                    - (0+0) )*-1
+                            ELSE
+                        (  (C.VALOR - (0+0)) *
+                                (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                    END 
+                    
+                    ELSE 
+                    
+                    CASE WHEN C.CODEVENTO IN ('001','002') THEN
+                        ((C.VALOR*
+                            (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                - (CASE WHEN INICIOPERMESALTERADO > '{$dataFimAnterior}' THEN 0 ELSE VALORCOMPENSADO+VALORLANCADO END) )*-1
+                        ELSE
+                    (  (C.VALOR - (CASE WHEN INICIOPERMESALTERADO > '{$dataFimAnterior}' THEN 0 ELSE VALORCOMPENSADO+VALORLANCADO END)) *
                             (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
                                 END 
                     END SALDO									 
@@ -2839,7 +2883,7 @@ class EspelhoModel extends Model {
                             (CONVERT(VARCHAR,INICIOPERMESALTERADO,103) + ' - ' + CONVERT(VARCHAR, FIMPERMESALTERADO,103))
                         END) MOVIMENTO,
                     
-                        CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
+                        /*CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
                             CASE WHEN C.CODEVENTO IN ('001','002') THEN
                                 ((C.VALOR*
                                     (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
@@ -2859,7 +2903,28 @@ class EspelhoModel extends Model {
                         (  (C.VALOR - (VALORCOMPENSADO+VALORLANCADO)) *
                                 (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
                                     END 
-                        END SALDO									 
+                        END SALDO*/	
+                        CASE WHEN FIMPERMESALTERADO = '2050-01-01' THEN
+                            CASE WHEN C.CODEVENTO IN ('001','002') THEN
+                                ((C.VALOR*
+                                    (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                        - (0+0) )*-1
+                                ELSE
+                            (  (C.VALOR - (0+0)) *
+                                    (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                        END 
+                        
+                        ELSE 
+                        
+                        CASE WHEN C.CODEVENTO IN ('001','002') THEN
+                            ((C.VALOR*
+                                (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                    - (CASE WHEN INICIOPERMESALTERADO > '{$dataFimAnterior}' THEN 0 ELSE VALORCOMPENSADO+VALORLANCADO END) )*-1
+                            ELSE
+                        (  (C.VALOR - (CASE WHEN INICIOPERMESALTERADO > '{$dataFimAnterior}' THEN 0 ELSE VALORCOMPENSADO+VALORLANCADO END)) *
+                                (SELECT (CASE WHEN CONSPERCENT = '1' THEN N.PORCINCID ELSE 1 END) FROM AEVEPCOL M, PEVENTO N WHERE M.CODCOLIGADA = N.CODCOLIGADA AND M.CODEVEREL = N.CODIGO AND C.CODCOLIGADA = M.CODCOLIGADA AND C.CODEVENTO = M.CODEVEPTO AND M.CODPARCOL = E.CODPARCOL) )
+                                    END 
+                        END SALDO								 
                         
                     FROM 
                         ABANCOHORFUNDETALHE C,

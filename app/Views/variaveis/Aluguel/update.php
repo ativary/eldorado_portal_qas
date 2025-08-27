@@ -253,10 +253,13 @@ function quantMeses() {
     const quantMeses = <?= $valores->quantMes ?>; 
     const filial = $("#filial").val();
    
-    console.log(regra);
-    console.log(quantMeses);
-    console.log(filial);
+    //console.log(regra);
+    //console.log(quantMeses);
+    //console.log(filial);
     regra.dependentes.forEach(function(aluguel) {
+   
+    //estava assim em produção
+    //regra.aluguel.forEach(function(aluguel) {
         $('#quantMes').empty(); // Limpa as opções anteriores
         // Verifica se o nome no array é igual ao CODFILIAL da pessoa
         if (aluguel.nome == filial) {

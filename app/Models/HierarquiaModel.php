@@ -35,9 +35,9 @@ class HierarquiaModel extends Model {
 		}	
 
 		// verifica se é lider de BP
-		$isLiderBP = $this->getSecaoPodeVerLiderBP();
+		//$isLiderBP = $this->getSecaoPodeVerLiderBP();
 		
-		if($isLiderBP) return $isLiderBP;
+		//if($isLiderBP) return $isLiderBP;
 
         //$isLider = $this->dbportal->query(" SELECT * FROM zcrmportal_hierarquia_lider_func_ponto WHERE chapa = '{$chapa}' AND coligada = '{$coligada}' AND inativo IS NULL AND '".date('Y-m-d')."' BETWEEN A.perini AND (CASE WHEN A.perfim IS NOT NULL THEN A.perfim ELSE '2090-12-31' END) ");
 		$isLider = $this->isLider($chapa, $coligada);
@@ -82,7 +82,7 @@ class HierarquiaModel extends Model {
 					AND B.inativo IS NULL
 					AND C.inativo IS NULL
 					AND X.inativo IS NULL 
-					AND '".date('Y-m-d')."' BETWEEN A.perini AND (CASE WHEN A.perfim IS NOT NULL THEN A.perfim ELSE '2090-12-31' END)
+					AND '".date('Y-m-d')."' BETWEEN X.perini AND (CASE WHEN X.perfim IS NOT NULL THEN X.perfim ELSE '2090-12-31' END)
 				GROUP BY
 					C.chapa
 			)X GROUP BY chapa
@@ -94,7 +94,7 @@ class HierarquiaModel extends Model {
 					: false;
 
         }else{
-
+			
             $query = "
                 SELECT 
 					XC.codsecao 
@@ -320,7 +320,7 @@ class HierarquiaModel extends Model {
 					AND XC.coligada = '{$coligada}'
 					AND XB.inativo IS NULL
             ";
-
+			
 			//echo '<textarea>'.$query.'</textarea>';exit;
 			$result = $this->dbportal->query($query);
 
@@ -344,6 +344,15 @@ class HierarquiaModel extends Model {
 					];
 				}
 			}
+			$isLiderBP = $this->getSecaoPodeVerLiderBP();
+ 
+            if($isLiderBP){
+                foreach($isLiderBP as $key3 => $dadosLiderBp){
+                    $arraySecao[] = [
+                        'codsecao' => $dadosLiderBp['codsecao']
+                    ];
+                }
+            }
 
 			return $arraySecao;
 
@@ -390,7 +399,7 @@ class HierarquiaModel extends Model {
 
 		if($coligada === null || $chapa === null) return false;
 
-		$query = "  SELECT * FROM zcrmportal_hierarquia_gestor_substituto WHERE chapa_substituto IN ({$chapa}) AND coligada = '{$coligada}' AND inativo IS NULL AND '".date('Y-m-d')."' BETWEEN dtini AND (CASE WHEN dtfim IS NOT NULL THEN dtfim ELSE '2090-12-31' END) ";
+		$query = "  SELECT * FROM zcrmportal_hierarquia_gestor_substituto WHERE chapa_substituto IN ({$chapa}) AND coligada = '{$coligada}' AND ISNULL(inativo,0) = 0 AND '".date('Y-m-d')."' BETWEEN dtini AND (CASE WHEN dtfim IS NOT NULL THEN dtfim ELSE '2090-12-31' END) ";
 		
 		$result = $this->dbportal->query($query);
 		return ($result->getNumRows() > 0) 

@@ -90,6 +90,8 @@ const salvaDados = () => {
         if(dados.usuario_senha == ""){ exibeAlerta("error", "<b>Senha</b> obrigatório."); return false; }
         if(dados.usuario_senhac != dados.usuario_senha){ exibeAlerta("error", "<b>Confirmação de senha</b> inválida."); return false; }
     }
+	
+	if(!dados.usuario_email.includes("@eldoradobrasil.com.br")){ exibeAlerta("error", "<b>E-mail</b> deve conter <b>@eldoradobrasil.com.br."); return false; }
 
     openLoading();
 

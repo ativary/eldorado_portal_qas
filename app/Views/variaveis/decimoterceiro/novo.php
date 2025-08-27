@@ -329,6 +329,5 @@ const selecionaFuncionario = (chapa) => {
 
     
 }    
-
 </script>
 <?php loadPlugin(['select2','maskmoney']); ?>

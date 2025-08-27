@@ -16,7 +16,7 @@ curl_close($ch);
 
 echo $result;
 	
-$arquivo = "E:/crmserver/htdocs/portal_prd/hierarquia/log_lider.txt";
+$arquivo = "E:/crmserver/htdocs/portal_prd/cron/log_lider.txt";
 $fp = fopen($arquivo, "w+");
 fwrite($fp, '('.$result.') Executado em => '.date('d/m/Y H:i:s'));
 fclose($fp);

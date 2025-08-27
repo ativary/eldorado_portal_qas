@@ -303,7 +303,9 @@ $(document).ready(function(){
 										}
 									}
 								}
-								//if($statusPeriodo == 0) $periodo_bloqueado = true;
+
+								// EM DEV ESTAVA BLOQUEADO O IF ABAIXO - PROVAVELMENTE PARA TESTES
+								if($statusPeriodo == 0) $periodo_bloqueado = true;
 								//-----------------------------------------------
 
 
@@ -1102,24 +1104,24 @@ $(document).ready(function(){
 
 									$abono_pendente_rh = $resData[$i]['ABONO_PENDENTE_RH'];
 
-                  $motivo_justificativa = 'Não justificado';
-                  $banco_horas_menu = false;
+									$motivo_justificativa = 'Não justificado';
+									$banco_horas_menu = false;
 
-                  if($resData[$i]['USABANCOHORAS'] == 1 and ($resData[$i]['ATRASO_CASE'] or $resData[$i]['FALTA_CASE'])) {
-                    //$motivo_justificativa = 'Banco de Horas';
-                    $banco_horas_menu = true;
-                  }
+									if($resData[$i]['USABANCOHORAS'] == 1 and ($resData[$i]['ATRASO_CASE'] or $resData[$i]['FALTA_CASE'])) {
+										//$motivo_justificativa = 'Banco de Horas';
+										$banco_horas_menu = true;
+									}
 
-                  if(strlen(trim($resData[$i]['JUSTIFICATIVA'])) > 0) {
-									  $motivo_justificativa = $resData[$i]['JUSTIFICATIVA'];
-                    $banco_horas_menu = false;
-                  }
+									if(strlen(trim($resData[$i]['JUSTIFICATIVA'])) > 0) {
+														$motivo_justificativa = $resData[$i]['JUSTIFICATIVA'];
+										$banco_horas_menu = false;
+									}
 
 									$status_atitude = '';
 									if(strlen(trim($resData[$i]['JUSTIFICATIVA_ATITUDE'])) > 0){
 										$status_atitude = substr($resData[$i]['JUSTIFICATIVA_ATITUDE'],-1);
 										$motivo_justificativa = substr($resData[$i]['JUSTIFICATIVA_ATITUDE'],0, -1);
-                    $banco_horas_menu = false;
+                    					$banco_horas_menu = false;
 									}     
 
 									$html = '<tr class="tbadmlistalin">';
@@ -1187,22 +1189,22 @@ $(document).ready(function(){
 									if ($ck_ExtraExecutado && $vl_extra_executado > 0)
 										$html .= '<td class="n-mobile-cell" align="center">' . (($resData[$i]['EXTRAEXECUTADO_CASE']) ? m2h($resData[$i]['EXTRAEXECUTADO_CASE']) : '') . '</td>';
 									if ($ck_Atrasos) {
-                    if ($ck_todos and $resData[$i]['SEM_PAR_CORRESPONDENTE'])  { 
-                      $html .= '<td class="n-mobile-cell" align="center"> </td>';
-                    } else {
-                      $html .= '<td class="n-mobile-cell" align="center" '.(($abono_pendente_rh > 0 && $resData[$i]['ATRASO_CASE']) ? ' title="Aguardando Aprovação RH" style="background:#dbdcdd;" ':'').' '.(($abono_pendente_atraso == 1) ? ' title="Aguardando Aprovação" style="background:#feca07;"  ' : '').' '.(($abono_reprovado_atraso != '') ? ' title="'.$abono_reprovado_atraso.'" style="background:#f4811f;" class="txteldorado_2" ' : '').'>' . (($resData[$i]['ATRASO_CASE']) ? m2h($resData[$i]['ATRASO_CASE']) : '') . '</td>';
-                    }
-                  }
+										if ($ck_todos and $resData[$i]['SEM_PAR_CORRESPONDENTE'])  { 
+										$html .= '<td class="n-mobile-cell" align="center"> </td>';
+										} else {
+										$html .= '<td class="n-mobile-cell" align="center" '.(($abono_pendente_rh > 0 && $resData[$i]['ATRASO_CASE']) ? ' title="Aguardando Aprovação RH" style="background:#dbdcdd;" ':'').' '.(($abono_pendente_atraso == 1) ? ' title="Aguardando Aprovação" style="background:#feca07;"  ' : '').' '.(($abono_reprovado_atraso != '') ? ' title="'.$abono_reprovado_atraso.'" style="background:#f4811f;" class="txteldorado_2" ' : '').'>' . (($resData[$i]['ATRASO_CASE']) ? m2h($resData[$i]['ATRASO_CASE']) : '') . '</td>';
+										}
+									}
 									if ($ck_Faltas) {
-                    if ($ck_todos and $resData[$i]['SEM_PAR_CORRESPONDENTE'])  { 
-                      $html .= '<td class="n-mobile-cell" align="center"> </td>';
-                    } else {
-										  $html .= '<td class="n-mobile-cell" align="center" '.(($abono_pendente_rh > 0 && $resData[$i]['FALTA_CASE']) ? ' title="Aguardando Aprovação RH" style="background:#dbdcdd;" ':'').' '.(($abono_pendente_falta == 1 || $status_atitude == 1) ? ' title="Aguardando Aprovação" style="background:#feca07;"  ' : '').' '.(($abono_reprovado_falta != '' || $status_atitude == 3) ? ' title="'.$abono_reprovado_falta.'" style="background:#f4811f;"  class="txteldorado_2"' : '').'>' . (($resData[$i]['FALTA_CASE']) ? m2h($resData[$i]['FALTA_CASE']) : '') . '</td>';
-                    }
-                  }
-                  if ($ck_jorMaior10)
+										if ($ck_todos and $resData[$i]['SEM_PAR_CORRESPONDENTE'])  { 
+											$html .= '<td class="n-mobile-cell" align="center"> </td>';
+										} else {
+											$html .= '<td class="n-mobile-cell" align="center" '.(($abono_pendente_rh > 0 && $resData[$i]['FALTA_CASE']) ? ' title="Aguardando Aprovação RH" style="background:#dbdcdd;" ':'').' '.(($abono_pendente_falta == 1 || $status_atitude == 1) ? ' title="Aguardando Aprovação" style="background:#feca07;"  ' : '').' '.(($abono_reprovado_falta != '' || $status_atitude == 3) ? ' title="'.$abono_reprovado_falta.'" style="background:#f4811f;"  class="txteldorado_2"' : '').'>' . (($resData[$i]['FALTA_CASE']) ? m2h($resData[$i]['FALTA_CASE']) : '') . '</td>';
+										}
+									}
+									if ($ck_jorMaior10)
 										$html .= '<td class="n-mobile-cell" title="' . $resData[$i]['JORNADA_MAIOR_10HORAS_DESC'] . '" align="center">' . (($resData[$i]['JORNADA_MAIOR_10HORAS']) ? '<i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</td>';
-                  if ($ck_jorMaior12)
+									if ($ck_jorMaior12)
 										$html .= '<td class="n-mobile-cell" title="' . $resData[$i]['JORNADA_MAIOR_12HORAS_DESC'] . '" align="center">' . (($resData[$i]['JORNADA_MAIOR_12HORAS']) ? '<i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</td>';
 									if ($ck_interjornada)
 										$html .= '<td class="n-mobile-cell" title="' . $resData[$i]['INTERJORNADA_DESC'] . '" align="center">' . (($resData[$i]['INTERJORNADA']) ? '<i class="fas fa-exclamation-triangle" style="color: red;"></i>' : '') . '</td>';
@@ -1229,38 +1231,38 @@ $(document).ready(function(){
 														$inicioEscala   = $escala[0];
 														$terminoEscala  = end($escala);
 
-                            if ($motivo_justificativa == 'Não justificado') {
-														  $html .= '<button onclick="abrirAlteracaoBatida(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_batidas)).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.$resData[$i]['CPF'].'\', \''.(int)$resData[$i]['IS_MOTORISTA'].'\')" type="button" class="dropdown-item" title="Alterar registro"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar registro</button>';
-                            } else {
-                              $html .= '<button type="button" class="dropdown-item disabled" title="Incluir/Alterar registro" disabled><i class="mdi mdi-lock-alert" disabled ></i> Incluir/Alterar registro</button>';
-                            }
+															if ($motivo_justificativa == 'Não justificado') {
+																						$html .= '<button onclick="abrirAlteracaoBatida(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_batidas)).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.$resData[$i]['CPF'].'\', \''.(int)$resData[$i]['IS_MOTORISTA'].'\')" type="button" class="dropdown-item" title="Alterar registro"><i class="mdi mdi-pencil-outline"></i> Incluir/Alterar registro</button>';
+															} else {
+															$html .= '<button type="button" class="dropdown-item disabled" title="Incluir/Alterar registro" disabled><i class="mdi mdi-lock-alert" disabled ></i> Incluir/Alterar registro</button>';
+															}
 
-														if ($ck_Atrasos && ($resData[$i]['ATRASO_CASE'])){
+																						if ($ck_Atrasos && ($resData[$i]['ATRASO_CASE'])){
 
-                              if ($motivo_justificativa == 'Não justificado') {
-															  $html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_atraso)).'\', 5, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \'0:00\', \''.m2h($resData[$i]['ATRASO_CASE']).'\')" type="button" class="dropdown-item" title="Solicitar Abono Atraso"><i class="mdi mdi-av-timer"></i> Solicitar Abono Atraso</button>';
-                                if ($banco_horas_menu) {
-                                  $banco_horas_menu = false;
-                                  $html .= '<button onclick="confirmaBH(\''.dtEn($resData[$i]['DATA'], true).'\', \''.$resData[$i]['CHAPA'].'\', \'A\', \''.$resData[$i]['ATRASO_CASE'].'\')" type="button" class="dropdown-item" title="Confirma Banco de horas"><i class="mdi mdi-calendar-clock"></i> Confirma Banco de Horas</button>';
-                                }
-                              } else {
-                                $html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Atraso" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Atraso</button>';
-                              }
+															if ($motivo_justificativa == 'Não justificado') {
+																							$html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_atraso)).'\', 5, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \'0:00\', \''.m2h($resData[$i]['ATRASO_CASE']).'\')" type="button" class="dropdown-item" title="Solicitar Abono Atraso"><i class="mdi mdi-av-timer"></i> Solicitar Abono Atraso</button>';
+																if ($banco_horas_menu) {
+																$banco_horas_menu = false;
+																$html .= '<button onclick="confirmaBH(\''.dtEn($resData[$i]['DATA'], true).'\', \''.$resData[$i]['CHAPA'].'\', \'A\', \''.$resData[$i]['ATRASO_CASE'].'\')" type="button" class="dropdown-item" title="Confirma Banco de horas"><i class="mdi mdi-calendar-clock"></i> Confirma Banco de Horas</button>';
+																}
+															} else {
+																$html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Atraso" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Atraso</button>';
+															}
 
 															$html .= '<button onclick="abrirAlteraAtitude(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \'A\', \''.$resData[$i]['USABANCOHORAS'].'\')" type="button" class="dropdown-item" title="Altera Atitude Atraso"><i class="mdi mdi-calendar-question"></i> Altera Atitude Atraso</button>';
 															// $html .= '<button onclick="InsereAbonoAtraso(\'' . date('d/m/Y', strtotime($resData[$i]['DATA'])) . '\',\'' . $resData[$i]['CHAPA'] . '\',\'' . m2h($resData[$i]['FALTA_CASE']) . '\', \'' . $resData[$i]['NOME'] . '\', \'\', \'' . $resData[$i]['CODFILIAL'] . '\')" type="button" class="dropdown-item" title="Justificativa de exceção"><i class="mdi mdi-calendar-star"></i> Justificativa de exceção</button>';
 														}
 
 														if ($ck_Faltas && ($resData[$i]['FALTA_CASE'] && $resData[$i]['BATIDAS_PORTAL'] == 0)){
-                              if ($motivo_justificativa == 'Não justificado') {
-                                $html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_falta)).'\', 6, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.m2h($resData[$i]['FALTA_CASE']).'\', \'0:00\')" type="button" class="dropdown-item" title="Solicitar Abono Falta"><i class="mdi mdi-timer-off"></i> Solicitar Abono Falta</button>';
-                                if ($banco_horas_menu) {
-                                  $banco_horas_menu = false;
-                                  $html .= '<button onclick="confirmaBH(\''.dtEn($resData[$i]['DATA'], true).'\', \''.$resData[$i]['CHAPA'].'\', \'F\', \''.$resData[$i]['FALTA_CASE'].'\')" type="button" class="dropdown-item" title="Confirma Banco de horas"><i class="mdi mdi-calendar-clock"></i> Confirma Banco de Horas</button>';
-                                }
-                              } else {
-                                $html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Falta" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Falta</button>';
-                              }
+															if ($motivo_justificativa == 'Não justificado') {
+																$html .= '<button onclick="abrirSolicitacaoAbono(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.urlencode(json_encode($array_abonos_falta)).'\', 6, \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \''.(($periodo_bloqueado) ? 1 : 0).'\', \''.$inicioEscala.'\', \''.$terminoEscala.'\', \''.m2h($resData[$i]['FALTA_CASE']).'\', \'0:00\')" type="button" class="dropdown-item" title="Solicitar Abono Falta"><i class="mdi mdi-timer-off"></i> Solicitar Abono Falta</button>';
+																if ($banco_horas_menu) {
+																$banco_horas_menu = false;
+																$html .= '<button onclick="confirmaBH(\''.dtEn($resData[$i]['DATA'], true).'\', \''.$resData[$i]['CHAPA'].'\', \'F\', \''.$resData[$i]['FALTA_CASE'].'\')" type="button" class="dropdown-item" title="Confirma Banco de horas"><i class="mdi mdi-calendar-clock"></i> Confirma Banco de Horas</button>';
+																}
+															} else {
+																$html .= '<button type="button" class="dropdown-item disabled" title="Solicitar Abono Falta" disabled><i class="mdi mdi-lock-alert" disabled ></i> Solicitar Abono Falta</button>';
+															}
 
 															if($status_atitude != 'S') $html .= '<button onclick="abrirAlteraAtitude(\''.dtEn($resData[$i]['DATA'], true).'\', \''.dtBr($resData[$i]['DATA']).'\', \''.diaSemana($resData[$i]['DATA']).'\', \''.$resData[$i]['CHAPA'].'\', \''.$resData[$i]['ESCALA'].'\', \''.urlencode(json_encode($array_batidas)).'\', \'F\', \''.$resData[$i]['USABANCOHORAS'].'\')" type="button" class="dropdown-item" title="Altera Atitude Falta"><i class="mdi mdi-calendar-question"></i> Altera Atitude Falta</button>';
 															// $html .= '<button onclick="InsereAbonoFalta(\'' . date('d/m/Y', strtotime($resData[$i]['DATA'])) . '\',\'' . $resData[$i]['CHAPA'] . '\',\'' . m2h($resData[$i]['FALTA_CASE']) . '\', \'' . $resData[$i]['NOME'] . '\', \'\', \'' . $resData[$i]['CODFILIAL'] . '\')" type="button" class="dropdown-item" title="Falta"><i class="mdi mdi-calendar-question"></i> Altera Atitude/Justificativa</button>';
@@ -1784,11 +1786,11 @@ $(document).ready(function(){
 		}
 	})
 
-  function removerHTML(variavelComHTML) {
-    const elemento = document.createElement('div');
-    elemento.innerHTML = variavelComHTML;
-    return elemento.textContent || elemento.innerText || '';
-  }
+	function removerHTML(variavelComHTML) {
+		const elemento = document.createElement('div');
+		elemento.innerHTML = variavelComHTML;
+		return elemento.textContent || elemento.innerText || '';
+	}
 
 	function h2m(hora) {
 		var horas = hora.split(':');
@@ -2460,6 +2462,7 @@ data_nova_batida = '';
 tipo_atitude = '';
 tipo_do_abono = '';
 chapaFunc = '';
+nomeFunc = '';
 cpfFunc = '';
 abono_noturno = false;
 msg_noturno = "";
@@ -2632,9 +2635,10 @@ const verificaLimite = () => {
 //------------------------------------------------------
 // alteração de batidas
 //------------------------------------------------------
-const abrirAlteracaoBatida = (data, data_br, diasemana, batidas, chapa, escala, inicioEscala, terminoEscala, cpf, is_motorista) => {
+const abrirAlteracaoBatida = (data, data_br, diasemana, batidas, chapa, escala, inicioEscala, terminoEscala, cpf, is_motorista, nome) => {
 
 	chapaFunc = chapa;
+	nomeFunc = nome;
 	cpfFunc = cpf;
 	msg_aviso_batida = "";
 	msg_aviso_datas = "";
@@ -3241,6 +3245,7 @@ const solicitarAbono = () => {
 				'inicio_default' : $(this).find('input')[2].getAttribute('data-inicio-default'),
 				'termino_default': $(this).find('input')[3].getAttribute('data-termino-default'),
 				'tem_anexo'      : tem_anexo,
+				'flag_parcial'   : $(this).find('input[type="checkbox"]')[0]?.checked ? 1 : 0,
 				"codfilial"      : '1',
 				"chapa"          : chapaFunc,
 				"tipo_ocorrencia": tipo_do_abono
@@ -3741,7 +3746,7 @@ const abrirAlteraAtitude = (data, data_br, diasemana, chapa, escala, batidas, ti
 	$('[data-atitude-atitude]').val('');
 
 	//var bancodehoras = (usabanco == 1) ? '<option value="1">Banco de Horas</option>' : '';
-  var bancodehoras =  ''; //DESTIVADO POR ALVARO ZARAGOZA EM 16/06/2025
+  	var bancodehoras =  ''; //DESTIVADO POR ALVARO ZARAGOZA EM 16/06/2025
 
 	if(tipo == 'F'){
 		$('[data-atitude-atitude]').html(`
@@ -3914,7 +3919,7 @@ $(document).ready(function(){
 			$("#ck_jorMaior10").prop('checked', true);
 			$("#ck_jorMaior12").prop('checked', true);
 			$("#ck_interjornada").prop('checked', true);
-      $("#vl_extra_executado").val('00:01');
+      		$("#vl_extra_executado").val('00:01');
 			$("#vl_atrasos").val('00:01');
 		}else{
 			$("#ck_ExtraExecutado").prop('checked', false);
@@ -3924,7 +3929,7 @@ $(document).ready(function(){
 			$("#ck_jorMaior10").prop('checked', false);
 			$("#ck_jorMaior12").prop('checked', false);
 			$("#ck_interjornada").prop('checked', false);
-      $("#vl_extra_executado").val('');
+      		$("#vl_extra_executado").val('');
 			$("#vl_atrasos").val('');
 		}
 	});
@@ -4212,7 +4217,7 @@ $.ajax({
                             <span><div id="data_macro">-</div></span>
                             <span><button id="dia_posterior" type="button" class="text-primary" style="border: none; background: none;"><i class="fa fa-arrow-right"></i></button></span>
                         </h3>
-                        <h3 class="m-0"><?= $resFuncionario[0]['CHAPA'].' - '.$resFuncionario[0]['NOME']; ?></h3>
+                        <h3 class="m-0"></h3>
                         <h5 data-h-escala class="h7 mt-0"></h5>
 
                         <table class="table table-sm" id="table_macro">
@@ -4247,7 +4252,8 @@ $.ajax({
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <!-- modal modal_macro -->
- <!-- Modal Observação -->
+ 
+<!-- Modal Observação -->
 <div class="modal" id="modalObservacaoExtra" tabindex="-1" role="dialog" aria-labelledby="modalObservacaoExtraLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -4284,6 +4290,7 @@ const carregaMacro = (data_macro = data_nova_batida ) => {
 	$('#data_macro').html(`${day}/${month}/${year}`);
 
 	$('#table_macro tbody').html('');
+	$('.modal_macro h3:eq(1)').html(`${chapaFunc} - ${nomeFunc}`);
 	$('#dia_anterior').attr("onClick","carregaMacro('"+previousDate+"')");
 	$('#dia_posterior').attr("onClick","carregaMacro('"+nextDate+"')");
 

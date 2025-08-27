@@ -27,6 +27,7 @@ class Logged implements FilterInterface
         if(in_array('cronATS', $urlRequest)) return false;
         if(in_array('cronATSMacro', $urlRequest)) return false;
         if(in_array('inativaLider', $urlRequest)) return false;
+        if(in_array('cronApiPontoMais', $urlRequest)) return false;
         if(!session()->get('authenticate')){
             return redirect()->to(base_url('acesso/login'));
         }

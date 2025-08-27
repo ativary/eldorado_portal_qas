@@ -279,6 +279,7 @@ $(document).ready(function(){
                                         <th class="n-mobile-cell"><strong>Registros do Dia</strong></th>
                                         <th class="n-mobile-cell"><strong>Data de Referência</strong></th>
                                         <th class="n-mobile-cell"><strong>Data solicitação</strong></th>
+                                        <th class="n-mobile-cell"><strong>Data aprovação</strong></th>
                                         <th class="n-mobile-cell"><strong>Solicitante</strong></th>
                                         <!-- <th class="n-mobile-cell"><strong>Aprovador</strong></th> -->
                                         <th class="y-mobile-cell d-none"><b>DADOS</b></th>
@@ -498,6 +499,8 @@ $(document).ready(function(){
                                                 <td class="n-mobile-cell"><?= $registro['batidas_dia']; ?>
                                                 <td class="n-mobile-cell"><?= (strlen(trim($registro['data_referencia'])) > 0 ? dtBr($registro['data_referencia']) : ''); ?></td>
                                                 <td class="n-mobile-cell"><?= dtBr($registro['data_solicitacao']); ?></td>
+                                                <td class="n-mobile-cell"><?= (($registro['status'] ?? 0) == 2) ? dtBr($registro['dtapr']) : ''; ?></td>
+
                                                 <td class="n-mobile-cell"><?= $registro['chapa_solicitante'].' - '.$registro['solicitante']; ?></td>
                                                 <!-- <td class="n-mobile-cell"><?= $registro['chapa_gestor'].' - '.$registro['nome_gestor']; ?></td> -->
                                                 <td class="y-mobile-cell d-none">
@@ -885,6 +888,13 @@ $(document).ready(function(){
         if (filtro_tipo == '') {
           exibeAlerta('error', 'Categoria não informada.');
           return false;
+
+        /*  removido no merge do GIT 26/08/2025
+        var secao = document.getElementById('secao').value;
+        if (secao == '') {
+            alert('Selecione uma seção');
+            return false;
+        */
         }
         openLoading();
         $("#form_secao").attr('target', '_top');
@@ -1123,7 +1133,6 @@ $(document).ready(function(){
         document.getElementById('form1').action="<?= base_url('ponto/aprova/excel'); ?>";
         document.getElementById('form1').submit();
     }
-
     const justificativas = (idEscala) => {
         <?= (!$acessoPermitido) ? 'return false;' : ''; ?>
         openLoading();
@@ -1385,6 +1394,20 @@ body {
                 "sSortDescending": ": Ordenar colunas de forma descendente"
             }
         },
+        /* ANALISAR indices das colunas abaixo (devem ser datas)
+        "columnDefs": [
+            {
+                "targets": [3, 9, 10, 11],
+                "className": "text-center",
+                "render": function(data, type, row) {
+                    if (type === 'sort' || type === 'type') {
+                        return data.split('/').reverse().join('-');
+                    }
+                    return data;
+                }
+            }
+        ], 
+        */
         initComplete: function () {
             var api = this.api(); // Instância do DataTable
             var p_linha = api.columns()[0].length;

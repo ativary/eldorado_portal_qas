@@ -173,6 +173,7 @@ class AprovaModel extends Model
 			atitude_dt,
 			atitude_tipo,
 			justificativa_excecao,
+			flag_parcial,
 			ISNULL((SELECT BASE FROM " . DBRM_BANCO . "..AAFHTFUN WHERE CHAPA = zcrmportal_ponto_horas.chapa COLLATE Latin1_General_CI_AS AND CODCOLIGADA = zcrmportal_ponto_horas.coligada AND DATA = zcrmportal_ponto_horas.dtponto),0) htrab,
 			(CASE WHEN abn_dtfim > abn_dtini THEN abn_horafim+1440 - abn_horaini ELSE abn_horafim - abn_horaini END) horas_abono
 		FROM 
@@ -277,6 +278,8 @@ class AprovaModel extends Model
 
         $desconsidera = 1;
 
+        $flagParcial = isset($res[0]['flag_parcial']) ? (int)$res[0]['flag_parcial'] : 0;
+
         if ($res[0]['movimento'] == '9') {
           $desconsidera = 0;
         }
@@ -284,7 +287,7 @@ class AprovaModel extends Model
         if ($res[0]['movimento'] == '5') $SOLUCAOCONFLITO = 1;
 
         if (strlen(trim($res[0]['horas_abono'])) > 0) {
-          if ((int)$res[0]['horas_abono'] >= (int)$res[0]['htrab']) {
+          if ((int)$res[0]['horas_abono'] >= (int)$res[0]['htrab'] || $flagParcial == 0) {
             $SOLUCAOCONFLITO = 6;
           }
         }
@@ -1023,7 +1026,8 @@ class AprovaModel extends Model
 
     $filtro_chapa_lider = "";
     $filtro_secao_lider = "";
-    if ($isLider) {
+
+    if ($isLider && $objFuncLider) {
       $chapas_lider = "";
       $codsecoes = "";
       foreach ($objFuncLider as $idx => $value) {
@@ -1237,7 +1241,8 @@ class AprovaModel extends Model
                 AND AA.dtponto = A.dtponto
                 AND AA.chapa = A.chapa
             ) obs_just,
-          B.CODFILIAL as codfilial
+          B.CODFILIAL as codfilial,
+					NULL dtapr
 				FROM
 					zcrmportal_ponto_horas A (NOLOCK)
 					INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
@@ -1258,7 +1263,17 @@ class AprovaModel extends Model
 					{$filtro_filial}
 					{$filtro_legenda}
 					{$filtro_tipo_ponto}
+
+        ";
+          /* em produção
+					{$periodo}
+					{$filtro_chapa}
+					" . ((($dados['filtro_tipo'] ?? 'ponto') == 'ponto') ? '' : $filtro_tipo) . "
+					{$filtro_filial}
+					{$filtro_1}
+					{$filtro_legenda} */
 					
+      $query = $query . "
 				UNION ALL
 				
 				SELECT
@@ -1350,7 +1365,8 @@ class AprovaModel extends Model
 	        NULL art61_chapa_gerente,
 	        NULL obs,
 	        NULL obs_just,
-          B.CODFILIAL as codfilial
+          B.CODFILIAL as codfilial,
+					(CASE WHEN a.situacao = 2 THEN COALESCE(a.dtapr,a.dtupload,a.dtcad) ELSE NULL END) dtapr
 				FROM
 					zcrmportal_escala a (NOLOCK)
 					INNER JOIN " . DBRM_BANCO . "..PFUNC B (NOLOCK) ON B.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND B.CODCOLIGADA = A.coligada
@@ -1427,7 +1443,8 @@ class AprovaModel extends Model
 	        g.ger_chapa as art61_chapa_gerente,
 	        NULL obs,
 	        NULL obs_just,
-          f.CODFILIAL as codfilial
+          f.CODFILIAL as codfilial,
+          dt_aprovacao as dtapr
           FROM zcrmportal_art61_requisicao r
             LEFT JOIN " . DBRM_BANCO . "..PFUNC f ON f.CODCOLIGADA = r.id_coligada
             AND f.CHAPA = r.chapa_requisitor COLLATE Latin1_General_CI_AS
@@ -1452,6 +1469,23 @@ class AprovaModel extends Model
 
     //echo $query;
     //die();
+
+    /* antes em produção
+    
+					{$periodoEscala}
+					" . (str_replace(['a.movimento', 'ponto'], ['a.tipo', '0'], $filtro_tipo)) . "
+					{$filtro_chapa}
+					{$filtro_filial}
+					{$filtro_2}
+					{$filtro_legenda2}
+			)X
+			ORDER BY
+				X.chapa,
+				X.dtponto
+		";
+    
+    */
+
     $result = $this->dbportal->query($query);
     if ($result->getNumRows() > 0) {
       $response = array();

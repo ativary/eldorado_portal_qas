@@ -668,46 +668,46 @@ class RequisicaoModel extends Model {
     //-------------------------------
     public function GerenteChapaSub($dados){
 
-      $id_coligada = $_SESSION['func_coligada'];
-      if(!isset($dados['chapa_requisitor'])) return [];
-
-      $chapa = $dados['chapa_requisitor'];
-      $ger_chapa = $this->GerenteChapa($chapa);
-      if($ger_chapa) {
-        $sqlger = "
-          SELECT '".$ger_chapa."' AS CHAPA
-          UNION";
-      } else {
-        $sqlger = "";
+        $id_coligada = $_SESSION['func_coligada'];
+        if(!isset($dados['chapa_requisitor'])) return [];
+  
+        $chapa = $dados['chapa_requisitor'];
+        $ger_chapa = $this->GerenteChapa($chapa);
+        if($ger_chapa) {
+          $sqlger = "
+            SELECT '".$ger_chapa."' AS CHAPA
+            UNION";
+        } else {
+          $sqlger = "";
+        }
+        $sql = "
+          WITH LISTA AS 
+          (
+          ".$sqlger." 
+          SELECT
+                chapa_gestor AS CHAPA
+          FROM zcrmportal_hierarquia_gestor_substituto
+          WHERE 
+            getdate() between dtini and dtfim
+          AND inativo = 0
+          AND CHARINDEX('\"11\"', modulos) > 0
+          AND chapa_substituto = '".$chapa."'
+          AND coligada = ".$id_coligada."
+          )
+  
+          SELECT DISTINCT 
+            L.CHAPA,
+            F.NOME
+          FROM 
+            LISTA L
+          INNER JOIN ".DBRM_BANCO."..PFUNC F ON F.CODCOLIGADA = 1 AND F.CHAPA = L.CHAPA COLLATE Latin1_General_CI_AS
+        ";
+        
+        $result = $this->dbportal->query($sql);
+          return ($result->getNumRows() > 0) 
+                  ? $result->getResultArray() 
+                  : [];
       }
-      $sql = "
-        WITH LISTA AS 
-        (
-        ".$sqlger." 
-        SELECT
-              chapa_gestor AS CHAPA
-        FROM zcrmportal_hierarquia_gestor_substituto
-        WHERE 
-          getdate() between dtini and dtfim
-        AND inativo = 0
-        AND CHARINDEX('\"11\"', modulos) > 0
-        AND chapa_substituto = '".$chapa."'
-        AND coligada = ".$id_coligada."
-        )
-
-        SELECT DISTINCT 
-          L.CHAPA,
-          F.NOME
-        FROM 
-          LISTA L
-        INNER JOIN ".DBRM_BANCO."..PFUNC F ON F.CODCOLIGADA = 1 AND F.CHAPA = L.CHAPA COLLATE Latin1_General_CI_AS
-      ";
-      
-      $result = $this->dbportal->query($sql);
-        return ($result->getNumRows() > 0) 
-                ? $result->getResultArray() 
-                : [];
-    }
 
     //-----------------------------------
     // Retorna o coordenador de uma chapa
@@ -2168,7 +2168,7 @@ SELECT
                         f.codcoligada = ".$codcoligada." AND
                         ((a.dtinicio BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."') OR
                          (a.dtfinal  BETWEEN '".$dtini_ponto."' AND '".$dtfim_ponto."') OR 
-						              (a.dtinicio < '".$dtini_ponto."' AND a.dtfinal > '".$dtfim_ponto."') OR
+						 (a.dtinicio < '".$dtini_ponto."' AND a.dtfinal > '".$dtfim_ponto."') OR
                          ( (a.dtinicio <= '".$dtfim_ponto."') AND a.dtfinal is NULL) ) AND
                         f.chapa = '".$chapa."' 
                 )
@@ -2196,7 +2196,6 @@ SELECT
                 AND f.CHAPA = '".$chapa."'
                 AND h.dtinicio IS NOT NULL
                 AND (SELECT COUNT(CHAPA) FROM AFAST) = 0
-
                 ";
                 /*if($chapa=='050008006') {
                     echo '<pre> '.$query;

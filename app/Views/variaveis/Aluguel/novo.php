@@ -173,8 +173,6 @@ function verificaValor(input) {
 
     });
 
-    console.log('valor_max:', limitePermitido);
-    console.log('regra.dep', regra.dependentes);
     if (limitePermitido !== null && valor > limitePermitido) {
         Swal.fire({
             icon: 'error', // Ícone de erro para indicar que algo está errado

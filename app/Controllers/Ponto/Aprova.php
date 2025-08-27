@@ -29,7 +29,7 @@ class Aprova extends BaseController
   public function index()
   {
 
-    //set_time_limit(60*2);
+    set_time_limit(60*30);
 
     parent::VerificaPerfil('PONTO_APROVA');
     
@@ -444,12 +444,12 @@ class Aprova extends BaseController
             ),
         );
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleArray);
-        $spreadsheet->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleBorda);
+        $spreadsheet->getActiveSheet()->getStyle('A1:L1')->applyFromArray($styleArray);
+        $spreadsheet->getActiveSheet()->getStyle('A1:L1')->applyFromArray($styleBorda);
 
         $spreadsheet
         ->getActiveSheet()
-        ->getStyle('A1:K1')
+        ->getStyle('A1:L1')
         ->getFill()
         ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
         ->getStartColor()
@@ -457,7 +457,7 @@ class Aprova extends BaseController
 
         // nome da aba da planilha
         $spreadsheet->getActiveSheet()->setTitle('Aprovação de Ponto');
-        $spreadsheet->getActiveSheet()->setAutoFilter('A1:K1'); // auto filtro no titulo
+        $spreadsheet->getActiveSheet()->setAutoFilter('A1:L1'); // auto filtro no titulo
 
         // titulo das colunas
         $sheet = $spreadsheet->getActiveSheet();
@@ -471,7 +471,8 @@ class Aprova extends BaseController
         $sheet->setCellValue('H1', 'REGISTROS DO DIA');
         $sheet->setCellValue('I1', 'DATA REFERÊNCIA');
         $sheet->setCellValue('J1', 'DATA SOLICITAÇÃO');
-        $sheet->setCellValue('K1', 'SOLICITANTE');
+        $sheet->setCellValue('K1', 'DATA APROVAÇÃO');
+        $sheet->setCellValue('L1', 'SOLICITANTE');
         // $sheet->setCellValue('L1', 'APROVADOR');
 
         $rows = 2;
@@ -624,11 +625,12 @@ class Aprova extends BaseController
                 $sheet->setCellValue('H' . $rows, $registro['batidas_dia']);
                 $sheet->setCellValue('I' . $rows, (strlen(trim($registro['data_referencia'])) > 0 ? dtBr($registro['data_referencia']) : ''));
                 $sheet->setCellValue('J' . $rows, dtBr($registro['data_solicitacao']));
-                $sheet->setCellValue('K' . $rows, $registro['chapa_solicitante'].' - '.$registro['solicitante']);
+                $sheet->setCellValue('K' . $rows, ((($registro['status'] ?? 0) == 2) ? dtBr($registro['dtapr']) : ''));
+                $sheet->setCellValue('L' . $rows, $registro['chapa_solicitante'].' - '.$registro['solicitante']);
                 // $sheet->setCellValue('L' . $rows, $registro['chapa_gestor'].' - '.$registro['nome_gestor']);
 
                 // $spreadsheet->getActiveSheet()->getStyle('C'.$rows)->applyFromArray(($SaldoBancoHoras['SALDO'] < 0) ? $styleRed : $styleGreen);
-                $spreadsheet->getActiveSheet()->getStyle('A'.$rows.':K'.$rows)->applyFromArray($styleBorda);
+                $spreadsheet->getActiveSheet()->getStyle('A'.$rows.':L'.$rows)->applyFromArray($styleBorda);
                 $rows++;
             }
         }
@@ -651,7 +653,7 @@ class Aprova extends BaseController
 
     }
 
-  //-----------------------------------------------------------
+    //-----------------------------------------------------------
     // Action
     //-----------------------------------------------------------
     public function action($act){

@@ -709,6 +709,24 @@ table th {
                                             }
                                         }
                                         
+                                        /* REMOVIDO EM 26/08/2025        
+                                                $ent[$indice_ent] = $concat . m2h($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['batida'], 4);
+                                                $ent_portal[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['portal'] == 1 && $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] != 'T') ? '<i title="Aguardando Aprovação Gestor" class="mdi mdi-square" style="font-size:20px; color: #feca07;"></i>' : '';
+
+                                                if($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] == 'T') $ent_portal[$indice_ent] = '<i title="Pendente Aprovação RH" class="mdi mdi-square" style="font-size:20px; color: #dbdcdd;"></i>';
+
+                                                $ent_motivo_reprova[$indice_ent] = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['motivo_reprova'];
+                                                $ent_justificativa_batida[$indice_ent] = $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['justificativa_batida'];
+                                                $status_ent[$indice_ent] = isset($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status']) ? $resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['status'] : 'D';
+                                                $dataref_forcado_ent[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['forcado'] == 1) ? 1 : 0;
+                                                $dataref_ent[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['datareferencia']);
+                                                $data_ent[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['data']);
+                                                $idaafdt_ent[$indice_ent] = ($resBatidasEspelho[$chapa][$DiasEspelho['DATA']]['batidas'][7]['idaafdt']);
+                                                $indice_ent++;
+                                            }
+                                        }
+                                        */
+                                        
                                         $bglinha = "";
                                         if (diaSemana($DiasEspelho['DATA'], true) == "Dom" || diaSemana($DiasEspelho['DATA'], true) == "Sáb") $bglinha = ' style="background-color: #f9f9f9;" ';
 
@@ -1830,7 +1848,6 @@ table th {
         }
         // cria nova linha para inclusão de nova batida
         const incluirNovaBatida = () => {
-
             if (!validaDados()) return;
 
             $("[data-just]").fadeOut(0);
@@ -2408,6 +2425,7 @@ table th {
                         'inicio_default' : $(this).find('input')[2].getAttribute('data-inicio-default'),
                         'termino_default': $(this).find('input')[3].getAttribute('data-termino-default'),
                         'tem_anexo'      : tem_anexo,
+                        'flag_parcial'   : $(this).find('input[type="checkbox"]')[0]?.checked ? 1 : 0,
                         "codfilial"      : '<?= ($resFuncionario[0]['CODFILIAL'] ?? 1) ?>',
                         "chapa"          : '<?= $chapa ?>',
                         "tipo_ocorrencia": tipo_do_abono
@@ -3004,11 +3022,11 @@ function m2h(minutos) {
                         <?php if($is_motorista): ?><button class="btn btn-primary btn-sm float-right" type="button" onclick="carregaMacro()" id="btnConsultaMacro"><i class="fa fa-cogs"></i> Consulta Macros</button><?php endif; ?>
                         <h3 data-h-data class="m-0"></h3>
                         <h5 data-h-escala class="h7 m-0"></h5>
-						            <h6 data-h-batidas class="h7 m-0"></h6>
+						<h6 data-h-batidas class="h7 m-0"></h6>
                         <p class="m-0">
-					                <b>Legenda:</b> 
-                          <i title="Registro Coletado" class="mdi mdi-alpha-c-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Coletado
-                          <i title="Registro Digitado" class="mdi mdi-alpha-d-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Digitado 
+					        <b>Legenda:</b> 
+                            <i title="Registro Coletado" class="mdi mdi-alpha-c-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Coletado
+                            <i title="Registro Digitado" class="mdi mdi-alpha-d-box-outline ml-3" style="font-size:20px; color:rgb(43, 41, 41);"></i> Digitado 
                         </p>
                         <table class="table table-sm tablebatida">
                             <thead>

@@ -162,7 +162,7 @@ class VariaveisModel extends Model {
 				AND A.CODSECAO = B.CODIGO
 				{$qr_func}
 				{$qr_secao}
-        {$filtro_secao}
+                {$filtro_secao}
 				{$where_sub}
 
 			GROUP BY
@@ -493,7 +493,7 @@ class VariaveisModel extends Model {
         $query2 = " 
         SELECT nome, email FROM zcrmportal_usuario WHERE login = '".$aprovador."'
         UNION ALL
-        SELECT B.SUBSTITUTO_NOME, B.email FROM zcrmportal_usuario A
+        SELECT B.SUBSTITUTO_NOME as nome, B.email FROM zcrmportal_usuario A
                 INNER JOIN GESTOR_SUBSTITUTO_CHAPA B ON B.GESTOR_ID = A.ID
             WHERE login = '".$aprovador."'
             AND B.FUNCOES LIKE '%\"219\"%'";
@@ -510,11 +510,11 @@ class VariaveisModel extends Model {
 
        
         $query2 = " 
-        SELECT * FROM zcrmportal_usuario WHERE id ='".$aprovador."'
+        SELECT nome, email FROM zcrmportal_usuario WHERE id ='".$aprovador."'
         UNION ALL
-        SELECT B.SUBSTITUTO_NOME, B.email FROM zcrmportal_usuario A
+        SELECT B.SUBSTITUTO_NOME as nome, B.email FROM zcrmportal_usuario A
                 INNER JOIN GESTOR_SUBSTITUTO_CHAPA B ON B.GESTOR_ID = A.ID
-            WHERE login = '".$aprovador."'";
+            WHERE A.id = '".$aprovador."'";
          //exit('<pre>'.print_r($query2,1));
         $result2 = $this->dbportal->query($query2);
        
@@ -2579,7 +2579,6 @@ class VariaveisModel extends Model {
             return [];
         }
     }
-
     public function getReqDados($id)
     {
         try {
@@ -2606,6 +2605,16 @@ class VariaveisModel extends Model {
             $query = " 
               with aprov as (
                 select top 1 
+                  id_requisicao,
+                  format(dtcad,'dd') as dia,
+                  month(dtcad) as mes,
+                  year(dtcad)  as ano
+                from zcrmportal_variaveis_aprovacao 
+                where 
+                  nivel_apr_area = 3 and
+                  id_requisicao = ".$id."
+                order by dtcad desc
+                )
                   id_requisicao,
                   format(dtcad,'dd') as dia,
                   month(dtcad) as mes,

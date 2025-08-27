@@ -796,7 +796,7 @@ class LiderModel extends Model {
         
         $this->dbportal->query(" UPDATE zcrmportal_hierarquia_lider_ponto SET inativo = 1, usu_inativou = 0, dt_inativou = getdate() WHERE perfim < '".date('Y-m-d')."' AND perfim IS NOT NULL AND inativo IS NULL ");
 
-        /*$query = $this->dbportal->query("
+        $query = $this->dbportal->query("
             UPDATE 
                 zcrmportal_hierarquia_lider_func_ponto 
             SET 
@@ -815,7 +815,7 @@ class LiderModel extends Model {
                     a.inativo IS NULL 
                     AND b.CODSITUACAO = 'D'
                 )
-        ");*/
+        ");
        
             $this->dbportal->query("
                 UPDATE 
@@ -838,7 +838,92 @@ class LiderModel extends Model {
                     )
             ");
         
-        /*$query = $this->dbportal->query("
+            // transferencia de filial e seção
+            $this->dbportal->query("
+                UPDATE 
+                    zcrmportal_hierarquia_lider_ponto 
+                SET 
+                    inativo = 1, 
+                    usu_inativou = 0, 
+                    dt_inativou = getdate() 
+                WHERE 
+                    id IN (
+                        SELECT 
+                            DISTINCT
+                            a.id
+                        FROM 
+                            zcrmportal_hierarquia_lider_ponto a
+                            JOIN ".DBRM_BANCO."..PFUNC AS F ON F.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND F.CODCOLIGADA = a.coligada
+                            
+                            JOIN ".DBRM_BANCO."..PFHSTSEC AS ATU 
+                                ON F.CODCOLIGADA = ATU.CODCOLIGADA
+                            AND F.CHAPA = ATU.CHAPA
+                            AND CAST(ATU.RECCREATEDON AS DATE) = CAST(GETDATE() AS DATE)
+                            
+                            OUTER APPLY (
+                                SELECT 
+                                    TOP 1 ANT.CODSECAO
+                                FROM 
+                                    ".DBRM_BANCO."..PFHSTSEC AS ANT
+                                WHERE 
+                                        ANT.CODCOLIGADA = f.CODCOLIGADA
+                                    AND ANT.CHAPA = F.CHAPA
+                                    AND ANT.DTMUDANCA < ATU.DTMUDANCA
+                                ORDER BY 
+                                    ANT.DTMUDANCA 
+                                DESC
+                            ) AS ANT
+                        WHERE 
+                                F.CODSITUACAO = 'A'
+                            AND F.CODCOLIGADA = a.coligada
+                            AND (ANT.CODSECAO IS NULL OR ANT.CODSECAO <> ATU.CODSECAO)
+                            AND a.inativo IS NULL 
+                    )
+            ");
+
+            // transferencia de filial e seção | funcionário
+            $this->dbportal->query("
+                UPDATE 
+                    zcrmportal_hierarquia_lider_func_ponto 
+                SET 
+                    inativo = 1, 
+                    usu_inativou = 0, 
+                    dt_inativou = getdate() 
+                WHERE 
+                    concat(coligada,'-',chapa) IN (
+                        SELECT 
+                            DISTINCT
+                            concat(a.coligada,'-',a.chapa)
+                        FROM 
+                            zcrmportal_hierarquia_lider_func_ponto a
+                            JOIN ".DBRM_BANCO."..PFUNC AS F ON F.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND F.CODCOLIGADA = a.coligada
+                            
+                            JOIN ".DBRM_BANCO."..PFHSTSEC AS ATU 
+                                ON F.CODCOLIGADA = ATU.CODCOLIGADA
+                            AND F.CHAPA = ATU.CHAPA
+                            AND CAST(ATU.RECCREATEDON AS DATE) = CAST(GETDATE() AS DATE)
+                            
+                            OUTER APPLY (
+                                SELECT 
+                                    TOP 1 ANT.CODSECAO
+                                FROM 
+                                    ".DBRM_BANCO."..PFHSTSEC AS ANT
+                                WHERE 
+                                        ANT.CODCOLIGADA = f.CODCOLIGADA
+                                    AND ANT.CHAPA = F.CHAPA
+                                    AND ANT.DTMUDANCA < ATU.DTMUDANCA
+                                ORDER BY 
+                                    ANT.DTMUDANCA 
+                                DESC
+                            ) AS ANT
+                        WHERE 
+                                F.CODSITUACAO = 'A'
+                            AND F.CODCOLIGADA = a.coligada
+                            AND (ANT.CODSECAO IS NULL OR ANT.CODSECAO <> ATU.CODSECAO)
+                            AND a.inativo IS NULL 
+                    )
+            ");
+        $query = $this->dbportal->query("
             UPDATE 
                 zcrmportal_hierarquia_lider_func_ponto 
             SET 
@@ -857,7 +942,7 @@ class LiderModel extends Model {
                         a.inativo IS NULL 
                     AND b.CODSITUACAO = 'D'
                 )
-        ");*/
+        ");
         $query = $this->dbportal->query("
             UPDATE 
                 zcrmportal_hierarquia_lider_excecao_ponto 
@@ -879,6 +964,49 @@ class LiderModel extends Model {
                 )
         ");
 
+        // transferencia de filial e seção (excecao)
+        $query = $this->dbportal->query("
+            UPDATE 
+                zcrmportal_hierarquia_lider_excecao_ponto 
+            SET 
+                inativo = 1, 
+                usu_inativou = 0, 
+                dt_inativou = getdate() 
+            WHERE 
+                CONCAT(coligada, '-', chapa) IN (
+                    SELECT 
+                        DISTINCT
+                        concat(a.coligada, '-', a.chapa)
+                    FROM 
+                        zcrmportal_hierarquia_lider_excecao_ponto a
+                        JOIN ".DBRM_BANCO."..PFUNC AS F ON F.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND F.CODCOLIGADA = a.coligada
+                        
+                        JOIN ".DBRM_BANCO."..PFHSTSEC AS ATU 
+                            ON F.CODCOLIGADA = ATU.CODCOLIGADA
+                        AND F.CHAPA = ATU.CHAPA
+                        AND CAST(ATU.RECCREATEDON AS DATE) = CAST(GETDATE() AS DATE)
+                        
+                        OUTER APPLY (
+                            SELECT 
+                                TOP 1 ANT.CODSECAO
+                            FROM 
+                                ".DBRM_BANCO."..PFHSTSEC AS ANT
+                            WHERE 
+                                    ANT.CODCOLIGADA = f.CODCOLIGADA
+                                AND ANT.CHAPA = F.CHAPA
+                                AND ANT.DTMUDANCA < ATU.DTMUDANCA
+                            ORDER BY 
+                                ANT.DTMUDANCA 
+                            DESC
+                        ) AS ANT
+                    WHERE 
+                            F.CODSITUACAO = 'A'
+                        AND F.CODCOLIGADA = a.coligada
+                        AND (ANT.CODSECAO IS NULL OR ANT.CODSECAO <> ATU.CODSECAO)
+                        AND a.inativo IS NULL 
+                )
+        ");
+
     }
 
     private function inativarGestor()
@@ -887,22 +1015,56 @@ class LiderModel extends Model {
 
             $gestorDemitido = $this->dbportal->query("
                 SELECT
-                    a.*
+                    a.*, b.CODSITUACAO
                 FROM
                     zcrmportal_hierarquia_chapa a
                     INNER JOIN ".DBRM_BANCO."..PFUNC b ON b.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND b.CODCOLIGADA = a.coligada
                 WHERE
                         a.inativo IS NULL
                     AND b.CODSITUACAO = 'D'
+                UNION ALL
+
+                SELECT 
+                    a.*, f.CODSITUACAO
+                FROM 
+                    zcrmportal_hierarquia_chapa a
+                    JOIN ".DBRM_BANCO."..PFUNC AS F ON F.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND F.CODCOLIGADA = a.coligada
+                    
+                    JOIN ".DBRM_BANCO."..PFHSTSEC AS ATU 
+                        ON F.CODCOLIGADA = ATU.CODCOLIGADA
+                    AND F.CHAPA = ATU.CHAPA
+                    AND CAST(ATU.RECCREATEDON AS DATE) = CAST(GETDATE() AS DATE)
+                    
+                    OUTER APPLY (
+                        SELECT 
+                            TOP 1 ANT.CODSECAO
+                        FROM 
+                            ".DBRM_BANCO."..PFHSTSEC AS ANT
+                        WHERE 
+                                ANT.CODCOLIGADA = f.CODCOLIGADA
+                            AND ANT.CHAPA = F.CHAPA
+                            AND ANT.DTMUDANCA < ATU.DTMUDANCA
+                        ORDER BY 
+                            ANT.DTMUDANCA 
+                        DESC
+                    ) AS ANT
+                WHERE 
+                        F.CODSITUACAO = 'A'
+                    AND F.CODCOLIGADA = a.coligada
+                    AND (ANT.CODSECAO IS NULL OR ANT.CODSECAO <> ATU.CODSECAO)
+                    AND a.inativo IS NULL
+
             ");
 
             if($gestorDemitido){
                 $dadosGestores = $gestorDemitido->getResult();
                 foreach($dadosGestores as $gestor){
-
-                    // inativa gestor da hierarquia
-                    $this->dbportal->query(" UPDATE zcrmportal_hierarquia_chapa SET inativo = 1, dtalt = '{$this->now}', usualt = '0' WHERE id_hierarquia = '{$gestor->id_hierarquia}' AND inativo IS NULL ");
-
+                    
+                    if($gestor->CODSITUACAO == 'D'){
+                        // inativa gestor da hierarquia
+                        $this->dbportal->query(" UPDATE zcrmportal_hierarquia_chapa SET inativo = 1, dtalt = '{$this->now}', usualt = '0' WHERE id_hierarquia = '{$gestor->id_hierarquia}' AND inativo IS NULL ");
+                    }
+                    
                     // pega os lideres do gestor
                     $liderDoGestor = $this->dbportal->query(" SELECT * FROM zcrmportal_hierarquia_lider_ponto WHERE id_hierarquia = '{$gestor->id_hierarquia}' AND inativo IS NULL ");
                     if($liderDoGestor){
@@ -948,6 +1110,37 @@ class LiderModel extends Model {
                 WHERE
                         a.inativo IS NULL
                     AND b.CODSITUACAO = 'D'
+                UNION ALL
+
+                SELECT 
+                    a.*
+                FROM 
+                    zcrmportal_hierarquia_chapa_sub a
+                    JOIN ".DBRM_BANCO."..PFUNC AS F ON F.CHAPA = A.chapa COLLATE Latin1_General_CI_AS AND F.CODCOLIGADA = a.coligada
+                    
+                    JOIN ".DBRM_BANCO."..PFHSTSEC AS ATU 
+                        ON F.CODCOLIGADA = ATU.CODCOLIGADA
+                    AND F.CHAPA = ATU.CHAPA
+                    AND CAST(ATU.RECCREATEDON AS DATE) = CAST(GETDATE() AS DATE)
+                    
+                    OUTER APPLY (
+                        SELECT 
+                            TOP 1 ANT.CODSECAO
+                        FROM 
+                            ".DBRM_BANCO."..PFHSTSEC AS ANT
+                        WHERE 
+                                ANT.CODCOLIGADA = f.CODCOLIGADA
+                            AND ANT.CHAPA = F.CHAPA
+                            AND ANT.DTMUDANCA < ATU.DTMUDANCA
+                        ORDER BY 
+                            ANT.DTMUDANCA 
+                        DESC
+                    ) AS ANT
+                WHERE 
+                        F.CODSITUACAO = 'A'
+                    AND F.CODCOLIGADA = a.coligada
+                    AND (ANT.CODSECAO IS NULL OR ANT.CODSECAO <> ATU.CODSECAO)
+                    AND a.inativo IS NULL
             ");
 
             if($gestorSubDemitido){

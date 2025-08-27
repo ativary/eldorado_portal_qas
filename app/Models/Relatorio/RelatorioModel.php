@@ -6236,38 +6236,11 @@ FROM (
                             DATAMUDANCA DESC
                     ) [SITUAÇÃO],
                     (
-                        SELECT
-                            TOP 1
-                            CONCAT(A2.CODIGO, ' - ', A2.DESCRICAO, ' - ', ZZ.INDICE)
-                        FROM
-                            ".DBRM_BANCO."..PFHSTHOR A1 (NOLOCK)
-                            INNER JOIN ".DBRM_BANCO."..AHORARIO A2 (NOLOCK) ON A2.CODCOLIGADA = A1.CODCOLIGADA AND A2.CODIGO = A1.CODHORARIO
-                            LEFT JOIN ".DBRM_BANCO."..Z_OUTSERV_MELHORIAS4 (NOLOCK) ZZ ON ZZ.CODCOLIGADA = A1.CODCOLIGADA AND ZZ.CODHORARIO = A1.CODHORARIO AND ZZ.DATA = (DATEADD(day, +(A1.INDINICIOHOR-1), a.datamudanca))
-                        WHERE
-                            A1.DTMUDANCA <= a.datamudanca
-                            AND A1.CHAPA = a.chapa COLLATE Latin1_General_CI_AS
-                            AND A1.CODCOLIGADA = a.coligada
-                        ORDER BY
-                            A1.DTMUDANCA DESC
-                    ) [ANTES - TROCA],
-                    CONCAT(a.codhorario, ' - ', f.descricao collate Latin1_General_CI_AS,' - ', a.codindice) [APÓS - TROCA],
-                    CASE WHEN a.tipo = 2 THEN (
-                        SELECT
-                            TOP 1
-                            CONCAT(A2.CODIGO, ' - ', A2.DESCRICAO, ' - ', ZZ.INDICE)
-                        FROM
-                            ".DBRM_BANCO."..PFHSTHOR A1 (NOLOCK)
-                            INNER JOIN ".DBRM_BANCO."..AHORARIO A2 (NOLOCK) ON A2.CODCOLIGADA = A1.CODCOLIGADA AND A2.CODIGO = A1.CODHORARIO
-                            LEFT JOIN ".DBRM_BANCO."..Z_OUTSERV_MELHORIAS4 (NOLOCK) ZZ ON ZZ.CODCOLIGADA = A1.CODCOLIGADA AND ZZ.CODHORARIO = A1.CODHORARIO AND ZZ.DATA = (DATEADD(day, +(A1.INDINICIOHOR-1), a.datamudanca_folga))
-                        WHERE
-                            A1.DTMUDANCA <= a.datamudanca_folga
-                            AND A1.CHAPA = a.chapa COLLATE Latin1_General_CI_AS
-                            AND A1.CODCOLIGADA = a.coligada
-                        ORDER BY
-                            A1.DTMUDANCA DESC
-                    ) ELSE NULL END [ANTES - FOLGA],
-                    CASE WHEN a.tipo = 2 THEN CONCAT(a.codhorario, ' - ', f.descricao collate Latin1_General_CI_AS,' - ', a.codindice_folga) ELSE NULL END [APÓS - FOLGA],
-                    
+                        CASE
+                            WHEN a.tipo = 1 THEN CONCAT('Índice: ', a.codindice, ' Horário: ', f.DESCRICAO)
+                            ELSE CONCAT('Data Útil: ', CONVERT(VARCHAR, a.datamudanca, 103), ' Índice Útil: ', a.codindice, ' Data Folga: ', CONVERT(VARCHAR, a.datamudanca_folga, 103), ' Horário: ', f.DESCRICAO)
+                        END
+                    ) [DESCRICAO TIPO],
                     (
                     SELECT 
                         TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
@@ -6278,7 +6251,8 @@ FROM (
                         AA.CPF = g.login COLLATE Latin1_General_CI_AS
                         AND BB.DATAADMISSAO <= a.datamudanca
                     ) [USUÁRIO - SOLICITANTE],
-                    
+
+                    (CASE WHEN a.dtapr IS NOT NULL THEN CONVERT(VARCHAR, a.dtapr, 103) ELSE NULL END) [DATA DE APROVAÇÃO - GESTOR],
                     (
                     SELECT 
                         TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
@@ -6288,8 +6262,9 @@ FROM (
                     WHERE
                         AA.CPF = h.login COLLATE Latin1_General_CI_AS
                         AND BB.DATAADMISSAO <= a.datamudanca
-                    ) [USUÁRIO - GESTOR],
+                    ) [USUÁRIO DE APROVAÇÃO - GESTOR],
                     
+                    (CASE WHEN a.dtrh IS NOT NULL THEN CONVERT(VARCHAR, a.dtrh, 103) ELSE NULL END) [DATA DE APROVAÇÃO - RH],
                     (
                     SELECT 
                         TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
@@ -6299,7 +6274,33 @@ FROM (
                     WHERE
                         AA.CPF = i.login COLLATE Latin1_General_CI_AS
                         AND BB.DATAADMISSAO <= a.datamudanca
-                    ) [USUÁRIO - RH],
+                    ) [USUÁRIO DE APROVAÇÃO - RH],
+                    
+                    (CASE WHEN a.situacao = 11 AND a.dtalt IS NOT NULL AND l.login IS NOT NULL THEN CONVERT(VARCHAR, a.dtalt, 103) ELSE NULL END) [DATA DE EXCLUSÃO - RH],
+
+                    (CASE WHEN a.situacao = 11 THEN (
+                    SELECT 
+                        TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
+                    FROM
+                        ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO AND ISNULL(BB.TIPODEMISSAO, '0') NOT IN ('5', '6')
+                    WHERE
+                        AA.CPF = l.login COLLATE Latin1_General_CI_AS
+                        AND BB.DATAADMISSAO <= a.datamudanca
+                    ) ELSE NULL END) [USUÁRIO DE EXCLUSÃO - RH],
+                    
+                    (CASE WHEN a.situacao = 11 AND a.dtalt IS NOT NULL AND n.login IS NOT NULL THEN CONVERT(VARCHAR, a.dtalt, 103) ELSE NULL END) [DATA DE EXCLUSÃO - USUÁRIO],
+
+                    (CASE WHEN a.situacao = 11 THEN (
+                    SELECT 
+                        TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
+                    FROM
+                        ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO AND ISNULL(BB.TIPODEMISSAO, '0') NOT IN ('5', '6')
+                    WHERE
+                        AA.CPF = n.login COLLATE Latin1_General_CI_AS
+                        AND BB.DATAADMISSAO <= a.datamudanca
+                    ) ELSE NULL END) [USUÁRIO DE EXCLUSÃO],
                     CONCAT(
                     	CASE WHEN a.justificativa_11_horas IS NOT NULL THEN CONCAT('Interjornada 11h: ',a.justificativa_11_horas, ', ') ELSE '' END,
                     	CASE WHEN a.justificativa_6_dias IS NOT NULL THEN CONCAT('6 dias consecutivos: ', a.justificativa_11_horas, ', ') ELSE '' END,
@@ -6308,10 +6309,24 @@ FROM (
                     	CASE WHEN a.justificativa_periodo IS NOT NULL THEN CONCAT('Fora período: ', a.justificativa_periodo, ', ') ELSE '' END
                     ) [JUSTIFICATIVA SOLICITAÇÃO],
                     CASE WHEN a.dtapr IS NULL THEN NULL ELSE CONVERT(VARCHAR, a.dtapr, 103) END [DATA APROVAÇÃO],
-                    CASE WHEN a.dtcancelado IS NULL THEN NULL ELSE CONVERT(VARCHAR, a.dtcancelado, 103) END [DATA REPROVAÇÃO],
-                    a.motivocancelado [JUSTIFICATIVA REPROVAÇÃO],
-                    CONVERT(VARCHAR, a.dtcad, 103) [DATA SOLICITAÇÃO]
                     
+                    (CASE WHEN a.dtcancelado IS NOT NULL THEN CONVERT(VARCHAR, a.dtcancelado, 103) ELSE NULL END) [DATA DE REPROVAÇÃO],
+                    (
+                    SELECT 
+                        TOP 1 CONCAT(BB.CHAPA,'-',BB.NOME)
+                    FROM
+                        ".DBRM_BANCO."..PPESSOA AA (NOLOCK)
+                        INNER JOIN ".DBRM_BANCO."..PFUNC BB (NOLOCK) ON BB.CODPESSOA = AA.CODIGO AND ISNULL(BB.TIPODEMISSAO, '0') NOT IN ('5', '6')
+                    WHERE
+                        AA.CPF = m.login COLLATE Latin1_General_CI_AS
+                        AND BB.DATAADMISSAO <= a.datamudanca
+                    ) [USUÁRIO DE REPROVAÇÃO],
+                    a.motivocancelado [JUSTIFICATIVA REPROVAÇÃO],
+
+                    CONVERT(VARCHAR, a.dtcad, 103) [DATA SOLICITAÇÃO],
+
+                    (CASE WHEN ISNULL(termo_obrigatorio,0) = 0 THEN 'Não' ELSE 'Sim' END) [ANEXO OBRIGATÓRIO]
+
                 FROM
                     zcrmportal_escala a (NOLOCK)
                     INNER JOIN ".DBRM_BANCO."..PFUNC b (NOLOCK) ON b.CHAPA = a.chapa COLLATE Latin1_General_CI_AS AND b.CODCOLIGADA = a.coligada
@@ -6324,8 +6339,39 @@ FROM (
                     INNER JOIN zcrmportal_usuario g (NOLOCK) ON g.id = a.usucad
                     LEFT JOIN zcrmportal_usuario h (NOLOCK) ON h.id = a.usuapr
                     LEFT JOIN zcrmportal_usuario i (NOLOCK) ON i.id = a.usurh
+                    LEFT JOIN zcrmportal_usuario l (NOLOCK) ON l.id = a.usualt
+                    AND l.id IN(
+                        SELECT 
+                            distinct
+                            uf.id_usuario
+                        FROM 
+                            zcrmportal_funcoes ff,
+                            zcrmportal_perfilfuncao pf,
+                            zcrmportal_usuarioperfil uf
+                        WHERE 
+                            ff.id = pf.id_funcao
+                            AND uf.id_perfil = pf.id_perfil
+                            AND ff.nome = 'GLOBAL_RH'
+                    )
+                    LEFT JOIN zcrmportal_usuario m (NOLOCK) ON m.id = a.usucancelado
+                    LEFT JOIN zcrmportal_usuario n (NOLOCK) ON n.id = a.usualt
+                    AND n.id NOT IN(
+                        SELECT 
+                            distinct
+                            uf.id_usuario
+                        FROM 
+                            zcrmportal_funcoes ff,
+                            zcrmportal_perfilfuncao pf,
+                            zcrmportal_usuarioperfil uf
+                        WHERE 
+                            ff.id = pf.id_funcao
+                            AND uf.id_perfil = pf.id_perfil
+                            AND ff.nome = 'GLOBAL_RH'
+                    )
+                    
                 WHERE
                         1=1
+                    AND a.coligada = '{$this->coligada}' 
                     {$FiltroSecao}
                     {$FiltroChapa}
                     {$FiltroFuncao}

@@ -843,7 +843,7 @@ ABATFUN A
 LEFT JOIN PAR P ON P.COLIGADA = A.CODCOLIGADA
 WHERE 
 A.CODCOLIGADA = P.COLIGADA
-AND A.DATA BETWEEN P.INICIO AND P.FIM
+AND ISNULL(A.DATAREFERENCIA,A.DATA) BETWEEN P.INICIO AND P.FIM
 AND A.STATUS NOT IN ('T')
 GROUP BY
 A.CODCOLIGADA
@@ -4665,7 +4665,7 @@ FROM
 	LEFT JOIN PAR P ON P.COLIGADA = A.CODCOLIGADA
 WHERE 
 	A.CODCOLIGADA = P.COLIGADA
-	AND A.DATA BETWEEN P.INICIO AND P.FIM
+	AND ISNULL(A.DATAREFERENCIA,A.DATA) BETWEEN P.INICIO AND P.FIM
 	AND A.STATUS NOT IN ('T')
  GROUP BY
  	 A.CODCOLIGADA
@@ -12774,8 +12774,15 @@ exit();
 	}
 
 
-	public function ListaDadosHorario($request)
+	public function ListaDadosHorario($request, $sincroniza = false)
 	{
+		if($sincroniza){
+			$this->dbrm
+			->table('Z_OUTSERV_MELHORIAS3')
+			->where('CODCOLIGADA', $this->coligada)
+			->where('CODHORARIO', $request['codhorario'])
+			->delete();
+		}
 
 		self::geraMelhoria3();
 
@@ -13620,33 +13627,6 @@ exit();
 
 	}
 
-	public function ConfiguracaoWorkflowRH($request)
-	{
-		try{
-
-			$data = [
-				'wflow_dias_notif' 		 => $request['dgestor1'],
-				'wflow_dias_notif_acima' => $request['dgestor2'],
-			];
-
-			$result = self::ListaConfiguracaoWorkflow();
-
-			$this->dbportal
-			->table('zcrmportal_espelho_config')
-			->set($data)
-			->where('coligada', $this->coligada)
-			->update();
-
-			return 	($this->dbportal->affectedRows() > 0) 
-					? responseJson('success', 'Configuração realizada com sucesso')
-					: responseJson('error', 'Não foi possivel configurar este workflow');
-
-		} catch (\Exception | \Error $e) {
-			return responseJson('error', 'Erro interno: '.$e->getMessage());
-		}
-
-	}
-
   	public function ConfigWorkflowFaltas($request)
 	{
 		try{
@@ -13895,6 +13875,33 @@ exit();
 		}
 
 	}
+	
+	public function ConfiguracaoWorkflowRH($request)
+	{
+		try{
+
+			$data = [
+				'wflow_dias_notif' 		 => $request['dgestor1'],
+				'wflow_dias_notif_acima' => $request['dgestor2'],
+			];
+
+			$result = self::ListaConfiguracaoWorkflow();
+
+			$this->dbportal
+			->table('zcrmportal_espelho_config')
+			->set($data)
+			->where('coligada', $this->coligada)
+			->update();
+
+			return 	($this->dbportal->affectedRows() > 0) 
+					? responseJson('success', 'Configuração realizada com sucesso')
+					: responseJson('error', 'Não foi possivel configurar este workflow');
+
+		} catch (\Exception | \Error $e) {
+			return responseJson('error', 'Erro interno: '.$e->getMessage());
+		}
+
+	}	
 
 }
 ?>

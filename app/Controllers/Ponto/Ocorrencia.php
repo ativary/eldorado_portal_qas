@@ -12,6 +12,7 @@ Class Ocorrencia extends BaseController {
 
     public function __construct()
     {
+        ini_set('max_execution_time', 3600);
         
         parent::__construct('Ponto'); // sempre manter
         $this->_moduloName = '<i class="mdi mdi-calendar-clock"></i> Ponto';
@@ -864,6 +865,9 @@ Class Ocorrencia extends BaseController {
             case 'carrega_dados_horario':
                 exit(json_encode($this->mOcorrencia->ListaDadosHorario($dados)));
                 break;
+            case 'sincroniza_dados_horario':
+                    exit(json_encode($this->mOcorrencia->ListaDadosHorario($dados, true)));
+                    break;
             case 'salva_dados_horario':
                 exit($this->mOcorrencia->SalvaDadosHorario($dados['dados']));
                 break;

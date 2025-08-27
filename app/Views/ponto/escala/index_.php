@@ -120,8 +120,6 @@
                                     <th><strong>Colaborador</strong></th>
                                     <th><strong>Data de Solicitação</strong></th>
                                     <th><strong>Usuário Solicitante</strong></th>
-                                    <th><strong>Data de Aprovação - Gestor</strong></th>
-                                    <th><strong>Usuário Aprovador - Gestor</strong></th>
                                     <th class="text-center"><strong>Anexo</strong></th>
                                     <th class="text-center no-sort" width="10"><strong>Ações</strong></th>
                                 </tr>
@@ -158,11 +156,9 @@
                                                 }
                                             ?>
                                         </td>
-                                        <td><a href="<?= base_url('ponto/escala/'.(($Escala['tipo'] == 1) ? 'editar' : 'editardia').'/'.id($Escala['id'])).'/'.id($Escala['situacao']); ?>" target="_blank"><?= $Escala['chapa'].' - '.$Escala['nome']; ?></a></td>
+                                        <td><a href="<?= base_url('ponto/escala/'.(($Escala['tipo'] == 1) ? 'editar' : 'editardia').'/'.id($Escala['id'])).'/'.id($Escala['situacao']); ?>"><?= $Escala['chapa'].' - '.$Escala['nome']; ?></a></td>
                                         <td><?= date('d/m/Y', strtotime($Escala['dtcad'])); ?></td>
                                         <td><?= $Escala['chapa_solicitante'].' - '.$Escala['solicitante']; ?></td>
-                                        <td><?= $Escala['dtapr'] ? dtBr($Escala['dtapr']) : ''; ?></td>
-                                        <td><?= $Escala['dtapr'] ? $Escala['chapa_aprovador'].' - '.$Escala['aprovador'] : ''; ?></td>
                                         <td class="text-center"><?= ($Escala['usuupload']) ? '<a href="'.base_url('ponto/escala/download_termo_aditivo/'.id($Escala['id']).'/'.id($Escala['situacao'])).'" target="_blank">Ver documento</a>' : '' ?></td>
                                         <td class="text-center">
                                             <div class="btn-group dropleft mb-2 mb-md-0">
@@ -178,35 +174,35 @@
                                                             <button type="button" onclick="abreUpload('<?= id($Escala['id']); ?>')" class="dropdown-item"><i class="mdi mdi-file-upload-outline"></i> <?= ($Escala['situacao'] == 0 && strlen(trim($Escala['usuupload']) <= 0)) ? 'Anexar documento' : 'Alterar documento' ?></button>
                                                         <?php endif; ?>
 
-                                                        <a href="<?= base_url('ponto/escala/'.(($Escala['tipo'] == 1) ? 'editar' : 'editardia').'/'.id($Escala['id'])).'/'.id($Escala['situacao']); ?>" class="dropdown-item" target="_blank">
+                                                        <a href="<?= base_url('ponto/escala/'.(($Escala['tipo'] == 1) ? 'editar' : 'editardia').'/'.id($Escala['id'])).'/'.id($Escala['situacao']); ?>" class="dropdown-item">
                                                             <?php if(in_array($Escala['situacao'], [0,8])): ?>
                                                                 <i class="mdi mdi-square-edit-outline"></i> Editar requisição
                                                             <?php else: ?>
                                                                 <i class="mdi mdi-eye-outline"></i> Ver requisição
                                                             <?php endif; ?>
                                                         </a>
-                                                        
+
+
                                                         <?php if(in_array($Escala['situacao'], [0])): ?>
                                                             <button type="button" onclick="enviaParaAprovacao(<?= $Escala['id']; ?>)" class="dropdown-item"><i class="mdi mdi-file-send"></i> Enviar para aprovação</button>
                                                         <?php endif; ?>
+
+                                                       
+                                                       
+                                                        
+                                                       
                                                         
                                                         <button type="button" onclick="justificativas('<?= id($Escala['id']); ?>')" class="dropdown-item"><i class="mdi mdi-comment-eye-outline"></i> Ver justificativa</button>
                                                         <?php if(in_array($Escala['situacao'], [0,8])): ?>
                                                             <div class="dropdown-divider"></div>
+                                                           
                                                             <button onclick="excluir('<?= $Escala['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Excluir</button>
                                                         <?php endif; ?>
-                                                        
-                                                        <?php if($rh): ?>
-                                                            <div class="dropdown-divider"></div>
-                                                            <button onclick="excluirRH('<?= $Escala['id']; ?>')" class="dropdown-item text-danger"><i class="mdi mdi-trash-can-outline"></i> Excluir RH</button>
-                                                        <?php endif; ?>
-
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
-                                    <?php unset($resEscala[$idx], $Escala); ?>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
@@ -523,47 +519,6 @@ const excluir = (idEscala) => {
         }
     });
 }
-<?php if($rh): ?>
-    const excluirRH = (idEscala) => {
-    event.preventDefault();
-    Swal.fire({
-        icon              : 'question',
-        title             : 'Confirmar a exclusão da requisição de troca de Dia?',
-        text              : 'Após exclusão não será possivel recuperar.',
-        showDenyButton    : true,
-        showCancelButton  : true,
-        confirmButtonText : `Sim Excluir`,
-        denyButtonText    : `Cancelar`,
-        showCancelButton  : false,
-        showCloseButton   : false,
-        allowOutsideClick : false,
-        width             : 600,
-    }).then((result) => {
-        if (result.isConfirmed) {
-            openLoading();
-
-            $.ajax({
-                url: "<?= base_url('ponto/escala/action/excluir_rh') ?>",
-                type:'POST',
-                data: {
-                    'id': idEscala
-                },
-                success:function(result){
-                    
-                    var response = JSON.parse(result);
-
-                    if(response.tipo != 'success'){
-                        exibeAlerta(response.tipo, response.msg);
-                    }else{
-                        exibeAlerta(response.tipo, response.msg, 3, window.location.href);
-                    }
-                    
-                },
-            });
-        }
-    });
-}
-<?php endif; ?>
 const carregaColaboradores = () => {
 
     var periodo = $("#data_inicio").val();
@@ -663,18 +618,6 @@ body {
                 "sSortDescending": ": Ordenar colunas de forma descendente"
             }
         },
-        "columnDefs": [
-            {
-                "targets": [4, 6],
-                "className": "text-center",
-                "render": function(data, type, row) {
-                    if (type === 'sort' || type === 'type') {
-                        return data.split('/').reverse().join('-');
-                    }
-                    return data;
-                }
-            }
-        ],
         initComplete: function () {
             var api = this.api(); // Instância do DataTable
             var p_linha = api.columns()[0].length;
@@ -683,7 +626,7 @@ body {
             api.columns().every(function () {
                 var column = this;
 
-                if (column[0][0] == 0 || column[0][0] == 8) return false;
+                if (column[0][0] == 0 || column[0][0] == 7) return false;
 
                 var select = $('<select class="form-control form-control-sm filtro_table"><option value=""></option></select>')
                     .appendTo($(column.header()))

@@ -475,7 +475,6 @@ const salvaDados = () => {
             console.log(result);
 
             var response = JSON.parse(result);
-            console.log(response);
             if(response.tipo != 'success'){
                 exibeAlerta(response.tipo, response.msg, 2);
                 openLoading(true);

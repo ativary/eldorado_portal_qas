@@ -5,8 +5,8 @@
  | --------------------------------------------------------------------------
  |
  */
-define('VERSION_JS', '1.0.11');
-define('VERSION_CSS', '1.0.8');
+define('VERSION_JS', '1.0.12');
+define('VERSION_CSS', '1.0.9');
 define('MENU_VERTICAL', true);
 define('NOME_PORTAL', 'Eldorado Brasil');
 define('TAMANHO_SECAO', 13);

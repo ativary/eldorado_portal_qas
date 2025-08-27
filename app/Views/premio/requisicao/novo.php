@@ -129,7 +129,6 @@ const salvaDados = () => {
     });
     
 }
-
 const buscaGerente = () => {
     
     //nome_de_gestor

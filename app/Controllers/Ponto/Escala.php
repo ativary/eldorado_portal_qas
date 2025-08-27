@@ -585,6 +585,13 @@ Class Escala extends BaseController {
             case 'excluir':
                 exit($this->mEscala->ExcluirEscala($dados));
                 break;
+            case 'excluir_rh':
+                $isRH = parent::VerificaPerfil('GLOBAL_RH', false);
+                if(!$isRH){
+                    return responseJson('error', 'Sem permissão para excluir troca de dia.');
+                }
+                exit($this->mEscala->ExcluirEscalaRH($dados));
+                break;
             case 'justificativa':
                 $filtro['rh'] = true;
                 $escala = $this->mEscala->ListarEscala(cid($dados['id'], disabled: true), $filtro);

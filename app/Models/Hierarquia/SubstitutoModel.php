@@ -359,8 +359,8 @@ class SubstitutoModel extends Model {
                 INNER JOIN PFUNCAO B ON B.CODCOLIGADA = A.CODCOLIGADA AND B.CODIGO = A.CODFUNCAO 
                 INNER JOIN PPESSOA C ON C.CODIGO = A.CODPESSOA 
                 INNER JOIN ".DBPORTAL_BANCO."..zcrmportal_usuario D ON D.LOGIN = C.CPF COLLATE Latin1_General_CI_AS	
-            WHERE A.CODCOLIGADA = '1' 
-                AND A.CODSITUACAO NOT IN ('D') 
+            WHERE
+                A.CODSITUACAO NOT IN ('D') 
                 AND (A.NOME LIKE ? OR A.CHAPA LIKE ?) 
             ORDER BY A.NOME ASC";
         $result = $this->dbrm->query($query, array("%".$request['colab']."%","%".$request['colab']."%"));
